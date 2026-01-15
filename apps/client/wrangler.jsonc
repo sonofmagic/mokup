@@ -1,0 +1,24 @@
+{
+  "$schema": "./node_modules/wrangler/config-schema.json",
+  "name": "monorepo-client",
+  "compatibility_date": "2025-10-16",
+  "main": "./worker/fetch-entry.ts",
+  "assets": {
+    "not_found_handling": "single-page-application",
+    "run_worker_first": [
+      "/api/*"
+    ]
+  },
+  "dev": {
+    "port": 8787
+  },
+  "routes": [
+    {
+      "custom_domain": true,
+      "pattern": "client.monorepo.icebreaker.top"
+    }
+  ],
+  "observability": {
+    "enabled": true
+  }
+}

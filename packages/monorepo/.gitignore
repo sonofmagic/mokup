@@ -1,0 +1,5 @@
+assets/*
+!assets/monorepo.config.ts
+fixtures/assets
+test/fixtures/demo
+templates

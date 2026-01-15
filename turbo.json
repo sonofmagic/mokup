@@ -1,0 +1,74 @@
+{
+  "$schema": "https://turborepo.com/schema.json",
+  "tasks": {
+    "build": {
+      "dependsOn": [
+        "^build"
+      ],
+      "inputs": [
+        "src/**",
+        "lib/**",
+        "package.json",
+        "tsconfig*.json",
+        "*.config.{js,ts,mjs,mts}"
+      ],
+      "outputs": [
+        "dist/**",
+        "bin/**"
+      ]
+    },
+    "lint": {
+      "dependsOn": [
+        "^lint"
+      ],
+      "inputs": [
+        "src/**",
+        "lib/**",
+        "test/**",
+        "*.config.{js,ts}",
+        ".eslintrc*",
+        ".stylelintrc*"
+      ],
+      "outputs": []
+    },
+    "dev": {
+      "cache": false,
+      "persistent": true
+    },
+    "test": {
+      "dependsOn": [
+        "^test"
+      ],
+      "inputs": [
+        "src/**",
+        "lib/**",
+        "test/**",
+        "package.json",
+        "vitest.config.{js,ts}",
+        "tsconfig*.json"
+      ],
+      "outputs": [
+        "coverage/**"
+      ]
+    },
+    "typecheck": {
+      "dependsOn": [
+        "^typecheck"
+      ],
+      "inputs": [
+        "src/**",
+        "lib/**",
+        "test/**",
+        "package.json",
+        "tsconfig*.json"
+      ],
+      "outputs": []
+    },
+    "release": {
+      "cache": false
+    },
+    "sync": {
+      "cache": false
+    }
+  }
+}
