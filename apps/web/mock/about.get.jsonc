@@ -1,0 +1,6 @@
+{
+  // JSONC supports comments and trailing commas
+  "version": "0.1.0",
+  "mission": "Mock APIs at lightspeed",
+  "regions": ["alpha", "beta", "gamma"],
+}

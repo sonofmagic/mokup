@@ -1,0 +1,13 @@
+{
+  "extends": "../../tsconfig.json",
+  "compilerOptions": {
+    "jsx": "preserve",
+    "types": [
+      "vite/client"
+    ]
+  },
+  "include": [
+    "src",
+    "env.d.ts"
+  ]
+}

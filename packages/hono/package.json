@@ -1,0 +1,39 @@
+{
+  "name": "moku-hono",
+  "type": "module",
+  "version": "0.0.0",
+  "description": "Hono adapter for moku-runtime.",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/sonofmagic/moku.git",
+    "directory": "packages/hono"
+  },
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.mjs",
+      "require": "./dist/index.cjs"
+    }
+  },
+  "main": "./dist/index.cjs",
+  "module": "./dist/index.mjs",
+  "types": "./dist/index.d.ts",
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "build": "unbuild",
+    "dev": "unbuild --stub",
+    "lint": "eslint .",
+    "typecheck": "tsc -p tsconfig.json --noEmit"
+  },
+  "dependencies": {
+    "hono": "^4.9.0",
+    "moku-runtime": "workspace:*"
+  },
+  "devDependencies": {
+    "typescript": "^5.9.3",
+    "unbuild": "^3.6.1"
+  }
+}

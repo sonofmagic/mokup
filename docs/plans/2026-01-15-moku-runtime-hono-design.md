@@ -9,9 +9,9 @@
 
 ## Packages
 
-- `packages/moku-runtime`: core matching + response runtime.
-- `packages/moku-hono`: Hono adapter for Node/Workers.
-- `packages/moku-cli`: build CLI to generate manifest/handlers.
+- `packages/runtime`: core matching + response runtime.
+- `packages/hono`: Hono adapter for Node/Workers.
+- `packages/cli`: build CLI to generate manifest/handlers.
 - `apps/mock-node`: Node deployment template.
 - `apps/mock-worker`: Workers deployment template.
 

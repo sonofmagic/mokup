@@ -1,0 +1,78 @@
+@import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=Orbitron:wght@500;600;700&family=Rajdhani:wght@400;500;600&display=swap');
+@import 'tailwindcss';
+
+@layer base {
+  :root {
+    color-scheme: dark;
+  }
+
+  body {
+    @apply bg-slate-950 text-slate-100;
+    font-family: 'Rajdhani', 'Segoe UI', sans-serif;
+  }
+
+  code,
+  pre {
+    font-family: 'IBM Plex Mono', 'JetBrains Mono', monospace;
+  }
+}
+
+@layer utilities {
+  .grid-glow {
+    background-image:
+      radial-gradient(circle at 20% 20%, rgba(56, 189, 248, 0.15), transparent 45%),
+      radial-gradient(circle at 80% 10%, rgba(192, 132, 252, 0.18), transparent 50%),
+      linear-gradient(120deg, rgba(59, 130, 246, 0.08), transparent 35%),
+      linear-gradient(160deg, rgba(14, 165, 233, 0.08), transparent 55%),
+      repeating-linear-gradient(
+        90deg,
+        rgba(148, 163, 184, 0.08) 0px,
+        rgba(148, 163, 184, 0.08) 1px,
+        transparent 1px,
+        transparent 60px
+      ),
+      repeating-linear-gradient(
+        0deg,
+        rgba(148, 163, 184, 0.08) 0px,
+        rgba(148, 163, 184, 0.08) 1px,
+        transparent 1px,
+        transparent 60px
+      );
+  }
+
+  .panel-glow {
+    box-shadow:
+      0 0 40px rgba(56, 189, 248, 0.15),
+      0 0 80px rgba(59, 130, 246, 0.1);
+  }
+
+  .glass {
+    background: linear-gradient(135deg, rgba(15, 23, 42, 0.7), rgba(15, 23, 42, 0.35));
+    border: 1px solid rgba(148, 163, 184, 0.18);
+    backdrop-filter: blur(24px);
+  }
+
+  .font-display {
+    font-family: 'Orbitron', 'Rajdhani', sans-serif;
+    letter-spacing: 0.02em;
+  }
+
+  .font-mono {
+    font-family: 'IBM Plex Mono', 'JetBrains Mono', monospace;
+  }
+
+  .rise-in {
+    animation: rise-in 0.8s ease both;
+  }
+}
+
+@keyframes rise-in {
+  from {
+    opacity: 0;
+    transform: translateY(18px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
