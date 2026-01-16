@@ -2,7 +2,9 @@ import { describe, expect, it } from 'vitest'
 import {
   compareRouteScore,
   matchRouteTokens,
+  normalizePathname,
   parseRouteTemplate,
+  scoreRouteTokens,
 } from '../src/index'
 
 const getTokens = (template: string) => parseRouteTemplate(template).tokens
@@ -31,6 +33,30 @@ describe('router parsing', () => {
     const catchall = parseRouteTemplate('/reports/[...slug]/extra')
     expect(catchall.errors.length).toBeGreaterThan(0)
   })
+
+  it('normalizes templates and warns on duplicate params', () => {
+    const parsed = parseRouteTemplate('users/[id]/[id]')
+    expect(parsed.template).toBe('/users/[id]/[id]')
+    expect(parsed.warnings).toContain('Duplicate param name "id"')
+  })
+
+  it('rejects invalid params and segments', () => {
+    const invalidParam = parseRouteTemplate('/users/[i*d]')
+    expect(invalidParam.errors.length).toBeGreaterThan(0)
+
+    const invalidSegment = parseRouteTemplate('/users/[id]extra')
+    expect(invalidSegment.errors.length).toBeGreaterThan(0)
+
+    const optionalPlacement = parseRouteTemplate('/docs/[[...slug]]/extra')
+    expect(optionalPlacement.errors.length).toBeGreaterThan(0)
+  })
+})
+
+describe('pathname normalization', () => {
+  it('strips query/hash and normalizes slashes', () => {
+    expect(normalizePathname('docs/?q=1#hash')).toBe('/docs')
+    expect(normalizePathname('/docs/')).toBe('/docs')
+  })
 })
 
 describe('router matching', () => {
@@ -51,6 +77,20 @@ describe('router matching', () => {
     const catchall = matchRouteTokens(getTokens('/reports/[...slug]'), '/reports')
     expect(catchall).toBeNull()
   })
+
+  it('decodes params and rejects extra segments', () => {
+    const decoded = matchRouteTokens(getTokens('/users/[id]'), '/users/hello%20world')
+    expect(decoded?.params).toEqual({ id: 'hello world' })
+
+    const invalid = matchRouteTokens(getTokens('/users/[id]'), '/users/%E0')
+    expect(invalid?.params).toEqual({ id: '%E0' })
+
+    const extra = matchRouteTokens(getTokens('/users'), '/users/extra')
+    expect(extra).toBeNull()
+
+    const missing = matchRouteTokens(getTokens('/users/[id]'), '/users')
+    expect(missing).toBeNull()
+  })
 })
 
 describe('route scoring', () => {
@@ -61,5 +101,15 @@ describe('route scoring', () => {
 
     expect(compareRouteScore(staticScore, dynamicScore)).toBeLessThan(0)
     expect(compareRouteScore(dynamicScore, catchallScore)).toBeLessThan(0)
+  })
+
+  it('scores tokens consistently and compares length', () => {
+    const score = scoreRouteTokens([
+      { type: 'static', value: 'users' },
+      { type: 'param', name: 'id' },
+      { type: 'catchall', name: 'slug' },
+    ])
+    expect(score).toEqual([4, 3, 2])
+    expect(compareRouteScore([4, 4], [4])).toBeLessThan(0)
   })
 })
