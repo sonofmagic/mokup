@@ -19,6 +19,50 @@ export interface RequestOptions {
   data?: unknown
   headers?: Record<string, string>
   responseType?: AxiosRequestConfig['responseType']
+  baseURL?: string
+}
+
+export interface UseRequestOptions extends RequestOptions {
+  mock?: boolean
+}
+
+const truthyValues = new Set(['1', 'true', 'yes', 'on'])
+const falsyValues = new Set(['0', 'false', 'no', 'off'])
+
+function parseEnvBoolean(value?: string): boolean | undefined {
+  if (!value) {
+    return undefined
+  }
+  const normalized = value.trim().toLowerCase()
+  if (truthyValues.has(normalized)) {
+    return true
+  }
+  if (falsyValues.has(normalized)) {
+    return false
+  }
+  return undefined
+}
+
+const envUseMock = parseEnvBoolean(import.meta.env.VITE_USE_MOCK)
+const defaultUseMock = typeof envUseMock === 'boolean'
+  ? envUseMock
+  : import.meta.env.DEV
+
+let globalUseMock: boolean | undefined
+
+export function setUseMock(value: boolean) {
+  globalUseMock = value
+}
+
+export function getUseMock() {
+  return typeof globalUseMock === 'boolean' ? globalUseMock : defaultUseMock
+}
+
+function resolveBaseURL(useMock: boolean) {
+  if (useMock) {
+    return import.meta.env.BASE_URL ?? '/'
+  }
+  return import.meta.env.VITE_API_BASE ?? '/api'
 }
 
 function normalizeHeaders(headers: Record<string, unknown>) {
@@ -76,6 +120,9 @@ export async function sendRequest(options: RequestOptions): Promise<ApiResult> {
   if (options.responseType) {
     requestConfig.responseType = options.responseType
   }
+  if (options.baseURL) {
+    requestConfig.baseURL = options.baseURL
+  }
   const response = await apiClient.request(requestConfig)
   const duration = Math.round(performance.now() - startedAt)
   const normalized = normalizeResponseData(response.data, options.responseType)
@@ -91,4 +138,14 @@ export async function sendRequest(options: RequestOptions): Promise<ApiResult> {
     result.note = normalized.note
   }
   return result
+}
+
+export async function useRequest(options: UseRequestOptions): Promise<ApiResult> {
+  const { mock, ...rest } = options
+  const shouldUseMock = typeof mock === 'boolean' ? mock : getUseMock()
+  const baseURL = resolveBaseURL(shouldUseMock)
+  return sendRequest({
+    ...rest,
+    baseURL,
+  })
 }

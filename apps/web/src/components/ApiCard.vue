@@ -3,7 +3,7 @@ import type { ApiResult } from '../api'
 
 import type { RouteSpec } from '../data/mock-routes'
 import { computed, ref } from 'vue'
-import { sendRequest } from '../api'
+import { useRequest } from '../api'
 
 const props = defineProps<{ route: RouteSpec }>()
 
@@ -64,7 +64,7 @@ async function runRequest() {
     return
   }
   try {
-    result.value = await sendRequest({
+    result.value = await useRequest({
       method: props.route.method,
       url: props.route.path,
       params: parsedQuery.value,

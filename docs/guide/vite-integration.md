@@ -378,3 +378,40 @@ mokup({
 ### `req` 报 TS7006？
 
 函数响应请显式声明 `MockResponseHandler`，不要直接写 `(req) => ...`。
+
+## 应用层中间层（useRequest）
+
+在应用侧可以封装一个 `useRequest` 中间层，根据 mock 开关选择 mock 或真实接口。
+
+### 编译时变量
+
+```ini
+# .env
+VITE_USE_MOCK=true
+VITE_API_BASE=https://api.example.com
+```
+
+### 全局开关 + 单次覆写
+
+```ts
+import { getUseMock, setUseMock, useRequest } from '@/api'
+
+setUseMock(false)
+console.log(getUseMock())
+
+await useRequest({
+  method: 'GET',
+  url: '/users',
+})
+
+await useRequest({
+  method: 'GET',
+  url: '/users',
+  mock: true,
+})
+```
+
+`useRequest` 会根据 `mock` 参数或全局开关选择 `baseURL`：
+
+- mock：`import.meta.env.BASE_URL ?? '/'`
+- real：`import.meta.env.VITE_API_BASE ?? '/api'`
