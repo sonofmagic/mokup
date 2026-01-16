@@ -6,6 +6,7 @@ import { cwd } from 'node:process'
 import chokidar from 'chokidar'
 import { createLogger } from './logger'
 import { createMiddleware } from './middleware'
+import { createPlaygroundMiddleware, resolvePlaygroundOptions } from './playground'
 import { scanRoutes } from './scanner'
 import { createDebouncer, isInDirs, resolveDirs } from './utils'
 
@@ -16,6 +17,12 @@ export function createMokupPlugin(options: MokupViteOptions = {}): Plugin {
 
   const logger = createLogger(options.log !== false)
   const watchEnabled = options.watch !== false
+  const playgroundConfig = resolvePlaygroundOptions(options.playground)
+  const playgroundMiddleware = createPlaygroundMiddleware({
+    getRoutes: () => routes,
+    config: playgroundConfig,
+    logger,
+  })
 
   const refreshRoutes = async (server?: ViteDevServer | PreviewServer) => {
     const dirs = resolveDirs(options.dir, root)
@@ -44,6 +51,7 @@ export function createMokupPlugin(options: MokupViteOptions = {}): Plugin {
     },
     async configureServer(server) {
       await refreshRoutes(server)
+      server.middlewares.use(playgroundMiddleware)
       server.middlewares.use(createMiddleware(() => routes, logger))
       if (!watchEnabled) {
         return
@@ -69,6 +77,7 @@ export function createMokupPlugin(options: MokupViteOptions = {}): Plugin {
     },
     async configurePreviewServer(server) {
       await refreshRoutes(server)
+      server.middlewares.use(playgroundMiddleware)
       server.middlewares.use(createMiddleware(() => routes, logger))
       if (!watchEnabled) {
         return

@@ -119,16 +119,19 @@ importers:
       '@hono/node-server':
         specifier: ^1.12.0
         version: 1.19.9(hono@4.11.4)
-      hono:
-        specifier: ^4.9.0
-        version: 4.11.4
       '@mokup/hono':
         specifier: workspace:*
         version: link:../../packages/hono
+      hono:
+        specifier: ^4.9.0
+        version: 4.11.4
     devDependencies:
       '@mokup/cli':
         specifier: workspace:*
         version: link:../../packages/cli
+      '@mokup/runtime':
+        specifier: workspace:*
+        version: link:../../packages/runtime
       tsx:
         specifier: ^4.21.0
         version: 4.21.0
@@ -138,12 +141,12 @@ importers:
 
   apps/mock-worker:
     dependencies:
-      hono:
-        specifier: ^4.9.0
-        version: 4.11.4
       '@mokup/hono':
         specifier: workspace:*
         version: link:../../packages/hono
+      hono:
+        specifier: ^4.9.0
+        version: 4.11.4
     devDependencies:
       '@cloudflare/workers-types':
         specifier: ^4.20250912.0
@@ -151,6 +154,9 @@ importers:
       '@mokup/cli':
         specifier: workspace:*
         version: link:../../packages/cli
+      '@mokup/runtime':
+        specifier: workspace:*
+        version: link:../../packages/runtime
       typescript:
         specifier: ^5.9.3
         version: 5.9.3
@@ -191,15 +197,15 @@ importers:
 
   packages/cli:
     dependencies:
+      '@mokup/runtime':
+        specifier: workspace:*
+        version: link:../runtime
       esbuild:
         specifier: ^0.27.2
         version: 0.27.2
       jsonc-parser:
         specifier: ^3.3.1
         version: 3.3.1
-      '@mokup/runtime':
-        specifier: workspace:*
-        version: link:../runtime
       pathe:
         specifier: ^2.0.3
         version: 2.0.3
@@ -216,12 +222,12 @@ importers:
 
   packages/hono:
     dependencies:
-      hono:
-        specifier: ^4.9.0
-        version: 4.11.4
       '@mokup/runtime':
         specifier: workspace:*
         version: link:../runtime
+      hono:
+        specifier: ^4.9.0
+        version: 4.11.4
     devDependencies:
       typescript:
         specifier: ^5.9.3
@@ -232,6 +238,9 @@ importers:
 
   packages/mokup:
     dependencies:
+      '@mokup/playground':
+        specifier: workspace:*
+        version: link:../playground
       '@mokup/runtime':
         specifier: workspace:*
         version: link:../runtime
@@ -257,6 +266,28 @@ importers:
       unbuild:
         specifier: ^3.6.1
         version: 3.6.1(typescript@5.9.3)(vue@3.5.26(typescript@5.9.3))
+      vite:
+        specifier: ^7.3.1
+        version: 7.3.1(@types/node@25.0.9)(jiti@2.6.1)(lightningcss@1.30.2)(tsx@4.21.0)(yaml@2.8.2)
+
+  packages/playground:
+    dependencies:
+      vue:
+        specifier: ^3.5.26
+        version: 3.5.26(typescript@5.9.3)
+    devDependencies:
+      '@tailwindcss/vite':
+        specifier: ^4.1.13
+        version: 4.1.18(vite@7.3.1(@types/node@25.0.9)(jiti@2.6.1)(lightningcss@1.30.2)(tsx@4.21.0)(yaml@2.8.2))
+      '@vitejs/plugin-vue':
+        specifier: ^6.0.3
+        version: 6.0.3(vite@7.3.1(@types/node@25.0.9)(jiti@2.6.1)(lightningcss@1.30.2)(tsx@4.21.0)(yaml@2.8.2))(vue@3.5.26(typescript@5.9.3))
+      tailwindcss:
+        specifier: ^4.1.13
+        version: 4.1.18
+      typescript:
+        specifier: ^5.9.3
+        version: 5.9.3
       vite:
         specifier: ^7.3.1
         version: 7.3.1(@types/node@25.0.9)(jiti@2.6.1)(lightningcss@1.30.2)(tsx@4.21.0)(yaml@2.8.2)

@@ -49,6 +49,10 @@ export interface MokupViteOptions {
   exclude?: RegExp | RegExp[]
   watch?: boolean
   log?: boolean
+  playground?: boolean | {
+    path?: string
+    enabled?: boolean
+  }
 }
 
 export interface ResolvedRoute {

@@ -1,0 +1,35 @@
+@import url('https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,600&family=Space+Grotesk:wght@400;500;600;700&display=swap');
+@import 'tailwindcss';
+
+@layer base {
+  :root {
+    color-scheme: light;
+  }
+
+  body {
+    font-family: 'Space Grotesk', 'Segoe UI', sans-serif;
+    color: #1f1408;
+  }
+
+  .font-display {
+    font-family: 'Fraunces', 'Times New Roman', serif;
+  }
+}
+
+@layer utilities {
+  .method-get {
+    @apply bg-emerald-200/70 text-emerald-900;
+  }
+  .method-post {
+    @apply bg-amber-200/70 text-amber-950;
+  }
+  .method-put {
+    @apply bg-orange-200/70 text-orange-900;
+  }
+  .method-patch {
+    @apply bg-indigo-200/70 text-indigo-900;
+  }
+  .method-delete {
+    @apply bg-rose-200/70 text-rose-900;
+  }
+}

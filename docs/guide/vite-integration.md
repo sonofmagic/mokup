@@ -365,6 +365,33 @@ mokup({
 })
 ```
 
+### Playground 路由
+
+默认会挂载 `/_mokup` 作为 mock 调试入口：
+
+```ts
+mokup({
+  playground: true,
+})
+```
+
+自定义路径或关闭：
+
+```ts
+mokup({
+  playground: {
+    path: '/_mokup',
+    enabled: true,
+  },
+})
+
+mokup({
+  playground: false,
+})
+```
+
+Playground 会请求 `/_mokup/routes` 获取当前扫描到的 mock 列表，UI 由 Vue 3 + Tailwind CSS 4 构建。
+
 ## 常见问题
 
 ### 没有方法后缀？
