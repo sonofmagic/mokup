@@ -1,4 +1,3 @@
-import type { Manifest } from '@mokup/runtime'
 import { readFile } from 'node:fs/promises'
 
 import * as nodeProcess from 'node:process'
@@ -9,7 +8,7 @@ async function start() {
   const manifestPath = new URL('../dist/mokup.manifest.json', import.meta.url)
   const manifest = JSON.parse(
     await readFile(manifestPath, 'utf8'),
-  ) as Manifest
+  ) as Parameters<typeof createMokupHonoApp>[0]['manifest']
 
   const app = createMokupHonoApp({
     manifest,
@@ -33,5 +32,5 @@ start().catch((error) => {
   nodeProcess.stderr.write(
     `${error instanceof Error ? error.message : error}\n`,
   )
-  nodeProcess.exitCode = 1
+  nodeProcess.exit(1)
 })

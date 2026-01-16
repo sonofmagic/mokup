@@ -3,7 +3,7 @@
 ## Goals
 
 - Provide a Vite plugin at `mokup/vite` that serves mock APIs from a folder.
-- Support `json`, `jsonc`, and `mock.[tj]s` with hot updates.
+- Support `json`, `jsonc`, and TypeScript/JavaScript mocks with hot updates.
 - Allow both filename- and file-content-based route definitions.
 - Provide `.d.ts` for editor IntelliSense.
 
@@ -37,15 +37,16 @@ export interface MokupViteOptions {
   - Strip extension and method suffix (e.g. `.get.json`).
   - Map `/index` to its directory.
   - Apply `prefix` if present.
+  - Support UVR-style segments like `[id]`, `[...slug]`, and `[[...slug]]`.
 - Method resolution:
-  - Filename suffix (e.g. `.get.json`) wins.
-  - Else `rule.method`.
-  - Else default `GET`.
+  - `rule.method` overrides the file suffix when provided.
+  - Otherwise use filename suffix (e.g. `.get.json`).
+  - Missing suffix logs a warning and skips the file.
 
 ## File Formats
 
 - `json/jsonc`: file content is response body.
-- `mock.[tj]s` or any `.ts/.js` with default export:
+- `.ts/.js` with default export:
   - Single rule object or array of rules.
   - Rule fields: `url`, `method`, `response`, `status`, `headers`, `delay`.
   - `response` can be a value or a function.

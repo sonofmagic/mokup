@@ -103,11 +103,13 @@ function resolveProjects(): string[] {
 }
 
 const projects = resolveProjects()
+const shouldUseProjects = projects.length > 0
 
 export default defineConfig(() => {
   return {
     test: {
-      projects,
+      ...(shouldUseProjects ? { projects } : {}),
+      passWithNoTests: !shouldUseProjects,
       coverage: {
         enabled: true,
         skipFull: true,

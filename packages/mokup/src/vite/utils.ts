@@ -14,14 +14,6 @@ export function normalizeMethod(method?: string | null): HttpMethod | undefined 
   return undefined
 }
 
-export function normalizeUrl(url: string) {
-  const sanitized = url.split('?')[0]
-  if (!sanitized.startsWith('/')) {
-    return `/${sanitized}`
-  }
-  return sanitized
-}
-
 export function normalizePrefix(prefix: string) {
   if (!prefix) {
     return ''

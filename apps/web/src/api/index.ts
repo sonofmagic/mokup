@@ -58,23 +58,37 @@ function normalizeResponseData(
 
 export async function sendRequest(options: RequestOptions): Promise<ApiResult> {
   const startedAt = performance.now()
-  const response = await apiClient.request({
-    method: options.method,
+  const requestConfig: AxiosRequestConfig = {
     url: options.url,
-    params: options.params,
-    data: options.data,
-    headers: options.headers,
-    responseType: options.responseType,
-  })
+  }
+  if (options.method) {
+    requestConfig.method = options.method
+  }
+  if (options.params) {
+    requestConfig.params = options.params
+  }
+  if (typeof options.data !== 'undefined') {
+    requestConfig.data = options.data
+  }
+  if (options.headers) {
+    requestConfig.headers = options.headers
+  }
+  if (options.responseType) {
+    requestConfig.responseType = options.responseType
+  }
+  const response = await apiClient.request(requestConfig)
   const duration = Math.round(performance.now() - startedAt)
   const normalized = normalizeResponseData(response.data, options.responseType)
-  return {
+  const result: ApiResult = {
     status: response.status,
     statusText: response.statusText,
     duration,
     headers: normalizeHeaders(response.headers ?? {}),
     data: normalized.data,
-    note: normalized.note,
     ok: response.status >= 200 && response.status < 300,
   }
+  if (typeof normalized.note === 'string') {
+    result.note = normalized.note
+  }
+  return result
 }

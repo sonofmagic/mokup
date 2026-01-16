@@ -49,24 +49,30 @@ async function toRuntimeRequest(c: Context): Promise<RuntimeRequest> {
   }
 
   const rawBodyText = await c.req.text()
-  const contentType = (headers['content-type'] || '').split(';')[0].trim()
+  const contentType = (headers['content-type'] ?? '').split(';')[0]?.trim() ?? ''
   const parsedBody = parseBody(rawBodyText, contentType)
 
-  return {
+  const request: RuntimeRequest = {
     method: c.req.method,
     path: url.pathname,
     query,
     headers,
     body: parsedBody,
-    rawBody: rawBodyText || undefined,
   }
+  if (rawBodyText) {
+    request.rawBody = rawBodyText
+  }
+  return request
 }
 
 export function createMokupHonoApp(options: MokupHonoOptions) {
-  const runtime = createRuntime({
+  const runtimeOptions: RuntimeOptions = {
     manifest: options.manifest,
-    moduleBase: options.moduleBase,
-  })
+  }
+  if (options.moduleBase) {
+    runtimeOptions.moduleBase = options.moduleBase
+  }
+  const runtime = createRuntime(runtimeOptions)
 
   const app = new Hono()
 
@@ -76,7 +82,10 @@ export function createMokupHonoApp(options: MokupHonoOptions) {
     if (!result) {
       return options.onNotFound === 'response' ? c.notFound() : next()
     }
-    return new Response(result.body, {
+    const responseBody = result.body instanceof Uint8Array
+      ? new Uint8Array(result.body).buffer
+      : result.body
+    return new Response(responseBody, {
       status: result.status,
       headers: result.headers,
     })

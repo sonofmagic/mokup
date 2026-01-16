@@ -16,6 +16,7 @@
   "devDependencies": {
     "@cloudflare/workers-types": "^4.20250912.0",
     "@mokup/cli": "workspace:*",
+    "@mokup/runtime": "workspace:*",
     "typescript": "^5.9.3",
     "wrangler": "^4.0.0"
   }

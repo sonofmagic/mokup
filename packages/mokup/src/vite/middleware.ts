@@ -46,7 +46,11 @@ async function readRequestBody(req: IncomingMessage, parsedUrl: URL) {
     return { query, body: undefined, rawBody: undefined }
   }
   const rawText = rawBody.toString('utf8')
-  const contentType = (req.headers['content-type'] || '').split(';')[0].trim()
+  const contentTypeHeader = req.headers['content-type']
+  const contentTypeValue = Array.isArray(contentTypeHeader)
+    ? (contentTypeHeader[0] ?? '')
+    : (contentTypeHeader ?? '')
+  const contentType = contentTypeValue.split(';')[0]?.trim() ?? ''
   if (contentType === 'application/json' || contentType.endsWith('+json')) {
     try {
       return { query, body: JSON.parse(rawText), rawBody: rawText }
@@ -143,8 +147,10 @@ export function createMiddleware(
         headers: req.headers,
         query,
         body,
-        rawBody,
         params: matched.params,
+      }
+      if (rawBody) {
+        mockReq.rawBody = rawBody
       }
       const ctx: MockContext = {
         delay: (ms: number) => delay(ms),

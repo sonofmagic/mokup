@@ -27,10 +27,6 @@ function decodeSegment(segment: string) {
   }
 }
 
-function splitPath(value: string) {
-  return normalizePathname(value).split('/').filter(Boolean)
-}
-
 function scoreToken(token: RouteToken) {
   switch (token.type) {
     case 'static':
@@ -53,8 +49,10 @@ export function scoreRouteTokens(tokens: RouteToken[]) {
 export function compareRouteScore(a: number[], b: number[]) {
   const min = Math.min(a.length, b.length)
   for (let i = 0; i < min; i += 1) {
-    if (a[i] !== b[i]) {
-      return b[i] - a[i]
+    const aValue = a[i] ?? 0
+    const bValue = b[i] ?? 0
+    if (aValue !== bValue) {
+      return bValue - aValue
     }
   }
   if (a.length !== b.length) {
@@ -64,12 +62,17 @@ export function compareRouteScore(a: number[], b: number[]) {
 }
 
 export function normalizePathname(value: string) {
-  const withoutQuery = value.split('?')[0].split('#')[0]
-  let normalized = withoutQuery.startsWith('/') ? withoutQuery : `/${withoutQuery}`
+  const withoutQuery = value.split('?')[0] ?? ''
+  const withoutHash = withoutQuery.split('#')[0] ?? ''
+  let normalized = withoutHash.startsWith('/') ? withoutHash : `/${withoutHash}`
   if (normalized.length > 1 && normalized.endsWith('/')) {
     normalized = normalized.slice(0, -1)
   }
   return normalized
+}
+
+function splitPath(value: string) {
+  return normalizePathname(value).split('/').filter(Boolean)
 }
 
 export function parseRouteTemplate(template: string): ParsedRouteTemplate {
@@ -82,6 +85,9 @@ export function parseRouteTemplate(template: string): ParsedRouteTemplate {
 
   for (let index = 0; index < segments.length; index += 1) {
     const segment = segments[index]
+    if (!segment) {
+      continue
+    }
     if (groupPattern.test(segment)) {
       errors.push(`Route groups are not supported: ${segment}`)
       continue
@@ -90,6 +96,10 @@ export function parseRouteTemplate(template: string): ParsedRouteTemplate {
     const optionalCatchallMatch = segment.match(optionalCatchallPattern)
     if (optionalCatchallMatch) {
       const name = optionalCatchallMatch[1]
+      if (!name) {
+        errors.push(`Invalid optional catch-all param name "${segment}"`)
+        continue
+      }
       if (!paramNamePattern.test(name)) {
         errors.push(`Invalid optional catch-all param name "${name}"`)
         continue
@@ -109,6 +119,10 @@ export function parseRouteTemplate(template: string): ParsedRouteTemplate {
     const catchallMatch = segment.match(catchallPattern)
     if (catchallMatch) {
       const name = catchallMatch[1]
+      if (!name) {
+        errors.push(`Invalid catch-all param name "${segment}"`)
+        continue
+      }
       if (!paramNamePattern.test(name)) {
         errors.push(`Invalid catch-all param name "${name}"`)
         continue
@@ -128,6 +142,10 @@ export function parseRouteTemplate(template: string): ParsedRouteTemplate {
     const paramMatch = segment.match(paramPattern)
     if (paramMatch) {
       const name = paramMatch[1]
+      if (!name) {
+        errors.push(`Invalid param name "${segment}"`)
+        continue
+      }
       if (!paramNamePattern.test(name)) {
         errors.push(`Invalid param name "${name}"`)
         continue
@@ -164,21 +182,26 @@ export function matchRouteTokens(tokens: RouteToken[], pathname: string) {
 
   for (const token of tokens) {
     if (token.type === 'static') {
-      if (segments[index] !== token.value) {
+      const segment = segments[index]
+      if (segment !== token.value) {
         return null
       }
       index += 1
       continue
     }
     if (token.type === 'param') {
-      if (index >= segments.length) {
+      const segment = segments[index]
+      if (!segment) {
         return null
       }
-      params[token.name] = decodeSegment(segments[index])
+      params[token.name] = decodeSegment(segment)
       index += 1
       continue
     }
     if (token.type === 'catchall') {
+      if (index >= segments.length) {
+        return null
+      }
       params[token.name] = segments.slice(index).map(decodeSegment)
       index = segments.length
       continue

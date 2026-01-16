@@ -127,17 +127,24 @@ export function resolveRule(params: {
   for (const warning of parsed.warnings) {
     params.logger.warn(`${warning} in ${params.file}`)
   }
-  return {
+  const route: ResolvedRoute = {
     file: params.file,
     template: parsed.template,
     method,
     tokens: parsed.tokens,
     score: parsed.score,
     response: params.rule.response,
-    status: params.rule.status,
-    headers: params.rule.headers,
-    delay: params.rule.delay,
   }
+  if (typeof params.rule.status === 'number') {
+    route.status = params.rule.status
+  }
+  if (params.rule.headers) {
+    route.headers = params.rule.headers
+  }
+  if (typeof params.rule.delay === 'number') {
+    route.delay = params.rule.delay
+  }
+  return route
 }
 
 export function sortRoutes(routes: ResolvedRoute[]) {

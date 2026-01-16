@@ -471,14 +471,24 @@ export async function buildManifest(options: BuildOptions = {}) {
       if (typeof rule.response === 'undefined') {
         continue
       }
-      const resolved = resolveRule({
+      const resolveParams: {
+        rule: MockRule
+        derivedTemplate: string
+        derivedMethod: HttpMethod
+        prefix: string
+        file: string
+        log?: (message: string) => void
+      } = {
         rule,
         derivedTemplate: derived.template,
         derivedMethod: derived.method,
         prefix: options.prefix ?? '',
         file: fileInfo.file,
-        log: options.log,
-      })
+      }
+      if (options.log) {
+        resolveParams.log = options.log
+      }
+      const resolved = resolveRule(resolveParams)
       if (!resolved) {
         continue
       }
@@ -503,17 +513,24 @@ export async function buildManifest(options: BuildOptions = {}) {
         continue
       }
       const source = toPosix(relative(root, fileInfo.file))
-      routes.push({
+      const route: ManifestRoute = {
         method: resolved.method,
         url: resolved.template,
         tokens: resolved.tokens,
         score: resolved.score,
         source,
-        status: rule.status,
-        headers: rule.headers,
-        delay: rule.delay,
         response,
-      })
+      }
+      if (typeof rule.status === 'number') {
+        route.status = rule.status
+      }
+      if (rule.headers) {
+        route.headers = rule.headers
+      }
+      if (typeof rule.delay === 'number') {
+        route.delay = rule.delay
+      }
+      routes.push(route)
     }
   }
 

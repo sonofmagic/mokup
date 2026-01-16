@@ -232,6 +232,9 @@ importers:
 
   packages/mokup:
     dependencies:
+      '@mokup/runtime':
+        specifier: workspace:*
+        version: link:../runtime
       chokidar:
         specifier: ^5.0.0
         version: 5.0.0

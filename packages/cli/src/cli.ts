@@ -1,6 +1,6 @@
 #!/usr/bin/env node
+import type { BuildOptions } from './index'
 import { argv, exit } from 'node:process'
-
 import { buildManifest } from './index'
 
 function parseBuildOptions(argv: string[]) {
@@ -59,15 +59,26 @@ function parseBuildOptions(argv: string[]) {
     }
   }
 
-  return {
-    dir: dirs.length ? dirs : undefined,
-    outDir,
-    prefix,
-    include: includes.length ? includes : undefined,
-    exclude: excludes.length ? excludes : undefined,
+  const options: BuildOptions = {
     handlers,
     log: (message: string) => console.log(message),
   }
+  if (dirs.length > 0) {
+    options.dir = dirs
+  }
+  if (outDir) {
+    options.outDir = outDir
+  }
+  if (prefix) {
+    options.prefix = prefix
+  }
+  if (includes.length > 0) {
+    options.include = includes
+  }
+  if (excludes.length > 0) {
+    options.exclude = excludes
+  }
+  return options
 }
 
 function printHelp() {

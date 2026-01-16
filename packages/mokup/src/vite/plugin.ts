@@ -1,7 +1,8 @@
+import type { FSWatcher } from 'chokidar'
 import type { Plugin, PreviewServer, ViteDevServer } from 'vite'
 import type { MokupViteOptions, RouteTable } from './types'
-import { cwd } from 'node:process'
 
+import { cwd } from 'node:process'
 import chokidar from 'chokidar'
 import { createLogger } from './logger'
 import { createMiddleware } from './middleware'
@@ -11,21 +12,28 @@ import { createDebouncer, isInDirs, resolveDirs } from './utils'
 export function createMokupPlugin(options: MokupViteOptions = {}): Plugin {
   let root = cwd()
   let routes: RouteTable = []
-  let previewWatcher: chokidar.FSWatcher | null = null
+  let previewWatcher: FSWatcher | null = null
 
   const logger = createLogger(options.log !== false)
   const watchEnabled = options.watch !== false
 
   const refreshRoutes = async (server?: ViteDevServer | PreviewServer) => {
     const dirs = resolveDirs(options.dir, root)
-    routes = await scanRoutes({
+    const scanParams: Parameters<typeof scanRoutes>[0] = {
       dirs,
       prefix: options.prefix ?? '',
-      include: options.include,
-      exclude: options.exclude,
-      server,
       logger,
-    })
+    }
+    if (options.include) {
+      scanParams.include = options.include
+    }
+    if (options.exclude) {
+      scanParams.exclude = options.exclude
+    }
+    if (server) {
+      scanParams.server = server
+    }
+    routes = await scanRoutes(scanParams)
   }
 
   return {

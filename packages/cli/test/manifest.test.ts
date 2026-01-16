@@ -1,0 +1,152 @@
+import { promises as fs } from 'node:fs'
+import os from 'node:os'
+import path from 'node:path'
+import { describe, expect, it } from 'vitest'
+import { buildManifest } from '../src/index'
+
+async function writeFile(filePath: string, contents: string) {
+  await fs.mkdir(path.dirname(filePath), { recursive: true })
+  await fs.writeFile(filePath, contents, 'utf8')
+}
+
+async function createTempRoot() {
+  const root = await fs.mkdtemp(path.join(os.tmpdir(), 'mokup-cli-'))
+  const mockDir = path.join(root, 'mock')
+  await fs.mkdir(mockDir, { recursive: true })
+  return { root, mockDir }
+}
+
+async function cleanupTempRoot(root: string) {
+  await fs.rm(root, { recursive: true, force: true })
+}
+
+describe('buildManifest', () => {
+  it('skips mocks without method suffix and route groups', async () => {
+    const { root, mockDir } = await createTempRoot()
+    const logs: string[] = []
+    try {
+      await writeFile(path.join(mockDir, 'users.get.json'), '{"ok":true}')
+      await writeFile(path.join(mockDir, 'profile.json'), '{"skip":true}')
+      await writeFile(path.join(mockDir, '(group)', 'users.get.json'), '{"skip":true}')
+
+      const result = await buildManifest({
+        root,
+        dir: 'mock',
+        outDir: 'dist',
+        handlers: false,
+        log: message => logs.push(message),
+      })
+
+      expect(result.manifest.routes.map(route => route.url)).toEqual(['/users'])
+      expect(logs.some(message => message.includes('method suffix'))).toBe(true)
+      expect(logs.some(message => message.includes('Route groups'))).toBe(true)
+    }
+    finally {
+      await cleanupTempRoot(root)
+    }
+  })
+
+  it('orders static routes before dynamic and catch-all routes', async () => {
+    const { root, mockDir } = await createTempRoot()
+    try {
+      await writeFile(path.join(mockDir, 'users', 'me.get.json'), '{"ok":true}')
+      await writeFile(path.join(mockDir, 'users', '[id].get.json'), '{"ok":true}')
+      await writeFile(path.join(mockDir, 'users', '[...slug].get.json'), '{"ok":true}')
+      await writeFile(path.join(mockDir, 'docs', '[[...slug]].get.json'), '{"ok":true}')
+
+      const result = await buildManifest({
+        root,
+        dir: 'mock',
+        outDir: 'dist',
+        handlers: false,
+      })
+
+      const urls = result.manifest.routes.map(route => route.url)
+      expect(urls).toContain('/docs/[[...slug]]')
+      expect(urls.slice(0, 3)).toEqual([
+        '/users/me',
+        '/users/[id]',
+        '/users/[...slug]',
+      ])
+
+      const optionalRoute = result.manifest.routes.find(
+        route => route.url === '/docs/[[...slug]]',
+      )
+      expect(optionalRoute?.tokens).toEqual([
+        { type: 'static', value: 'docs' },
+        { type: 'optional-catchall', name: 'slug' },
+      ])
+    }
+    finally {
+      await cleanupTempRoot(root)
+    }
+  })
+
+  it('applies rule method overrides and prefix', async () => {
+    const { root, mockDir } = await createTempRoot()
+    try {
+      await writeFile(
+        path.join(mockDir, 'override.get.ts'),
+        [
+          'export default {',
+          '  method: \'post\',',
+          '  url: \'/special\',',
+          '  response: { ok: true },',
+          '}',
+        ].join('\n'),
+      )
+
+      const result = await buildManifest({
+        root,
+        dir: 'mock',
+        outDir: 'dist',
+        prefix: '/api',
+        handlers: false,
+      })
+
+      expect(result.manifest.routes[0]?.method).toBe('POST')
+      expect(result.manifest.routes[0]?.url).toBe('/api/special')
+    }
+    finally {
+      await cleanupTempRoot(root)
+    }
+  })
+
+  it('bundles handler modules when response is a function', async () => {
+    const { root, mockDir } = await createTempRoot()
+    try {
+      await writeFile(
+        path.join(mockDir, 'handler.get.ts'),
+        [
+          'export default function handler() {',
+          '  return { ok: true }',
+          '}',
+        ].join('\n'),
+      )
+
+      const result = await buildManifest({
+        root,
+        dir: 'mock',
+        outDir: 'dist',
+        handlers: true,
+      })
+
+      const route = result.manifest.routes[0]
+      expect(route?.response.type).toBe('module')
+      expect(route?.response.module).toBe('./mokup-handlers/mock/handler.get.mjs')
+
+      const handlerPath = path.join(
+        root,
+        'dist',
+        'mokup-handlers',
+        'mock',
+        'handler.get.mjs',
+      )
+      const stats = await fs.stat(handlerPath)
+      expect(stats.isFile()).toBe(true)
+    }
+    finally {
+      await cleanupTempRoot(root)
+    }
+  })
+})
