@@ -1,22 +1,22 @@
-# Moku Vite Mock Plugin Design
+# Mokup Vite Mock Plugin Design
 
 ## Goals
 
-- Provide a Vite plugin at `moku/vite` that serves mock APIs from a folder.
+- Provide a Vite plugin at `mokup/vite` that serves mock APIs from a folder.
 - Support `json`, `jsonc`, and `mock.[tj]s` with hot updates.
 - Allow both filename- and file-content-based route definitions.
 - Provide `.d.ts` for editor IntelliSense.
 
 ## Package Layout
 
-- `packages/moku/src/index.ts`: shared types and helpers.
-- `packages/moku/src/vite.ts`: default export `moku(options)` Vite plugin.
+- `packages/mokup/src/index.ts`: shared types and helpers.
+- `packages/mokup/src/vite.ts`: default export `mokup(options)` Vite plugin.
 - Build via `unbuild` to emit ESM/CJS and `.d.ts`.
 
 ## Config
 
 ```ts
-export interface MokuViteOptions {
+export interface MokupViteOptions {
   dir?: string | string[] | ((root: string) => string | string[])
   prefix?: string
   include?: RegExp | RegExp[]

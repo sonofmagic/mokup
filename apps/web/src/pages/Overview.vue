@@ -33,7 +33,7 @@ const sectionSummary = computed(() =>
         Mock Flight Overview
       </p>
       <h1 class="mt-4 font-display text-4xl text-slate-100 md:text-5xl">
-        Everything moku can do,
+        Everything mokup can do,
         <span class="text-sky-300">mapped to routes.</span>
       </h1>
       <p class="mt-4 max-w-2xl text-base text-slate-300">

@@ -1,16 +1,16 @@
-# moku
+# mokup
 
 Mock utilities and a Vite plugin for local API mocking.
 
 ## Vite plugin
 
 ```ts
-import moku from 'moku/vite'
+import mokup from 'mokup/vite'
 import { defineConfig } from 'vite'
 
 export default defineConfig({
   plugins: [
-    moku({
+    mokup({
       dir: 'mock',
       prefix: '',
     }),

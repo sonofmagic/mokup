@@ -1,5 +1,5 @@
 import type { AxiosRequestConfig } from 'axios'
-import type { HttpMethod } from 'moku'
+import type { HttpMethod } from 'mokup'
 
 export interface RouteSpec {
   id: string
@@ -81,7 +81,7 @@ const coreRoutes: RouteSpec[] = [
     description: 'Uses req.body and res.statusCode.',
     features: ['mock-ts', 'body', 'status', 'response-fn'],
     request: {
-      body: { username: 'moku', password: '123456' },
+      body: { username: 'mokup', password: '123456' },
     },
     expectedStatus: 200,
     group: 'mock',

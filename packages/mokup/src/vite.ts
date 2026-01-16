@@ -1,3 +1,5 @@
+export { createMokupPlugin as default } from './vite/plugin'
+
 export type {
   HttpMethod,
   MockContext,
@@ -5,5 +7,5 @@ export type {
   MockResponse,
   MockResponseHandler,
   MockRule,
-  MokuViteOptions,
-} from './vite'
+  MokupViteOptions,
+} from './vite/types'

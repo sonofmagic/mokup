@@ -1,4 +1,4 @@
-import type { MockRule } from 'moku'
+import type { MockRule } from 'mokup'
 import { Buffer } from 'node:buffer'
 
 const rule: MockRule = {
@@ -6,7 +6,7 @@ const rule: MockRule = {
   method: 'get',
   headers: {
     'Content-Type': 'application/octet-stream',
-    'x-moku-binary': '1',
+    'x-mokup-binary': '1',
   },
   response: Buffer.from('MOKU_BINARY_PAYLOAD'),
 }

@@ -40,7 +40,7 @@ export interface MockRule {
   delay?: number
 }
 
-export interface MokuViteOptions {
+export interface MokupViteOptions {
   dir?: string | string[] | ((root: string) => string | string[])
   prefix?: string
   include?: RegExp | RegExp[]

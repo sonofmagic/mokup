@@ -1,13 +1,13 @@
 {
-  "name": "moku",
+  "name": "mokup",
   "type": "module",
   "version": "0.0.0",
-  "description": "Mock utilities and Vite plugin for moku.",
+  "description": "Mock utilities and Vite plugin for mokup.",
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/sonofmagic/moku.git",
-    "directory": "packages/moku"
+    "url": "git+https://github.com/sonofmagic/mokup.git",
+    "directory": "packages/mokup"
   },
   "exports": {
     ".": {

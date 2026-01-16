@@ -1,9 +1,9 @@
-# Web Vue Moku Demo Design
+# Web Vue Mokup Demo Design
 
 ## Goals
 
 - Add a Vite + Vue 3 + TypeScript demo app under `apps/web`.
-- Use the `moku/vite` plugin to serve mock APIs from `apps/web/mock`.
+- Use the `mokup/vite` plugin to serve mock APIs from `apps/web/mock`.
 - Use axios via a small `src/api` module.
 - Provide two example endpoints: one GET via JSON and one POST via mock TS.
 
@@ -23,18 +23,18 @@
 `vite.config.ts` uses:
 
 ```ts
-import moku from 'moku/vite'
+import mokup from 'mokup/vite'
 
 export default defineConfig({
   plugins: [
-    moku({ dir: 'mock' }),
+    mokup({ dir: 'mock' }),
   ],
 })
 ```
 
 ## Data Flow
 
-- Vite dev server starts with `moku` middleware.
+- Vite dev server starts with `mokup` middleware.
 - Axios calls hit the mock routes:
   - `GET /profile` from `profile.get.json`.
   - `POST /login` from `login.post.mock.ts`.

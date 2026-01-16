@@ -122,11 +122,11 @@ importers:
       hono:
         specifier: ^4.9.0
         version: 4.11.4
-      moku-hono:
+      mokup-hono:
         specifier: workspace:*
         version: link:../../packages/hono
     devDependencies:
-      moku-cli:
+      '@mokup/cli':
         specifier: workspace:*
         version: link:../../packages/cli
       tsx:
@@ -141,14 +141,14 @@ importers:
       hono:
         specifier: ^4.9.0
         version: 4.11.4
-      moku-hono:
+      mokup-hono:
         specifier: workspace:*
         version: link:../../packages/hono
     devDependencies:
       '@cloudflare/workers-types':
         specifier: ^4.20250912.0
         version: 4.20260116.0
-      moku-cli:
+      '@mokup/cli':
         specifier: workspace:*
         version: link:../../packages/cli
       typescript:
@@ -176,9 +176,9 @@ importers:
       '@vitejs/plugin-vue':
         specifier: ^6.0.3
         version: 6.0.3(vite@7.3.1(@types/node@25.0.9)(jiti@2.6.1)(lightningcss@1.30.2)(tsx@4.21.0)(yaml@2.8.2))(vue@3.5.26(typescript@5.9.3))
-      moku:
+      mokup:
         specifier: workspace:*
-        version: link:../../packages/moku
+        version: link:../../packages/mokup
       tailwindcss:
         specifier: ^4.1.13
         version: 4.1.18
@@ -189,7 +189,48 @@ importers:
         specifier: ^7.3.1
         version: 7.3.1(@types/node@25.0.9)(jiti@2.6.1)(lightningcss@1.30.2)(tsx@4.21.0)(yaml@2.8.2)
 
-  packages/moku:
+  packages/cli:
+    dependencies:
+      esbuild:
+        specifier: ^0.27.2
+        version: 0.27.2
+      jsonc-parser:
+        specifier: ^3.3.1
+        version: 3.3.1
+      mokup-runtime:
+        specifier: workspace:*
+        version: link:../runtime
+      pathe:
+        specifier: ^2.0.3
+        version: 2.0.3
+    devDependencies:
+      '@types/node':
+        specifier: ^25.0.9
+        version: 25.0.9
+      typescript:
+        specifier: ^5.9.3
+        version: 5.9.3
+      unbuild:
+        specifier: ^3.6.1
+        version: 3.6.1(typescript@5.9.3)(vue@3.5.26(typescript@5.9.3))
+
+  packages/hono:
+    dependencies:
+      hono:
+        specifier: ^4.9.0
+        version: 4.11.4
+      mokup-runtime:
+        specifier: workspace:*
+        version: link:../runtime
+    devDependencies:
+      typescript:
+        specifier: ^5.9.3
+        version: 5.9.3
+      unbuild:
+        specifier: ^3.6.1
+        version: 3.6.1(typescript@5.9.3)(vue@3.5.26(typescript@5.9.3))
+
+  packages/mokup:
     dependencies:
       chokidar:
         specifier: ^5.0.0
@@ -216,47 +257,6 @@ importers:
       vite:
         specifier: ^7.3.1
         version: 7.3.1(@types/node@25.0.9)(jiti@2.6.1)(lightningcss@1.30.2)(tsx@4.21.0)(yaml@2.8.2)
-
-  packages/cli:
-    dependencies:
-      esbuild:
-        specifier: ^0.27.2
-        version: 0.27.2
-      jsonc-parser:
-        specifier: ^3.3.1
-        version: 3.3.1
-      moku-runtime:
-        specifier: workspace:*
-        version: link:../runtime
-      pathe:
-        specifier: ^2.0.3
-        version: 2.0.3
-    devDependencies:
-      '@types/node':
-        specifier: ^25.0.9
-        version: 25.0.9
-      typescript:
-        specifier: ^5.9.3
-        version: 5.9.3
-      unbuild:
-        specifier: ^3.6.1
-        version: 3.6.1(typescript@5.9.3)(vue@3.5.26(typescript@5.9.3))
-
-  packages/hono:
-    dependencies:
-      hono:
-        specifier: ^4.9.0
-        version: 4.11.4
-      moku-runtime:
-        specifier: workspace:*
-        version: link:../runtime
-    devDependencies:
-      typescript:
-        specifier: ^5.9.3
-        version: 5.9.3
-      unbuild:
-        specifier: ^3.6.1
-        version: 3.6.1(typescript@5.9.3)(vue@3.5.26(typescript@5.9.3))
 
   packages/runtime:
     devDependencies:

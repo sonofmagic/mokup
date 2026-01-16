@@ -1,4 +1,4 @@
-import type { MockRule } from 'moku'
+import type { MockRule } from 'mokup'
 
 const rule: MockRule = {
   url: '/login',
@@ -6,7 +6,7 @@ const rule: MockRule = {
   response: async (req, res, ctx) => {
     await ctx.delay(150)
     const payload = (req.body ?? {}) as { username?: string, password?: string }
-    if (payload.username === 'moku' && payload.password === '123456') {
+    if (payload.username === 'mokup' && payload.password === '123456') {
       return {
         ok: true,
         message: 'Access granted. Welcome to the mock channel.',
@@ -17,7 +17,7 @@ const rule: MockRule = {
     return {
       ok: false,
       message: 'Invalid credentials.',
-      hint: 'Try moku / 123456',
+      hint: 'Try mokup / 123456',
     }
   },
 }

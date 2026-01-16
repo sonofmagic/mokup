@@ -1,4 +1,4 @@
-import type { MockRule } from 'moku'
+import type { MockRule } from 'mokup'
 
 const rules: MockRule[] = [
   {

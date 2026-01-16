@@ -1,10 +1,10 @@
 import type { Context } from 'hono'
-import type { RuntimeOptions, RuntimeRequest } from 'moku-runtime'
+import type { RuntimeOptions, RuntimeRequest } from 'mokup-runtime'
 
 import { Hono } from 'hono'
-import { createRuntime } from 'moku-runtime'
+import { createRuntime } from 'mokup-runtime'
 
-export interface MokuHonoOptions extends RuntimeOptions {
+export interface MokupHonoOptions extends RuntimeOptions {
   onNotFound?: 'next' | 'response'
 }
 
@@ -62,7 +62,7 @@ async function toRuntimeRequest(c: Context): Promise<RuntimeRequest> {
   }
 }
 
-export function createMokuHonoApp(options: MokuHonoOptions) {
+export function createMokupHonoApp(options: MokupHonoOptions) {
   const runtime = createRuntime({
     manifest: options.manifest,
     moduleBase: options.moduleBase,

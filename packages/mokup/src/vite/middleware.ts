@@ -109,7 +109,7 @@ export function createMiddleware(
     next: (err?: unknown) => void,
   ) => {
     const url = req.url ?? '/'
-    const parsedUrl = new URL(url, 'http://moku.local')
+    const parsedUrl = new URL(url, 'http://mokup.local')
     const pathname = parsedUrl.pathname
     const method = normalizeMethod(req.method) ?? 'GET'
     const route = getRoutes().get(`${method} ${pathname}`)

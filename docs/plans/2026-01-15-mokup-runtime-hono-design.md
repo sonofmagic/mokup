@@ -1,4 +1,4 @@
-# Moku Cross-Runtime Mock Design
+# Mokup Cross-Runtime Mock Design
 
 ## Goals
 
@@ -20,13 +20,13 @@
 - Each entry contains: `method`, `url`, `status`, `headers`, `delay`, `type`.
 - Static payloads embed JSON/string in the manifest.
 - Function routes reference a bundled module:
-  - `{ type: "function", module: "./moku-handlers/login.mjs", exportName: "default" }`
+  - `{ type: "function", module: "./mokup-handlers/login.mjs", exportName: "default" }`
 
-## CLI (`moku build`)
+## CLI (`mokup build`)
 
 - Scans directories like the Vite plugin.
 - Normalizes routes (index mapping, method suffix, url/method override).
-- Emits `moku.manifest.json` and optional handler bundles.
+- Emits `mokup.manifest.json` and optional handler bundles.
 - Flags: `--dir`, `--out`, `--include`, `--exclude`, `--handlers`, `--manifest-url`.
 
 ## Runtime Flow

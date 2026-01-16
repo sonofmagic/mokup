@@ -1,17 +1,17 @@
-import type { Manifest } from 'moku-runtime'
+import type { Manifest } from 'mokup-runtime'
 import { readFile } from 'node:fs/promises'
 
 import * as nodeProcess from 'node:process'
 import { serve } from '@hono/node-server'
-import { createMokuHonoApp } from 'moku-hono'
+import { createMokupHonoApp } from 'mokup-hono'
 
 async function start() {
-  const manifestPath = new URL('../dist/moku.manifest.json', import.meta.url)
+  const manifestPath = new URL('../dist/mokup.manifest.json', import.meta.url)
   const manifest = JSON.parse(
     await readFile(manifestPath, 'utf8'),
   ) as Manifest
 
-  const app = createMokuHonoApp({
+  const app = createMokupHonoApp({
     manifest,
     moduleBase: new URL('../dist/', import.meta.url),
     onNotFound: 'response',
@@ -25,7 +25,7 @@ async function start() {
   })
 
   nodeProcess.stdout.write(
-    `moku mock server running on http://localhost:${port}\n`,
+    `mokup mock server running on http://localhost:${port}\n`,
   )
 }
 

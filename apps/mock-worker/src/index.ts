@@ -1,9 +1,9 @@
-import { createMokuHonoApp } from 'moku-hono'
-import manifest from './.moku/moku.manifest.json' assert { type: 'json' }
+import { createMokupHonoApp } from 'mokup-hono'
+import manifest from './.mokup/mokup.manifest.json' assert { type: 'json' }
 
-const app = createMokuHonoApp({
+const app = createMokupHonoApp({
   manifest,
-  moduleBase: new URL('./.moku/', import.meta.url),
+  moduleBase: new URL('./.mokup/', import.meta.url),
   onNotFound: 'response',
 })
 

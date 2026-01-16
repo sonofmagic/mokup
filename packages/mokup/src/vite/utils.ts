@@ -1,4 +1,4 @@
-import type { HttpMethod, MokuViteOptions } from './types'
+import type { HttpMethod, MokupViteOptions } from './types'
 
 import { isAbsolute, resolve } from 'pathe'
 import { methodSet } from './constants'
@@ -31,7 +31,7 @@ export function normalizePrefix(prefix: string) {
 }
 
 export function resolveDirs(
-  dir: MokuViteOptions['dir'],
+  dir: MokupViteOptions['dir'],
   root: string,
 ): string[] {
   const raw = typeof dir === 'function' ? dir(root) : dir

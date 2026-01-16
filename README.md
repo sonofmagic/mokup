@@ -1,4 +1,4 @@
-# moku
+# mokup
 
 ## Packages
 
@@ -10,13 +10,13 @@ Contributions Welcome! You can contribute in the following ways.
 - Pull Request - Fix a bug and typo. Refactor the code.
 - Create third-party middleware - Instruct below.
 - Share - Share your thoughts on the Blog, X, and others.
-- Make your application - Please try to use moku.
+- Make your application - Please try to use mokup.
 
 For more details, see [CONTRIBUTING.md](CONTRIBUTING.md).
 
 ## Contributors
 
-Thanks to [all contributors](https://github.com/sonofmagic/moku/graphs/contributors)!
+Thanks to [all contributors](https://github.com/sonofmagic/mokup/graphs/contributors)!
 
 ## Authors
 

@@ -5,19 +5,19 @@ export function createLogger(enabled: boolean): Logger {
     info: (...args: unknown[]) => {
       if (enabled) {
         // eslint-disable-next-line no-console
-        console.info('[moku]', ...args)
+        console.info('[mokup]', ...args)
       }
     },
     warn: (...args: unknown[]) => {
       if (enabled) {
         // eslint-disable-next-line no-console
-        console.warn('[moku]', ...args)
+        console.warn('[mokup]', ...args)
       }
     },
     error: (...args: unknown[]) => {
       if (enabled) {
         // eslint-disable-next-line no-console
-        console.error('[moku]', ...args)
+        console.error('[mokup]', ...args)
       }
     },
   }

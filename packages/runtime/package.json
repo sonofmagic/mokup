@@ -1,12 +1,12 @@
 {
-  "name": "moku-runtime",
+  "name": "mokup-runtime",
   "type": "module",
   "version": "0.0.0",
-  "description": "Cross-runtime mock matching and response handling for moku.",
+  "description": "Cross-runtime mock matching and response handling for mokup.",
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/sonofmagic/moku.git",
+    "url": "git+https://github.com/sonofmagic/mokup.git",
     "directory": "packages/runtime"
   },
   "exports": {

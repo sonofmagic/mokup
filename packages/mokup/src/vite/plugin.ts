@@ -1,5 +1,5 @@
 import type { Plugin, PreviewServer, ViteDevServer } from 'vite'
-import type { MokuViteOptions, RouteTable } from './types'
+import type { MokupViteOptions, RouteTable } from './types'
 import { cwd } from 'node:process'
 
 import chokidar from 'chokidar'
@@ -8,7 +8,7 @@ import { createMiddleware } from './middleware'
 import { scanRoutes } from './scanner'
 import { createDebouncer, isInDirs, resolveDirs } from './utils'
 
-export function createMokuPlugin(options: MokuViteOptions = {}): Plugin {
+export function createMokupPlugin(options: MokupViteOptions = {}): Plugin {
   let root = cwd()
   let routes: RouteTable = new Map()
   let previewWatcher: chokidar.FSWatcher | null = null
@@ -29,7 +29,7 @@ export function createMokuPlugin(options: MokuViteOptions = {}): Plugin {
   }
 
   return {
-    name: 'moku:vite',
+    name: 'mokup:vite',
     enforce: 'pre',
     configResolved(config) {
       root = config.root

@@ -13,7 +13,7 @@ import { RouterLink, RouterView } from 'vue-router'
             </div>
             <div>
               <p class="text-xs uppercase tracking-[0.3em] text-slate-400">
-                Moku Control
+                Mokup Control
               </p>
               <p class="font-display text-lg">
                 Mock Operations Deck
@@ -44,7 +44,7 @@ import { RouterLink, RouterView } from 'vue-router'
       </main>
 
       <footer class="border-t border-slate-800/70 px-6 py-6 text-center text-xs uppercase tracking-[0.2em] text-slate-500">
-        Moku Vite mock playground - live, fast, and unapologetically local.
+        Mokup Vite mock playground - live, fast, and unapologetically local.
       </footer>
     </div>
   </div>

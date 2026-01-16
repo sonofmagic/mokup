@@ -1,4 +1,4 @@
-import type { HttpMethod, Manifest, ManifestResponse, ManifestRoute } from 'moku-runtime'
+import type { HttpMethod, Manifest, ManifestResponse, ManifestRoute } from 'mokup-runtime'
 import { Buffer } from 'node:buffer'
 import { promises as fs } from 'node:fs'
 import { createRequire } from 'node:module'
@@ -415,7 +415,7 @@ async function bundleHandlers(files: string[], root: string, handlersDir: string
 export async function buildManifest(options: BuildOptions = {}) {
   const root = options.root ?? cwd()
   const outDir = resolve(root, options.outDir ?? 'dist')
-  const handlersDir = join(outDir, 'moku-handlers')
+  const handlersDir = join(outDir, 'mokup-handlers')
   const dirs = resolveDirs(options.dir, root)
 
   const files = await collectFiles(dirs)
@@ -485,7 +485,7 @@ export async function buildManifest(options: BuildOptions = {}) {
   }
 
   await fs.mkdir(outDir, { recursive: true })
-  const manifestPath = join(outDir, 'moku.manifest.json')
+  const manifestPath = join(outDir, 'mokup.manifest.json')
   await fs.writeFile(manifestPath, JSON.stringify(manifest, null, 2), 'utf8')
 
   options.log?.(`Manifest written to ${manifestPath}`)
