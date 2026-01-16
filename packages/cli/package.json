@@ -32,9 +32,9 @@
     "typecheck": "tsc -p tsconfig.json --noEmit"
   },
   "dependencies": {
+    "@mokup/runtime": "workspace:*",
     "esbuild": "^0.27.2",
     "jsonc-parser": "^3.3.1",
-    "mokup-runtime": "workspace:*",
     "pathe": "^2.0.3"
   },
   "devDependencies": {

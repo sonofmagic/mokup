@@ -10,8 +10,8 @@
   },
   "dependencies": {
     "@hono/node-server": "^1.12.0",
-    "hono": "^4.9.0",
-    "mokup-hono": "workspace:*"
+    "@mokup/hono": "workspace:*",
+    "hono": "^4.9.0"
   },
   "devDependencies": {
     "@mokup/cli": "workspace:*",

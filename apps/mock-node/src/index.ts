@@ -1,9 +1,9 @@
-import type { Manifest } from 'mokup-runtime'
+import type { Manifest } from '@mokup/runtime'
 import { readFile } from 'node:fs/promises'
 
 import * as nodeProcess from 'node:process'
 import { serve } from '@hono/node-server'
-import { createMokupHonoApp } from 'mokup-hono'
+import { createMokupHonoApp } from '@mokup/hono'
 
 async function start() {
   const manifestPath = new URL('../dist/mokup.manifest.json', import.meta.url)

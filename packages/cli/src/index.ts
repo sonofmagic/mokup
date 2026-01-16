@@ -1,4 +1,4 @@
-import type { HttpMethod, Manifest, ManifestResponse, ManifestRoute } from 'mokup-runtime'
+import type { HttpMethod, Manifest, ManifestResponse, ManifestRoute } from '@mokup/runtime'
 import { Buffer } from 'node:buffer'
 import { promises as fs } from 'node:fs'
 import { createRequire } from 'node:module'

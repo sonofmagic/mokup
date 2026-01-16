@@ -1,8 +1,8 @@
 {
-  "name": "mokup-hono",
+  "name": "@mokup/hono",
   "type": "module",
   "version": "0.0.0",
-  "description": "Hono adapter for mokup-runtime.",
+  "description": "Hono adapter for @mokup/runtime.",
   "license": "MIT",
   "repository": {
     "type": "git",
@@ -29,8 +29,8 @@
     "typecheck": "tsc -p tsconfig.json --noEmit"
   },
   "dependencies": {
-    "hono": "^4.9.0",
-    "mokup-runtime": "workspace:*"
+    "@mokup/runtime": "workspace:*",
+    "hono": "^4.9.0"
   },
   "devDependencies": {
     "typescript": "^5.9.3",

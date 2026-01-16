@@ -10,8 +10,8 @@
     "typecheck": "tsc -p tsconfig.json --noEmit"
   },
   "dependencies": {
-    "hono": "^4.9.0",
-    "mokup-hono": "workspace:*"
+    "@mokup/hono": "workspace:*",
+    "hono": "^4.9.0"
   },
   "devDependencies": {
     "@cloudflare/workers-types": "^4.20250912.0",

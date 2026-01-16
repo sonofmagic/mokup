@@ -1,4 +1,4 @@
-import { createMokupHonoApp } from 'mokup-hono'
+import { createMokupHonoApp } from '@mokup/hono'
 import manifest from './.mokup/mokup.manifest.json' assert { type: 'json' }
 
 const app = createMokupHonoApp({

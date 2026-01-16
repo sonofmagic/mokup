@@ -1,8 +1,8 @@
+import type { RuntimeOptions, RuntimeRequest } from '@mokup/runtime'
 import type { Context } from 'hono'
-import type { RuntimeOptions, RuntimeRequest } from 'mokup-runtime'
 
+import { createRuntime } from '@mokup/runtime'
 import { Hono } from 'hono'
-import { createRuntime } from 'mokup-runtime'
 
 export interface MokupHonoOptions extends RuntimeOptions {
   onNotFound?: 'next' | 'response'
