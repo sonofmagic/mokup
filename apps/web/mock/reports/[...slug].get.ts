@@ -1,14 +1,16 @@
-import type { MockRule } from 'mokup'
+import type { MockResponseHandler, MockRule } from 'mokup'
+
+const handler: MockResponseHandler = (req) => {
+  const slug = Array.isArray(req.params?.slug) ? req.params?.slug : []
+  return {
+    ok: true,
+    slug,
+    trail: slug.join('/'),
+  }
+}
 
 const rule: MockRule = {
-  response: (req) => {
-    const slug = Array.isArray(req.params?.slug) ? req.params?.slug : []
-    return {
-      ok: true,
-      slug,
-      trail: slug.join('/'),
-    }
-  },
+  response: handler,
 }
 
 export default rule
