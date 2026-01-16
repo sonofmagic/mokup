@@ -20,6 +20,8 @@ export default defineConfig({
 
 ## Mock files
 
+Filenames must include an HTTP method suffix (`.get`, `.post`, etc.).
+
 `mock/user.get.json`
 
 ```json
@@ -29,17 +31,23 @@ export default defineConfig({
 }
 ```
 
-`mock/auth.ts`
+`mock/auth.post.ts`
 
 ```ts
 export default {
-  url: '/login',
-  method: 'post',
   response: ({ body }) => {
     if (body && typeof body === 'object' && 'username' in body) {
       return { ok: true }
     }
     return { ok: false }
   },
+}
+```
+
+`mock/users/[id].get.ts`
+
+```ts
+export default {
+  response: ({ params }) => ({ ok: true, id: params?.id }),
 }
 ```

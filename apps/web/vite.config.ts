@@ -10,7 +10,7 @@ export default defineConfig({
     mokup({
       dir: ['mock', 'mock-extra', 'mock-ignored'],
       include: [/\/mock\//, /\/mock-extra\//],
-      exclude: [/\.disabled\./],
+      exclude: [/\/mock\/_ignored\//],
     }),
   ],
 })

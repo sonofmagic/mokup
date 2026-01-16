@@ -2,6 +2,7 @@ import type { IncomingMessage, ServerResponse } from 'node:http'
 import type { Logger, MockContext, MockRequest, RouteTable } from './types'
 
 import { Buffer } from 'node:buffer'
+import { matchRouteTokens } from '@mokup/runtime'
 import { delay, normalizeMethod } from './utils'
 
 function extractQuery(parsedUrl: URL) {
@@ -99,6 +100,23 @@ function writeResponse(res: ServerResponse, body: unknown) {
   res.end(JSON.stringify(body))
 }
 
+function findMatchingRoute(
+  routes: RouteTable,
+  method: string,
+  pathname: string,
+) {
+  for (const route of routes) {
+    if (route.method !== method) {
+      continue
+    }
+    const matched = matchRouteTokens(route.tokens, pathname)
+    if (matched) {
+      return { route, params: matched.params }
+    }
+  }
+  return null
+}
+
 export function createMiddleware(
   getRoutes: () => RouteTable,
   logger: Logger,
@@ -112,8 +130,8 @@ export function createMiddleware(
     const parsedUrl = new URL(url, 'http://mokup.local')
     const pathname = parsedUrl.pathname
     const method = normalizeMethod(req.method) ?? 'GET'
-    const route = getRoutes().get(`${method} ${pathname}`)
-    if (!route) {
+    const matched = findMatchingRoute(getRoutes(), method, pathname)
+    if (!matched) {
       return next()
     }
 
@@ -126,6 +144,7 @@ export function createMiddleware(
         query,
         body,
         rawBody,
+        params: matched.params,
       }
       const ctx: MockContext = {
         delay: (ms: number) => delay(ms),
@@ -134,20 +153,20 @@ export function createMiddleware(
 
       const startedAt = Date.now()
       const responseValue
-        = typeof route.response === 'function'
-          ? await route.response(mockReq, res, ctx)
-          : route.response
+        = typeof matched.route.response === 'function'
+          ? await matched.route.response(mockReq, res, ctx)
+          : matched.route.response
       if (res.writableEnded) {
         return
       }
 
-      if (route.delay && route.delay > 0) {
-        await delay(route.delay)
+      if (matched.route.delay && matched.route.delay > 0) {
+        await delay(matched.route.delay)
       }
 
-      applyHeaders(res, route.headers)
-      if (route.status) {
-        res.statusCode = route.status
+      applyHeaders(res, matched.route.headers)
+      if (matched.route.status) {
+        res.statusCode = matched.route.status
       }
       writeResponse(res, responseValue)
       logger.info(`${method} ${pathname} ${Date.now() - startedAt}ms`)

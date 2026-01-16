@@ -1,3 +1,4 @@
+import type { RouteToken } from '@mokup/runtime'
 import type { IncomingMessage, ServerResponse } from 'node:http'
 
 export type HttpMethod
@@ -16,6 +17,7 @@ export interface MockRequest {
   query: Record<string, string | string[]>
   body: unknown
   rawBody?: string
+  params?: Record<string, string | string[]>
 }
 
 export interface MockContext {
@@ -51,15 +53,17 @@ export interface MokupViteOptions {
 
 export interface ResolvedRoute {
   file: string
-  url: string
+  template: string
   method: HttpMethod
+  tokens: RouteToken[]
+  score: number[]
   response: MockResponse
   status?: number
   headers?: Record<string, string>
   delay?: number
 }
 
-export type RouteTable = Map<string, ResolvedRoute>
+export type RouteTable = ResolvedRoute[]
 
 export interface Logger {
   info: (...args: unknown[]) => void

@@ -3,8 +3,9 @@ import { Buffer } from 'node:buffer'
 import { promises as fs } from 'node:fs'
 import { createRequire } from 'node:module'
 import { cwd } from 'node:process'
-
 import { pathToFileURL } from 'node:url'
+
+import { compareRouteScore, parseRouteTemplate } from '@mokup/runtime'
 import { build as esbuild } from 'esbuild'
 import { parse as parseJsonc } from 'jsonc-parser'
 
@@ -68,14 +69,6 @@ function normalizeMethod(method?: string | null): HttpMethod | undefined {
   return undefined
 }
 
-function normalizeUrl(url: string) {
-  const sanitized = url.split('?')[0]
-  if (!sanitized.startsWith('/')) {
-    return `/${sanitized}`
-  }
-  return sanitized
-}
-
 function normalizePrefix(prefix: string) {
   if (!prefix) {
     return ''
@@ -88,18 +81,20 @@ function resolveMethod(
   fileMethod: HttpMethod | undefined,
   ruleMethod?: string,
 ): HttpMethod {
+  if (ruleMethod) {
+    const normalized = normalizeMethod(ruleMethod)
+    if (normalized) {
+      return normalized
+    }
+  }
   if (fileMethod) {
     return fileMethod
-  }
-  const normalized = normalizeMethod(ruleMethod)
-  if (normalized) {
-    return normalized
   }
   return 'GET'
 }
 
-function resolveUrl(url: string, prefix: string) {
-  const normalized = normalizeUrl(url)
+function resolveTemplate(template: string, prefix: string) {
+  const normalized = template.startsWith('/') ? template : `/${template}`
   if (!prefix) {
     return normalized
   }
@@ -120,39 +115,61 @@ function resolveUrl(url: string, prefix: string) {
 }
 
 function stripMethodSuffix(base: string) {
-  const sanitized = base.endsWith('.mock')
-    ? base.slice(0, -'.mock'.length)
-    : base
-  const segments = sanitized.split('.')
+  const segments = base.split('.')
   const last = segments.at(-1)
   if (last && methodSuffixSet.has(last.toLowerCase())) {
     segments.pop()
     return {
-      name: segments.join('.') || sanitized,
+      name: segments.join('.'),
       method: last.toUpperCase() as HttpMethod,
     }
   }
   return {
-    name: sanitized,
+    name: base,
     method: undefined,
   }
 }
 
-function deriveRouteFromFile(file: string, rootDir: string) {
+function deriveRouteFromFile(
+  file: string,
+  rootDir: string,
+  log?: (message: string) => void,
+) {
   const rel = toPosix(relative(rootDir, file))
   const ext = extname(rel)
   const withoutExt = rel.slice(0, rel.length - ext.length)
   const dir = dirname(withoutExt)
   const base = basename(withoutExt)
   const { name, method } = stripMethodSuffix(base)
+  if (!method) {
+    log?.(`Skip mock without method suffix: ${file}`)
+    return null
+  }
+  if (!name) {
+    log?.(`Skip mock with empty route name: ${file}`)
+    return null
+  }
   const joined = dir === '.' ? name : join(dir, name)
-  let url = `/${toPosix(joined)}`
-  if (url.endsWith('/index')) {
-    url = url.slice(0, -'/index'.length) || '/'
+  const segments = toPosix(joined).split('/')
+  if (segments.at(-1) === 'index') {
+    segments.pop()
+  }
+  const template = segments.length === 0 ? '/' : `/${segments.join('/')}`
+  const parsed = parseRouteTemplate(template)
+  if (parsed.errors.length > 0) {
+    for (const error of parsed.errors) {
+      log?.(`${error} in ${file}`)
+    }
+    return null
+  }
+  for (const warning of parsed.warnings) {
+    log?.(`${warning} in ${file}`)
   }
   return {
-    url,
+    template: parsed.template,
     method,
+    tokens: parsed.tokens,
+    score: parsed.score,
   }
 }
 
@@ -237,18 +254,29 @@ function resolveDirs(dir: BuildOptions['dir'], root: string): string[] {
 
 function resolveRule(params: {
   rule: MockRule
-  derivedUrl: string
+  derivedTemplate: string
   derivedMethod?: HttpMethod
   prefix: string
+  file: string
+  log?: (message: string) => void
 }) {
   const method = resolveMethod(params.derivedMethod, params.rule.method)
-  const url = resolveUrl(params.rule.url ?? params.derivedUrl, params.prefix)
-  if (!method || !url) {
+  const template = resolveTemplate(params.rule.url ?? params.derivedTemplate, params.prefix)
+  const parsed = parseRouteTemplate(template)
+  if (parsed.errors.length > 0) {
+    for (const error of parsed.errors) {
+      params.log?.(`${error} in ${params.file}`)
+    }
     return null
+  }
+  for (const warning of parsed.warnings) {
+    params.log?.(`${warning} in ${params.file}`)
   }
   return {
     method,
-    url,
+    template: parsed.template,
+    tokens: parsed.tokens,
+    score: parsed.score,
   }
 }
 
@@ -420,6 +448,7 @@ export async function buildManifest(options: BuildOptions = {}) {
 
   const files = await collectFiles(dirs)
   const routes: ManifestRoute[] = []
+  const seen = new Set<string>()
   const handlerSources = new Set<string>()
   const handlerModuleMap = new Map<string, string>()
 
@@ -430,7 +459,10 @@ export async function buildManifest(options: BuildOptions = {}) {
     if (!matchesFilter(fileInfo.file, options.include, options.exclude)) {
       continue
     }
-    const derived = deriveRouteFromFile(fileInfo.file, fileInfo.rootDir)
+    const derived = deriveRouteFromFile(fileInfo.file, fileInfo.rootDir, options.log)
+    if (!derived) {
+      continue
+    }
     const rules = await loadRules(fileInfo.file)
     for (const [index, rule] of rules.entries()) {
       if (!rule || typeof rule !== 'object') {
@@ -441,13 +473,20 @@ export async function buildManifest(options: BuildOptions = {}) {
       }
       const resolved = resolveRule({
         rule,
-        derivedUrl: derived.url,
+        derivedTemplate: derived.template,
         derivedMethod: derived.method,
         prefix: options.prefix ?? '',
+        file: fileInfo.file,
+        log: options.log,
       })
       if (!resolved) {
         continue
       }
+      const key = `${resolved.method} ${resolved.template}`
+      if (seen.has(key)) {
+        options.log?.(`Duplicate mock route ${key} from ${fileInfo.file}`)
+      }
+      seen.add(key)
       const response = buildResponse(
         rule.response,
         {
@@ -463,9 +502,13 @@ export async function buildManifest(options: BuildOptions = {}) {
       if (!response) {
         continue
       }
+      const source = toPosix(relative(root, fileInfo.file))
       routes.push({
         method: resolved.method,
-        url: resolved.url,
+        url: resolved.template,
+        tokens: resolved.tokens,
+        score: resolved.score,
+        source,
         status: rule.status,
         headers: rule.headers,
         delay: rule.delay,
@@ -481,7 +524,12 @@ export async function buildManifest(options: BuildOptions = {}) {
 
   const manifest: Manifest = {
     version: 1,
-    routes,
+    routes: routes.sort((a, b) => {
+      if (a.method !== b.method) {
+        return a.method.localeCompare(b.method)
+      }
+      return compareRouteScore(a.score ?? [], b.score ?? [])
+    }),
   }
 
   await fs.mkdir(outDir, { recursive: true })

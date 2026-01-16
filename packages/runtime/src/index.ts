@@ -1,3 +1,11 @@
+import type { RouteToken } from './router'
+import {
+  compareRouteScore,
+  matchRouteTokens,
+  parseRouteTemplate,
+  scoreRouteTokens,
+} from './router'
+
 export type HttpMethod
   = | 'GET'
     | 'POST'
@@ -15,6 +23,9 @@ export interface Manifest {
 export interface ManifestRoute {
   method: HttpMethod
   url: string
+  tokens?: RouteToken[]
+  score?: number[]
+  source?: string
   status?: number
   headers?: Record<string, string>
   delay?: number
@@ -49,6 +60,7 @@ export interface RuntimeRequest {
   headers: Record<string, string>
   body: unknown
   rawBody?: string
+  params?: Record<string, string | string[]>
 }
 
 export interface RuntimeResult {
@@ -337,7 +349,11 @@ async function executeRoute(
 
 export function createRuntime(options: RuntimeOptions) {
   let manifestCache: Manifest | null = null
-  let routeMap: Map<string, ManifestRoute> | null = null
+  let compiledRoutes: Map<HttpMethod, Array<{
+    route: ManifestRoute
+    tokens: RouteToken[]
+    score: number[]
+  }>> | null = null
   const moduleCache = new Map<string, RuntimeRule[]>()
 
   const getManifest = async () => {
@@ -350,30 +366,70 @@ export function createRuntime(options: RuntimeOptions) {
     return manifestCache
   }
 
-  const getRouteMap = async () => {
-    if (!routeMap) {
-      const manifest = await getManifest()
-      routeMap = new Map(
-        manifest.routes.map(route => [
-          `${route.method} ${route.url}`,
-          route,
-        ]),
-      )
+  const getRouteList = async () => {
+    if (compiledRoutes) {
+      return compiledRoutes
     }
-    return routeMap
+    const manifest = await getManifest()
+    const map = new Map<HttpMethod, Array<{
+      route: ManifestRoute
+      tokens: RouteToken[]
+      score: number[]
+    }>>()
+
+    for (const route of manifest.routes) {
+      const method = normalizeMethod(route.method) ?? 'GET'
+      const parsed = route.tokens
+        ? { tokens: route.tokens, score: route.score ?? scoreRouteTokens(route.tokens), errors: [] }
+        : parseRouteTemplate(route.url)
+      if (parsed.errors.length > 0) {
+        continue
+      }
+      const tokens = route.tokens ?? parsed.tokens
+      const score = route.score ?? parsed.score
+      const list = map.get(method) ?? []
+      list.push({ route, tokens, score })
+      map.set(method, list)
+    }
+
+    for (const list of map.values()) {
+      list.sort((a, b) => compareRouteScore(a.score, b.score))
+    }
+    compiledRoutes = map
+    return compiledRoutes
   }
 
   const handle = async (req: RuntimeRequest): Promise<RuntimeResult | null> => {
     const method = normalizeMethod(req.method) ?? 'GET'
-    const map = await getRouteMap()
-    const route = map.get(`${method} ${req.path}`)
-    if (!route) {
+    const map = await getRouteList()
+    const list = map.get(method)
+    if (!list || list.length === 0) {
       return null
     }
-    return executeRoute(route, req, moduleCache, options.moduleBase)
+    for (const entry of list) {
+      const matched = matchRouteTokens(entry.tokens, req.path)
+      if (!matched) {
+        continue
+      }
+      const requestWithParams: RuntimeRequest = {
+        ...req,
+        params: matched.params,
+      }
+      return executeRoute(entry.route, requestWithParams, moduleCache, options.moduleBase)
+    }
+    return null
   }
 
   return {
     handle,
   }
 }
+
+export type { ParsedRouteTemplate, RouteToken } from './router'
+export {
+  compareRouteScore,
+  matchRouteTokens,
+  normalizePathname,
+  parseRouteTemplate,
+  scoreRouteTokens,
+} from './router'

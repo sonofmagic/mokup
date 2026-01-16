@@ -3,7 +3,7 @@ import type { PreviewServer, ViteDevServer } from 'vite'
 import type { Logger, RouteTable } from './types'
 import { collectFiles, isSupportedFile } from './files'
 import { loadRules } from './loader'
-import { deriveRouteFromFile, resolveRule } from './routes'
+import { deriveRouteFromFile, resolveRule, sortRoutes } from './routes'
 import { matchesFilter } from './utils'
 
 export async function scanRoutes(params: {
@@ -14,7 +14,8 @@ export async function scanRoutes(params: {
   server?: ViteDevServer | PreviewServer
   logger: Logger
 }): Promise<RouteTable> {
-  const routes: RouteTable = new Map()
+  const routes: RouteTable = []
+  const seen = new Set<string>()
   const files = await collectFiles(params.dirs)
   for (const fileInfo of files) {
     if (!isSupportedFile(fileInfo.file)) {
@@ -23,7 +24,10 @@ export async function scanRoutes(params: {
     if (!matchesFilter(fileInfo.file, params.include, params.exclude)) {
       continue
     }
-    const derived = deriveRouteFromFile(fileInfo.file, fileInfo.rootDir)
+    const derived = deriveRouteFromFile(fileInfo.file, fileInfo.rootDir, params.logger)
+    if (!derived) {
+      continue
+    }
     const rules = await loadRules(fileInfo.file, params.server, params.logger)
     for (const rule of rules) {
       if (!rule || typeof rule !== 'object') {
@@ -35,7 +39,7 @@ export async function scanRoutes(params: {
       }
       const resolved = resolveRule({
         rule,
-        derivedUrl: derived.url,
+        derivedTemplate: derived.template,
         derivedMethod: derived.method,
         prefix: params.prefix,
         file: fileInfo.file,
@@ -44,12 +48,13 @@ export async function scanRoutes(params: {
       if (!resolved) {
         continue
       }
-      const key = `${resolved.method} ${resolved.url}`
-      if (routes.has(key)) {
+      const key = `${resolved.method} ${resolved.template}`
+      if (seen.has(key)) {
         params.logger.warn(`Duplicate mock route ${key} from ${fileInfo.file}`)
       }
-      routes.set(key, resolved)
+      seen.add(key)
+      routes.push(resolved)
     }
   }
-  return routes
+  return sortRoutes(routes)
 }

@@ -10,7 +10,7 @@ import { createDebouncer, isInDirs, resolveDirs } from './utils'
 
 export function createMokupPlugin(options: MokupViteOptions = {}): Plugin {
   let root = cwd()
-  let routes: RouteTable = new Map()
+  let routes: RouteTable = []
   let previewWatcher: chokidar.FSWatcher | null = null
 
   const logger = createLogger(options.log !== false)

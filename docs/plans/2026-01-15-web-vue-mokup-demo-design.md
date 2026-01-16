@@ -16,7 +16,7 @@
 - `apps/web/src/api/client.ts`: axios instance.
 - `apps/web/src/api/index.ts`: `fetchProfile()` and `login()` helpers.
 - `apps/web/mock/profile.get.json`: GET response example.
-- `apps/web/mock/login.post.mock.ts`: POST response example.
+- `apps/web/mock/login.post.ts`: POST response example.
 
 ## Plugin Usage
 
@@ -37,7 +37,7 @@ export default defineConfig({
 - Vite dev server starts with `mokup` middleware.
 - Axios calls hit the mock routes:
   - `GET /profile` from `profile.get.json`.
-  - `POST /login` from `login.post.mock.ts`.
+  - `POST /login` from `login.post.ts`.
 - The UI renders raw JSON and a summary message for each response.
 
 ## Error Handling
