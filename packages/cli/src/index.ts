@@ -412,7 +412,7 @@ async function writeHandlerIndex(
 
 async function writeBundle(outDir: string, hasHandlers: boolean) {
   const lines = [
-    'import manifest from \'./mokup.manifest.json\' assert { type: \'json\' }',
+    'import manifest from \'./mokup.manifest.mjs\'',
   ]
   if (hasHandlers) {
     lines.push(
@@ -451,6 +451,23 @@ async function writeBundle(outDir: string, hasHandlers: boolean) {
   await fs.writeFile(join(outDir, 'mokup.bundle.mjs'), lines.join('\n'), 'utf8')
   await fs.writeFile(join(outDir, 'mokup.bundle.d.ts'), dts.join('\n'), 'utf8')
   await fs.writeFile(join(outDir, 'mokup.bundle.d.mts'), dts.join('\n'), 'utf8')
+}
+
+async function writeManifestModule(outDir: string, manifest: Manifest) {
+  const lines = [
+    `const manifest = ${JSON.stringify(manifest, null, 2)}`,
+    '',
+    'export default manifest',
+    '',
+  ]
+  const dts = [
+    'import type { Manifest } from \'@mokup/runtime\'',
+    'declare const manifest: Manifest',
+    'export default manifest',
+    '',
+  ]
+  await fs.writeFile(join(outDir, 'mokup.manifest.mjs'), lines.join('\n'), 'utf8')
+  await fs.writeFile(join(outDir, 'mokup.manifest.d.mts'), dts.join('\n'), 'utf8')
 }
 
 function buildResponse(
@@ -617,13 +634,6 @@ export async function buildManifest(options: BuildOptions = {}) {
     }
   }
 
-  if (handlerSources.size > 0) {
-    await fs.mkdir(handlersDir, { recursive: true })
-    await bundleHandlers(Array.from(handlerSources), root, handlersDir)
-    await writeHandlerIndex(handlerModuleMap, handlersDir, outDir)
-  }
-  await writeBundle(outDir, handlerSources.size > 0)
-
   const manifest: Manifest = {
     version: 1,
     routes: routes.sort((a, b) => {
@@ -635,8 +645,15 @@ export async function buildManifest(options: BuildOptions = {}) {
   }
 
   await fs.mkdir(outDir, { recursive: true })
+  if (handlerSources.size > 0) {
+    await fs.mkdir(handlersDir, { recursive: true })
+    await bundleHandlers(Array.from(handlerSources), root, handlersDir)
+    await writeHandlerIndex(handlerModuleMap, handlersDir, outDir)
+  }
   const manifestPath = join(outDir, 'mokup.manifest.json')
   await fs.writeFile(manifestPath, JSON.stringify(manifest, null, 2), 'utf8')
+  await writeManifestModule(outDir, manifest)
+  await writeBundle(outDir, handlerSources.size > 0)
 
   options.log?.(`Manifest written to ${manifestPath}`)
 
