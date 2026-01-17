@@ -1,4 +1,11 @@
-import type { ManifestResponse, MockContext, MockResponder, MockResponseHandler, RuntimeRequest } from './types'
+import type {
+  ManifestResponse,
+  MockContext,
+  MockResponder,
+  MockResponseHandler,
+  ModuleMap,
+  RuntimeRequest,
+} from './types'
 
 export interface RuntimeRule {
   url?: string
@@ -16,7 +23,17 @@ export function resolveModuleUrl(modulePath: string, moduleBase?: string | URL) 
   if (!moduleBase) {
     throw new Error('moduleBase is required for relative module paths.')
   }
-  return new URL(modulePath, moduleBase).href
+  const base = typeof moduleBase === 'string' ? moduleBase : moduleBase.href
+  if (/^(?:data|http|https|file):/.test(base)) {
+    return new URL(modulePath, base).href
+  }
+  const normalizedBase = base.endsWith('/') ? base : `${base}/`
+  const normalizedModule = modulePath.startsWith('./')
+    ? modulePath.slice(2)
+    : modulePath.startsWith('/')
+      ? modulePath.slice(1)
+      : modulePath
+  return `${normalizedBase}${normalizedModule}`
 }
 
 export function normalizeRules(value: unknown): RuntimeRule[] {
@@ -64,13 +81,19 @@ export async function loadModuleRule(
   response: Extract<ManifestResponse, { type: 'module' }>,
   moduleCache: Map<string, RuntimeRule[]>,
   moduleBase?: string | URL,
+  moduleMap?: ModuleMap,
 ) {
-  const resolvedUrl = resolveModuleUrl(response.module, moduleBase)
   const exportName = response.exportName ?? 'default'
-  const cacheKey = `${resolvedUrl}::${exportName}`
+  const directMapValue = moduleMap?.[response.module]
+  const resolvedUrl = directMapValue
+    ? undefined
+    : resolveModuleUrl(response.module, moduleBase)
+  const resolvedMapValue = resolvedUrl ? moduleMap?.[resolvedUrl] : undefined
+  const cacheKey = `${resolvedUrl ?? response.module}::${exportName}`
   let rules = moduleCache.get(cacheKey)
   if (!rules) {
-    const module = await import(resolvedUrl)
+    const moduleValue = directMapValue ?? resolvedMapValue
+    const module = moduleValue ?? await import(resolvedUrl ?? response.module)
     const exported = module[exportName] ?? module.default ?? module
     rules = normalizeRules(exported)
     moduleCache.set(cacheKey, rules)

@@ -15,6 +15,7 @@ export type {
   MockContext,
   MockResponder,
   MockResponseHandler,
+  ModuleMap,
   RuntimeOptions,
   RuntimeRequest,
   RuntimeResult,

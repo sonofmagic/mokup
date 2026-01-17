@@ -1,0 +1,5 @@
+{
+  "name": "web-mokup-worker",
+  "main": "worker/src/index.ts",
+  "compatibility_date": "2025-01-15"
+}

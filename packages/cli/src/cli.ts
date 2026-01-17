@@ -83,7 +83,7 @@ function parseBuildOptions(argv: string[]) {
 
 function printHelp() {
   console.log(
-    `mokup build [options]\n\nOptions:\n  --dir, -d       Mock directory (repeatable)\n  --out, -o       Output directory (default: dist)\n  --prefix        URL prefix\n  --include       Include regex (repeatable)\n  --exclude       Exclude regex (repeatable)\n  --no-handlers   Skip function handler output`,
+    `mokup build [options]\n\nOptions:\n  --dir, -d       Mock directory (repeatable)\n  --out, -o       Output directory (default: .mokup)\n  --prefix        URL prefix\n  --include       Include regex (repeatable)\n  --exclude       Exclude regex (repeatable)\n  --no-handlers   Skip function handler output`,
   )
 }
 

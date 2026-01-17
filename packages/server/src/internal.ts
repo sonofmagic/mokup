@@ -25,13 +25,16 @@ export interface NodeResponseLike {
 export function toRuntimeOptions(
   options: MokupServerOptions,
 ): RuntimeOptions {
-  if (typeof options.moduleBase === 'undefined') {
-    return { manifest: options.manifest }
-  }
-  return {
+  const runtimeOptions: RuntimeOptions = {
     manifest: options.manifest,
-    moduleBase: options.moduleBase,
   }
+  if (typeof options.moduleBase !== 'undefined') {
+    runtimeOptions.moduleBase = options.moduleBase
+  }
+  if (typeof options.moduleMap !== 'undefined') {
+    runtimeOptions.moduleMap = options.moduleMap
+  }
+  return runtimeOptions
 }
 
 export function normalizeQuery(

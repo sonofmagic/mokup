@@ -84,4 +84,7 @@ export type MockResponseHandler = (
 export interface RuntimeOptions {
   manifest: Manifest | (() => Promise<Manifest>)
   moduleBase?: string | URL
+  moduleMap?: ModuleMap
 }
+
+export type ModuleMap = Record<string, Record<string, unknown>>

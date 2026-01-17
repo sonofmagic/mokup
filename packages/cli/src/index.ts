@@ -370,6 +370,89 @@ function getHandlerModulePath(file: string, handlersDir: string, root: string) {
   return normalized.startsWith('.') ? normalized : `./${normalized}`
 }
 
+async function writeHandlerIndex(
+  handlerModuleMap: Map<string, string>,
+  handlersDir: string,
+  outDir: string,
+) {
+  const modulePaths = Array.from(new Set(handlerModuleMap.values()))
+  if (modulePaths.length === 0) {
+    return
+  }
+  const imports: string[] = []
+  const entries: Array<{ key: string, name: string }> = []
+
+  modulePaths.forEach((modulePath, index) => {
+    const absolutePath = resolve(outDir, modulePath)
+    const relImport = toPosix(relative(handlersDir, absolutePath))
+    const importPath = relImport.startsWith('.') ? relImport : `./${relImport}`
+    const name = `module${index}`
+    imports.push(`import * as ${name} from '${importPath}'`)
+    entries.push({ key: modulePath, name })
+  })
+
+  const lines = [
+    ...imports,
+    '',
+    'export const mokupModuleMap = {',
+    ...entries.map(entry => `  '${entry.key}': ${entry.name},`),
+    '}',
+    '',
+  ]
+
+  await fs.writeFile(join(handlersDir, 'index.mjs'), lines.join('\n'), 'utf8')
+  const dts = [
+    'export type MokupModuleMap = Record<string, Record<string, unknown>>',
+    'export declare const mokupModuleMap: MokupModuleMap',
+    '',
+  ]
+  await fs.writeFile(join(handlersDir, 'index.d.ts'), dts.join('\n'), 'utf8')
+  await fs.writeFile(join(handlersDir, 'index.d.mts'), dts.join('\n'), 'utf8')
+}
+
+async function writeBundle(outDir: string, hasHandlers: boolean) {
+  const lines = [
+    'import manifest from \'./mokup.manifest.json\' assert { type: \'json\' }',
+  ]
+  if (hasHandlers) {
+    lines.push(
+      'import { mokupModuleMap } from \'./mokup-handlers/index.mjs\'',
+      '',
+      'const mokupBundle = {',
+      '  manifest,',
+      '  moduleMap: mokupModuleMap,',
+      '  moduleBase: \'./\',',
+      '}',
+    )
+  }
+  else {
+    lines.push(
+      '',
+      'const mokupBundle = {',
+      '  manifest,',
+      '}',
+    )
+  }
+  lines.push('', 'export default mokupBundle', 'export { mokupBundle }', '')
+
+  const dts = [
+    'import type { Manifest, ModuleMap } from \'@mokup/runtime\'',
+    'export interface MokupBundle {',
+    '  manifest: Manifest',
+    '  moduleMap?: ModuleMap',
+    '  moduleBase?: string | URL',
+    '}',
+    'declare const mokupBundle: MokupBundle',
+    'export default mokupBundle',
+    'export { mokupBundle }',
+    '',
+  ]
+
+  await fs.writeFile(join(outDir, 'mokup.bundle.mjs'), lines.join('\n'), 'utf8')
+  await fs.writeFile(join(outDir, 'mokup.bundle.d.ts'), dts.join('\n'), 'utf8')
+  await fs.writeFile(join(outDir, 'mokup.bundle.d.mts'), dts.join('\n'), 'utf8')
+}
+
 function buildResponse(
   response: unknown,
   options: {
@@ -442,7 +525,7 @@ async function bundleHandlers(files: string[], root: string, handlersDir: string
 
 export async function buildManifest(options: BuildOptions = {}) {
   const root = options.root ?? cwd()
-  const outDir = resolve(root, options.outDir ?? 'dist')
+  const outDir = resolve(root, options.outDir ?? '.mokup')
   const handlersDir = join(outDir, 'mokup-handlers')
   const dirs = resolveDirs(options.dir, root)
 
@@ -537,7 +620,9 @@ export async function buildManifest(options: BuildOptions = {}) {
   if (handlerSources.size > 0) {
     await fs.mkdir(handlersDir, { recursive: true })
     await bundleHandlers(Array.from(handlerSources), root, handlersDir)
+    await writeHandlerIndex(handlerModuleMap, handlersDir, outDir)
   }
+  await writeBundle(outDir, handlerSources.size > 0)
 
   const manifest: Manifest = {
     version: 1,

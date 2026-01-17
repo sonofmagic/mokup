@@ -4,6 +4,7 @@ import type {
   HttpMethod,
   Manifest,
   ManifestRoute,
+  ModuleMap,
   RuntimeOptions,
   RuntimeRequest,
   RuntimeResult,
@@ -29,6 +30,7 @@ async function executeRoute(
   req: RuntimeRequest,
   moduleCache: Map<string, RuntimeRule[]>,
   moduleBase?: string | URL,
+  moduleMap?: ModuleMap,
 ): Promise<RuntimeResult> {
   const responder = new ResponseController()
   const ctx = {
@@ -56,6 +58,7 @@ async function executeRoute(
       route.response,
       moduleCache,
       moduleBase,
+      moduleMap,
     )
     responseValue = await executeRule(rule, req, responder, ctx)
   }
@@ -154,7 +157,13 @@ export function createRuntime(options: RuntimeOptions) {
         ...req,
         params: matched.params,
       }
-      return executeRoute(entry.route, requestWithParams, moduleCache, options.moduleBase)
+      return executeRoute(
+        entry.route,
+        requestWithParams,
+        moduleCache,
+        options.moduleBase,
+        options.moduleMap,
+      )
     }
     return null
   }
