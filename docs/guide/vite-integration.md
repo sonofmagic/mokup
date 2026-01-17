@@ -396,7 +396,7 @@ Playground 会请求 `/_mokup/routes` 获取当前扫描到的 mock 列表，UI 
 
 ### 没有方法后缀？
 
-会被跳过并告警。请确保文件名类似 `users.get.ts`。
+`.json/.jsonc` 会默认当作 `GET`，其他文件会被跳过并告警。请确保文件名类似 `users.get.ts`。
 
 ### 路由冲突？
 

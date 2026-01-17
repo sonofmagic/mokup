@@ -16,6 +16,14 @@ interface PlaygroundResponse {
   routes: PlaygroundRoute[]
 }
 
+declare global {
+  interface Window {
+    __MOKUP_PLAYGROUND__?: {
+      reloadRoutes?: () => void
+    }
+  }
+}
+
 const routes = ref<PlaygroundRoute[]>([])
 const filtered = ref<PlaygroundRoute[]>([])
 const selected = ref<PlaygroundRoute | null>(null)
@@ -82,6 +90,10 @@ function applyFilter() {
     : [...routes.value]
 }
 
+function routeKey(route: PlaygroundRoute) {
+  return `${route.method} ${route.url}`
+}
+
 function selectRoute(route: PlaygroundRoute) {
   selected.value = route
   responseText.value = 'No response yet.'
@@ -92,6 +104,7 @@ function selectRoute(route: PlaygroundRoute) {
 async function loadRoutes() {
   loading.value = true
   error.value = ''
+  const previousKey = selected.value ? routeKey(selected.value) : ''
   try {
     const response = await fetch(routesEndpoint.value)
     if (!response.ok) {
@@ -99,8 +112,14 @@ async function loadRoutes() {
     }
     const data = await response.json() as PlaygroundResponse
     routes.value = data.routes ?? []
-    filtered.value = [...routes.value]
-    selected.value = filtered.value[0] ?? null
+    applyFilter()
+    if (previousKey) {
+      const match = routes.value.find(route => routeKey(route) === previousKey)
+      selected.value = match ?? filtered.value[0] ?? null
+    }
+    else {
+      selected.value = filtered.value[0] ?? null
+    }
   }
   catch (err) {
     error.value = err instanceof Error ? err.message : String(err)
@@ -192,7 +211,7 @@ const selectedKey = computed(() => {
   if (!selected.value) {
     return ''
   }
-  return `${selected.value.method}-${selected.value.url}`
+  return routeKey(selected.value)
 })
 
 const methodBadge = (method: string) => `method-${method.toLowerCase()}`
@@ -211,6 +230,11 @@ function routeMeta(route: PlaygroundRoute) {
 
 onMounted(() => {
   basePath.value = normalizeBasePath(window.location.pathname)
+  window.__MOKUP_PLAYGROUND__ = {
+    reloadRoutes: () => {
+      loadRoutes().catch(() => undefined)
+    },
+  }
   loadRoutes().catch(() => undefined)
 })
 </script>
@@ -275,9 +299,9 @@ onMounted(() => {
           <div v-else class="flex flex-col gap-3">
             <button
               v-for="(route, index) in filtered"
-              :key="`${route.method}-${route.url}-${index}`"
+              :key="`${routeKey(route)}-${index}`"
               class="group rounded-2xl border border-amber-900/10 bg-white/70 px-4 py-3 text-left shadow-sm transition hover:-translate-y-0.5"
-              :class="selectedKey === `${route.method}-${route.url}` ? 'border-amber-500/60 bg-white shadow-lg' : ''"
+              :class="selectedKey === routeKey(route) ? 'border-amber-500/60 bg-white shadow-lg' : ''"
               @click="selectRoute(route)"
             >
               <div class="flex items-center gap-3">

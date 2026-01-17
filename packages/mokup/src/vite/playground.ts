@@ -1,8 +1,10 @@
 import type { IncomingMessage, ServerResponse } from 'node:http'
+import type { PreviewServer, ViteDevServer } from 'vite'
 import type { Logger, MokupViteOptions, RouteTable } from './types'
 import { promises as fs } from 'node:fs'
 import { createRequire } from 'node:module'
-import { extname, join, normalize } from 'pathe'
+import { cwd } from 'node:process'
+import { extname, join, normalize, relative } from 'pathe'
 
 const require = createRequire(import.meta.url)
 
@@ -32,6 +34,46 @@ function normalizePlaygroundPath(value?: string) {
   return normalized.length > 1 && normalized.endsWith('/')
     ? normalized.slice(0, -1)
     : normalized
+}
+
+function normalizeBase(base: string) {
+  if (!base || base === '/') {
+    return ''
+  }
+  return base.endsWith('/') ? base.slice(0, -1) : base
+}
+
+function injectPlaygroundHmr(html: string, base: string) {
+  if (html.includes('mokup-playground-hmr')) {
+    return html
+  }
+  const normalizedBase = normalizeBase(base)
+  const clientPath = `${normalizedBase}/@vite/client`
+  const snippet = [
+    '<script type="module" id="mokup-playground-hmr">',
+    `import('${clientPath}').then(({ createHotContext }) => {`,
+    '  const hot = createHotContext(\'/@mokup/playground\')',
+    '  hot.on(\'mokup:routes-changed\', () => {',
+    '    const api = window.__MOKUP_PLAYGROUND__',
+    '    if (api && typeof api.reloadRoutes === \'function\') {',
+    '      api.reloadRoutes()',
+    '      return',
+    '    }',
+    '    window.location.reload()',
+    '  })',
+    '}).catch(() => {})',
+    '</script>',
+  ].join('\n')
+  if (html.includes('</body>')) {
+    return html.replace('</body>', `${snippet}\n</body>`)
+  }
+  return `${html}\n${snippet}`
+}
+
+function isViteDevServer(
+  server: ViteDevServer | PreviewServer | undefined | null,
+): server is ViteDevServer {
+  return !!server && 'ws' in server
 }
 
 export function resolvePlaygroundOptions(
@@ -74,11 +116,26 @@ function sendFile(
   res.end(content)
 }
 
-function toPlaygroundRoute(route: RouteTable[number]) {
+function toPosixPath(value: string) {
+  return value.replace(/\\/g, '/')
+}
+
+function formatRouteFile(file: string, root?: string) {
+  if (!root) {
+    return toPosixPath(file)
+  }
+  const rel = toPosixPath(relative(root, file))
+  if (!rel || rel.startsWith('..')) {
+    return toPosixPath(file)
+  }
+  return rel
+}
+
+function toPlaygroundRoute(route: RouteTable[number], root?: string) {
   return {
     method: route.method,
     url: route.template,
-    file: route.file,
+    file: formatRouteFile(route.file, root),
     type: typeof route.response === 'function' ? 'handler' : 'static',
     status: route.status,
     delay: route.delay,
@@ -89,6 +146,7 @@ export function createPlaygroundMiddleware(params: {
   getRoutes: () => RouteTable
   config: PlaygroundConfig
   logger: Logger
+  getServer?: () => ViteDevServer | PreviewServer | null
 }) {
   const distDir = resolvePlaygroundDist()
   const playgroundPath = params.config.path
@@ -106,11 +164,22 @@ export function createPlaygroundMiddleware(params: {
     }
 
     const subPath = pathname.slice(playgroundPath.length)
+    if (subPath === '') {
+      const suffix = url.search ?? ''
+      res.statusCode = 302
+      res.setHeader('Location', `${playgroundPath}/${suffix}`)
+      res.end()
+      return
+    }
     if (subPath === '' || subPath === '/' || subPath === '/index.html') {
       try {
         const html = await fs.readFile(indexPath, 'utf8')
+        const server = params.getServer?.()
+        const output = isViteDevServer(server)
+          ? injectPlaygroundHmr(html, server.config.base ?? '/')
+          : html
         const contentType = mimeTypes['.html'] ?? 'text/html; charset=utf-8'
-        sendFile(res, html, contentType)
+        sendFile(res, output, contentType)
       }
       catch (error) {
         params.logger.error('Failed to load playground index:', error)
@@ -121,11 +190,13 @@ export function createPlaygroundMiddleware(params: {
     }
 
     if (subPath === '/routes') {
+      const server = params.getServer?.()
+      const baseRoot = server?.config?.root ?? cwd()
       const routes = params.getRoutes()
       sendJson(res, {
         basePath: playgroundPath,
         count: routes.length,
-        routes: routes.map(toPlaygroundRoute),
+        routes: routes.map(route => toPlaygroundRoute(route, baseRoot)),
       })
       return
     }

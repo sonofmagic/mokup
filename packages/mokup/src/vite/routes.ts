@@ -5,6 +5,8 @@ import { basename, dirname, extname, join, relative } from 'pathe'
 import { methodSuffixSet } from './constants'
 import { normalizeMethod, normalizePrefix, toPosix } from './utils'
 
+const jsonExtensions = new Set(['.json', '.jsonc'])
+
 function resolveMethod(
   fileMethod: HttpMethod | undefined,
   ruleMethod: string | undefined,
@@ -71,7 +73,8 @@ export function deriveRouteFromFile(
   const dir = dirname(withoutExt)
   const base = basename(withoutExt)
   const { name, method } = stripMethodSuffix(base)
-  if (!method) {
+  const resolvedMethod = method ?? (jsonExtensions.has(ext) ? 'GET' : undefined)
+  if (!resolvedMethod) {
     logger.warn(`Skip mock without method suffix: ${file}`)
     return null
   }
@@ -97,7 +100,7 @@ export function deriveRouteFromFile(
   }
   return {
     template: parsed.template,
-    method,
+    method: resolvedMethod,
     tokens: parsed.tokens,
     score: parsed.score,
   }

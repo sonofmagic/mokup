@@ -40,11 +40,21 @@ describe('file route derivation', () => {
   it('warns and skips files without method suffix', () => {
     const { warnings, logger } = createLogger()
     const root = path.join('/tmp', 'mock')
-    const file = path.join(root, 'profile.json')
+    const file = path.join(root, 'profile.ts')
     const derived = deriveRouteFromFile(file, root, logger)
 
     expect(derived).toBeNull()
     expect(warnings.some(message => message.includes('method suffix'))).toBe(true)
+  })
+
+  it('defaults json files without method suffix to GET', () => {
+    const { warnings, logger } = createLogger()
+    const root = path.join('/tmp', 'mock')
+    const file = path.join(root, 'profile.json')
+    const derived = deriveRouteFromFile(file, root, logger)
+
+    expect(derived?.method).toBe('GET')
+    expect(warnings.length).toBe(0)
   })
 
   it('skips unsupported route group segments', () => {

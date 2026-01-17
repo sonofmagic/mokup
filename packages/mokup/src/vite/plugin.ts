@@ -10,10 +10,33 @@ import { createPlaygroundMiddleware, resolvePlaygroundOptions } from './playgrou
 import { scanRoutes } from './scanner'
 import { createDebouncer, isInDirs, resolveDirs } from './utils'
 
+function buildRouteSignature(routes: RouteTable) {
+  return routes
+    .map(route =>
+      [
+        route.method,
+        route.template,
+        route.file,
+        typeof route.response === 'function' ? 'handler' : 'static',
+        route.status ?? '',
+        route.delay ?? '',
+      ].join('|'),
+    )
+    .join('\n')
+}
+
+function isViteDevServer(
+  server: ViteDevServer | PreviewServer | undefined | null,
+): server is ViteDevServer {
+  return !!server && 'ws' in server
+}
+
 export function createMokupPlugin(options: MokupViteOptions = {}): Plugin {
   let root = cwd()
   let routes: RouteTable = []
   let previewWatcher: FSWatcher | null = null
+  let currentServer: ViteDevServer | PreviewServer | null = null
+  let lastSignature: string | null = null
 
   const logger = createLogger(options.log !== false)
   const watchEnabled = options.watch !== false
@@ -22,6 +45,7 @@ export function createMokupPlugin(options: MokupViteOptions = {}): Plugin {
     getRoutes: () => routes,
     config: playgroundConfig,
     logger,
+    getServer: () => currentServer,
   })
 
   const refreshRoutes = async (server?: ViteDevServer | PreviewServer) => {
@@ -41,6 +65,17 @@ export function createMokupPlugin(options: MokupViteOptions = {}): Plugin {
       scanParams.server = server
     }
     routes = await scanRoutes(scanParams)
+    const signature = buildRouteSignature(routes)
+    if (isViteDevServer(server) && server.ws) {
+      if (lastSignature && signature !== lastSignature) {
+        server.ws.send({
+          type: 'custom',
+          event: 'mokup:routes-changed',
+          data: { ts: Date.now() },
+        })
+      }
+    }
+    lastSignature = signature
   }
 
   return {
@@ -50,6 +85,7 @@ export function createMokupPlugin(options: MokupViteOptions = {}): Plugin {
       root = config.root
     },
     async configureServer(server) {
+      currentServer = server
       await refreshRoutes(server)
       server.middlewares.use(playgroundMiddleware)
       server.middlewares.use(createMiddleware(() => routes, logger))
@@ -76,6 +112,7 @@ export function createMokupPlugin(options: MokupViteOptions = {}): Plugin {
       })
     },
     async configurePreviewServer(server) {
+      currentServer = server
       await refreshRoutes(server)
       server.middlewares.use(playgroundMiddleware)
       server.middlewares.use(createMiddleware(() => routes, logger))
