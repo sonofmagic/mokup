@@ -34,16 +34,16 @@ const { t } = useI18n()
   <div class="flex flex-col gap-3">
     <div class="flex items-center gap-2">
       <button
-        class="flex items-center gap-2 rounded-full border border-amber-900/10 bg-white/70 px-3 py-1.5 text-xs uppercase tracking-[0.25em] text-amber-950 transition hover:-translate-y-0.5 dark:border-amber-100/10 dark:bg-slate-900/60 dark:text-amber-50"
-        :class="treeMode === 'file' ? 'border-amber-500/60 bg-white shadow-lg dark:border-amber-300/60 dark:bg-slate-900/80 dark:shadow-none' : ''"
+        class="flex items-center gap-2 rounded-full border border-amber-900/10 bg-white/80 px-3 py-1.5 text-[0.6rem] uppercase tracking-[0.25em] text-amber-950 transition hover:-translate-y-0.5 dark:border-amber-100/10 dark:bg-slate-900/80 dark:text-amber-50"
+        :class="treeMode === 'file' ? 'border-amber-500/60 bg-white dark:border-amber-300/60 dark:bg-slate-900/80' : ''"
         @click="setMode('file')"
       >
         <span class="i-[carbon--document] h-4 w-4" aria-hidden="true" />
         <span>{{ t('tree.file') }}</span>
       </button>
       <button
-        class="flex items-center gap-2 rounded-full border border-amber-900/10 bg-white/70 px-3 py-1.5 text-xs uppercase tracking-[0.25em] text-amber-950 transition hover:-translate-y-0.5 dark:border-amber-100/10 dark:bg-slate-900/60 dark:text-amber-50"
-        :class="treeMode === 'route' ? 'border-amber-500/60 bg-white shadow-lg dark:border-amber-300/60 dark:bg-slate-900/80 dark:shadow-none' : ''"
+        class="flex items-center gap-2 rounded-full border border-amber-900/10 bg-white/80 px-3 py-1.5 text-[0.6rem] uppercase tracking-[0.25em] text-amber-950 transition hover:-translate-y-0.5 dark:border-amber-100/10 dark:bg-slate-900/80 dark:text-amber-50"
+        :class="treeMode === 'route' ? 'border-amber-500/60 bg-white dark:border-amber-300/60 dark:bg-slate-900/80' : ''"
         @click="setMode('route')"
       >
         <span class="i-[carbon--link] h-4 w-4" aria-hidden="true" />
@@ -54,8 +54,8 @@ const { t } = useI18n()
       <button
         v-for="row in rows"
         :key="row.id"
-        class="group rounded-xl border border-amber-900/10 bg-white/70 px-3 py-2 text-left shadow-sm transition hover:-translate-y-0.5 dark:border-amber-100/10 dark:bg-slate-900/60"
-        :class="row.selected ? 'border-amber-500/60 bg-white shadow-lg dark:border-amber-300/60 dark:bg-slate-900/80 dark:shadow-none' : ''"
+        class="group rounded-lg border border-transparent px-2 py-1.5 text-left transition hover:bg-amber-50/80 dark:hover:bg-slate-900/70"
+        :class="row.selected ? 'border-amber-500/40 bg-amber-50/80 dark:border-amber-300/40 dark:bg-slate-900/70' : ''"
         :title="row.title"
         @click="handleRowClick(row)"
       >

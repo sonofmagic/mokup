@@ -39,6 +39,8 @@ const messages = {
     detail: {
       selectTitle: 'Select a route',
       selectHint: 'Choose a route on the left to run a request.',
+      requestLabel: 'Request',
+      responseLabel: 'Response',
       run: 'Run',
       query: 'Query (JSON)',
       headers: 'Headers (JSON)',
@@ -94,6 +96,8 @@ const messages = {
     detail: {
       selectTitle: '请选择接口',
       selectHint: '从左侧选择一个接口开始调试。',
+      requestLabel: '请求',
+      responseLabel: '响应',
       run: '发送',
       query: '查询参数 (JSON)',
       headers: '请求头 (JSON)',

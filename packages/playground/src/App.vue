@@ -87,7 +87,7 @@ onMounted(() => {
 
 <template>
   <div class="min-h-screen bg-[radial-gradient(circle_at_top,_rgba(255,196,150,0.35),_transparent_55%),radial-gradient(circle_at_80%_20%,_rgba(120,220,205,0.25),_transparent_50%),radial-gradient(circle_at_10%_80%,_rgba(250,220,180,0.25),_transparent_55%)] dark:bg-[radial-gradient(circle_at_top,_rgba(52,96,140,0.35),_transparent_55%),radial-gradient(circle_at_80%_20%,_rgba(26,115,104,0.25),_transparent_50%),radial-gradient(circle_at_10%_80%,_rgba(120,80,40,0.3),_transparent_55%)]">
-    <div class="mx-auto flex w-full max-w-6xl flex-col gap-6 px-6 py-10 lg:px-10">
+    <div class="mx-auto flex min-h-screen w-full max-w-7xl flex-col">
       <PlaygroundHeader
         :route-count="routeCount"
         :theme-mode="themeMode"
@@ -98,41 +98,49 @@ onMounted(() => {
         @refresh="loadRoutes"
       />
 
-      <PlaygroundFilters v-model:search="search" :base-path="basePath || '/'" />
+      <main class="flex flex-1 flex-col px-6 py-6 lg:px-10 lg:py-8">
+        <div class="flex flex-1 flex-col overflow-hidden rounded-3xl border border-amber-900/10 bg-white/60 shadow-xl dark:border-amber-100/10 dark:bg-slate-950/70">
+          <div class="flex flex-1 flex-col lg:flex-row">
+            <aside class="flex w-full max-w-none flex-col gap-4 border-b border-amber-900/10 p-4 dark:border-amber-100/10 lg:w-[320px] lg:border-b-0 lg:border-r">
+              <PlaygroundFilters v-model:search="search" :base-path="basePath || '/'" />
 
-      <PlaygroundTabs :groups="groups" :active-group="activeGroup" @select="setActiveGroup" />
+              <PlaygroundTabs :groups="groups" :active-group="activeGroup" @select="setActiveGroup" />
 
-      <main class="grid gap-6 lg:grid-cols-[minmax(260px,_1fr)_minmax(320px,_1.4fr)]">
-        <aside class="flex flex-col gap-4">
-          <div v-if="error" class="rounded-2xl border border-rose-500/40 bg-rose-50/80 px-4 py-3 text-sm text-rose-700 dark:border-rose-300/40 dark:bg-rose-950/40 dark:text-rose-100/80">
-            {{ error }}
-          </div>
-          <div v-else-if="loading" class="rounded-2xl border border-amber-900/10 bg-white/60 px-4 py-6 text-sm text-amber-700 dark:border-amber-100/10 dark:bg-slate-900/60 dark:text-amber-100/70">
-            {{ t('states.loadingRoutes') }}
-          </div>
-          <div v-else-if="!filtered.length" class="rounded-2xl border border-amber-900/10 bg-white/60 px-4 py-6 text-sm text-amber-700 dark:border-amber-100/10 dark:bg-slate-900/60 dark:text-amber-100/70">
-            {{ t('states.emptyRoutes') }}
-          </div>
-          <RouteTree
-            v-else
-            :rows="treeRows"
-            :tree-mode="treeMode"
-            @update:treeMode="setTreeMode"
-            @toggle="toggleExpanded"
-            @select="handleSelectRow"
-          />
-        </aside>
+              <div class="flex-1 overflow-auto">
+                <div v-if="error" class="rounded-2xl border border-rose-500/40 bg-rose-50/80 px-4 py-3 text-sm text-rose-700 dark:border-rose-300/40 dark:bg-rose-950/40 dark:text-rose-100/80">
+                  {{ error }}
+                </div>
+                <div v-else-if="loading" class="rounded-2xl border border-amber-900/10 bg-white/60 px-4 py-6 text-sm text-amber-700 dark:border-amber-100/10 dark:bg-slate-900/60 dark:text-amber-100/70">
+                  {{ t('states.loadingRoutes') }}
+                </div>
+                <div v-else-if="!filtered.length" class="rounded-2xl border border-amber-900/10 bg-white/60 px-4 py-6 text-sm text-amber-700 dark:border-amber-100/10 dark:bg-slate-900/60 dark:text-amber-100/70">
+                  {{ t('states.emptyRoutes') }}
+                </div>
+                <RouteTree
+                  v-else
+                  :rows="treeRows"
+                  :tree-mode="treeMode"
+                  @update:treeMode="setTreeMode"
+                  @toggle="toggleExpanded"
+                  @select="handleSelectRow"
+                />
+              </div>
+            </aside>
 
-        <RouteDetail
-          v-model:queryText="queryText"
-          v-model:headersText="headersText"
-          v-model:bodyText="bodyText"
-          :selected="selected"
-          :response-text="responseText"
-          :response-status="responseStatus"
-          :response-time="responseTime"
-          @run="runRequest"
-        />
+            <section class="flex min-h-0 flex-1 flex-col p-4 lg:p-6">
+              <RouteDetail
+                v-model:queryText="queryText"
+                v-model:headersText="headersText"
+                v-model:bodyText="bodyText"
+                :selected="selected"
+                :response-text="responseText"
+                :response-status="responseStatus"
+                :response-time="responseTime"
+                @run="runRequest"
+              />
+            </section>
+          </div>
+        </div>
       </main>
     </div>
   </div>
