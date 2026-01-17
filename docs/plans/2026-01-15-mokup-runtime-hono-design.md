@@ -42,7 +42,7 @@
 
 ## Hono Adapter
 
-- Creates a Hono app with a single catch-all route.
+- Exposes a Hono-compatible middleware for catch-all routing.
 - Maps Hono `Context` to runtime request and returns `Response`.
 - Provides `ctx.delay` and JSON helpers via runtime.
 

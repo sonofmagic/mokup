@@ -242,17 +242,20 @@ createServer(async (req, res) => {
 
 ```ts
 import { readFile } from 'node:fs/promises'
-import { createMokupHonoApp } from '@mokup/hono'
+import { mokup } from '@mokup/hono'
+import { Hono } from 'hono'
 
 const manifest = JSON.parse(
   await readFile(new URL('./dist/mokup.manifest.json', import.meta.url), 'utf8'),
 )
 
-const app = createMokupHonoApp({
+const app = new Hono()
+
+app.use(mokup({
   manifest,
   moduleBase: new URL('./dist/', import.meta.url),
   onNotFound: 'next',
-})
+}))
 
 export default app
 ```

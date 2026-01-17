@@ -1,12 +1,13 @@
 import type { RuntimeOptions, RuntimeRequest } from '@mokup/runtime'
-import type { Context } from 'hono'
+import type { Context, ErrorHandler, Hono, MiddlewareHandler, RouterRoute } from 'hono'
 
 import { createRuntime } from '@mokup/runtime'
-import { Hono } from 'hono'
 
 export interface MokupHonoOptions extends RuntimeOptions {
   onNotFound?: 'next' | 'response'
 }
+
+export type MokupHonoBridge = Hono & MiddlewareHandler
 
 function parseBody(rawText: string, contentType: string) {
   if (!rawText) {
@@ -65,7 +66,7 @@ async function toRuntimeRequest(c: Context): Promise<RuntimeRequest> {
   return request
 }
 
-export function createMokupHonoApp(options: MokupHonoOptions) {
+export function mokup(options: MokupHonoOptions): MokupHonoBridge {
   const runtimeOptions: RuntimeOptions = {
     manifest: options.manifest,
   }
@@ -74,9 +75,7 @@ export function createMokupHonoApp(options: MokupHonoOptions) {
   }
   const runtime = createRuntime(runtimeOptions)
 
-  const app = new Hono()
-
-  app.all('*', async (c, next) => {
+  const middleware: MiddlewareHandler = async (c, next) => {
     const request = await toRuntimeRequest(c)
     const result = await runtime.handle(request)
     if (!result) {
@@ -89,7 +88,21 @@ export function createMokupHonoApp(options: MokupHonoOptions) {
       status: result.status,
       headers: result.headers,
     })
-  })
+  }
 
-  return app
+  const route: RouterRoute = {
+    basePath: '',
+    path: '*',
+    method: 'ALL',
+    handler: middleware,
+  }
+
+  const bridge = middleware as MiddlewareHandler & {
+    routes: RouterRoute[]
+    errorHandler?: ErrorHandler
+  }
+  bridge.routes = [route]
+  bridge.errorHandler = undefined
+
+  return bridge as MokupHonoBridge
 }
