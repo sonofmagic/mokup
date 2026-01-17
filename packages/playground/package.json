@@ -18,9 +18,12 @@
     "preview": "vite preview"
   },
   "dependencies": {
-    "vue": "^3.5.26"
+    "vue": "^3.5.26",
+    "vue-i18n": "^11.1.12"
   },
   "devDependencies": {
+    "@iconify/json": "^2.2.429",
+    "@iconify/tailwind": "^1.2.0",
     "@tailwindcss/vite": "^4.1.13",
     "@vitejs/plugin-vue": "^6.0.3",
     "tailwindcss": "^4.1.13",

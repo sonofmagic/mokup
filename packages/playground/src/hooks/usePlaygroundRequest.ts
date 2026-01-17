@@ -1,19 +1,21 @@
 import type { Ref } from 'vue'
 import type { PlaygroundRoute } from '../types'
 import { ref, watch } from 'vue'
+import { useI18n } from 'vue-i18n'
 import { applyQuery, parseJsonInput } from '../utils/request'
 
 export function usePlaygroundRequest(selected: Ref<PlaygroundRoute | null>) {
+  const { t } = useI18n()
   const queryText = ref('')
   const headersText = ref('')
   const bodyText = ref('')
-  const responseText = ref('No response yet.')
-  const responseStatus = ref('Idle')
+  const responseText = ref(t('response.empty'))
+  const responseStatus = ref(t('response.idle'))
   const responseTime = ref('')
 
   function resetResponse() {
-    responseText.value = 'No response yet.'
-    responseStatus.value = 'Idle'
+    responseText.value = t('response.empty')
+    responseStatus.value = t('response.idle')
     responseTime.value = ''
   }
 
@@ -23,17 +25,17 @@ export function usePlaygroundRequest(selected: Ref<PlaygroundRoute | null>) {
     }
     const parsedQuery = parseJsonInput(queryText.value)
     if (parsedQuery.error) {
-      responseText.value = `Query JSON error: ${parsedQuery.error}`
+      responseText.value = t('errors.queryJson', { message: parsedQuery.error })
       return
     }
     const parsedHeaders = parseJsonInput(headersText.value)
     if (parsedHeaders.error) {
-      responseText.value = `Headers JSON error: ${parsedHeaders.error}`
+      responseText.value = t('errors.headersJson', { message: parsedHeaders.error })
       return
     }
     const parsedBody = parseJsonInput(bodyText.value)
     if (parsedBody.error) {
-      responseText.value = `Body JSON error: ${parsedBody.error}`
+      responseText.value = t('errors.bodyJson', { message: parsedBody.error })
       return
     }
 
@@ -65,9 +67,9 @@ export function usePlaygroundRequest(selected: Ref<PlaygroundRoute | null>) {
       }
     }
 
-    responseStatus.value = 'Loading...'
+    responseStatus.value = t('response.loading')
     responseTime.value = ''
-    responseText.value = 'Waiting for response...'
+    responseText.value = t('response.waiting')
 
     const startedAt = performance.now()
     try {
@@ -86,11 +88,11 @@ export function usePlaygroundRequest(selected: Ref<PlaygroundRoute | null>) {
         }
       }
       else {
-        responseText.value = raw || '[empty response]'
+        responseText.value = raw || t('response.emptyPayload')
       }
     }
     catch (err) {
-      responseStatus.value = 'Error'
+      responseStatus.value = t('response.error')
       responseText.value = err instanceof Error ? err.message : String(err)
     }
   }
