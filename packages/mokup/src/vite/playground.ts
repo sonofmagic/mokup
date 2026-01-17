@@ -120,6 +120,12 @@ function toPosixPath(value: string) {
   return value.replace(/\\/g, '/')
 }
 
+interface PlaygroundGroup {
+  key: string
+  label: string
+  path: string
+}
+
 function formatRouteFile(file: string, root?: string) {
   if (!root) {
     return toPosixPath(file)
@@ -131,7 +137,48 @@ function formatRouteFile(file: string, root?: string) {
   return rel
 }
 
-function toPlaygroundRoute(route: RouteTable[number], root?: string) {
+function resolveGroups(dirs: string[], root: string) {
+  const groups: PlaygroundGroup[] = []
+  const seen = new Set<string>()
+  for (const dir of dirs) {
+    const normalized = toPosixPath(normalize(dir))
+    if (seen.has(normalized)) {
+      continue
+    }
+    seen.add(normalized)
+    const rel = toPosixPath(relative(root, normalized))
+    const label = rel && !rel.startsWith('..') ? rel : normalized
+    groups.push({
+      key: normalized,
+      label,
+      path: normalized,
+    })
+  }
+  return groups
+}
+
+function resolveRouteGroup(routeFile: string, groups: PlaygroundGroup[]) {
+  if (groups.length === 0) {
+    return undefined
+  }
+  const normalizedFile = toPosixPath(normalize(routeFile))
+  let matched: PlaygroundGroup | undefined
+  for (const group of groups) {
+    if (normalizedFile === group.path || normalizedFile.startsWith(`${group.path}/`)) {
+      if (!matched || group.path.length > matched.path.length) {
+        matched = group
+      }
+    }
+  }
+  return matched
+}
+
+function toPlaygroundRoute(
+  route: RouteTable[number],
+  root: string | undefined,
+  groups: PlaygroundGroup[],
+) {
+  const matchedGroup = resolveRouteGroup(route.file, groups)
   return {
     method: route.method,
     url: route.template,
@@ -139,6 +186,8 @@ function toPlaygroundRoute(route: RouteTable[number], root?: string) {
     type: typeof route.response === 'function' ? 'handler' : 'static',
     status: route.status,
     delay: route.delay,
+    groupKey: matchedGroup?.key,
+    group: matchedGroup?.label,
   }
 }
 
@@ -147,6 +196,7 @@ export function createPlaygroundMiddleware(params: {
   config: PlaygroundConfig
   logger: Logger
   getServer?: () => ViteDevServer | PreviewServer | null
+  getDirs?: () => string[]
 }) {
   const distDir = resolvePlaygroundDist()
   const playgroundPath = params.config.path
@@ -192,11 +242,13 @@ export function createPlaygroundMiddleware(params: {
     if (subPath === '/routes') {
       const server = params.getServer?.()
       const baseRoot = server?.config?.root ?? cwd()
+      const groups = resolveGroups(params.getDirs?.() ?? [], baseRoot)
       const routes = params.getRoutes()
       sendJson(res, {
         basePath: playgroundPath,
         count: routes.length,
-        routes: routes.map(route => toPlaygroundRoute(route, baseRoot)),
+        groups: groups.map(group => ({ key: group.key, label: group.label })),
+        routes: routes.map(route => toPlaygroundRoute(route, baseRoot, groups)),
       })
       return
     }

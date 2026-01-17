@@ -55,6 +55,8 @@ export interface MokupViteOptions {
   }
 }
 
+export type MokupViteOptionsInput = MokupViteOptions | MokupViteOptions[]
+
 export interface ResolvedRoute {
   file: string
   template: string

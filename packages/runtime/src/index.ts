@@ -271,13 +271,14 @@ async function loadModuleRule(
   moduleBase?: string | URL,
 ) {
   const resolvedUrl = resolveModuleUrl(response.module, moduleBase)
-  let rules = moduleCache.get(resolvedUrl)
+  const exportName = response.exportName ?? 'default'
+  const cacheKey = `${resolvedUrl}::${exportName}`
+  let rules = moduleCache.get(cacheKey)
   if (!rules) {
     const module = await import(resolvedUrl)
-    const exportName = response.exportName ?? 'default'
     const exported = module[exportName] ?? module.default ?? module
     rules = normalizeRules(exported)
-    moduleCache.set(resolvedUrl, rules)
+    moduleCache.set(cacheKey, rules)
   }
   if (typeof response.ruleIndex === 'number') {
     return rules[response.ruleIndex]

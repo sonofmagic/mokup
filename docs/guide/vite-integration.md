@@ -95,6 +95,8 @@ mock-extra/
 }
 ```
 
+`.json` 文件也按 JSONC 解析，因此同样支持注释与尾逗号。
+
 ### TS/JS 模块
 
 支持导出对象、数组、函数。函数式响应建议显式声明 `MockResponseHandler`。
@@ -345,6 +347,15 @@ mokup({
 mokup({
   prefix: '/api',
 })
+```
+
+### 多目录不同前缀
+
+```ts
+mokup([
+  { dir: 'mock', prefix: '/api' },
+  { dir: 'mock-extra', prefix: '/api-extra' },
+])
 ```
 
 ### include/exclude

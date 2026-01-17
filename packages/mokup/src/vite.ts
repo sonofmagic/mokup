@@ -8,4 +8,5 @@ export type {
   MockResponseHandler,
   MockRule,
   MokupViteOptions,
+  MokupViteOptionsInput,
 } from './vite/types'

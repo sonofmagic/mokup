@@ -1,12 +1,13 @@
 import type { FSWatcher } from 'chokidar'
 import type { Plugin, PreviewServer, ViteDevServer } from 'vite'
-import type { MokupViteOptions, RouteTable } from './types'
+import type { MokupViteOptions, MokupViteOptionsInput, RouteTable } from './types'
 
 import { cwd } from 'node:process'
 import chokidar from 'chokidar'
 import { createLogger } from './logger'
 import { createMiddleware } from './middleware'
 import { createPlaygroundMiddleware, resolvePlaygroundOptions } from './playground'
+import { sortRoutes } from './routes'
 import { scanRoutes } from './scanner'
 import { createDebouncer, isInDirs, resolveDirs } from './utils'
 
@@ -31,40 +32,78 @@ function isViteDevServer(
   return !!server && 'ws' in server
 }
 
-export function createMokupPlugin(options: MokupViteOptions = {}): Plugin {
+function normalizeOptions(options: MokupViteOptionsInput): MokupViteOptions[] {
+  const list = Array.isArray(options) ? options : [options]
+  return list.length > 0 ? list : [{}]
+}
+
+function resolvePlaygroundInput(list: MokupViteOptions[]) {
+  for (const entry of list) {
+    if (typeof entry.playground !== 'undefined') {
+      return entry.playground
+    }
+  }
+  return undefined
+}
+
+export function createMokupPlugin(options: MokupViteOptionsInput = {}): Plugin {
   let root = cwd()
   let routes: RouteTable = []
   let previewWatcher: FSWatcher | null = null
   let currentServer: ViteDevServer | PreviewServer | null = null
   let lastSignature: string | null = null
 
-  const logger = createLogger(options.log !== false)
-  const watchEnabled = options.watch !== false
-  const playgroundConfig = resolvePlaygroundOptions(options.playground)
+  const optionList = normalizeOptions(options)
+  const logEnabled = optionList.every(entry => entry.log !== false)
+  const watchEnabled = optionList.every(entry => entry.watch !== false)
+  const playgroundConfig = resolvePlaygroundOptions(resolvePlaygroundInput(optionList))
+  const logger = createLogger(logEnabled)
+
+  const resolveAllDirs = () => {
+    const dirs: string[] = []
+    const seen = new Set<string>()
+    for (const entry of optionList) {
+      for (const dir of resolveDirs(entry.dir, root)) {
+        if (seen.has(dir)) {
+          continue
+        }
+        seen.add(dir)
+        dirs.push(dir)
+      }
+    }
+    return dirs
+  }
+
   const playgroundMiddleware = createPlaygroundMiddleware({
     getRoutes: () => routes,
     config: playgroundConfig,
     logger,
     getServer: () => currentServer,
+    getDirs: () => resolveAllDirs(),
   })
 
   const refreshRoutes = async (server?: ViteDevServer | PreviewServer) => {
-    const dirs = resolveDirs(options.dir, root)
-    const scanParams: Parameters<typeof scanRoutes>[0] = {
-      dirs,
-      prefix: options.prefix ?? '',
-      logger,
+    const collected: RouteTable = []
+    for (const entry of optionList) {
+      const dirs = resolveDirs(entry.dir, root)
+      const scanParams: Parameters<typeof scanRoutes>[0] = {
+        dirs,
+        prefix: entry.prefix ?? '',
+        logger,
+      }
+      if (entry.include) {
+        scanParams.include = entry.include
+      }
+      if (entry.exclude) {
+        scanParams.exclude = entry.exclude
+      }
+      if (server) {
+        scanParams.server = server
+      }
+      const scanned = await scanRoutes(scanParams)
+      collected.push(...scanned)
     }
-    if (options.include) {
-      scanParams.include = options.include
-    }
-    if (options.exclude) {
-      scanParams.exclude = options.exclude
-    }
-    if (server) {
-      scanParams.server = server
-    }
-    routes = await scanRoutes(scanParams)
+    routes = sortRoutes(collected)
     const signature = buildRouteSignature(routes)
     if (isViteDevServer(server) && server.ws) {
       if (lastSignature && signature !== lastSignature) {
@@ -92,7 +131,7 @@ export function createMokupPlugin(options: MokupViteOptions = {}): Plugin {
       if (!watchEnabled) {
         return
       }
-      const dirs = resolveDirs(options.dir, root)
+      const dirs = resolveAllDirs()
       server.watcher.add(dirs)
       const scheduleRefresh = createDebouncer(80, () => refreshRoutes(server))
       server.watcher.on('add', (file) => {
@@ -119,7 +158,7 @@ export function createMokupPlugin(options: MokupViteOptions = {}): Plugin {
       if (!watchEnabled) {
         return
       }
-      const dirs = resolveDirs(options.dir, root)
+      const dirs = resolveAllDirs()
       previewWatcher = chokidar.watch(dirs, { ignoreInitial: true })
       const scheduleRefresh = createDebouncer(80, () => refreshRoutes(server))
       previewWatcher.on('add', scheduleRefresh)
