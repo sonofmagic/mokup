@@ -10,7 +10,7 @@
     "typecheck": "tsc -p tsconfig.json --noEmit"
   },
   "dependencies": {
-    "@mokup/hono": "workspace:*",
+    "@mokup/server": "workspace:*",
     "hono": "^4.9.0"
   },
   "devDependencies": {

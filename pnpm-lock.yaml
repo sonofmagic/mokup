@@ -119,9 +119,9 @@ importers:
       '@hono/node-server':
         specifier: ^1.12.0
         version: 1.19.9(hono@4.11.4)
-      '@mokup/hono':
+      '@mokup/server':
         specifier: workspace:*
-        version: link:../../packages/hono
+        version: link:../../packages/server
       hono:
         specifier: ^4.9.0
         version: 4.11.4
@@ -141,9 +141,9 @@ importers:
 
   apps/mock-worker:
     dependencies:
-      '@mokup/hono':
+      '@mokup/server':
         specifier: workspace:*
-        version: link:../../packages/hono
+        version: link:../../packages/server
       hono:
         specifier: ^4.9.0
         version: 4.11.4
@@ -220,14 +220,11 @@ importers:
         specifier: ^3.6.1
         version: 3.6.1(typescript@5.9.3)(vue@3.5.26(typescript@5.9.3))
 
-  packages/hono:
+  packages/server:
     dependencies:
       '@mokup/runtime':
         specifier: workspace:*
         version: link:../runtime
-      hono:
-        specifier: ^4.9.0
-        version: 4.11.4
     devDependencies:
       typescript:
         specifier: ^5.9.3

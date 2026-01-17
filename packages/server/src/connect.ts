@@ -1,0 +1,37 @@
+import type { NodeRequestLike, NodeResponseLike } from './internal'
+import type { MokupServerOptions } from './types'
+
+import { createRuntime } from '@mokup/runtime'
+import {
+  applyRuntimeResultToNode,
+  toRuntimeOptions,
+  toRuntimeRequestFromNode,
+} from './internal'
+
+type NextFunction = (error?: unknown) => void
+
+export function createConnectMiddleware(
+  options: MokupServerOptions,
+) {
+  const runtime = createRuntime(toRuntimeOptions(options))
+  const onNotFound = options.onNotFound ?? 'next'
+
+  return async (
+    req: NodeRequestLike,
+    res: NodeResponseLike,
+    next: NextFunction,
+  ) => {
+    const runtimeRequest = await toRuntimeRequestFromNode(req)
+    const result = await runtime.handle(runtimeRequest)
+    if (!result) {
+      if (onNotFound === 'response') {
+        res.statusCode = 404
+        res.end()
+        return
+      }
+      next()
+      return
+    }
+    applyRuntimeResultToNode(res, result)
+  }
+}

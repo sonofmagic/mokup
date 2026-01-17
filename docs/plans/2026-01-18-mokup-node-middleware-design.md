@@ -1,11 +1,12 @@
 # Mokup Node Middleware Design
 
+Superseded by `docs/plans/2026-01-18-mokup-server-design.md`.
+
 ## Goals
 
 - Provide a single package, `@mokup/node`, that exposes framework-specific middlewares.
 - Support Express/Connect, Koa, and Hono with consistent behavior.
 - Keep runtime logic centralized and reuse the same request/response normalization.
-- Preserve current `@mokup/hono` usage as a thin wrapper.
 
 ## Non-goals
 
@@ -23,9 +24,6 @@ Exports:
 - `createKoaMiddleware(options)` -> `(ctx, next)`
 - `createHonoMiddleware(options)` -> `(c, next)`
 - `MokupNodeOptions` type (extends runtime options + `onNotFound`).
-
-`@mokup/hono` becomes a thin wrapper that re-exports or delegates to
-`createHonoMiddleware` while keeping the `mokup()` name.
 
 ## Architecture
 

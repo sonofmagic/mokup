@@ -1,20 +1,20 @@
-import type { MokupHonoOptions } from '@mokup/hono'
+import type { MokupServerOptions } from '@mokup/server'
 
 import { readFile } from 'node:fs/promises'
 import * as nodeProcess from 'node:process'
 import { serve } from '@hono/node-server'
-import { mokup } from '@mokup/hono'
+import { createHonoMiddleware } from '@mokup/server'
 import { Hono } from 'hono'
 
 async function start() {
   const manifestPath = new URL('../dist/mokup.manifest.json', import.meta.url)
   const manifest = JSON.parse(
     await readFile(manifestPath, 'utf8'),
-  ) as MokupHonoOptions['manifest']
+  ) as MokupServerOptions['manifest']
 
   const app = new Hono()
 
-  app.use(mokup({
+  app.use(createHonoMiddleware({
     manifest,
     moduleBase: new URL('../dist/', import.meta.url),
     onNotFound: 'response',

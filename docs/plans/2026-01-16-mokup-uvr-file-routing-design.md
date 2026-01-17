@@ -242,7 +242,7 @@ createServer(async (req, res) => {
 
 ```ts
 import { readFile } from 'node:fs/promises'
-import { mokup } from '@mokup/hono'
+import { createHonoMiddleware } from '@mokup/server'
 import { Hono } from 'hono'
 
 const manifest = JSON.parse(
@@ -251,7 +251,7 @@ const manifest = JSON.parse(
 
 const app = new Hono()
 
-app.use(mokup({
+app.use(createHonoMiddleware({
   manifest,
   moduleBase: new URL('./dist/', import.meta.url),
   onNotFound: 'next',

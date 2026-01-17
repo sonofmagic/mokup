@@ -19,7 +19,7 @@ New package: `packages/server` (published as `@mokup/server`).
 
 Exports (function-based API only):
 
-- `createFetchHandler(options)` -> `(request: Request) => Promise<Response>`
+- `createFetchHandler(options)` -> `(request: Request) => Promise<Response | null>`
 - `createExpressMiddleware(options)` -> `(req, res, next)`
 - `createConnectMiddleware(options)` -> `(req, res, next)`
 - `createKoaMiddleware(options)` -> `(ctx, next)`
@@ -64,7 +64,7 @@ Options shape:
 
 ## Framework Adapters
 
-- Fetch: `Request` in, `Response` out. Used for Edge/Worker/Node fetch runtimes.
+- Fetch: `Request` in, `Response` (or `null` when `onNotFound: 'next'`) out. Used for Edge/Worker/Node fetch runtimes.
 - Express/Connect: `(req, res, next)` middleware, respects `onNotFound`.
 - Koa: `async (ctx, next)` middleware, writes `ctx.status/ctx.body/ctx.set`.
 - Hono: adapter returns middleware with `routes` array for `app.use`/`app.route`.
@@ -98,6 +98,9 @@ import { createFetchHandler } from '@mokup/server'
 
 const handler = createFetchHandler({ manifest })
 const response = await handler(new Request('https://example.com/api'))
+if (!response) {
+  throw new Error('No response from mokup handler.')
+}
 ```
 
 ## Error Handling

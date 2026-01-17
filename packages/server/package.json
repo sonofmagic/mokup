@@ -1,13 +1,13 @@
 {
-  "name": "@mokup/hono",
+  "name": "@mokup/server",
   "type": "module",
   "version": "0.0.0",
-  "description": "Hono adapter for @mokup/runtime.",
+  "description": "Server adapters for @mokup/runtime.",
   "license": "MIT",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/sonofmagic/mokup.git",
-    "directory": "packages/hono"
+    "directory": "packages/server"
   },
   "exports": {
     ".": {
@@ -29,8 +29,7 @@
     "typecheck": "tsc -p tsconfig.json --noEmit"
   },
   "dependencies": {
-    "@mokup/runtime": "workspace:*",
-    "hono": "^4.9.0"
+    "@mokup/runtime": "workspace:*"
   },
   "devDependencies": {
     "typescript": "^5.9.3",
