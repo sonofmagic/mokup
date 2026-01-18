@@ -1,10 +1,9 @@
 import type {
   Manifest,
   ManifestRoute,
-  MokupServerOptions,
   MokupWorkerBundle,
 } from '@mokup/server'
-import { createFetchHandler } from '@mokup/server'
+import { createMokupWorker } from '@mokup/server/worker'
 import mokupBundle from './.mokup/mokup.bundle.mjs'
 
 interface AssetEnv {
@@ -16,18 +15,7 @@ interface AssetEnv {
 const playgroundBase = '/playground'
 const apiPrefix = '/api'
 const bundle = mokupBundle as MokupWorkerBundle
-
-const mockOptions: MokupServerOptions = {
-  manifest: bundle.manifest,
-  onNotFound: 'next',
-}
-if (typeof bundle.moduleBase !== 'undefined') {
-  mockOptions.moduleBase = bundle.moduleBase
-}
-if (typeof bundle.moduleMap !== 'undefined') {
-  mockOptions.moduleMap = bundle.moduleMap
-}
-const mockHandler = createFetchHandler(mockOptions)
+const mockHandler = createMokupWorker(bundle).fetch
 
 const playgroundGroups = [{ key: 'mock', label: 'mock' }]
 
