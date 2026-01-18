@@ -35,13 +35,16 @@ export async function buildManifest(options: BuildOptions = {}) {
     if (!matchesFilter(fileInfo.file, options.include, options.exclude)) {
       continue
     }
-    const config = await resolveDirectoryConfig({
+    const configParams: Parameters<typeof resolveDirectoryConfig>[0] = {
       file: fileInfo.file,
       rootDir: fileInfo.rootDir,
-      log: options.log,
       configCache,
       fileCache: configFileCache,
-    })
+    }
+    if (options.log) {
+      configParams.log = options.log
+    }
+    const config = await resolveDirectoryConfig(configParams)
     if (config.enabled === false) {
       continue
     }
