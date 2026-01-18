@@ -1,5 +1,6 @@
 {
-  "name": "docs-mokup-worker",
+  "$schema": "./node_modules/wrangler/config-schema.json",
+  "name": "mokup-website",
   "main": "worker/src/index.ts",
   "compatibility_date": "2025-01-15",
   "assets": {
@@ -8,7 +9,7 @@
   },
   "routes": [
     {
-      "pattern": "mokup.icebreaker.top/*",
+      "pattern": "mokup.icebreaker.top",
       "custom_domain": true
     }
   ]

@@ -1,14 +1,21 @@
 import type { MokupServerOptions } from '@mokup/server'
 import { createHonoMiddleware } from '@mokup/server'
 import { Hono } from 'hono'
-import manifest from './.mokup/mokup.manifest.json' assert { type: 'json' }
+import mokupBundle from './.mokup/mokup.bundle.mjs'
 
 const app = new Hono()
 
-app.use(createHonoMiddleware({
-  manifest: manifest as unknown as MokupServerOptions['manifest'],
-  moduleBase: new URL('./.mokup/', import.meta.url),
+const options: MokupServerOptions = {
+  manifest: mokupBundle.manifest,
   onNotFound: 'response',
-}))
+}
+if (typeof mokupBundle.moduleBase !== 'undefined') {
+  options.moduleBase = mokupBundle.moduleBase
+}
+if (typeof mokupBundle.moduleMap !== 'undefined') {
+  options.moduleMap = mokupBundle.moduleMap
+}
+
+app.use(createHonoMiddleware(options))
 
 export default app

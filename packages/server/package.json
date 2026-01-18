@@ -4,6 +4,7 @@
   "version": "0.0.0",
   "description": "Server adapters for @mokup/runtime.",
   "license": "MIT",
+  "homepage": "https://mokup.icebreaker.top",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/sonofmagic/mokup.git",

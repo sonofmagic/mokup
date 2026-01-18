@@ -3,6 +3,7 @@
   "type": "module",
   "version": "0.0.0",
   "private": true,
+  "homepage": "https://mokup.icebreaker.top",
   "scripts": {
     "dev": "vitepress dev docs --host",
     "build:docs": "vitepress build docs",

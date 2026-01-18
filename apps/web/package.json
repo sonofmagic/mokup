@@ -3,6 +3,7 @@
   "type": "module",
   "version": "0.0.0",
   "private": true,
+  "homepage": "https://mokup.icebreaker.top",
   "scripts": {
     "dev": "vite --host",
     "build:manifest": "pnpm --filter @mokup/cli build && mokup build --dir mock --out worker/src/.mokup",

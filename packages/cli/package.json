@@ -4,6 +4,7 @@
   "version": "0.0.0",
   "description": "CLI for building mokup manifests and handlers.",
   "license": "MIT",
+  "homepage": "https://mokup.icebreaker.top",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/sonofmagic/mokup.git",
