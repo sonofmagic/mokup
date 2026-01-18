@@ -4,7 +4,7 @@ import type { Logger, MokupViteOptions, RouteTable } from './types'
 import { promises as fs } from 'node:fs'
 import { createRequire } from 'node:module'
 import { cwd } from 'node:process'
-import { extname, join, normalize, relative } from 'pathe'
+import { dirname, extname, join, normalize, relative } from 'pathe'
 
 const require = createRequire(import.meta.url)
 
@@ -120,6 +120,50 @@ function toPosixPath(value: string) {
   return value.replace(/\\/g, '/')
 }
 
+function normalizePath(value: string) {
+  return toPosixPath(normalize(value))
+}
+
+function isAncestor(parent: string, child: string) {
+  const normalizedParent = normalizePath(parent).replace(/\/$/, '')
+  const normalizedChild = normalizePath(child)
+  return normalizedChild === normalizedParent || normalizedChild.startsWith(`${normalizedParent}/`)
+}
+
+function resolveGroupRoot(
+  dirs: string[],
+  serverRoot?: string,
+) {
+  if (!dirs || dirs.length === 0) {
+    return serverRoot ?? cwd()
+  }
+  if (serverRoot) {
+    const normalizedRoot = normalizePath(serverRoot)
+    const canUseRoot = dirs.every(dir => isAncestor(normalizedRoot, dir))
+    if (canUseRoot) {
+      return normalizedRoot
+    }
+  }
+  if (dirs.length === 1) {
+    return normalizePath(dirname(dirs[0]!))
+  }
+  let common = normalizePath(dirs[0]!)
+  for (const dir of dirs.slice(1)) {
+    const normalizedDir = normalizePath(dir)
+    while (common && !isAncestor(common, normalizedDir)) {
+      const parent = normalizePath(dirname(common))
+      if (parent === common) {
+        break
+      }
+      common = parent
+    }
+  }
+  if (!common || common === '/') {
+    return serverRoot ?? cwd()
+  }
+  return common
+}
+
 interface PlaygroundGroup {
   key: string
   label: string
@@ -141,7 +185,7 @@ function resolveGroups(dirs: string[], root: string) {
   const groups: PlaygroundGroup[] = []
   const seen = new Set<string>()
   for (const dir of dirs) {
-    const normalized = toPosixPath(normalize(dir))
+    const normalized = normalizePath(dir)
     if (seen.has(normalized)) {
       continue
     }
@@ -244,8 +288,9 @@ export function createPlaygroundMiddleware(params: {
 
     if (subPath === '/routes') {
       const server = params.getServer?.()
-      const baseRoot = server?.config?.root ?? cwd()
-      const groups = resolveGroups(params.getDirs?.() ?? [], baseRoot)
+      const dirs = params.getDirs?.() ?? []
+      const baseRoot = resolveGroupRoot(dirs, server?.config?.root)
+      const groups = resolveGroups(dirs, baseRoot)
       const routes = params.getRoutes()
       sendJson(res, {
         basePath: playgroundPath,

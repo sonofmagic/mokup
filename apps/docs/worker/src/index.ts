@@ -1,5 +1,9 @@
-import type { Manifest, ManifestRoute } from '@mokup/runtime'
-import type { MokupServerOptions, MokupWorkerBundle } from '@mokup/server'
+import type {
+  Manifest,
+  ManifestRoute,
+  MokupServerOptions,
+  MokupWorkerBundle,
+} from '@mokup/server'
 import { createFetchHandler } from '@mokup/server'
 import mokupBundle from './.mokup/mokup.bundle.mjs'
 

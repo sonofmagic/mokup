@@ -22,6 +22,10 @@ const emit = defineEmits<{
 const { t } = useI18n()
 
 const methodBadge = (method: string) => `method-${method.toLowerCase()}`
+
+const queryExample = '{ "q": "alpha", "page": 1 }'
+const headersExample = '{ "x-mokup": "playground" }'
+const bodyExample = '{ "name": "Ada" }'
 </script>
 
 <template>
@@ -86,7 +90,7 @@ const methodBadge = (method: string) => `method-${method.toLowerCase()}`
               :value="queryText"
               rows="4"
               class="rounded-lg border border-amber-900/10 bg-white/80 px-3 py-2 text-sm text-amber-950 outline-none focus:border-amber-500 dark:border-amber-100/10 dark:bg-slate-900/70 dark:text-amber-50"
-              :placeholder="t('detail.queryPlaceholder')"
+              :placeholder="t('detail.queryPlaceholder', { json: queryExample })"
               @input="emit('update:queryText', ($event.target as HTMLTextAreaElement | null)?.value ?? '')"
             />
           </label>
@@ -96,7 +100,7 @@ const methodBadge = (method: string) => `method-${method.toLowerCase()}`
               :value="headersText"
               rows="4"
               class="rounded-lg border border-amber-900/10 bg-white/80 px-3 py-2 text-sm text-amber-950 outline-none focus:border-amber-500 dark:border-amber-100/10 dark:bg-slate-900/70 dark:text-amber-50"
-              :placeholder="t('detail.headersPlaceholder')"
+              :placeholder="t('detail.headersPlaceholder', { json: headersExample })"
               @input="emit('update:headersText', ($event.target as HTMLTextAreaElement | null)?.value ?? '')"
             />
           </label>
@@ -106,7 +110,7 @@ const methodBadge = (method: string) => `method-${method.toLowerCase()}`
               :value="bodyText"
               rows="6"
               class="rounded-lg border border-amber-900/10 bg-white/80 px-3 py-2 text-sm text-amber-950 outline-none focus:border-amber-500 dark:border-amber-100/10 dark:bg-slate-900/70 dark:text-amber-50"
-              :placeholder="t('detail.bodyPlaceholder')"
+              :placeholder="t('detail.bodyPlaceholder', { json: bodyExample })"
               @input="emit('update:bodyText', ($event.target as HTMLTextAreaElement | null)?.value ?? '')"
             />
           </label>

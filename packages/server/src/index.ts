@@ -11,3 +11,9 @@ export type {
   MokupWorkerInput,
 } from './types'
 export { createMokupWorker } from './worker-node'
+export type {
+  Manifest,
+  ManifestRoute,
+  ModuleMap,
+  RuntimeOptions,
+} from '@mokup/runtime'

@@ -158,12 +158,10 @@ export default defineConfig({
     socialLinks: [
       { icon: 'github', link: 'https://github.com/sonofmagic/mokup' },
     ],
+    nav: zhNav,
+    sidebar: zhSidebar,
+    outlineTitle: '本页目录',
     locales: {
-      root: {
-        nav: zhNav,
-        sidebar: zhSidebar,
-        outlineTitle: '本页目录',
-      },
       en: {
         nav: enNav,
         sidebar: enSidebar,

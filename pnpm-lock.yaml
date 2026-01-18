@@ -123,15 +123,21 @@ importers:
       '@mokup/cli':
         specifier: workspace:*
         version: link:../../packages/cli
+      '@tailwindcss/vite':
+        specifier: ^4.1.13
+        version: 4.1.18(vite@7.3.1(@types/node@25.0.9)(jiti@2.6.1)(lightningcss@1.30.2)(tsx@4.21.0)(yaml@2.8.2))
       mokup:
         specifier: workspace:*
         version: link:../../packages/mokup
+      tailwindcss:
+        specifier: ^4.1.13
+        version: 4.1.18
       vitepress:
         specifier: ^1.6.3
         version: 1.6.4(@algolia/client-search@5.46.3)(@types/node@25.0.9)(axios@1.13.2)(change-case@5.4.4)(lightningcss@1.30.2)(postcss@8.5.6)(search-insights@2.17.3)(typescript@5.9.3)
       wrangler:
         specifier: ^4.0.0
-        version: 4.59.2(@cloudflare/workers-types@4.20260117.0)
+        version: 4.59.2(@cloudflare/workers-types@4.20260118.0)
 
   apps/mock-node:
     dependencies:
@@ -168,8 +174,8 @@ importers:
         version: 4.11.4
     devDependencies:
       '@cloudflare/workers-types':
-        specifier: ^4.20260117.0
-        version: 4.20260117.0
+        specifier: ^4.20260118.0
+        version: 4.20260118.0
       '@mokup/cli':
         specifier: workspace:*
         version: link:../../packages/cli
@@ -181,7 +187,7 @@ importers:
         version: 5.9.3
       wrangler:
         specifier: ^4.0.0
-        version: 4.59.2(@cloudflare/workers-types@4.20260117.0)
+        version: 4.59.2(@cloudflare/workers-types@4.20260118.0)
 
   apps/web:
     dependencies:
@@ -221,7 +227,7 @@ importers:
         version: 7.3.1(@types/node@25.0.9)(jiti@2.6.1)(lightningcss@1.30.2)(tsx@4.21.0)(yaml@2.8.2)
       wrangler:
         specifier: ^4.0.0
-        version: 4.59.2(@cloudflare/workers-types@4.20260117.0)
+        version: 4.59.2(@cloudflare/workers-types@4.20260118.0)
 
   packages/cli:
     dependencies:
@@ -671,8 +677,8 @@ packages:
     cpu: [x64]
     os: [win32]
 
-  '@cloudflare/workers-types@4.20260117.0':
-    resolution: {integrity: sha512-hAoNGDHRv+BaMJEFx5Zl5B2nzDW0+fa9aocIjUxhBGAZlXpGXhogK2lxtzJ7G8GzrgfXv8VRMA0n+H3OTgsiHQ==}
+  '@cloudflare/workers-types@4.20260118.0':
+    resolution: {integrity: sha512-t+2Q421kAQqwBzMUDvgg2flp8zFVxOpiAyZPbyNcnPxMDHf0z3B7LqBIVQawwI6ntZinbk9f4oUmaA5bGeYwlg==}
 
   '@commitlint/cli@20.3.1':
     resolution: {integrity: sha512-NtInjSlyev/+SLPvx/ulz8hRE25Wf5S9dLNDcIwazq0JyB4/w1ROF/5nV0ObPTX8YpRaKYeKtXDYWqumBNHWsw==}
@@ -1578,13 +1584,13 @@ packages:
     resolution: {integrity: sha512-hZ2uC1jbf6JMSsF2ZklhRQqf6GLpYyux6DlzegnW/aFlpu6qJj5GO7ub7WOETCrEl6pl6DAX7RgTgj/fyG+6BQ==}
     engines: {node: ^20.19.0 || ^22.13.0 || >=24}
 
-  '@exodus/bytes@1.8.0':
-    resolution: {integrity: sha512-8JPn18Bcp8Uo1T82gR8lh2guEOa5KKU/IEKvvdp0sgmi7coPBWf1Doi1EXsGZb2ehc8ym/StJCjffYV+ne7sXQ==}
+  '@exodus/bytes@1.9.0':
+    resolution: {integrity: sha512-lagqsvnk09NKogQaN/XrtlWeUF8SRhT12odMvbTIIaVObqzwAogL6jhR4DAp0gPuKoM1AOVrKUshJpRdpMFrww==}
     engines: {node: ^20.19.0 || ^22.12.0 || >=24.0.0}
     peerDependencies:
-      '@exodus/crypto': ^1.0.0-rc.4
+      '@noble/hashes': ^1.8.0 || ^2.0.0
     peerDependenciesMeta:
-      '@exodus/crypto':
+      '@noble/hashes':
         optional: true
 
   '@gwhitney/detect-indent@7.0.1':
@@ -8820,7 +8826,7 @@ snapshots:
   '@cloudflare/workerd-windows-64@1.20260114.0':
     optional: true
 
-  '@cloudflare/workers-types@4.20260117.0': {}
+  '@cloudflare/workers-types@4.20260118.0': {}
 
   '@commitlint/cli@20.3.1(@types/node@25.0.9)(typescript@5.9.3)':
     dependencies:
@@ -9510,7 +9516,7 @@ snapshots:
       '@eslint/core': 1.0.1
       levn: 0.4.1
 
-  '@exodus/bytes@1.8.0':
+  '@exodus/bytes@1.9.0':
     optional: true
 
   '@gwhitney/detect-indent@7.0.1': {}
@@ -13917,9 +13923,9 @@ snapshots:
 
   html-encoding-sniffer@6.0.0:
     dependencies:
-      '@exodus/bytes': 1.8.0
+      '@exodus/bytes': 1.9.0
     transitivePeerDependencies:
-      - '@exodus/crypto'
+      - '@noble/hashes'
     optional: true
 
   html-entities@2.6.0: {}
@@ -14279,7 +14285,7 @@ snapshots:
     dependencies:
       '@acemir/cssom': 0.9.31
       '@asamuzakjp/dom-selector': 6.7.6
-      '@exodus/bytes': 1.8.0
+      '@exodus/bytes': 1.9.0
       cssstyle: 5.3.7
       data-urls: 6.0.0
       decimal.js: 10.6.0
@@ -14298,7 +14304,7 @@ snapshots:
       ws: 8.19.0
       xml-name-validator: 5.0.0
     transitivePeerDependencies:
-      - '@exodus/crypto'
+      - '@noble/hashes'
       - bufferutil
       - supports-color
       - utf-8-validate
@@ -17538,7 +17544,7 @@ snapshots:
       '@cloudflare/workerd-linux-arm64': 1.20260114.0
       '@cloudflare/workerd-windows-64': 1.20260114.0
 
-  wrangler@4.59.2(@cloudflare/workers-types@4.20260117.0):
+  wrangler@4.59.2(@cloudflare/workers-types@4.20260118.0):
     dependencies:
       '@cloudflare/kv-asset-handler': 0.4.2
       '@cloudflare/unenv-preset': 2.10.0(unenv@2.0.0-rc.24)(workerd@1.20260114.0)
@@ -17549,7 +17555,7 @@ snapshots:
       unenv: 2.0.0-rc.24
       workerd: 1.20260114.0
     optionalDependencies:
-      '@cloudflare/workers-types': 4.20260117.0
+      '@cloudflare/workers-types': 4.20260118.0
       fsevents: 2.3.3
     transitivePeerDependencies:
       - bufferutil
