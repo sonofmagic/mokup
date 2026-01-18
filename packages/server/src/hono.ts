@@ -5,12 +5,14 @@ interface HonoContextLike {
   req: {
     raw: Request
   }
-  notFound?: () => Response
 }
 
-type HonoNext = () => Promise<unknown>
+type HonoNext = () => Promise<Response | void>
 
-type HonoMiddleware = (context: HonoContextLike, next: HonoNext) => Promise<unknown>
+type HonoMiddleware = (
+  context: HonoContextLike,
+  next: HonoNext,
+) => Promise<Response | void>
 
 interface HonoRouteLike {
   basePath: string
