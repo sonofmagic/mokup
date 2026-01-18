@@ -5,10 +5,21 @@
   "private": true,
   "scripts": {
     "dev": "vitepress dev docs",
-    "build": "vitepress build docs",
-    "preview": "vitepress preview docs"
+    "build:docs": "vitepress build docs",
+    "build:manifest": "pnpm --filter @mokup/cli build && mokup build --dir mock --out worker/src/.mokup --prefix /api",
+    "build:playground": "pnpm --filter @mokup/playground build && node scripts/copy-playground.mjs",
+    "build": "pnpm build:docs && pnpm build:playground",
+    "preview": "vitepress preview docs",
+    "worker:dev": "pnpm build:manifest && pnpm build && wrangler dev",
+    "worker:deploy": "pnpm build:manifest && pnpm build && wrangler deploy"
+  },
+  "dependencies": {
+    "@mokup/server": "workspace:*"
   },
   "devDependencies": {
-    "vitepress": "^1.6.3"
+    "@mokup/cli": "workspace:*",
+    "mokup": "workspace:*",
+    "vitepress": "^1.6.3",
+    "wrangler": "^4.0.0"
   }
 }

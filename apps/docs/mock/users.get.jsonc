@@ -1,0 +1,8 @@
+{
+  // Demo data for the playground.
+  "users": [
+    { "id": "u_1001", "name": "Alya" },
+    { "id": "u_1002", "name": "Kiro" },
+    { "id": "u_1003", "name": "Mira" }
+  ]
+}

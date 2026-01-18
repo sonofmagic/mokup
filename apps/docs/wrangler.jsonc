@@ -1,0 +1,9 @@
+{
+  "name": "docs-mokup-worker",
+  "main": "worker/src/index.ts",
+  "compatibility_date": "2025-01-15",
+  "assets": {
+    "directory": "docs/.vitepress/dist",
+    "binding": "ASSETS"
+  }
+}
