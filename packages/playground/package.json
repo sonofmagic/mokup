@@ -9,6 +9,9 @@
     "url": "git+https://github.com/sonofmagic/mokup.git",
     "directory": "packages/playground"
   },
+  "publishConfig": {
+    "access": "public"
+  },
   "files": [
     "dist"
   ],

@@ -22,6 +22,9 @@
   "bin": {
     "mokup": "./dist/cli.mjs"
   },
+  "publishConfig": {
+    "access": "public"
+  },
   "files": [
     "dist"
   ],
