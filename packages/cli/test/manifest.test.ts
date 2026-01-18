@@ -149,4 +149,31 @@ describe('buildManifest', () => {
       await cleanupTempRoot(root)
     }
   })
+
+  it('writes an ESM manifest module alongside the JSON manifest', async () => {
+    const { root, mockDir } = await createTempRoot()
+    try {
+      await writeFile(path.join(mockDir, 'users.get.json'), '{"ok":true}')
+
+      await buildManifest({
+        root,
+        dir: 'mock',
+        outDir: 'dist',
+        handlers: false,
+      })
+
+      const manifestModulePath = path.join(root, 'dist', 'mokup.manifest.mjs')
+      const manifestTypesPath = path.join(root, 'dist', 'mokup.manifest.d.mts')
+      const bundlePath = path.join(root, 'dist', 'mokup.bundle.mjs')
+
+      await expect(fs.stat(manifestModulePath)).resolves.toBeDefined()
+      await expect(fs.stat(manifestTypesPath)).resolves.toBeDefined()
+
+      const bundleSource = await fs.readFile(bundlePath, 'utf8')
+      expect(bundleSource).toContain('mokup.manifest.mjs')
+    }
+    finally {
+      await cleanupTempRoot(root)
+    }
+  })
 })
