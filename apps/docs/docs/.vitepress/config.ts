@@ -1,3 +1,4 @@
+import tailwindcss from '@tailwindcss/vite'
 import mokup from 'mokup/vite'
 import { defineConfig } from 'vitepress'
 
@@ -139,6 +140,7 @@ export default defineConfig({
   lastUpdated: true,
   vite: {
     plugins: [
+      tailwindcss(),
       mokup({
         dir: '../mock',
         prefix: '/api',

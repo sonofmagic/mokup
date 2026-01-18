@@ -4,7 +4,7 @@
   "version": "0.0.0",
   "private": true,
   "scripts": {
-    "dev": "vitepress dev docs",
+    "dev": "vitepress dev docs --host",
     "build:docs": "vitepress build docs",
     "build:manifest": "pnpm --filter @mokup/cli build && mokup build --dir mock --out worker/src/.mokup --prefix /api",
     "build:playground": "pnpm --filter @mokup/playground build && node scripts/copy-playground.mjs",
@@ -18,7 +18,9 @@
   },
   "devDependencies": {
     "@mokup/cli": "workspace:*",
+    "@tailwindcss/vite": "^4.1.13",
     "mokup": "workspace:*",
+    "tailwindcss": "^4.1.13",
     "vitepress": "^1.6.3",
     "wrangler": "^4.0.0"
   }
