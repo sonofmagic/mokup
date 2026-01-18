@@ -5,5 +5,11 @@
   "assets": {
     "directory": "docs/.vitepress/dist",
     "binding": "ASSETS"
-  }
+  },
+  "routes": [
+    {
+      "pattern": "mokup.icebreaker.top/*",
+      "custom_domain": true
+    }
+  ]
 }
