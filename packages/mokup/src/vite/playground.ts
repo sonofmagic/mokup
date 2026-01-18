@@ -179,6 +179,7 @@ function toPlaygroundRoute(
   groups: PlaygroundGroup[],
 ) {
   const matchedGroup = resolveRouteGroup(route.file, groups)
+  const middlewareSources = route.middlewares?.map(entry => formatRouteFile(entry.source, root))
   return {
     method: route.method,
     url: route.template,
@@ -186,6 +187,8 @@ function toPlaygroundRoute(
     type: typeof route.response === 'function' ? 'handler' : 'static',
     status: route.status,
     delay: route.delay,
+    middlewareCount: middlewareSources?.length ?? 0,
+    middlewares: middlewareSources,
     groupKey: matchedGroup?.key,
     group: matchedGroup?.label,
   }

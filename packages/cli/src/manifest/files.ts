@@ -2,7 +2,7 @@ import type { BuildOptions, FileInfo } from './types'
 
 import { promises as fs } from 'node:fs'
 
-import { extname, isAbsolute, join, resolve } from 'pathe'
+import { basename, extname, isAbsolute, join, resolve } from 'pathe'
 
 import { toPosix } from './utils'
 
@@ -88,6 +88,9 @@ export function matchesFilter(
 
 export function isSupportedFile(file: string) {
   if (file.endsWith('.d.ts')) {
+    return false
+  }
+  if (basename(file).startsWith('index.config.')) {
     return false
   }
   const ext = extname(file).toLowerCase()

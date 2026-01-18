@@ -7,6 +7,8 @@ export interface PlaygroundRoute {
   groupKey?: string
   status?: number
   delay?: number
+  middlewareCount?: number
+  middlewares?: string[]
 }
 
 export interface PlaygroundGroup {

@@ -1,6 +1,6 @@
 import { promises as fs } from 'node:fs'
 
-import { extname, join } from 'pathe'
+import { basename, extname, join } from 'pathe'
 
 import { supportedExtensions } from './constants'
 
@@ -53,6 +53,9 @@ export async function collectFiles(dirs: string[]): Promise<FileInfo[]> {
 
 export function isSupportedFile(file: string) {
   if (file.endsWith('.d.ts')) {
+    return false
+  }
+  if (basename(file).startsWith('index.config.')) {
     return false
   }
   const ext = extname(file).toLowerCase()

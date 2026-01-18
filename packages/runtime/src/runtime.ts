@@ -4,13 +4,14 @@ import type {
   HttpMethod,
   Manifest,
   ManifestRoute,
+  MockMiddleware,
   ModuleMap,
   RuntimeOptions,
   RuntimeRequest,
   RuntimeResult,
 } from './types'
 
-import { executeRule, loadModuleRule } from './module'
+import { executeRule, loadModuleMiddleware, loadModuleRule } from './module'
 import { delay, mergeHeaders, normalizeMethod } from './normalize'
 import {
   decodeBase64,
@@ -29,6 +30,7 @@ async function executeRoute(
   route: ManifestRoute,
   req: RuntimeRequest,
   moduleCache: Map<string, RuntimeRule[]>,
+  middlewareCache: Map<string, MockMiddleware[]>,
   moduleBase?: string | URL,
   moduleMap?: ModuleMap,
 ): Promise<RuntimeResult> {
@@ -38,30 +40,84 @@ async function executeRoute(
     json: <T>(data: T) => data,
   }
 
-  let responseValue: unknown
-  let contentType: string | undefined
-
-  if (route.response.type === 'json') {
-    responseValue = route.response.body
-    contentType = 'application/json; charset=utf-8'
-  }
-  else if (route.response.type === 'text') {
-    responseValue = route.response.body
-    contentType = 'text/plain; charset=utf-8'
-  }
-  else if (route.response.type === 'binary') {
-    responseValue = decodeBase64(route.response.body)
-    contentType = 'application/octet-stream'
-  }
-  else {
+  const runHandler = async (): Promise<{
+    value: unknown
+    contentType?: string
+  }> => {
+    if (route.response.type === 'json') {
+      return {
+        value: route.response.body,
+        contentType: 'application/json; charset=utf-8',
+      }
+    }
+    if (route.response.type === 'text') {
+      return {
+        value: route.response.body,
+        contentType: 'text/plain; charset=utf-8',
+      }
+    }
+    if (route.response.type === 'binary') {
+      return {
+        value: decodeBase64(route.response.body),
+        contentType: 'application/octet-stream',
+      }
+    }
     const rule = await loadModuleRule(
       route.response,
       moduleCache,
       moduleBase,
       moduleMap,
     )
-    responseValue = await executeRule(rule, req, responder, ctx)
+    const value = await executeRule(rule, req, responder, ctx)
+    return { value }
   }
+
+  const runMiddlewares = async (middlewares: MockMiddleware[]) => {
+    let lastIndex = -1
+    const dispatch = async (index: number): Promise<{ value: unknown, contentType?: string }> => {
+      if (index <= lastIndex) {
+        throw new Error('Middleware next() called multiple times.')
+      }
+      lastIndex = index
+      const handler = middlewares[index]
+      if (!handler) {
+        return runHandler()
+      }
+      let nextResult: { value: unknown, contentType?: string } | undefined
+      const next = async () => {
+        nextResult = await dispatch(index + 1)
+        return nextResult.value
+      }
+      const value = await handler(req, responder, ctx, next)
+      if (typeof value !== 'undefined') {
+        return { value }
+      }
+      if (nextResult) {
+        return nextResult
+      }
+      return { value: undefined }
+    }
+    return dispatch(0)
+  }
+
+  const middlewareHandlers: MockMiddleware[] = []
+  for (const entry of route.middleware ?? []) {
+    const handler = await loadModuleMiddleware(
+      entry,
+      middlewareCache,
+      moduleBase,
+      moduleMap,
+    )
+    if (handler) {
+      middlewareHandlers.push(handler)
+    }
+  }
+
+  const result = middlewareHandlers.length > 0
+    ? await runMiddlewares(middlewareHandlers)
+    : await runHandler()
+  const responseValue = result.value
+  const contentType = result.contentType
 
   if (route.delay && route.delay > 0) {
     await delay(route.delay)
@@ -97,6 +153,7 @@ export function createRuntime(options: RuntimeOptions) {
     score: number[]
   }>> | null = null
   const moduleCache = new Map<string, RuntimeRule[]>()
+  const middlewareCache = new Map<string, MockMiddleware[]>()
 
   const getManifest = async () => {
     if (!manifestCache) {
@@ -161,6 +218,7 @@ export function createRuntime(options: RuntimeOptions) {
         entry.route,
         requestWithParams,
         moduleCache,
+        middlewareCache,
         options.moduleBase,
         options.moduleMap,
       )

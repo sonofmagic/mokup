@@ -23,7 +23,14 @@ export interface ManifestRoute {
   status?: number
   headers?: Record<string, string>
   delay?: number
+  middleware?: ManifestModuleRef[]
   response: ManifestResponse
+}
+
+export interface ManifestModuleRef {
+  module: string
+  exportName?: string
+  ruleIndex?: number
 }
 
 export type ManifestResponse
@@ -40,12 +47,7 @@ export type ManifestResponse
     body: string
     encoding: 'base64'
   }
-  | {
-    type: 'module'
-    module: string
-    exportName?: string
-    ruleIndex?: number
-  }
+  | ({ type: 'module' } & ManifestModuleRef)
 
 export interface RuntimeRequest {
   method: string
@@ -74,6 +76,13 @@ export interface MockResponder {
   getHeader: (key: string) => string | undefined
   removeHeader: (key: string) => void
 }
+
+export type MockMiddleware = (
+  req: RuntimeRequest,
+  res: MockResponder,
+  ctx: MockContext,
+  next: () => Promise<unknown>,
+) => unknown | Promise<unknown>
 
 export type MockResponseHandler = (
   req: RuntimeRequest,

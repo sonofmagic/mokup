@@ -61,6 +61,24 @@ const methodBadge = (method: string) => `method-${method.toLowerCase()}`
             {{ t('detail.run') }}
           </button>
         </div>
+        <div class="flex flex-wrap items-center gap-2 border-t border-amber-900/10 px-4 py-3 text-[0.6rem] uppercase tracking-[0.2em] text-amber-800/70 dark:border-amber-100/10 dark:text-amber-100/70">
+          <span>{{ t('detail.middlewares') }}</span>
+          <span class="rounded-full bg-amber-100 px-2 py-0.5 text-[0.55rem] text-amber-900 dark:bg-slate-800 dark:text-amber-100">
+            {{ selected.middlewareCount ?? 0 }}
+          </span>
+        </div>
+        <div
+          v-if="selected.middlewares && selected.middlewares.length > 0"
+          class="flex flex-wrap gap-2 border-t border-amber-900/10 px-4 py-3 text-xs text-amber-900 dark:border-amber-100/10 dark:text-amber-100"
+        >
+          <span
+            v-for="middleware in selected.middlewares"
+            :key="middleware"
+            class="rounded-full border border-amber-900/10 bg-white/80 px-3 py-1 text-[0.6rem] dark:border-amber-100/10 dark:bg-slate-900/70"
+          >
+            {{ middleware }}
+          </span>
+        </div>
         <div class="grid gap-3 border-t border-amber-900/10 p-4 dark:border-amber-100/10 lg:grid-cols-2">
           <label class="flex flex-col gap-1.5 text-[0.65rem] uppercase tracking-[0.2em] text-amber-800/70 dark:text-amber-100/70">
             {{ t('detail.query') }}

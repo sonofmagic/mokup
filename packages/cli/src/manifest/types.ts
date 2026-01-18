@@ -10,12 +10,25 @@ export interface BuildOptions {
 }
 
 export interface MockRule {
-  url?: string
-  method?: string
   response: unknown
   status?: number
   headers?: Record<string, string>
   delay?: number
+}
+
+export type MockMiddleware = (
+  req: unknown,
+  res: unknown,
+  ctx: unknown,
+  next: () => Promise<unknown>,
+) => unknown | Promise<unknown>
+
+export interface DirectoryConfig {
+  headers?: Record<string, string>
+  status?: number
+  delay?: number
+  enabled?: boolean
+  middleware?: MockMiddleware | MockMiddleware[]
 }
 
 export interface FileInfo {

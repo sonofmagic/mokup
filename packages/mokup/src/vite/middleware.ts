@@ -158,10 +158,39 @@ export function createMiddleware(
       }
 
       const startedAt = Date.now()
-      const responseValue
-        = typeof matched.route.response === 'function'
+      const executeHandler = async () => {
+        return typeof matched.route.response === 'function'
           ? await matched.route.response(mockReq, res, ctx)
           : matched.route.response
+      }
+      const runMiddlewares = async (middlewares: NonNullable<typeof matched.route.middlewares>) => {
+        let lastIndex = -1
+        const dispatch = async (index: number): Promise<unknown> => {
+          if (index <= lastIndex) {
+            throw new Error('Middleware next() called multiple times.')
+          }
+          lastIndex = index
+          const entry = middlewares[index]
+          if (!entry) {
+            return executeHandler()
+          }
+          let nextResult: unknown
+          const next = async () => {
+            nextResult = await dispatch(index + 1)
+            return nextResult
+          }
+          const value = await entry.handle(mockReq, res, ctx, next)
+          if (typeof value !== 'undefined') {
+            return value
+          }
+          return nextResult
+        }
+        return dispatch(0)
+      }
+
+      const responseValue = matched.route.middlewares && matched.route.middlewares.length > 0
+        ? await runMiddlewares(matched.route.middlewares)
+        : await executeHandler()
       if (res.writableEnded) {
         return
       }

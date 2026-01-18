@@ -3,27 +3,9 @@ import type { HttpMethod, MockRule, ResolvedRoute } from './types'
 import { compareRouteScore, parseRouteTemplate } from '@mokup/runtime'
 import { basename, dirname, extname, join, relative } from 'pathe'
 import { methodSuffixSet } from './constants'
-import { normalizeMethod, normalizePrefix, toPosix } from './utils'
+import { normalizePrefix, toPosix } from './utils'
 
 const jsonExtensions = new Set(['.json', '.jsonc'])
-
-function resolveMethod(
-  fileMethod: HttpMethod | undefined,
-  ruleMethod: string | undefined,
-  logger: { warn: (...args: unknown[]) => void },
-): HttpMethod {
-  if (ruleMethod) {
-    const normalized = normalizeMethod(ruleMethod)
-    if (normalized) {
-      return normalized
-    }
-    logger.warn(`Unknown method "${ruleMethod}", falling back to file method`)
-  }
-  if (fileMethod) {
-    return fileMethod
-  }
-  return 'GET'
-}
 
 function resolveTemplate(template: string, prefix: string) {
   const normalized = template.startsWith('/') ? template : `/${template}`
@@ -114,12 +96,12 @@ export function resolveRule(params: {
   file: string
   logger: { warn: (...args: unknown[]) => void }
 }): ResolvedRoute | null {
-  const method = resolveMethod(params.derivedMethod, params.rule.method, params.logger)
+  const method = params.derivedMethod
   if (!method) {
-    params.logger.warn(`Invalid mock method in ${params.file}`)
+    params.logger.warn(`Skip mock without method suffix: ${params.file}`)
     return null
   }
-  const template = resolveTemplate(params.rule.url ?? params.derivedTemplate, params.prefix)
+  const template = resolveTemplate(params.derivedTemplate, params.prefix)
   const parsed = parseRouteTemplate(template)
   if (parsed.errors.length > 0) {
     for (const error of parsed.errors) {

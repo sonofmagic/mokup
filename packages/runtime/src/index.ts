@@ -10,9 +10,11 @@ export { createRuntime } from './runtime'
 export type {
   HttpMethod,
   Manifest,
+  ManifestModuleRef,
   ManifestResponse,
   ManifestRoute,
   MockContext,
+  MockMiddleware,
   MockResponder,
   MockResponseHandler,
   ModuleMap,

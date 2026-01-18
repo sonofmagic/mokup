@@ -21,12 +21,20 @@ async function cleanupTempRoot(root: string) {
 }
 
 describe('buildManifest', () => {
-  it('skips mocks without method suffix and route groups', async () => {
+  it('handles json routes without method suffix and skips invalid entries', async () => {
     const { root, mockDir } = await createTempRoot()
     const logs: string[] = []
     try {
       await writeFile(path.join(mockDir, 'users.get.json'), '{"ok":true}')
-      await writeFile(path.join(mockDir, 'profile.json'), '{"skip":true}')
+      await writeFile(path.join(mockDir, 'profile.json'), '{"ok":true}')
+      await writeFile(
+        path.join(mockDir, 'profile.ts'),
+        [
+          'export default {',
+          '  response: { skip: true },',
+          '}',
+        ].join('\n'),
+      )
       await writeFile(path.join(mockDir, '(group)', 'users.get.json'), '{"skip":true}')
 
       const result = await buildManifest({
@@ -37,7 +45,9 @@ describe('buildManifest', () => {
         log: message => logs.push(message),
       })
 
-      expect(result.manifest.routes.map(route => route.url)).toEqual(['/users'])
+      const urls = result.manifest.routes.map(route => route.url)
+      expect(urls).toHaveLength(2)
+      expect(urls).toEqual(expect.arrayContaining(['/users', '/profile']))
       expect(logs.some(message => message.includes('method suffix'))).toBe(true)
       expect(logs.some(message => message.includes('Route groups'))).toBe(true)
     }
@@ -82,15 +92,13 @@ describe('buildManifest', () => {
     }
   })
 
-  it('applies rule method overrides and prefix', async () => {
+  it('applies prefix to derived routes', async () => {
     const { root, mockDir } = await createTempRoot()
     try {
       await writeFile(
-        path.join(mockDir, 'override.get.ts'),
+        path.join(mockDir, 'users.post.ts'),
         [
           'export default {',
-          '  method: \'post\',',
-          '  url: \'/special\',',
           '  response: { ok: true },',
           '}',
         ].join('\n'),
@@ -105,7 +113,7 @@ describe('buildManifest', () => {
       })
 
       expect(result.manifest.routes[0]?.method).toBe('POST')
-      expect(result.manifest.routes[0]?.url).toBe('/api/special')
+      expect(result.manifest.routes[0]?.url).toBe('/api/users')
     }
     finally {
       await cleanupTempRoot(root)
@@ -143,6 +151,51 @@ describe('buildManifest', () => {
         'handler.get.mjs',
       )
       const stats = await fs.stat(handlerPath)
+      expect(stats.isFile()).toBe(true)
+    }
+    finally {
+      await cleanupTempRoot(root)
+    }
+  })
+
+  it('applies directory config and emits middleware references', async () => {
+    const { root, mockDir } = await createTempRoot()
+    try {
+      await writeFile(
+        path.join(mockDir, 'index.config.ts'),
+        [
+          'export default {',
+          '  headers: {',
+          '    \"x-scope\": \"root\",',
+          '  },',
+          '  middleware: [async (_req, _res, _ctx, next) => {',
+          '    await next()',
+          '  }],',
+          '}',
+        ].join('\n'),
+      )
+      await writeFile(path.join(mockDir, 'users.get.json'), '{"ok":true}')
+
+      const result = await buildManifest({
+        root,
+        dir: 'mock',
+        outDir: 'dist',
+        handlers: true,
+      })
+
+      const route = result.manifest.routes[0]
+      expect(route?.headers).toEqual({ 'x-scope': 'root' })
+      expect(route?.middleware?.length).toBe(1)
+      expect(route?.middleware?.[0]?.module).toBe('./mokup-handlers/mock/index.config.mjs')
+
+      const middlewarePath = path.join(
+        root,
+        'dist',
+        'mokup-handlers',
+        'mock',
+        'index.config.mjs',
+      )
+      const stats = await fs.stat(middlewarePath)
       expect(stats.isFile()).toBe(true)
     }
     finally {

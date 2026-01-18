@@ -1,6 +1,7 @@
 import type { PreviewServer, ViteDevServer } from 'vite'
 
-import type { Logger, RouteTable } from './types'
+import type { DirectoryConfig, Logger, RouteTable } from './types'
+import { resolveDirectoryConfig } from './config'
 import { collectFiles, isSupportedFile } from './files'
 import { loadRules } from './loader'
 import { deriveRouteFromFile, resolveRule, sortRoutes } from './routes'
@@ -17,11 +18,24 @@ export async function scanRoutes(params: {
   const routes: RouteTable = []
   const seen = new Set<string>()
   const files = await collectFiles(params.dirs)
+  const configCache = new Map<string, DirectoryConfig | null>()
+  const fileCache = new Map<string, string | null>()
   for (const fileInfo of files) {
     if (!isSupportedFile(fileInfo.file)) {
       continue
     }
     if (!matchesFilter(fileInfo.file, params.include, params.exclude)) {
+      continue
+    }
+    const config = await resolveDirectoryConfig({
+      file: fileInfo.file,
+      rootDir: fileInfo.rootDir,
+      server: params.server,
+      logger: params.logger,
+      configCache,
+      fileCache,
+    })
+    if (config.enabled === false) {
       continue
     }
     const derived = deriveRouteFromFile(fileInfo.file, fileInfo.rootDir, params.logger)
@@ -47,6 +61,18 @@ export async function scanRoutes(params: {
       })
       if (!resolved) {
         continue
+      }
+      if (config.headers) {
+        resolved.headers = { ...config.headers, ...(resolved.headers ?? {}) }
+      }
+      if (typeof resolved.status === 'undefined' && typeof config.status === 'number') {
+        resolved.status = config.status
+      }
+      if (typeof resolved.delay === 'undefined' && typeof config.delay === 'number') {
+        resolved.delay = config.delay
+      }
+      if (config.middlewares.length > 0) {
+        resolved.middlewares = config.middlewares
       }
       const key = `${resolved.method} ${resolved.template}`
       if (seen.has(key)) {

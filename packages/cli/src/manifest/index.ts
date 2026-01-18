@@ -1,5 +1,5 @@
 import type { Manifest, ManifestRoute } from '@mokup/runtime'
-import type { BuildOptions, MockRule } from './types'
+import type { BuildOptions, DirectoryConfig, MockRule } from './types'
 
 import { promises as fs } from 'node:fs'
 import { cwd } from 'node:process'
@@ -7,8 +7,9 @@ import { cwd } from 'node:process'
 import { join, relative, resolve } from 'pathe'
 
 import { writeBundle, writeManifestModule } from './bundle'
+import { resolveDirectoryConfig } from './config'
 import { collectFiles, isSupportedFile, matchesFilter, resolveDirs } from './files'
-import { buildResponse, bundleHandlers, writeHandlerIndex } from './handlers'
+import { buildResponse, bundleHandlers, getHandlerModulePath, writeHandlerIndex } from './handlers'
 import { deriveRouteFromFile, resolveRule, sortRoutes } from './routes'
 import { loadRules } from './rules'
 import { toPosix } from './utils'
@@ -24,12 +25,24 @@ export async function buildManifest(options: BuildOptions = {}) {
   const seen = new Set<string>()
   const handlerSources = new Set<string>()
   const handlerModuleMap = new Map<string, string>()
+  const configCache = new Map<string, DirectoryConfig | null>()
+  const configFileCache = new Map<string, string | null>()
 
   for (const fileInfo of files) {
     if (!isSupportedFile(fileInfo.file)) {
       continue
     }
     if (!matchesFilter(fileInfo.file, options.include, options.exclude)) {
+      continue
+    }
+    const config = await resolveDirectoryConfig({
+      file: fileInfo.file,
+      rootDir: fileInfo.rootDir,
+      log: options.log,
+      configCache,
+      fileCache: configFileCache,
+    })
+    if (config.enabled === false) {
       continue
     }
     const derived = deriveRouteFromFile(fileInfo.file, fileInfo.rootDir, options.log)
@@ -86,6 +99,17 @@ export async function buildManifest(options: BuildOptions = {}) {
         continue
       }
       const source = toPosix(relative(root, fileInfo.file))
+      const middlewareRefs = options.handlers === false
+        ? []
+        : config.middlewares.map((entry) => {
+            handlerSources.add(entry.file)
+            const modulePath = getHandlerModulePath(entry.file, handlersDir, root)
+            handlerModuleMap.set(entry.file, modulePath)
+            return {
+              module: modulePath,
+              ruleIndex: entry.index,
+            }
+          })
       const route: ManifestRoute = {
         method: resolved.method,
         url: resolved.template,
@@ -97,11 +121,23 @@ export async function buildManifest(options: BuildOptions = {}) {
       if (typeof rule.status === 'number') {
         route.status = rule.status
       }
+      if (config.headers) {
+        route.headers = { ...config.headers }
+      }
       if (rule.headers) {
-        route.headers = rule.headers
+        route.headers = { ...(route.headers ?? {}), ...rule.headers }
       }
       if (typeof rule.delay === 'number') {
         route.delay = rule.delay
+      }
+      if (typeof route.status === 'undefined' && typeof config.status === 'number') {
+        route.status = config.status
+      }
+      if (typeof route.delay === 'undefined' && typeof config.delay === 'number') {
+        route.delay = config.delay
+      }
+      if (middlewareRefs.length > 0) {
+        route.middleware = middlewareRefs
       }
       routes.push(route)
     }

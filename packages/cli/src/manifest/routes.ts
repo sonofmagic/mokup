@@ -21,22 +21,13 @@ const methodSuffixSet = new Set(
   Array.from(methodSet, method => method.toLowerCase()),
 )
 
+const jsonExtensions = new Set(['.json', '.jsonc'])
+
 export interface DerivedRoute {
   template: string
   method: HttpMethod
   tokens: RouteToken[]
   score: number[]
-}
-
-function normalizeMethod(method?: string | null): HttpMethod | undefined {
-  if (!method) {
-    return undefined
-  }
-  const normalized = method.toUpperCase()
-  if (methodSet.has(normalized as HttpMethod)) {
-    return normalized as HttpMethod
-  }
-  return undefined
 }
 
 function normalizePrefix(prefix: string) {
@@ -45,22 +36,6 @@ function normalizePrefix(prefix: string) {
   }
   const normalized = prefix.startsWith('/') ? prefix : `/${prefix}`
   return normalized.endsWith('/') ? normalized.slice(0, -1) : normalized
-}
-
-function resolveMethod(
-  fileMethod: HttpMethod | undefined,
-  ruleMethod?: string,
-): HttpMethod {
-  if (ruleMethod) {
-    const normalized = normalizeMethod(ruleMethod)
-    if (normalized) {
-      return normalized
-    }
-  }
-  if (fileMethod) {
-    return fileMethod
-  }
-  return 'GET'
 }
 
 function resolveTemplate(template: string, prefix: string) {
@@ -111,7 +86,8 @@ export function deriveRouteFromFile(
   const dir = dirname(withoutExt)
   const base = basename(withoutExt)
   const { name, method } = stripMethodSuffix(base)
-  if (!method) {
+  const resolvedMethod = method ?? (jsonExtensions.has(ext) ? 'GET' : undefined)
+  if (!resolvedMethod) {
     log?.(`Skip mock without method suffix: ${file}`)
     return null
   }
@@ -137,7 +113,7 @@ export function deriveRouteFromFile(
   }
   return {
     template: parsed.template,
-    method,
+    method: resolvedMethod,
     tokens: parsed.tokens,
     score: parsed.score,
   }
@@ -151,8 +127,11 @@ export function resolveRule(params: {
   file: string
   log?: (message: string) => void
 }) {
-  const method = resolveMethod(params.derivedMethod, params.rule.method)
-  const template = resolveTemplate(params.rule.url ?? params.derivedTemplate, params.prefix)
+  const method = params.derivedMethod
+  if (!method) {
+    return null
+  }
+  const template = resolveTemplate(params.derivedTemplate, params.prefix)
   const parsed = parseRouteTemplate(template)
   if (parsed.errors.length > 0) {
     for (const error of parsed.errors) {

@@ -25,6 +25,13 @@ export interface MockContext {
   json: (data: unknown) => unknown
 }
 
+export type MockMiddleware = (
+  req: MockRequest,
+  res: ServerResponse,
+  ctx: MockContext,
+  next: () => Promise<unknown>,
+) => unknown | Promise<unknown>
+
 export type MockResponseHandler = (
   req: MockRequest,
   res: ServerResponse,
@@ -34,12 +41,23 @@ export type MockResponseHandler = (
 export type MockResponse = unknown | MockResponseHandler
 
 export interface MockRule {
-  url?: string
-  method?: string
   response: MockResponse
   status?: number
   headers?: Record<string, string>
   delay?: number
+}
+
+export interface DirectoryConfig {
+  headers?: Record<string, string>
+  status?: number
+  delay?: number
+  enabled?: boolean
+  middleware?: MockMiddleware | MockMiddleware[]
+}
+
+export interface ResolvedMiddleware {
+  handle: MockMiddleware
+  source: string
 }
 
 export interface MokupViteOptions {
@@ -64,6 +82,7 @@ export interface ResolvedRoute {
   tokens: RouteToken[]
   score: number[]
   response: MockResponse
+  middlewares?: ResolvedMiddleware[]
   status?: number
   headers?: Record<string, string>
   delay?: number
