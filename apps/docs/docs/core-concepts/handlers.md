@@ -1,6 +1,6 @@
-# 函数处理器
+# Handlers
 
-当 `response` 是函数时，Mokup 会把它视为可执行的处理器：
+When `response` is a function, Mokup treats it as an executable handler:
 
 ```ts
 export default {
@@ -13,10 +13,10 @@ export default {
 }
 ```
 
-函数签名：
+Signature:
 
-- `req`: 请求信息（`method`, `path`, `query`, `headers`, `body`, `params`）
-- `res`: 响应控制器（`statusCode`, `setHeader`, `removeHeader`）
-- `ctx`: 辅助工具（`delay(ms)`, `json(data)`）
+- `req`: request info (`method`, `path`, `query`, `headers`, `body`, `params`)
+- `res`: response controller (`statusCode`, `setHeader`, `removeHeader`)
+- `ctx`: helpers (`delay(ms)`, `json(data)`)
 
-在 CLI 构建时，函数处理器会被打包到 `.mokup/mokup-handlers`，并在 manifest 中以 `module` 形式引用。
+When building with the CLI, handlers are bundled into `.mokup/mokup-handlers` and referenced as `module` responses in the manifest.

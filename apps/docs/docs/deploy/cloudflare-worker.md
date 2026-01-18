@@ -1,14 +1,14 @@
 # Cloudflare Worker
 
-Mokup 可以直接运行在 Worker 中，推荐使用 `@mokup/server/worker`：
+Run Mokup in Workers with `@mokup/server/worker`.
 
-## 1. 生成 Worker 产物
+## 1. Build outputs
 
 ```bash
 pnpm exec mokup build --dir mock --out worker/src/.mokup
 ```
 
-## 2. Worker 入口
+## 2. Worker entry
 
 ```ts
 import { createMokupWorker } from '@mokup/server/worker'
@@ -17,9 +17,7 @@ import mokupBundle from './.mokup/mokup.bundle.mjs'
 export default createMokupWorker(mokupBundle)
 ```
 
-## 3. Wrangler 配置
-
-`wrangler.jsonc` 示例：
+## 3. Wrangler config
 
 ```jsonc
 {
@@ -29,4 +27,4 @@ export default createMokupWorker(mokupBundle)
 }
 ```
 
-Worker 入口只依赖 `mokup.bundle.mjs`，无需手动传入 `moduleBase` 或 `moduleMap`。
+No extra `moduleBase` or `moduleMap` wiring is required when using the bundle.

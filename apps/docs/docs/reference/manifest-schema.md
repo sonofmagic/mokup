@@ -1,6 +1,6 @@
-# Manifest 结构
+# Manifest Schema
 
-`mokup.manifest.json` 的核心字段：
+`mokup.manifest.json` core fields:
 
 ```ts
 interface Manifest {
@@ -21,7 +21,7 @@ interface ManifestRoute {
 }
 ```
 
-`ManifestResponse`：
+`ManifestResponse`:
 
 ```ts
 type ManifestResponse
@@ -31,4 +31,4 @@ type ManifestResponse
     | { type: 'module', module: string, exportName?: string, ruleIndex?: number }
 ```
 
-通常你不需要手写 manifest，CLI 会自动生成。
+The CLI generates this for you automatically.

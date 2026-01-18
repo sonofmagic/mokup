@@ -1,28 +1,28 @@
-# 安装
+# Installation
 
-## 前置要求
+## Requirements
 
 - Node.js 20+
-- pnpm（推荐）
+- pnpm (recommended)
 
-## 安装依赖
+## Packages
 
-Vite 插件（开发期 mock）：
+Vite plugin (dev mocks):
 
 ```bash
 pnpm add -D mokup
 ```
 
-CLI（生成 `.mokup` 产物）：
+CLI (generate `.mokup` output):
 
 ```bash
 pnpm add -D @mokup/cli
 ```
 
-Server/Worker 运行时（部署或中间件）：
+Server/Worker runtime (deploy or middleware):
 
 ```bash
 pnpm add @mokup/server @mokup/runtime
 ```
 
-如果你只做本地 Vite 开发，只需要 `mokup` 即可。
+If you only need Vite dev mocks, `mokup` is enough.

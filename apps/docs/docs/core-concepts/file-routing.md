@@ -1,36 +1,36 @@
-# 文件路由
+# File Routing
 
-Mokup 通过文件路径与文件名生成路由，核心规则如下：
+Mokup turns file paths into routes. Key rules:
 
-## Method 后缀
+## Method suffix
 
-文件名必须包含 HTTP 方法后缀（`.get`、`.post` 等）：
+Files must include an HTTP method suffix (`.get`, `.post`, etc.):
 
 ```
 mock/users.get.json   -> GET /users
 mock/users.post.ts    -> POST /users
 ```
 
-在 Vite 插件中，`.json/.jsonc` 如果没有方法后缀，会默认视为 `GET`；在 CLI 构建时建议显式写方法后缀，避免歧义。
+In the Vite plugin, `.json/.jsonc` files default to `GET` if no suffix is present. For CLI builds, an explicit suffix is recommended.
 
-## index 路由
+## index routes
 
-`index` 会被视为目录根路径：
+`index` maps to the directory root:
 
 ```
 mock/index.get.json       -> GET /
 mock/users/index.get.ts   -> GET /users
 ```
 
-## 动态参数
+## Dynamic params
 
-使用方括号定义参数：
+Use brackets:
 
 ```
 mock/users/[id].get.ts    -> GET /users/:id
 ```
 
-在处理函数中可以通过 `req.params` 访问：
+Access via `req.params`:
 
 ```ts
 export default {
@@ -38,11 +38,9 @@ export default {
 }
 ```
 
-## Catch-all 与可选段
+## Catch-all and optional segments
 
 ```
-mock/docs/[...slug].get.ts   -> /docs/* (至少 1 段)
-mock/docs/[[...slug]].get.ts -> /docs (可选)
+mock/docs/[...slug].get.ts   -> /docs/* (at least 1 segment)
+mock/docs/[[...slug]].get.ts -> /docs (optional)
 ```
-
-这些规则与前端路由常见语法一致，适合做文档类 API 模拟。

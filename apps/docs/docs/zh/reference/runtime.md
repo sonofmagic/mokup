@@ -1,6 +1,6 @@
 # Runtime API
 
-`@mokup/runtime` is the core matcher and response executor.
+`@mokup/runtime` 是路由匹配与响应处理的核心。
 
 ## createRuntime
 
@@ -27,4 +27,4 @@ export interface RuntimeOptions {
 }
 ```
 
-`moduleMap` is required for Worker-like environments where you cannot import local files directly.
+`moduleMap` 用于 Worker 等无法动态 import 本地文件的场景，通常由 `mokup.bundle.mjs` 生成。

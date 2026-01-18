@@ -1,8 +1,8 @@
-# Server Adapters
+# Server 适配器
 
-`@mokup/server` ships adapters for multiple frameworks, all sharing `MokupServerOptions`.
+`@mokup/server` 提供多种框架的适配器，统一使用 `MokupServerOptions`。
 
-## Options
+## 选项
 
 ```ts
 export interface MokupServerOptions {
@@ -54,7 +54,7 @@ const handler = createFetchHandler({ manifest })
 const response = await handler(new Request('https://example.com/api'))
 ```
 
-Workers should use:
+Worker 环境请使用专用入口：
 
 ```ts
 import { createMokupWorker } from '@mokup/server/worker'

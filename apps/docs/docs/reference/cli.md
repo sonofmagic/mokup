@@ -1,25 +1,25 @@
 # CLI
 
-`@mokup/cli` 提供 `mokup build` 命令，用于生成 `.mokup` 产物。
+`@mokup/cli` provides the `mokup build` command to generate `.mokup` outputs.
 
-## 基本用法
+## Usage
 
 ```bash
 pnpm exec mokup build --dir mock --out .mokup
 ```
 
-## 参数
+## Options
 
-| 参数            | 说明                      |
-| --------------- | ------------------------- |
-| `--dir, -d`     | mock 目录（可重复）       |
-| `--out, -o`     | 输出目录（默认 `.mokup`） |
-| `--prefix`      | 路由前缀                  |
-| `--include`     | 仅包含匹配的正则          |
-| `--exclude`     | 排除匹配的正则            |
-| `--no-handlers` | 不生成函数处理器          |
+| Option          | Description                          |
+| --------------- | ------------------------------------ |
+| `--dir, -d`     | Mock directory (repeatable)          |
+| `--out, -o`     | Output directory (default: `.mokup`) |
+| `--prefix`      | URL prefix                           |
+| `--include`     | Include regex                        |
+| `--exclude`     | Exclude regex                        |
+| `--no-handlers` | Skip handler output                  |
 
-## 说明
+## Notes
 
-- `--dir` 可多次传入，但会在同一份 manifest 中合并。
-- 生成的 `mokup.bundle.mjs` 适合在 Worker 或 Node 运行时直接导入。
+- Multiple `--dir` values are merged into one manifest.
+- `mokup.bundle.mjs` is the recommended runtime entry.

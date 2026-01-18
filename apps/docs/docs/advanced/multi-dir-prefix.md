@@ -1,6 +1,6 @@
-# 多目录与前缀
+# Multi-Dir & Prefix
 
-Vite 插件支持多个目录与前缀组合，适合拆分多套 mock：
+The Vite plugin supports multiple directories and prefixes:
 
 ```ts
 import mokup from 'mokup/vite'
@@ -17,10 +17,10 @@ export default defineConfig({
 })
 ```
 
-说明：
+Notes:
 
-- `dir` 可为单个字符串或数组。
-- `prefix` 会自动规范化（确保前导 `/`）。
-- 多个目录会被合并到同一个路由表里。
+- `dir` accepts a string or array.
+- `prefix` is normalized with a leading `/`.
+- All entries are merged into one route table.
 
-CLI 构建时建议按目录分别生成 `.mokup`，再在运行时自行组合。
+For CLI builds, generate outputs per directory and combine at runtime if needed.

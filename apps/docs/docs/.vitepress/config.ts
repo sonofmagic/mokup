@@ -9,9 +9,9 @@ const themeConfig: DefaultTheme.Config = {
   socialLinks: [
     { icon: 'github', link: 'https://github.com/sonofmagic/mokup' },
   ],
-  nav: zhNav,
-  sidebar: zhSidebar,
-  outlineTitle: '本页目录',
+  nav: enNav,
+  sidebar: enSidebar,
+  outlineTitle: 'On this page',
 }
 
 const vitePlugins = [
@@ -28,22 +28,22 @@ const vitePlugins = [
 export default defineConfig({
   title: 'Mokup',
   description: 'Mock utilities for Vite, Node adapters, and Workers.',
-  lang: 'zh-CN',
+  lang: 'en-US',
   cleanUrls: true,
   lastUpdated: true,
   vite: {
     plugins: vitePlugins,
   },
   locales: {
-    root: { label: '简体中文', lang: 'zh-CN' },
-    en: {
-      label: 'English',
-      lang: 'en-US',
-      link: '/en/',
+    root: { label: 'English', lang: 'en-US' },
+    zh: {
+      label: '简体中文',
+      lang: 'zh-CN',
+      link: '/zh/',
       themeConfig: {
-        nav: enNav,
-        sidebar: enSidebar,
-        outlineTitle: 'On this page',
+        nav: zhNav,
+        sidebar: zhSidebar,
+        outlineTitle: '本页目录',
       },
     },
   },

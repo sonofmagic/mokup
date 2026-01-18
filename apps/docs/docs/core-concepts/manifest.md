@@ -1,8 +1,8 @@
 # Manifest
 
-CLI 构建会输出 `.mokup/mokup.manifest.json` 与 `.mokup/mokup.manifest.mjs`，用于描述所有路由与响应规则。
+CLI builds output `.mokup/mokup.manifest.json` and `.mokup/mokup.manifest.mjs`, describing all routes and rules.
 
-核心结构（简化）：
+Core shape (simplified):
 
 ```json
 {
@@ -20,7 +20,7 @@ CLI 构建会输出 `.mokup/mokup.manifest.json` 与 `.mokup/mokup.manifest.mjs`
 }
 ```
 
-当 `response.type` 为 `module` 时，表示该规则指向一个函数处理器：
+When `response.type` is `module`, it points to a bundled handler:
 
 ```json
 {
@@ -30,4 +30,4 @@ CLI 构建会输出 `.mokup/mokup.manifest.json` 与 `.mokup/mokup.manifest.mjs`
 }
 ```
 
-`mokup.bundle.mjs` 会把 manifest 与 handler module map 打包成一个可直接导入的对象，适用于 Worker 或其他运行时。
+`mokup.bundle.mjs` combines the manifest and handler module map for easy runtime usage.

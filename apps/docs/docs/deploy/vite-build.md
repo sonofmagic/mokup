@@ -1,12 +1,12 @@
-# Vite 构建产物
+# Vite Build Output
 
-当需要在构建期生成可部署的 mock 产物时，使用 CLI：
+Generate deployable artifacts with the CLI:
 
 ```bash
 pnpm exec mokup build --dir mock --out .mokup
 ```
 
-输出目录结构：
+Output structure:
 
 ```
 .mokup/
@@ -16,7 +16,7 @@ pnpm exec mokup build --dir mock --out .mokup
   mokup.bundle.mjs
   mokup.bundle.d.ts
   mokup.bundle.d.mts
-  mokup-handlers/ (可选)
+  mokup-handlers/ (optional)
 ```
 
-`mokup.bundle.mjs` 是最方便的入口文件，适合在 Worker 或自定义运行时中直接导入。
+`mokup.bundle.mjs` is the easiest entry for Workers or custom runtimes.

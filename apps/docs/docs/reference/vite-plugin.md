@@ -1,8 +1,8 @@
-# Vite 插件
+# Vite Plugin
 
-Mokup 的 Vite 插件入口为 `mokup/vite`。
+Use `mokup/vite` as the Vite plugin entry.
 
-## 基本用法
+## Usage
 
 ```ts
 import mokup from 'mokup/vite'
@@ -17,19 +17,19 @@ export default {
 }
 ```
 
-## 选项
+## Options
 
-| 选项         | 类型        | 说明                                  |
-| ------------ | ----------- | ------------------------------------- | ------------------- | --------- | --------- |
-| `dir`        | `string \\  | string[] \\                           | (root) => string \\ | string[]` | mock 目录 |
-| `prefix`     | `string`    | 路由前缀                              |
-| `include`    | `RegExp \\  | RegExp[]`                             | 仅包含匹配文件      |
-| `exclude`    | `RegExp \\  | RegExp[]`                             | 排除匹配文件        |
-| `watch`      | `boolean`   | 是否监听文件变化                      |
-| `log`        | `boolean`   | 是否输出日志                          |
-| `playground` | `boolean \\ | { path?: string, enabled?: boolean }` | Playground 配置     |
+| Option       | Type        | Description                           |
+| ------------ | ----------- | ------------------------------------- | ------------------- | --------- | -------------- |
+| `dir`        | `string \\  | string[] \\                           | (root) => string \\ | string[]` | Mock directory |
+| `prefix`     | `string`    | URL prefix                            |
+| `include`    | `RegExp \\  | RegExp[]`                             | Include files       |
+| `exclude`    | `RegExp \\  | RegExp[]`                             | Exclude files       |
+| `watch`      | `boolean`   | Watch file changes                    |
+| `log`        | `boolean`   | Enable logging                        |
+| `playground` | `boolean \\ | { path?: string, enabled?: boolean }` | Playground config   |
 
-## 多目录
+## Multi-dir
 
 ```ts
 export default {

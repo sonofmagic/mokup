@@ -1,8 +1,8 @@
-# 快速开始
+# Quick Start
 
-## 1. 创建 mock 文件
+## 1. Create a mock file
 
-在项目根目录创建 `mock/users.get.json`：
+Create `mock/users.get.json`:
 
 ```json
 {
@@ -11,7 +11,7 @@
 }
 ```
 
-## 2. 启用 Vite 插件
+## 2. Enable the Vite plugin
 
 ```ts
 import mokup from 'mokup/vite'
@@ -27,20 +27,18 @@ export default defineConfig({
 })
 ```
 
-## 3. 启动开发服务
+## 3. Run dev server
 
 ```bash
 pnpm dev
 ```
 
-访问 `http://localhost:5173/api/users` 应该返回你的 JSON。
+Visit `http://localhost:5173/api/users` to see your JSON.
 
-## 4. 打开 Playground
-
-默认入口为 `/_mokup`：
+## 4. Open Playground
 
 ```
 http://localhost:5173/_mokup
 ```
 
-Playground 会展示所有已加载的 mock 路由，支持调试与热更新。
+Playground lists all routes and supports live refresh.
