@@ -17,6 +17,28 @@ const result = await runtime.handle({
 })
 ```
 
+## createRuntimeApp
+
+Build a Hono app from the manifest (useful for Service Worker or custom fetch handlers).
+
+```ts
+import { createRuntimeApp } from 'mokup/runtime'
+
+const app = await createRuntimeApp({ manifest })
+const response = await app.fetch(new Request('http://localhost/api/users'))
+```
+
+## Service Worker helper
+
+`mokup/runtime` also re-exports `handle` from `hono/service-worker`.
+
+```ts
+import { createRuntimeApp, handle } from 'mokup/runtime'
+
+const app = await createRuntimeApp({ manifest })
+globalThis.addEventListener('fetch', handle(app))
+```
+
 ## RuntimeOptions
 
 ```ts

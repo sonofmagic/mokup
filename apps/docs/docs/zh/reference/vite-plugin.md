@@ -19,17 +19,17 @@ export default {
 
 ## 选项
 
-| 选项         | 类型                                                                                              | 说明                              |
-| ------------ | ------------------------------------------------------------------------------------------------- | --------------------------------- |
-| `dir`        | `string / string[] / (root) => string / string[]`                                                 | mock 目录                         |
-| `prefix`     | `string`                                                                                          | 路由前缀                          |
-| `include`    | `RegExp / RegExp[]`                                                                               | 仅包含匹配文件                    |
-| `exclude`    | `RegExp / RegExp[]`                                                                               | 排除匹配文件                      |
-| `watch`      | `boolean`                                                                                         | 是否监听文件变化                  |
-| `log`        | `boolean`                                                                                         | 是否输出日志                      |
-| `mode`       | `'server' / 'sw'`                                                                                 | mock 运行模式                     |
-| `sw`         | `{ path?: string; scope?: string; register?: boolean; unregister?: boolean; fallback?: boolean }` | Service Worker 配置（仅 SW 模式） |
-| `playground` | `boolean / { path?: string; enabled?: boolean }`                                                  | Playground 配置                   |
+| 选项         | 类型                                                                                                                            | 说明                              |
+| ------------ | ------------------------------------------------------------------------------------------------------------------------------- | --------------------------------- |
+| `dir`        | `string / string[] / (root) => string / string[]`                                                                               | mock 目录                         |
+| `prefix`     | `string`                                                                                                                        | 路由前缀                          |
+| `include`    | `RegExp / RegExp[]`                                                                                                             | 仅包含匹配文件                    |
+| `exclude`    | `RegExp / RegExp[]`                                                                                                             | 排除匹配文件                      |
+| `watch`      | `boolean`                                                                                                                       | 是否监听文件变化                  |
+| `log`        | `boolean`                                                                                                                       | 是否输出日志                      |
+| `mode`       | `'server' / 'sw'`                                                                                                               | mock 运行模式                     |
+| `sw`         | `{ path?: string; scope?: string; register?: boolean; unregister?: boolean; fallback?: boolean; basePath?: string / string[] }` | Service Worker 配置（仅 SW 模式） |
+| `playground` | `boolean / { path?: string; enabled?: boolean }`                                                                                | Playground 配置                   |
 
 ## Service Worker 模式
 
@@ -93,7 +93,25 @@ export default {
 注意：
 
 - `sw.fallback` 默认是 `true`。设为 `false` 表示不再注册 server 中间件。
+- `sw.basePath` 用于控制 SW 只拦截哪些路径。如果未设置，会继承对应 entry 的 `prefix`；若 `prefix` 为空，则可能拦截所有路径。
 - 多个 SW 配置同时存在时，首个 `sw.path`/`sw.scope`/`sw.register`/`sw.unregister` 生效，其它冲突配置会被忽略并提示告警。
+
+### 拦截范围
+
+```ts
+export default {
+  plugins: [
+    mokup({
+      dir: 'mock',
+      prefix: '/api',
+      mode: 'sw',
+      sw: {
+        basePath: '/api',
+      },
+    }),
+  ],
+}
+```
 
 ### 卸载
 
