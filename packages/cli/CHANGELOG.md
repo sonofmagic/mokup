@@ -1,5 +1,11 @@
 # @mokup/cli
 
+## 0.2.0
+
+### Minor Changes
+
+- ✨ **Move the `mokup` CLI binary into `mokup` and keep `@mokup/cli` as API-only.** [`3700230`](https://github.com/sonofmagic/mokup/commit/3700230085f0b17d9022aa3a14fd6f8e558b1e41) by @sonofmagic
+
 ## 0.1.0
 
 ### Minor Changes
