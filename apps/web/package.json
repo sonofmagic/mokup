@@ -6,7 +6,7 @@
   "homepage": "https://mokup.icebreaker.top",
   "scripts": {
     "dev": "vite --host",
-    "build:manifest": "pnpm --filter @mokup/cli build && node ../../packages/cli/dist/cli.mjs build --dir mock --out worker/src/.mokup",
+    "build:manifest": "pnpm --filter @mokup/runtime build && pnpm --filter @mokup/cli build && node ../../packages/cli/dist/cli.mjs build --dir mock --out worker/src/.mokup",
     "worker:dev": "pnpm build:manifest && wrangler dev",
     "worker:deploy": "pnpm build:manifest && wrangler deploy",
     "build": "vite build",

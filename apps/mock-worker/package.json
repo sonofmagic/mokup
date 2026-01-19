@@ -5,7 +5,7 @@
   "private": true,
   "homepage": "https://mokup.icebreaker.top",
   "scripts": {
-    "build:manifest": "pnpm --filter @mokup/cli build && node ../../packages/cli/dist/cli.mjs build --dir mock --out src/.mokup",
+    "build:manifest": "pnpm --filter @mokup/runtime build && pnpm --filter @mokup/cli build && node ../../packages/cli/dist/cli.mjs build --dir mock --out src/.mokup",
     "dev": "wrangler dev src/index.ts",
     "deploy": "wrangler deploy src/index.ts",
     "typecheck": "tsc -p tsconfig.json --noEmit"
