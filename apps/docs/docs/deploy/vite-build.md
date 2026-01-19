@@ -20,3 +20,27 @@ Output structure:
 ```
 
 `mokup.bundle.mjs` is the easiest entry for Workers or custom runtimes.
+
+## Service Worker build
+
+When you set `mode: 'sw'` in the Vite plugin, the service worker script is emitted during `vite build` (default `/mokup-sw.js`). The plugin also injects a registration snippet unless `sw.register` is `false`.
+
+```ts
+import mokup from 'mokup/vite'
+
+export default {
+  plugins: [
+    mokup({
+      dir: 'mock',
+      prefix: '/api',
+      mode: 'sw',
+      sw: {
+        path: '/mokup-sw.js',
+        scope: '/',
+      },
+    }),
+  ],
+}
+```
+
+This is ideal for static hosting because mock requests are handled in the browser. If you also ship the playground, make sure `/_mokup/routes` is available as a static JSON file (generate it during build with the CLI or a small script).

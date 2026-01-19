@@ -17,7 +17,14 @@ interface ManifestRoute {
   status?: number
   headers?: Record<string, string>
   delay?: number
+  middleware?: ManifestModuleRef[]
   response: ManifestResponse
+}
+
+interface ManifestModuleRef {
+  module: string
+  exportName?: string
+  ruleIndex?: number
 }
 ```
 
@@ -28,7 +35,9 @@ type ManifestResponse
   = | { type: 'json', body: unknown }
     | { type: 'text', body: string }
     | { type: 'binary', body: string, encoding: 'base64' }
-    | { type: 'module', module: string, exportName?: string, ruleIndex?: number }
+    | ({ type: 'module' } & ManifestModuleRef)
 ```
+
+`ruleIndex` selects an entry when a module exports an array of rules or middleware. `module` can be a relative path (CLI output) or a Vite module path (SW build).
 
 The CLI generates this for you automatically.
