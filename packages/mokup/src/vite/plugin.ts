@@ -10,7 +10,7 @@ import { createHonoApp, createMiddleware } from './middleware'
 import { createPlaygroundMiddleware, resolvePlaygroundOptions } from './playground'
 import { sortRoutes } from './routes'
 import { scanRoutes } from './scanner'
-import { buildSwScript, resolveSwConfig } from './sw'
+import { buildSwScript, resolveSwConfig, resolveSwUnregisterConfig } from './sw'
 import { createDebouncer, isInDirs, resolveDirs } from './utils'
 
 function buildRouteSignature(routes: RouteTable) {
@@ -97,7 +97,9 @@ export function createMokupPlugin(options: MokupViteOptionsInput = {}): Plugin {
   const watchEnabled = optionList.every(entry => entry.watch !== false)
   const playgroundConfig = resolvePlaygroundOptions(resolvePlaygroundInput(optionList))
   const logger = createLogger(logEnabled)
+  const hasSwEntries = optionList.some(entry => entry.mode === 'sw')
   const swConfig = resolveSwConfig(optionList, logger)
+  const unregisterConfig = resolveSwUnregisterConfig(optionList, logger)
 
   const resolveAllDirs = () => {
     const dirs: string[] = []
@@ -123,31 +125,32 @@ export function createMokupPlugin(options: MokupViteOptionsInput = {}): Plugin {
   })
 
   const hasSwRoutes = () => !!swConfig && swRoutes.length > 0
-  const resolveSwRequestPath = () => {
-    if (!swConfig) {
-      return null
-    }
-    return resolveRegisterPath(base, swConfig.path)
-  }
-  const resolveSwRegisterScope = () => {
-    if (!swConfig) {
-      return null
-    }
-    return resolveRegisterScope(base, swConfig.scope)
-  }
+  const resolveSwRequestPath = (path: string) => resolveRegisterPath(base, path)
+  const resolveSwRegisterScope = (scope: string) => resolveRegisterScope(base, scope)
 
   const swVirtualId = 'virtual:mokup-sw'
   const resolvedSwVirtualId = `\0${swVirtualId}`
 
-  const buildRegisterScript = () => {
-    if (!swConfig) {
+  const buildSwLifecycleScript = () => {
+    const shouldUnregister = unregisterConfig.unregister === true || !hasSwEntries
+    if (shouldUnregister) {
+      const path = resolveSwRequestPath(unregisterConfig.path)
+      const scope = resolveSwRegisterScope(unregisterConfig.scope)
+      return [
+        'import { unregisterMokupServiceWorker } from \'mokup/sw\'',
+        '(async () => {',
+        `  await unregisterMokupServiceWorker({ path: ${JSON.stringify(path)}, scope: ${JSON.stringify(scope)} })`,
+        '})()',
+      ].join('\n')
+    }
+    if (!swConfig || swConfig.register === false) {
       return null
     }
-    const path = resolveRegisterPath(base, swConfig.path)
-    const scope = resolveSwRegisterScope()
-    if (!scope) {
+    if (!hasSwRoutes()) {
       return null
     }
+    const path = resolveSwRequestPath(swConfig.path)
+    const scope = resolveSwRegisterScope(swConfig.scope)
     return [
       'import { registerMokupServiceWorker } from \'mokup/sw\'',
       '(async () => {',
@@ -246,16 +249,10 @@ export function createMokupPlugin(options: MokupViteOptionsInput = {}): Plugin {
       })
     },
     async transformIndexHtml(html) {
-      if (!swConfig || swConfig.register === false) {
-        return html
-      }
       if (swRoutes.length === 0) {
         await refreshRoutes(currentServer ?? undefined)
       }
-      if (!hasSwRoutes()) {
-        return html
-      }
-      const script = buildRegisterScript()
+      const script = buildSwLifecycleScript()
       if (!script) {
         return html
       }
@@ -280,7 +277,7 @@ export function createMokupPlugin(options: MokupViteOptionsInput = {}): Plugin {
       currentServer = server
       await refreshRoutes(server)
       server.middlewares.use(playgroundMiddleware)
-      const swPath = resolveSwRequestPath()
+      const swPath = swConfig ? resolveSwRequestPath(swConfig.path) : null
       if (swPath && hasSwRoutes()) {
         server.middlewares.use(async (req, res, next) => {
           const requestUrl = req.url ?? '/'
@@ -332,7 +329,7 @@ export function createMokupPlugin(options: MokupViteOptionsInput = {}): Plugin {
       currentServer = server
       await refreshRoutes(server)
       server.middlewares.use(playgroundMiddleware)
-      const swPath = resolveSwRequestPath()
+      const swPath = swConfig ? resolveSwRequestPath(swConfig.path) : null
       if (swPath && hasSwRoutes()) {
         server.middlewares.use(async (req, res, next) => {
           const requestUrl = req.url ?? '/'

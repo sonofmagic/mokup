@@ -33,6 +33,7 @@ export interface MokupSwOptions {
   path?: string
   scope?: string
   register?: boolean
+  unregister?: boolean
   fallback?: boolean
 }
 

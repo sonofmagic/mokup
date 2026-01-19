@@ -115,10 +115,6 @@ importers:
         version: 2.8.2
 
   apps/docs:
-    dependencies:
-      '@mokup/server':
-        specifier: workspace:*
-        version: link:../../packages/server
     devDependencies:
       '@mokup/cli':
         specifier: workspace:*

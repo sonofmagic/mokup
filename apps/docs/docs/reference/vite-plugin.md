@@ -19,17 +19,17 @@ export default {
 
 ## Options
 
-| Option       | Type                                                                        | Description                           |
-| ------------ | --------------------------------------------------------------------------- | ------------------------------------- |
-| `dir`        | `string / string[] / (root) => string / string[]`                           | Mock directory                        |
-| `prefix`     | `string`                                                                    | URL prefix                            |
-| `include`    | `RegExp / RegExp[]`                                                         | Include files                         |
-| `exclude`    | `RegExp / RegExp[]`                                                         | Exclude files                         |
-| `watch`      | `boolean`                                                                   | Watch file changes                    |
-| `log`        | `boolean`                                                                   | Enable logging                        |
-| `mode`       | `'server' / 'sw'`                                                           | Mock runtime mode                     |
-| `sw`         | `{ path?: string; scope?: string; register?: boolean; fallback?: boolean }` | Service worker options (SW mode only) |
-| `playground` | `boolean / { path?: string; enabled?: boolean }`                            | Playground config                     |
+| Option       | Type                                                                                              | Description                           |
+| ------------ | ------------------------------------------------------------------------------------------------- | ------------------------------------- |
+| `dir`        | `string / string[] / (root) => string / string[]`                                                 | Mock directory                        |
+| `prefix`     | `string`                                                                                          | URL prefix                            |
+| `include`    | `RegExp / RegExp[]`                                                                               | Include files                         |
+| `exclude`    | `RegExp / RegExp[]`                                                                               | Exclude files                         |
+| `watch`      | `boolean`                                                                                         | Watch file changes                    |
+| `log`        | `boolean`                                                                                         | Enable logging                        |
+| `mode`       | `'server' / 'sw'`                                                                                 | Mock runtime mode                     |
+| `sw`         | `{ path?: string; scope?: string; register?: boolean; unregister?: boolean; fallback?: boolean }` | Service worker options (SW mode only) |
+| `playground` | `boolean / { path?: string; enabled?: boolean }`                                                  | Playground config                     |
 
 ## Service Worker mode
 
@@ -93,7 +93,38 @@ export default {
 Notes:
 
 - `sw.fallback` defaults to `true`. Set it to `false` to disable server middleware for that entry.
-- If multiple entries use SW mode, the first `sw.path`/`sw.scope`/`sw.register` wins; conflicting values are ignored with a warning.
+- If multiple entries use SW mode, the first `sw.path`/`sw.scope`/`sw.register`/`sw.unregister` wins; conflicting values are ignored with a warning.
+
+### Unregister
+
+```ts
+export default {
+  plugins: [
+    mokup({
+      dir: 'mock',
+      prefix: '/api',
+      mode: 'sw',
+      sw: {
+        unregister: true,
+      },
+    }),
+  ],
+}
+```
+
+```ts
+import { unregisterMokupServiceWorker } from 'mokup/sw'
+
+await unregisterMokupServiceWorker({
+  path: '/mokup-sw.js',
+  scope: '/',
+})
+```
+
+Notes:
+
+- `sw.unregister: true` injects an uninstall script and skips registration.
+- If there are no SW entries, the plugin auto-injects an uninstall script using the configured `sw.path`/`sw.scope` (or defaults) to clean stale registrations.
 
 ## Multi-dir
 

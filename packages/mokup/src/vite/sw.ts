@@ -10,13 +10,14 @@ import { Buffer } from 'node:buffer'
 import { isAbsolute, relative, resolve } from 'pathe'
 import { toPosix } from './utils'
 
-const defaultSwPath = '/mokup-sw.js'
-const defaultSwScope = '/'
+export const defaultSwPath = '/mokup-sw.js'
+export const defaultSwScope = '/'
 
 export interface ResolvedSwConfig {
   path: string
   scope: string
   register: boolean
+  unregister: boolean
 }
 
 function normalizeSwPath(path: string) {
@@ -41,14 +42,30 @@ export function resolveSwConfig(
   if (swEntries.length === 0) {
     return null
   }
+  return resolveSwConfigFromEntries(swEntries, logger)
+}
+
+export function resolveSwUnregisterConfig(
+  options: MokupViteOptions[],
+  logger: Logger,
+): ResolvedSwConfig {
+  return resolveSwConfigFromEntries(options, logger)
+}
+
+function resolveSwConfigFromEntries(
+  entries: MokupViteOptions[],
+  logger: Logger,
+): ResolvedSwConfig {
   let path = defaultSwPath
   let scope = defaultSwScope
   let register = true
+  let unregister = false
   let hasPath = false
   let hasScope = false
   let hasRegister = false
+  let hasUnregister = false
 
-  for (const entry of swEntries) {
+  for (const entry of entries) {
     const config = entry.sw
     if (config?.path) {
       const next = normalizeSwPath(config.path)
@@ -81,12 +98,24 @@ export function resolveSwConfig(
         )
       }
     }
+    if (typeof config?.unregister === 'boolean') {
+      if (!hasUnregister) {
+        unregister = config.unregister
+        hasUnregister = true
+      }
+      else if (unregister !== config.unregister) {
+        logger.warn(
+          `SW unregister="${String(config.unregister)}" ignored; using "${String(unregister)}".`,
+        )
+      }
+    }
   }
 
   return {
     path,
     scope,
     register,
+    unregister,
   }
 }
 

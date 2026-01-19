@@ -3,7 +3,7 @@ import type { ResolvedRoute } from '../src/vite/types'
 import path from 'node:path'
 import { parseRouteTemplate } from '@mokup/runtime'
 import { describe, expect, it } from 'vitest'
-import { buildSwScript, resolveSwConfig } from '../src/vite/sw'
+import { buildSwScript, resolveSwConfig, resolveSwUnregisterConfig } from '../src/vite/sw'
 
 function extractManifest(code: string): Manifest {
   const marker = 'const manifest = '
@@ -101,6 +101,7 @@ describe('mokup SW', () => {
       path: '/mokup-sw.js',
       scope: '/',
       register: true,
+      unregister: false,
     })
     expect(warnings).toHaveLength(0)
   })
@@ -131,9 +132,47 @@ describe('mokup SW', () => {
       path: '/mock-sw.js',
       scope: '/api',
       register: false,
+      unregister: false,
     })
     expect(warnings.some(message => message.includes('SW path'))).toBe(true)
     expect(warnings.some(message => message.includes('SW scope'))).toBe(true)
     expect(warnings.some(message => message.includes('SW register'))).toBe(true)
+  })
+
+  it('resolves unregister config from non-SW entries', () => {
+    const warnings: string[] = []
+    const logger = createLogger(warnings)
+    const result = resolveSwUnregisterConfig([
+      {
+        mode: 'server',
+        sw: {
+          path: '/mock-sw.js',
+          scope: '/api',
+          unregister: true,
+        },
+      },
+    ], logger)
+
+    expect(result).toEqual({
+      path: '/mock-sw.js',
+      scope: '/api',
+      register: true,
+      unregister: true,
+    })
+    expect(warnings).toHaveLength(0)
+  })
+
+  it('returns defaults for unregister config when no entries match', () => {
+    const warnings: string[] = []
+    const logger = createLogger(warnings)
+    const result = resolveSwUnregisterConfig([], logger)
+
+    expect(result).toEqual({
+      path: '/mokup-sw.js',
+      scope: '/',
+      register: true,
+      unregister: false,
+    })
+    expect(warnings).toHaveLength(0)
   })
 })
