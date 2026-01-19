@@ -222,12 +222,10 @@ export function buildSwScript(params: {
   routes: RouteTable
   root: string
   runtimeImportPath?: string
-  honoImportPath?: string
   basePaths?: string[]
 }) {
   const { routes, root } = params
   const runtimeImportPath = params.runtimeImportPath ?? 'mokup/runtime'
-  const honoImportPath = params.honoImportPath ?? 'hono/service-worker'
   const basePaths = params.basePaths ?? []
   const ruleModules = new Map<string, string>()
   const middlewareModules = new Map<string, string>()
@@ -272,8 +270,7 @@ export function buildSwScript(params: {
   }
 
   const imports: string[] = [
-    `import { createRuntimeApp } from ${JSON.stringify(runtimeImportPath)}`,
-    `import { handle } from ${JSON.stringify(honoImportPath)}`,
+    `import { createRuntimeApp, handle } from ${JSON.stringify(runtimeImportPath)}`,
   ]
   const moduleEntries: Array<{ id: string, name: string, kind: 'rule' | 'middleware' }> = []
   let moduleIndex = 0

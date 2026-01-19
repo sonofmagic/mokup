@@ -21,3 +21,4 @@ export type {
   RuntimeRequest,
   RuntimeResult,
 } from './types'
+export { handle } from 'hono/service-worker'

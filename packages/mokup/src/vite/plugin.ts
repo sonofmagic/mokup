@@ -91,11 +91,6 @@ function resolveSwRuntimeImportPath(base: string) {
   return `${normalizedBase}@id/mokup/runtime`
 }
 
-function resolveSwHonoImportPath(base: string) {
-  const normalizedBase = normalizeBase(base)
-  return `${normalizedBase}@id/hono/service-worker`
-}
-
 type MiddlewareHandler = (
   req: IncomingMessage,
   res: ServerResponse,
@@ -344,7 +339,6 @@ export function createMokupPlugin(options: MokupViteOptionsInput = {}): Plugin {
               routes: swRoutes,
               root,
               runtimeImportPath: resolveSwRuntimeImportPath(base),
-              honoImportPath: resolveSwHonoImportPath(base),
               basePaths: swConfig?.basePaths ?? [],
             })
             res.statusCode = 200
