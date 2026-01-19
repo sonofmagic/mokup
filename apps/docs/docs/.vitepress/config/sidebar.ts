@@ -32,6 +32,16 @@ export const zhSidebar: DefaultTheme.Sidebar = {
       ],
     },
   ],
+  '/zh/ai/': [
+    {
+      text: 'AI 提示词',
+      items: [
+        { text: '概览', link: '/zh/ai/' },
+        { text: 'DTS 模板', link: '/zh/ai/prompt-templates-dts' },
+        { text: 'OpenAPI 模板', link: '/zh/ai/prompt-templates-openapi' },
+      ],
+    },
+  ],
   '/zh/deploy/': [
     {
       text: '部署',
@@ -85,6 +95,16 @@ export const enSidebar: DefaultTheme.Sidebar = {
         { text: 'Multi-Dir & Prefix', link: '/advanced/multi-dir-prefix' },
         { text: 'Playground', link: '/advanced/playground' },
         { text: 'Hot Reload & Debug', link: '/advanced/hot-reload' },
+      ],
+    },
+  ],
+  '/ai/': [
+    {
+      text: 'AI Prompts',
+      items: [
+        { text: 'Overview', link: '/ai/' },
+        { text: 'DTS Templates', link: '/ai/prompt-templates-dts' },
+        { text: 'OpenAPI Templates', link: '/ai/prompt-templates-openapi' },
       ],
     },
   ],
