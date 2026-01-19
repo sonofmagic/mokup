@@ -1,4 +1,4 @@
-import type { Manifest } from '@mokup/runtime'
+import type { Manifest, ManifestResponse } from '@mokup/runtime'
 import type {
   Logger,
   MokupViteOptions,
@@ -182,7 +182,7 @@ function toBinaryBody(handler: ResolvedRoute['handler']) {
 function buildManifestResponse(
   route: ResolvedRoute,
   moduleId: string | null,
-) {
+): ManifestResponse {
   if (moduleId) {
     const response: {
       type: 'module'
