@@ -268,6 +268,25 @@ async function buildApp(params: {
   return app
 }
 
+export async function createRuntimeApp(options: RuntimeOptions): Promise<Hono> {
+  const manifest = typeof options.manifest === 'function'
+    ? await options.manifest()
+    : options.manifest
+  const moduleCache = new Map<string, RuntimeRule[]>()
+  const middlewareCache = new Map<string, MockMiddleware[]>()
+  return await buildApp({
+    manifest,
+    moduleCache,
+    middlewareCache,
+    ...(typeof options.moduleBase !== 'undefined'
+      ? { moduleBase: options.moduleBase }
+      : {}),
+    ...(typeof options.moduleMap !== 'undefined'
+      ? { moduleMap: options.moduleMap }
+      : {}),
+  })
+}
+
 function appendQueryParams(url: URL, query: RuntimeRequest['query']) {
   for (const [key, value] of Object.entries(query)) {
     if (Array.isArray(value)) {

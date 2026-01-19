@@ -35,6 +35,7 @@ export interface MokupSwOptions {
   register?: boolean
   unregister?: boolean
   fallback?: boolean
+  basePath?: string | string[]
 }
 
 export interface DirectoryConfig {

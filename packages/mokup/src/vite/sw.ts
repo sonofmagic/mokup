@@ -8,7 +8,7 @@ import type {
 
 import { Buffer } from 'node:buffer'
 import { isAbsolute, relative, resolve } from 'pathe'
-import { toPosix } from './utils'
+import { normalizePrefix, toPosix } from './utils'
 
 export const defaultSwPath = '/mokup-sw.js'
 export const defaultSwScope = '/'
@@ -18,6 +18,7 @@ export interface ResolvedSwConfig {
   scope: string
   register: boolean
   unregister: boolean
+  basePaths: string[]
 }
 
 function normalizeSwPath(path: string) {
@@ -34,22 +35,15 @@ function normalizeSwScope(scope: string) {
   return scope.startsWith('/') ? scope : `/${scope}`
 }
 
-export function resolveSwConfig(
-  options: MokupViteOptions[],
-  logger: Logger,
-): ResolvedSwConfig | null {
-  const swEntries = options.filter(entry => entry.mode === 'sw')
-  if (swEntries.length === 0) {
-    return null
+function normalizeBasePath(value: string) {
+  if (!value) {
+    return '/'
   }
-  return resolveSwConfigFromEntries(swEntries, logger)
-}
-
-export function resolveSwUnregisterConfig(
-  options: MokupViteOptions[],
-  logger: Logger,
-): ResolvedSwConfig {
-  return resolveSwConfigFromEntries(options, logger)
+  const normalized = value.startsWith('/') ? value : `/${value}`
+  if (normalized.length > 1 && normalized.endsWith('/')) {
+    return normalized.slice(0, -1)
+  }
+  return normalized
 }
 
 function resolveSwConfigFromEntries(
@@ -60,6 +54,7 @@ function resolveSwConfigFromEntries(
   let scope = defaultSwScope
   let register = true
   let unregister = false
+  const basePaths: string[] = []
   let hasPath = false
   let hasScope = false
   let hasRegister = false
@@ -109,6 +104,20 @@ function resolveSwConfigFromEntries(
         )
       }
     }
+
+    if (typeof config?.basePath !== 'undefined') {
+      const values = Array.isArray(config.basePath)
+        ? config.basePath
+        : [config.basePath]
+      for (const value of values) {
+        basePaths.push(normalizeBasePath(value))
+      }
+      continue
+    }
+    const normalizedPrefix = normalizePrefix(entry.prefix ?? '')
+    if (normalizedPrefix) {
+      basePaths.push(normalizedPrefix)
+    }
   }
 
   return {
@@ -116,7 +125,26 @@ function resolveSwConfigFromEntries(
     scope,
     register,
     unregister,
+    basePaths: Array.from(new Set(basePaths)),
   }
+}
+
+export function resolveSwConfig(
+  options: MokupViteOptions[],
+  logger: Logger,
+): ResolvedSwConfig | null {
+  const swEntries = options.filter(entry => entry.mode === 'sw')
+  if (swEntries.length === 0) {
+    return null
+  }
+  return resolveSwConfigFromEntries(swEntries, logger)
+}
+
+export function resolveSwUnregisterConfig(
+  options: MokupViteOptions[],
+  logger: Logger,
+): ResolvedSwConfig {
+  return resolveSwConfigFromEntries(options, logger)
 }
 
 function toViteImportPath(file: string, root: string) {
@@ -194,9 +222,13 @@ export function buildSwScript(params: {
   routes: RouteTable
   root: string
   runtimeImportPath?: string
+  honoImportPath?: string
+  basePaths?: string[]
 }) {
   const { routes, root } = params
   const runtimeImportPath = params.runtimeImportPath ?? 'mokup/runtime'
+  const honoImportPath = params.honoImportPath ?? 'hono/service-worker'
+  const basePaths = params.basePaths ?? []
   const ruleModules = new Map<string, string>()
   const middlewareModules = new Map<string, string>()
 
@@ -240,7 +272,8 @@ export function buildSwScript(params: {
   }
 
   const imports: string[] = [
-    `import { createRuntime } from ${JSON.stringify(runtimeImportPath)}`,
+    `import { createRuntimeApp } from ${JSON.stringify(runtimeImportPath)}`,
+    `import { handle } from ${JSON.stringify(honoImportPath)}`,
   ]
   const moduleEntries: Array<{ id: string, name: string, kind: 'rule' | 'middleware' }> = []
   let moduleIndex = 0
@@ -327,7 +360,7 @@ export function buildSwScript(params: {
     : '{ manifest }'
 
   lines.push(
-    `const runtime = createRuntime(${runtimeOptions})`,
+    `const basePaths = ${JSON.stringify(basePaths)}`,
     '',
     'self.addEventListener(\'install\', () => {',
     '  self.skipWaiting()',
@@ -337,93 +370,37 @@ export function buildSwScript(params: {
     '  event.waitUntil(self.clients.claim())',
     '})',
     '',
-    'const normalizeQuery = (params) => {',
-    '  const query = {}',
-    '  for (const [key, value] of params.entries()) {',
-    '    const current = query[key]',
-    '    if (typeof current === \'undefined\') {',
-    '      query[key] = value',
+    'const shouldHandle = (request) => {',
+    '  if (!basePaths || basePaths.length === 0) {',
+    '    return true',
+    '  }',
+    '  const pathname = new URL(request.url).pathname',
+    '  return basePaths.some((basePath) => {',
+    '    if (basePath === \'/\') {',
+    '      return true',
     '    }',
-    '    else if (Array.isArray(current)) {',
-    '      current.push(value)',
-    '    }',
-    '    else {',
-    '      query[key] = [current, value]',
-    '    }',
-    '  }',
-    '  return query',
-    '}',
-    '',
-    'const normalizeHeaders = (headers) => {',
-    '  const record = {}',
-    '  headers.forEach((value, key) => {',
-    '    record[key.toLowerCase()] = value',
-    '  })',
-    '  return record',
-    '}',
-    '',
-    'const parseBody = (rawText, contentType) => {',
-    '  if (!rawText) {',
-    '    return undefined',
-    '  }',
-    '  if (contentType === \'application/json\' || contentType.endsWith(\'+json\')) {',
-    '    try {',
-    '      return JSON.parse(rawText)',
-    '    }',
-    '    catch {',
-    '      return rawText',
-    '    }',
-    '  }',
-    '  if (contentType === \'application/x-www-form-urlencoded\') {',
-    '    const params = new URLSearchParams(rawText)',
-    '    return Object.fromEntries(params.entries())',
-    '  }',
-    '  return rawText',
-    '}',
-    '',
-    'const toRuntimeRequest = async (request) => {',
-    '  const url = new URL(request.url)',
-    '  const headers = normalizeHeaders(request.headers)',
-    '  const contentType = (headers[\'content-type\'] ?? \'\').split(\';\')[0]?.trim() ?? \'\'',
-    '  const rawBody = await request.clone().text()',
-    '  const body = parseBody(rawBody, contentType)',
-    '  return {',
-    '    method: request.method,',
-    '    path: url.pathname,',
-    '    query: normalizeQuery(url.searchParams),',
-    '    headers,',
-    '    body,',
-    '    ...(rawBody ? { rawBody } : {}),',
-    '  }',
-    '}',
-    '',
-    'const toFetchResponse = (result) => {',
-    '  if (!result) {',
-    '    return null',
-    '  }',
-    '  const body = result.body === null',
-    '    ? null',
-    '    : typeof result.body === \'string\'',
-    '      ? result.body',
-    '      : result.body',
-    '  return new Response(body, {',
-    '    status: result.status,',
-    '    headers: result.headers,',
+    '    return pathname === basePath || pathname.startsWith(basePath + \'/\')',
     '  })',
     '}',
     '',
-    'const handleRequest = async (request) => {',
-    '  const runtimeRequest = await toRuntimeRequest(request)',
-    '  const result = await runtime.handle(runtimeRequest)',
-    '  const response = toFetchResponse(result)',
-    '  if (!response) {',
-    '    return fetch(request)',
-    '  }',
-    '  return response',
+    'let handler = null',
+    'try {',
+    `  const app = await createRuntimeApp(${runtimeOptions})`,
+    '  handler = handle(app)',
+    '}',
+    'catch (error) {',
+    '  console.error(\'[mokup] Failed to build service worker app:\', error)',
     '}',
     '',
     'self.addEventListener(\'fetch\', (event) => {',
-    '  event.respondWith(handleRequest(event.request))',
+    '  if (!shouldHandle(event.request)) {',
+    '    return',
+    '  }',
+    '  if (!handler) {',
+    '    event.respondWith(fetch(event.request))',
+    '    return',
+    '  }',
+    '  handler(event)',
     '})',
     '',
   )

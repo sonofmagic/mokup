@@ -91,6 +91,11 @@ function resolveSwRuntimeImportPath(base: string) {
   return `${normalizedBase}@id/mokup/runtime`
 }
 
+function resolveSwHonoImportPath(base: string) {
+  const normalizedBase = normalizeBase(base)
+  return `${normalizedBase}@id/hono/service-worker`
+}
+
 type MiddlewareHandler = (
   req: IncomingMessage,
   res: ServerResponse,
@@ -160,15 +165,6 @@ export function createMokupPlugin(options: MokupViteOptionsInput = {}): Plugin {
     return dirs
   }
 
-  const playgroundMiddleware = createPlaygroundMiddleware({
-    getRoutes: () => routes,
-    config: playgroundConfig,
-    logger,
-    getServer: () => currentServer,
-    getDirs: () => resolveAllDirs(),
-    getSwScript: () => buildSwLifecycleScript(resolveSwImportPath(base)),
-  })
-
   const hasSwRoutes = () => !!swConfig && swRoutes.length > 0
   const resolveSwRequestPath = (path: string) => resolveRegisterPath(base, path)
   const resolveSwRegisterScope = (scope: string) => resolveRegisterScope(base, scope)
@@ -208,6 +204,15 @@ export function createMokupPlugin(options: MokupViteOptionsInput = {}): Plugin {
       '})()',
     ].join('\n')
   }
+
+  const playgroundMiddleware = createPlaygroundMiddleware({
+    getRoutes: () => routes,
+    config: playgroundConfig,
+    logger,
+    getServer: () => currentServer,
+    getDirs: () => resolveAllDirs(),
+    getSwScript: () => buildSwLifecycleScript(resolveSwImportPath(base)),
+  })
 
   const refreshRoutes = async (server?: ViteDevServer | PreviewServer) => {
     const collected: RouteTable = []
@@ -274,7 +279,11 @@ export function createMokupPlugin(options: MokupViteOptionsInput = {}): Plugin {
       if (swRoutes.length === 0) {
         await refreshRoutes()
       }
-      return buildSwScript({ routes: swRoutes, root })
+      return buildSwScript({
+        routes: swRoutes,
+        root,
+        basePaths: swConfig?.basePaths ?? [],
+      })
     },
     async buildStart() {
       if (!swConfig || command !== 'build') {
@@ -335,6 +344,8 @@ export function createMokupPlugin(options: MokupViteOptionsInput = {}): Plugin {
               routes: swRoutes,
               root,
               runtimeImportPath: resolveSwRuntimeImportPath(base),
+              honoImportPath: resolveSwHonoImportPath(base),
+              basePaths: swConfig?.basePaths ?? [],
             })
             res.statusCode = 200
             res.setHeader('Content-Type', 'application/javascript; charset=utf-8')
@@ -387,7 +398,11 @@ export function createMokupPlugin(options: MokupViteOptionsInput = {}): Plugin {
             return next()
           }
           try {
-            const code = buildSwScript({ routes: swRoutes, root })
+            const code = buildSwScript({
+              routes: swRoutes,
+              root,
+              basePaths: swConfig?.basePaths ?? [],
+            })
             res.statusCode = 200
             res.setHeader('Content-Type', 'application/javascript; charset=utf-8')
             res.setHeader('Cache-Control', 'no-cache')

@@ -6,7 +6,7 @@ export {
   parseRouteTemplate,
   scoreRouteTokens,
 } from './router'
-export { createRuntime } from './runtime'
+export { createRuntime, createRuntimeApp } from './runtime'
 export type {
   HttpMethod,
   Manifest,
