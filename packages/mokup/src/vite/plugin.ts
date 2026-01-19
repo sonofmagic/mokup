@@ -1,5 +1,6 @@
 import type { FSWatcher } from 'chokidar'
 import type { Hono } from 'hono'
+import type { IncomingMessage, ServerResponse } from 'node:http'
 import type { Plugin, PreviewServer, ViteDevServer } from 'vite'
 import type { MokupViteOptions, MokupViteOptionsInput, RouteTable } from './types'
 
@@ -78,6 +79,39 @@ function resolveRegisterScope(base: string, scope: string) {
     return normalizedScope
   }
   return `${normalizedBase}${normalizedScope.slice(1)}`
+}
+
+type MiddlewareHandler = (
+  req: IncomingMessage,
+  res: ServerResponse,
+  next: (err?: unknown) => void,
+) => void
+
+interface MiddlewareStackEntry {
+  route: string
+  handle: MiddlewareHandler
+}
+
+interface MiddlewareWithStack {
+  stack: MiddlewareStackEntry[]
+}
+
+function hasMiddlewareStack(
+  middlewares: ViteDevServer['middlewares'] | PreviewServer['middlewares'],
+): middlewares is ViteDevServer['middlewares'] & MiddlewareWithStack {
+  const candidate = middlewares as { stack?: unknown }
+  return Array.isArray(candidate.stack)
+}
+
+function addMiddlewareFirst(
+  server: ViteDevServer | PreviewServer,
+  middleware: MiddlewareHandler,
+) {
+  if (hasMiddlewareStack(server.middlewares)) {
+    server.middlewares.stack.unshift({ route: '', handle: middleware })
+    return
+  }
+  server.middlewares.use(middleware)
 }
 
 export function createMokupPlugin(options: MokupViteOptionsInput = {}): Plugin {
@@ -276,7 +310,7 @@ export function createMokupPlugin(options: MokupViteOptionsInput = {}): Plugin {
     async configureServer(server) {
       currentServer = server
       await refreshRoutes(server)
-      server.middlewares.use(playgroundMiddleware)
+      addMiddlewareFirst(server, playgroundMiddleware)
       const swPath = swConfig ? resolveSwRequestPath(swConfig.path) : null
       if (swPath && hasSwRoutes()) {
         server.middlewares.use(async (req, res, next) => {
@@ -328,7 +362,7 @@ export function createMokupPlugin(options: MokupViteOptionsInput = {}): Plugin {
     async configurePreviewServer(server) {
       currentServer = server
       await refreshRoutes(server)
-      server.middlewares.use(playgroundMiddleware)
+      addMiddlewareFirst(server, playgroundMiddleware)
       const swPath = swConfig ? resolveSwRequestPath(swConfig.path) : null
       if (swPath && hasSwRoutes()) {
         server.middlewares.use(async (req, res, next) => {
