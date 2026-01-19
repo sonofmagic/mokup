@@ -82,10 +82,32 @@ function compileRoutes(manifest: Manifest): CompiledRoute[] {
 
 function shouldTreatAsText(contentType: string) {
   const normalized = contentType.toLowerCase()
-  return normalized.startsWith('text/')
+  if (!normalized) {
+    return true
+  }
+  if (
+    normalized.startsWith('text/')
     || normalized.includes('json')
     || normalized.includes('xml')
     || normalized.includes('javascript')
+  ) {
+    return true
+  }
+  if (
+    normalized.startsWith('image/')
+    || normalized.startsWith('audio/')
+    || normalized.startsWith('video/')
+    || normalized.includes('octet-stream')
+  ) {
+    return false
+  }
+  if (
+    normalized.startsWith('application/')
+    && (normalized.includes('pdf') || normalized.includes('zip') || normalized.includes('gzip'))
+  ) {
+    return false
+  }
+  return true
 }
 
 async function toRuntimeResult(response: Response): Promise<RuntimeResult> {
@@ -448,7 +470,8 @@ export function createRuntime(options: RuntimeOptions) {
     }
     const app = await getApp()
     const response = await app.fetch(toFetchRequest(req))
-    return await toRuntimeResult(response)
+    const resolvedResponse = applyRouteOverrides(response, matchedRoute)
+    return await toRuntimeResult(resolvedResponse)
   }
 
   return {

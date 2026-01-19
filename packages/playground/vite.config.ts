@@ -5,6 +5,7 @@ import { defineConfig } from 'vite'
 import mokup from '../mokup/src/vite'
 
 const mockDir = fileURLToPath(new URL('../../apps/docs/mock', import.meta.url))
+const runtimeEntry = fileURLToPath(new URL('../runtime/src/index.ts', import.meta.url))
 
 function routesAliasPlugin() {
   return {
@@ -34,6 +35,11 @@ function routesAliasPlugin() {
 
 export default defineConfig({
   base: './',
+  resolve: {
+    alias: {
+      'mokup/runtime': runtimeEntry,
+    },
+  },
   plugins: [
     vue(),
     tailwindcss(),

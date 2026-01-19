@@ -54,7 +54,7 @@ describe('mokup SW', () => {
     const manifest = extractManifest(code)
     const manifestRoute = manifest.routes[0]
 
-    expect(code).toContain('import { createRuntime } from \'mokup/runtime\'')
+    expect(code).toContain('import { createRuntimeApp, handle } from \"mokup/runtime\"')
     expect(manifestRoute?.response.type).toBe('module')
     expect(manifestRoute?.response.module).toBe('/mock/users.get.ts')
     expect(manifestRoute?.response.ruleIndex).toBe(3)
@@ -103,6 +103,7 @@ describe('mokup SW', () => {
       scope: '/',
       register: true,
       unregister: false,
+      basePaths: [],
     })
     expect(warnings).toHaveLength(0)
   })
@@ -134,6 +135,7 @@ describe('mokup SW', () => {
       scope: '/api',
       register: false,
       unregister: false,
+      basePaths: [],
     })
     expect(warnings.some(message => message.includes('SW path'))).toBe(true)
     expect(warnings.some(message => message.includes('SW scope'))).toBe(true)
@@ -159,6 +161,7 @@ describe('mokup SW', () => {
       scope: '/api',
       register: true,
       unregister: true,
+      basePaths: [],
     })
     expect(warnings).toHaveLength(0)
   })
@@ -173,6 +176,7 @@ describe('mokup SW', () => {
       scope: '/',
       register: true,
       unregister: false,
+      basePaths: [],
     })
     expect(warnings).toHaveLength(0)
   })

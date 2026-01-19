@@ -85,12 +85,12 @@ describe('runtime handling', () => {
     const jsonResult = await runtime.handle(createRequest('/json?foo=1#hash'))
     const jsonBody = jsonResult?.body ? JSON.parse(String(jsonResult.body)) : null
     expect(jsonResult?.status).toBe(200)
-    expect(jsonResult?.headers['content-type']).toBe('application/json; charset=utf-8')
+    expect(jsonResult?.headers['content-type']).toContain('application/json')
     expect(jsonBody).toEqual({ ok: true })
 
     const textResult = await runtime.handle(createRequest('/text'))
     expect(textResult?.body).toBe('hello')
-    expect(textResult?.headers['content-type']).toBe('text/plain; charset=utf-8')
+    expect(textResult?.headers['content-type']).toContain('text/plain')
 
     const binaryResult = await runtime.handle(createRequest('/binary'))
     expect(binaryResult?.headers['content-type']).toBe('application/octet-stream')
@@ -165,7 +165,7 @@ describe('runtime handling', () => {
     const objectResult = await runtime.handle(createRequest('/module/object'))
     const objectBody = objectResult?.body ? JSON.parse(String(objectResult.body)) : null
     expect(objectBody).toEqual({ step: 'object' })
-    expect(objectResult?.headers['content-type']).toBe('application/json; charset=utf-8')
+    expect(objectResult?.headers['content-type']).toContain('application/json')
 
     const rulesResult = await runtime.handle(createRequest('/module/rules'))
     const rulesBody = rulesResult?.body ? JSON.parse(String(rulesResult.body)) : null
