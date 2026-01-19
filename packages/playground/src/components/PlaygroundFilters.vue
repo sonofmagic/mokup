@@ -1,10 +1,15 @@
 <script setup lang="ts">
 import { useI18n } from 'vue-i18n'
 
-defineProps<{
+const props = withDefaults(defineProps<{
   search: string
   basePath: string
-}>()
+  showBase?: boolean
+  compact?: boolean
+}>(), {
+  showBase: true,
+  compact: false,
+})
 
 const emit = defineEmits<{
   (event: 'update:search', value: string): void
@@ -19,23 +24,32 @@ const { t } = useI18n()
 </script>
 
 <template>
-  <section class="grid gap-3">
-    <label class="flex flex-col gap-1.5 text-[0.65rem] uppercase tracking-[0.2em] text-amber-800/70 dark:text-amber-100/60">
+  <section class="grid" :class="props.compact ? 'gap-2' : 'gap-3'">
+    <label
+      class="flex flex-col uppercase text-slate-600/70 dark:text-slate-200/60"
+      :class="props.compact ? 'gap-1 text-[0.55rem] tracking-[0.25em]' : 'gap-1.5 text-[0.65rem] tracking-[0.2em]'"
+    >
       {{ t('filters.search') }}
       <input
         :value="search"
         type="search"
-        class="rounded-lg border border-amber-900/10 bg-white/80 px-3 py-2 text-sm text-amber-950 outline-none transition focus:border-amber-500 dark:border-amber-100/10 dark:bg-slate-900/80 dark:text-amber-50"
+        class="rounded-lg border border-slate-200/70 bg-white/80 text-slate-800 outline-none transition focus:border-sky-400 dark:border-slate-700/50 dark:bg-slate-900/80 dark:text-slate-50"
+        :class="props.compact ? 'px-2.5 py-1.5 text-[0.8rem]' : 'px-3 py-2 text-sm'"
         :placeholder="t('filters.searchPlaceholder')"
         @input="handleInput"
       >
     </label>
-    <label class="flex flex-col gap-1.5 text-[0.65rem] uppercase tracking-[0.2em] text-amber-800/70 dark:text-amber-100/60">
+    <label
+      v-if="props.showBase"
+      class="flex flex-col uppercase text-slate-600/70 dark:text-slate-200/60"
+      :class="props.compact ? 'gap-1 text-[0.55rem] tracking-[0.25em]' : 'gap-1.5 text-[0.65rem] tracking-[0.2em]'"
+    >
       {{ t('filters.base') }}
       <input
         :value="basePath"
         readonly
-        class="rounded-lg border border-amber-900/10 bg-white/80 px-3 py-2 text-sm text-amber-950 dark:border-amber-100/10 dark:bg-slate-900/80 dark:text-amber-50"
+        class="rounded-lg border border-slate-200/70 bg-white/80 text-slate-800 dark:border-slate-700/50 dark:bg-slate-900/80 dark:text-slate-50"
+        :class="props.compact ? 'px-2.5 py-1.5 text-[0.8rem]' : 'px-3 py-2 text-sm'"
       >
     </label>
   </section>

@@ -17,8 +17,8 @@ const { t } = useI18n()
 <template>
   <section class="flex flex-wrap items-center gap-2">
     <button
-      class="rounded-full border border-amber-900/10 bg-white/80 px-3 py-1.5 text-[0.6rem] uppercase tracking-[0.25em] text-amber-950 transition hover:-translate-y-0.5 dark:border-amber-100/10 dark:bg-slate-900/80 dark:text-amber-50"
-      :class="activeGroup === 'all' ? 'border-amber-500/70 bg-amber-50/80 text-amber-950 shadow-sm ring-1 ring-amber-300/40 dark:border-amber-300/70 dark:bg-slate-900/90 dark:text-amber-50 dark:ring-amber-200/30' : ''"
+      class="rounded-full border border-slate-200/70 bg-white/80 px-3 py-1.5 text-[0.6rem] uppercase tracking-[0.25em] text-slate-700 transition hover:-translate-y-0.5 dark:border-slate-700/50 dark:bg-slate-900/80 dark:text-slate-100"
+      :class="activeGroup === 'all' ? '!border-sky-500 !bg-sky-500 !text-white shadow-sm ring-1 ring-sky-300/60 dark:!border-sky-400 dark:!bg-sky-400' : ''"
       @click="emit('select', 'all')"
     >
       {{ t('tabs.overview') }}
@@ -26,8 +26,8 @@ const { t } = useI18n()
     <button
       v-for="group in groups"
       :key="group.key"
-      class="rounded-full border border-amber-900/10 bg-white/80 px-3 py-1.5 text-[0.6rem] uppercase tracking-[0.25em] text-amber-950 transition hover:-translate-y-0.5 dark:border-amber-100/10 dark:bg-slate-900/80 dark:text-amber-50"
-      :class="activeGroup === group.key ? 'border-amber-500/70 bg-amber-50/80 text-amber-950 shadow-sm ring-1 ring-amber-300/40 dark:border-amber-300/70 dark:bg-slate-900/90 dark:text-amber-50 dark:ring-amber-200/30' : ''"
+      class="rounded-full border border-slate-200/70 bg-white/80 px-3 py-1.5 text-[0.6rem] uppercase tracking-[0.25em] text-slate-700 transition hover:-translate-y-0.5 dark:border-slate-700/50 dark:bg-slate-900/80 dark:text-slate-100"
+      :class="activeGroup === group.key ? '!border-sky-500 !bg-sky-500 !text-white shadow-sm ring-1 ring-sky-300/60 dark:!border-sky-400 dark:!bg-sky-400' : ''"
       @click="emit('select', group.key)"
     >
       {{ group.label }}

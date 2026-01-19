@@ -15,6 +15,9 @@ const messages = {
       languageToggle: 'Language',
       themeToggle: 'Theme',
     },
+    controls: {
+      more: 'More',
+    },
     theme: {
       system: 'System',
       light: 'Light',
@@ -72,6 +75,9 @@ const messages = {
       routes: '{count} 条接口',
       languageToggle: '语言',
       themeToggle: '主题',
+    },
+    controls: {
+      more: '更多',
     },
     theme: {
       system: '跟随系统',

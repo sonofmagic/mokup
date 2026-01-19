@@ -1,35 +1,55 @@
+import { fileURLToPath } from 'node:url'
 import tailwindcss from '@tailwindcss/vite'
 import vue from '@vitejs/plugin-vue'
 import { defineConfig } from 'vite'
+import mokup from '../mokup/src/vite'
+
+const mockDir = fileURLToPath(new URL('../../apps/docs/mock', import.meta.url))
+
+function routesAliasPlugin() {
+  return {
+    name: 'playground:routes-alias',
+    configureServer(server: import('vite').ViteDevServer) {
+      const middleware = (
+        req: import('node:http').IncomingMessage,
+        _res: import('node:http').ServerResponse,
+        next: (err?: unknown) => void,
+      ) => {
+        const requestUrl = req.url ?? ''
+        if (requestUrl === '/routes' || requestUrl.startsWith('/routes?')) {
+          req.url = requestUrl.replace('/routes', '/_mokup/routes')
+        }
+        next()
+      }
+
+      const stack = (server.middlewares as { stack?: Array<{ route?: string, handle: typeof middleware }> }).stack
+      if (Array.isArray(stack)) {
+        stack.unshift({ route: '', handle: middleware })
+        return
+      }
+      server.middlewares.use(middleware)
+    },
+  }
+}
 
 export default defineConfig({
   base: './',
   plugins: [
     vue(),
     tailwindcss(),
+    routesAliasPlugin(),
+    mokup({
+      dir: mockDir,
+      prefix: '/api',
+      mode: 'sw',
+      sw: {
+        register: false,
+      },
+    }),
   ],
   server: {
     port: 5174,
-    strictPort: true,
-    proxy: {
-      '/routes': {
-        target: 'http://localhost:5173',
-        changeOrigin: true,
-        rewrite: () => '/_mokup/routes',
-      },
-      '/api': {
-        target: 'http://localhost:5173',
-        changeOrigin: true,
-      },
-      '/api-extra': {
-        target: 'http://localhost:5173',
-        changeOrigin: true,
-      },
-      '/api-ignored': {
-        target: 'http://localhost:5173',
-        changeOrigin: true,
-      },
-    },
+    strictPort: false,
   },
   build: {
     outDir: 'dist',
