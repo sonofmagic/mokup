@@ -30,11 +30,11 @@ mock/users/index.get.ts   -> GET /users
 mock/users/[id].get.ts    -> GET /users/:id
 ```
 
-在处理函数中可以通过 `req.params` 访问：
+在处理函数中可以通过 `c.req.param('id')` 访问：
 
 ```ts
 export default {
-  response: req => ({ id: req.params?.id }),
+  response: c => ({ id: c.req.param('id') }),
 }
 ```
 

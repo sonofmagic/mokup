@@ -11,11 +11,11 @@ async function createTempModule() {
   const root = await fs.mkdtemp(path.join(tmpdir(), 'mokup-runtime-'))
   const handlerPath = path.join(root, 'handler.mjs')
   const handlerSource = [
-    'export default function handler(req) {',
+    'export default function handler(c) {',
     '  return {',
     '    ok: true,',
-    '    id: req.params?.id ?? null,',
-    '    slug: req.params?.slug ?? null,',
+    '    id: c.req.param(\"id\") ?? null,',
+    '    slug: c.req.param(\"slug\") ?? null,',
     '  }',
     '}',
     '',

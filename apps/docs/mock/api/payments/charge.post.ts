@@ -1,10 +1,12 @@
 import type { DocsMockResponseHandler } from '../../types'
 
-const handler: DocsMockResponseHandler = (req, res) => {
-  const rawFail = req.query?.fail ?? req.body?.fail
+const handler: DocsMockResponseHandler = async (c) => {
+  const payload = await c.req.json().catch(() => ({}))
+  const body = payload && typeof payload === 'object' ? payload : {}
+  const rawFail = c.req.query('fail') ?? (body as { fail?: unknown }).fail
   const failValue = Array.isArray(rawFail) ? rawFail[0] : rawFail
   if (failValue === '1' || failValue === 'true' || failValue === true) {
-    res.statusCode = 402
+    c.status(402)
     return {
       ok: false,
       error: 'payment_required',

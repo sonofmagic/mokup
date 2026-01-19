@@ -66,11 +66,11 @@ mock-extra/
 ### 动态参数
 
 `mock/users/[id].get.ts` -> `GET /users/:id`
-`req.params.id` 为字符串。
+`c.req.param('id')` 为字符串。
 
 ### Catch-all 与可选 Catch-all
 
-`mock/reports/[...slug].get.ts` -> `/reports/*`，`req.params.slug` 为字符串数组。
+`mock/reports/[...slug].get.ts` -> `/reports/*`，`c.req.param('slug')` 为字符串（用 `/` 分割）。
 `mock/docs/[[...slug]].get.ts` -> `/docs` 或 `/docs/a/b`，缺省时数组为空。
 
 ### 路由优先级
@@ -108,8 +108,8 @@ mock-extra/
 ```ts
 import type { MockResponseHandler, MockRule } from 'mokup'
 
-const handler: MockResponseHandler = (req, res, ctx) => {
-  res.setHeader('x-mokup', 'ok')
+const handler: MockResponseHandler = (c) => {
+  c.header('x-mokup', 'ok')
   return { ok: true }
 }
 
@@ -143,12 +143,12 @@ export default rule
 ```ts
 import type { MockResponseHandler, MockRule } from 'mokup'
 
-const handler: MockResponseHandler = (req) => {
-  const id = typeof req.params?.id === 'string' ? req.params.id : undefined
+const handler: MockResponseHandler = (c) => {
+  const id = c.req.param('id')
   return {
     ok: true,
     id,
-    params: req.params ?? {},
+    params: c.req.param(),
   }
 }
 
@@ -166,8 +166,9 @@ export default rule
 ```ts
 import type { MockResponseHandler, MockRule } from 'mokup'
 
-const handler: MockResponseHandler = (req) => {
-  const slug = Array.isArray(req.params?.slug) ? req.params?.slug : []
+const handler: MockResponseHandler = (c) => {
+  const slugValue = c.req.param('slug')
+  const slug = slugValue ? slugValue.split('/') : []
   return {
     ok: true,
     slug,
@@ -189,8 +190,9 @@ export default rule
 ```ts
 import type { MockResponseHandler, MockRule } from 'mokup'
 
-const handler: MockResponseHandler = (req) => {
-  const slug = Array.isArray(req.params?.slug) ? req.params?.slug : []
+const handler: MockResponseHandler = (c) => {
+  const slugValue = c.req.param('slug')
+  const slug = slugValue ? slugValue.split('/') : []
   return {
     ok: true,
     slug,
@@ -214,13 +216,11 @@ export default rule
 ```ts
 import type { MockResponseHandler, MockRule } from 'mokup'
 
-const handler: MockResponseHandler = async (req, res, ctx) => {
-  await ctx.delay(220)
-  const query = req.query.q
-  const term = Array.isArray(query) ? query[0] : query
-  res.setHeader('x-mokup-query', String(term ?? ''))
-  const pageValue = req.query.page
-  const pageText = Array.isArray(pageValue) ? pageValue[0] : pageValue
+const handler: MockResponseHandler = async (c) => {
+  await new Promise(resolve => setTimeout(resolve, 220))
+  const term = c.req.query('q')
+  c.header('x-mokup-query', String(term ?? ''))
+  const pageText = c.req.query('page')
   return {
     term: term ?? 'none',
     page: Number(pageText ?? 1),
@@ -245,17 +245,21 @@ export default rule
 ```ts
 import type { MockResponseHandler, MockRule } from 'mokup'
 
-const handler: MockResponseHandler = async (req, res, ctx) => {
-  await ctx.delay(150)
-  const payload = (req.body ?? {}) as { username?: string, password?: string }
-  if (payload.username === 'mokup' && payload.password === '123456') {
+const handler: MockResponseHandler = async (c) => {
+  await new Promise(resolve => setTimeout(resolve, 150))
+  const payload = await c.req.json().catch(() => ({})) as {
+    username?: string
+    password?: string
+  }
+  const body = payload && typeof payload === 'object' ? payload : {}
+  if (body.username === 'mokup' && body.password === '123456') {
     return {
       ok: true,
       message: 'Access granted. Welcome to the mock channel.',
       token: 'mock-token-7d91',
     }
   }
-  res.statusCode = 401
+  c.status(401)
   return {
     ok: false,
     message: 'Invalid credentials.',
@@ -319,17 +323,18 @@ export default rules
 `MockResponseHandler` 的参数如下：
 
 ```ts
-type MockResponseHandler = (req, res, ctx) => unknown | Promise<unknown>
+import type { Context } from 'hono'
+
+type MockResponseHandler = (context: Context) => Response | Promise<Response> | unknown
 ```
 
-`req` 字段重点：
+`Context` 字段重点：
 
-- `req.params`: `Record<string, string | string[]>`
-- `req.query`: `Record<string, string | string[]>`
-- `req.body`: 解析后的 body（json、form 或 raw）
-- `req.rawBody`: 原始字符串（可选）
+- `c.req.param()` / `c.req.param('id')`
+- `c.req.query()` / `c.req.query('q')`
+- `await c.req.json()` 读取 body（JSON）
 
-`res` 用于设置状态码与头部，`ctx.delay(ms)` 可模拟延迟。
+`c.status()`/`c.header()` 用于设置状态码与头部，延迟可用 `await new Promise(...)` 或规则 `delay`。
 
 ## 高级配置
 
@@ -415,7 +420,7 @@ Playground 会请求 `/_mokup/routes` 获取当前扫描到的 mock 列表，UI 
 
 ### `req` 报 TS7006？
 
-函数响应请显式声明 `MockResponseHandler`，不要直接写 `(req) => ...`。
+函数响应请显式声明 `MockResponseHandler`，不要直接写 `(c) => ...`。
 
 ## 应用层中间层（useRequest）
 

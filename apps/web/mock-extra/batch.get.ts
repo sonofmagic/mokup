@@ -12,11 +12,14 @@ const rules: MockRule[] = [
   {
     url: '/batch/two',
     method: 'post',
-    response: req => ({
-      ok: true,
-      lane: 'two',
-      received: req.body ?? null,
-    }),
+    response: async (c) => {
+      const body = await c.req.json().catch(() => null)
+      return {
+        ok: true,
+        lane: 'two',
+        received: body,
+      }
+    },
   },
 ]
 

@@ -1,7 +1,7 @@
 import type { DirectoryConfig, MockMiddleware } from 'mokup'
 
-const middleware: MockMiddleware = async (_req, res, _ctx, next) => {
-  res.setHeader('x-mokup-middleware', 'enabled')
+const middleware: MockMiddleware = async (c, next) => {
+  c.header('x-mokup-middleware', 'enabled')
   return await next()
 }
 

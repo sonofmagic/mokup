@@ -1,7 +1,8 @@
 export type {
+  DirectoryConfig,
   HttpMethod,
   MockContext,
-  MockRequest,
+  MockMiddleware,
   MockResponse,
   MockResponseHandler,
   MockRule,

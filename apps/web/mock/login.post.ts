@@ -1,16 +1,19 @@
 import type { MockResponseHandler, MockRule } from 'mokup'
 
-const handler: MockResponseHandler = async (req, res, ctx) => {
-  await ctx.delay(150)
-  const payload = (req.body ?? {}) as { username?: string, password?: string }
-  if (payload.username === 'mokup' && payload.password === '123456') {
+const handler: MockResponseHandler = async (c) => {
+  await new Promise(resolve => setTimeout(resolve, 150))
+  const payload = await c.req.json().catch(() => ({}))
+  const body = payload && typeof payload === 'object' ? payload : {}
+  const username = (body as { username?: string }).username
+  const password = (body as { password?: string }).password
+  if (username === 'mokup' && password === '123456') {
     return {
       ok: true,
       message: 'Access granted. Welcome to the mock channel.',
       token: 'mock-token-7d91',
     }
   }
-  res.statusCode = 401
+  c.status(401)
   return {
     ok: false,
     message: 'Invalid credentials.',

@@ -1,11 +1,12 @@
 import type { DocsMockResponseHandler } from '../../types'
 
-const handler: DocsMockResponseHandler = (req, res) => {
-  const body = req.body && typeof req.body === 'object' ? req.body : {}
-  const username = body.username
-  const password = body.password
+const handler: DocsMockResponseHandler = async (c) => {
+  const payload = await c.req.json().catch(() => ({}))
+  const body = payload && typeof payload === 'object' ? payload : {}
+  const username = (body as { username?: string }).username
+  const password = (body as { password?: string }).password
   if (username !== 'demo' || password !== 'mokup') {
-    res.statusCode = 401
+    c.status(401)
     return {
       ok: false,
       error: 'invalid_credentials',

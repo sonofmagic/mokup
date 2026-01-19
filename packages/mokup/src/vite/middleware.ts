@@ -1,32 +1,122 @@
+import type { Context } from 'hono'
 import type { IncomingMessage, ServerResponse } from 'node:http'
-import type { Logger, MockContext, MockRequest, RouteTable } from './types'
+import type { Logger, ResolvedRoute, RouteTable } from './types'
 
 import { Buffer } from 'node:buffer'
-import { matchRouteTokens } from '@mokup/runtime'
+import { Hono } from 'hono'
+import { PatternRouter } from 'hono/router/pattern-router'
 import { delay, normalizeMethod } from './utils'
 
-function extractQuery(parsedUrl: URL) {
-  const query: Record<string, string | string[]> = {}
-  for (const [key, value] of parsedUrl.searchParams.entries()) {
-    const current = query[key]
-    if (typeof current === 'undefined') {
-      query[key] = value
+function toHonoPath(route: ResolvedRoute) {
+  if (!route.tokens || route.tokens.length === 0) {
+    return '/'
+  }
+  const segments = route.tokens.map((token) => {
+    if (token.type === 'static') {
+      return token.value
     }
-    else if (Array.isArray(current)) {
-      current.push(value)
+    if (token.type === 'param') {
+      return `:${token.name}`
     }
-    else {
-      query[key] = [current, value]
+    if (token.type === 'catchall') {
+      return `:${token.name}{.+}`
+    }
+    return `:${token.name}{.+}?`
+  })
+  return `/${segments.join('/')}`
+}
+
+function applyRouteOverrides(response: Response, route: ResolvedRoute) {
+  const headers = new Headers(response.headers)
+  const hasHeaders = !!route.headers && Object.keys(route.headers).length > 0
+  if (route.headers) {
+    for (const [key, value] of Object.entries(route.headers)) {
+      headers.set(key, value)
     }
   }
-  return query
+  const status = route.status ?? response.status
+  if (status === response.status && !hasHeaders) {
+    return response
+  }
+  return new Response(response.body, { status, headers })
+}
+
+function normalizeHandlerValue(c: Context, value: unknown): Response {
+  if (value instanceof Response) {
+    return value
+  }
+  if (typeof value === 'undefined') {
+    const response = c.body(null)
+    if (response.status === 200) {
+      return new Response(response.body, {
+        status: 204,
+        headers: response.headers,
+      })
+    }
+    return response
+  }
+  if (typeof value === 'string') {
+    return c.text(value)
+  }
+  if (value instanceof Uint8Array || value instanceof ArrayBuffer) {
+    if (!c.res.headers.get('content-type')) {
+      c.header('content-type', 'application/octet-stream')
+    }
+    return c.body(value)
+  }
+  return c.json(value)
+}
+
+function createRouteHandler(route: ResolvedRoute) {
+  return async (c: Context) => {
+    const value = typeof route.response === 'function'
+      ? await route.response(c)
+      : route.response
+    return normalizeHandlerValue(c, value)
+  }
+}
+
+function createFinalizeMiddleware(route: ResolvedRoute) {
+  return async (c: Context, next: () => Promise<Response | void>) => {
+    const response = await next()
+    const resolved = response ?? c.res
+    if (route.delay && route.delay > 0) {
+      await delay(route.delay)
+    }
+    return applyRouteOverrides(resolved, route)
+  }
+}
+
+export function createHonoApp(routes: RouteTable): Hono {
+  const app = new Hono({ router: new PatternRouter(), strict: false })
+
+  for (const route of routes) {
+    const middlewares = route.middlewares?.map(entry => entry.handle) ?? []
+    app.on(
+      route.method,
+      toHonoPath(route),
+      createFinalizeMiddleware(route),
+      ...middlewares,
+      createRouteHandler(route),
+    )
+  }
+
+  return app
 }
 
 async function readRawBody(req: IncomingMessage) {
-  return new Promise<Buffer | null>((resolve, reject) => {
-    const chunks: Buffer[] = []
+  return await new Promise<Uint8Array | null>((resolve, reject) => {
+    const chunks: Uint8Array[] = []
     req.on('data', (chunk) => {
-      chunks.push(Buffer.isBuffer(chunk) ? chunk : Buffer.from(chunk))
+      if (typeof chunk === 'string') {
+        chunks.push(Buffer.from(chunk))
+        return
+      }
+      if (chunk instanceof Uint8Array) {
+        chunks.push(chunk)
+        return
+      }
+      chunks.push(Buffer.from(String(chunk)))
     })
     req.on('end', () => {
       if (chunks.length === 0) {
@@ -39,90 +129,55 @@ async function readRawBody(req: IncomingMessage) {
   })
 }
 
-async function readRequestBody(req: IncomingMessage, parsedUrl: URL) {
-  const query = extractQuery(parsedUrl)
-  const rawBody = await readRawBody(req)
-  if (!rawBody) {
-    return { query, body: undefined, rawBody: undefined }
-  }
-  const rawText = rawBody.toString('utf8')
-  const contentTypeHeader = req.headers['content-type']
-  const contentTypeValue = Array.isArray(contentTypeHeader)
-    ? (contentTypeHeader[0] ?? '')
-    : (contentTypeHeader ?? '')
-  const contentType = contentTypeValue.split(';')[0]?.trim() ?? ''
-  if (contentType === 'application/json' || contentType.endsWith('+json')) {
-    try {
-      return { query, body: JSON.parse(rawText), rawBody: rawText }
-    }
-    catch {
-      return { query, body: rawText, rawBody: rawText }
-    }
-  }
-  if (contentType === 'application/x-www-form-urlencoded') {
-    const params = new URLSearchParams(rawText)
-    const body = Object.fromEntries(params.entries())
-    return { query, body, rawBody: rawText }
-  }
-  return { query, body: rawText, rawBody: rawText }
-}
-
-function applyHeaders(res: ServerResponse, headers?: Record<string, string>) {
-  if (!headers) {
-    return
-  }
+function buildHeaders(headers: IncomingMessage['headers']) {
+  const result = new Headers()
   for (const [key, value] of Object.entries(headers)) {
-    res.setHeader(key, value)
+    if (typeof value === 'undefined') {
+      continue
+    }
+    if (Array.isArray(value)) {
+      result.set(key, value.join(','))
+    }
+    else {
+      result.set(key, value)
+    }
   }
+  return result
 }
 
-function writeResponse(res: ServerResponse, body: unknown) {
-  if (typeof body === 'undefined') {
-    if (!res.headersSent && res.statusCode === 200) {
-      res.statusCode = 204
-    }
+async function toRequest(req: IncomingMessage) {
+  const url = new URL(req.url ?? '/', 'http://mokup.local')
+  const method = req.method ?? 'GET'
+  const headers = buildHeaders(req.headers)
+  const init: RequestInit = { method, headers }
+  const rawBody = await readRawBody(req)
+  if (rawBody && method !== 'GET' && method !== 'HEAD') {
+    init.body = rawBody
+  }
+  return new Request(url.toString(), init)
+}
+
+async function sendResponse(res: ServerResponse, response: Response) {
+  res.statusCode = response.status
+  response.headers.forEach((value, key) => {
+    res.setHeader(key, value)
+  })
+  if (!response.body) {
     res.end()
     return
   }
-  if (Buffer.isBuffer(body)) {
-    if (!res.getHeader('Content-Type')) {
-      res.setHeader('Content-Type', 'application/octet-stream')
-    }
-    res.end(body)
-    return
-  }
-  if (typeof body === 'string') {
-    if (!res.getHeader('Content-Type')) {
-      res.setHeader('Content-Type', 'text/plain; charset=utf-8')
-    }
-    res.end(body)
-    return
-  }
-  if (!res.getHeader('Content-Type')) {
-    res.setHeader('Content-Type', 'application/json; charset=utf-8')
-  }
-  res.end(JSON.stringify(body))
+  const buffer = new Uint8Array(await response.arrayBuffer())
+  res.end(buffer)
 }
 
-function findMatchingRoute(
-  routes: RouteTable,
-  method: string,
-  pathname: string,
-) {
-  for (const route of routes) {
-    if (route.method !== method) {
-      continue
-    }
-    const matched = matchRouteTokens(route.tokens, pathname)
-    if (matched) {
-      return { route, params: matched.params }
-    }
-  }
-  return null
+function hasMatch(app: Hono, method: string, pathname: string) {
+  const matchMethod = method === 'HEAD' ? 'GET' : method
+  const match = app.router.match(matchMethod, pathname)
+  return !!match && match[0].length > 0
 }
 
 export function createMiddleware(
-  getRoutes: () => RouteTable,
+  getApp: () => Hono | null,
   logger: Logger,
 ) {
   return async (
@@ -130,85 +185,34 @@ export function createMiddleware(
     res: ServerResponse,
     next: (err?: unknown) => void,
   ) => {
+    const app = getApp()
+    if (!app) {
+      return next()
+    }
+
     const url = req.url ?? '/'
     const parsedUrl = new URL(url, 'http://mokup.local')
     const pathname = parsedUrl.pathname
     const method = normalizeMethod(req.method) ?? 'GET'
-    const matched = findMatchingRoute(getRoutes(), method, pathname)
-    if (!matched) {
+
+    if (!hasMatch(app, method, pathname)) {
       return next()
     }
 
+    const startedAt = Date.now()
     try {
-      const { query, body, rawBody } = await readRequestBody(req, parsedUrl)
-      const mockReq: MockRequest = {
-        url: pathname,
-        method,
-        headers: req.headers,
-        query,
-        body,
-        params: matched.params,
-      }
-      if (rawBody) {
-        mockReq.rawBody = rawBody
-      }
-      const ctx: MockContext = {
-        delay: (ms: number) => delay(ms),
-        json: (data: unknown) => data,
-      }
-
-      const startedAt = Date.now()
-      const executeHandler = async () => {
-        return typeof matched.route.response === 'function'
-          ? await matched.route.response(mockReq, res, ctx)
-          : matched.route.response
-      }
-      const runMiddlewares = async (middlewares: NonNullable<typeof matched.route.middlewares>) => {
-        let lastIndex = -1
-        const dispatch = async (index: number): Promise<unknown> => {
-          if (index <= lastIndex) {
-            throw new Error('Middleware next() called multiple times.')
-          }
-          lastIndex = index
-          const entry = middlewares[index]
-          if (!entry) {
-            return executeHandler()
-          }
-          let nextResult: unknown
-          const next = async () => {
-            nextResult = await dispatch(index + 1)
-            return nextResult
-          }
-          const value = await entry.handle(mockReq, res, ctx, next)
-          if (typeof value !== 'undefined') {
-            return value
-          }
-          return nextResult
-        }
-        return dispatch(0)
-      }
-
-      const responseValue = matched.route.middlewares && matched.route.middlewares.length > 0
-        ? await runMiddlewares(matched.route.middlewares)
-        : await executeHandler()
+      const response = await app.fetch(await toRequest(req))
       if (res.writableEnded) {
         return
       }
-
-      if (matched.route.delay && matched.route.delay > 0) {
-        await delay(matched.route.delay)
-      }
-
-      applyHeaders(res, matched.route.headers)
-      if (matched.route.status) {
-        res.statusCode = matched.route.status
-      }
-      writeResponse(res, responseValue)
+      await sendResponse(res, response)
       logger.info(`${method} ${pathname} ${Date.now() - startedAt}ms`)
     }
     catch (error) {
-      res.statusCode = 500
-      res.setHeader('Content-Type', 'text/plain; charset=utf-8')
+      if (!res.headersSent) {
+        res.statusCode = 500
+        res.setHeader('Content-Type', 'text/plain; charset=utf-8')
+      }
       res.end('Mock handler error')
       logger.error('Mock handler failed:', error)
     }

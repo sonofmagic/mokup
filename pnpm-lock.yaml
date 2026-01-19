@@ -271,6 +271,9 @@ importers:
       esbuild:
         specifier: ^0.27.2
         version: 0.27.2
+      hono:
+        specifier: ^4.11.4
+        version: 4.11.4
       jsonc-parser:
         specifier: ^3.3.1
         version: 3.3.1
@@ -323,6 +326,10 @@ importers:
         version: 7.3.1(@types/node@25.0.9)(jiti@2.6.1)(lightningcss@1.30.2)(tsx@4.21.0)(yaml@2.8.2)
 
   packages/runtime:
+    dependencies:
+      hono:
+        specifier: ^4.11.4
+        version: 4.11.4
     devDependencies:
       typescript:
         specifier: ^5.9.3

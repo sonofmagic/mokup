@@ -1,11 +1,12 @@
 import type { FSWatcher } from 'chokidar'
+import type { Hono } from 'hono'
 import type { Plugin, PreviewServer, ViteDevServer } from 'vite'
 import type { MokupViteOptions, MokupViteOptionsInput, RouteTable } from './types'
 
 import { cwd } from 'node:process'
 import chokidar from 'chokidar'
 import { createLogger } from './logger'
-import { createMiddleware } from './middleware'
+import { createHonoApp, createMiddleware } from './middleware'
 import { createPlaygroundMiddleware, resolvePlaygroundOptions } from './playground'
 import { sortRoutes } from './routes'
 import { scanRoutes } from './scanner'
@@ -49,6 +50,7 @@ function resolvePlaygroundInput(list: MokupViteOptions[]) {
 export function createMokupPlugin(options: MokupViteOptionsInput = {}): Plugin {
   let root = cwd()
   let routes: RouteTable = []
+  let app: Hono | null = null
   let previewWatcher: FSWatcher | null = null
   let currentServer: ViteDevServer | PreviewServer | null = null
   let lastSignature: string | null = null
@@ -104,6 +106,7 @@ export function createMokupPlugin(options: MokupViteOptionsInput = {}): Plugin {
       collected.push(...scanned)
     }
     routes = sortRoutes(collected)
+    app = createHonoApp(routes)
     const signature = buildRouteSignature(routes)
     if (isViteDevServer(server) && server.ws) {
       if (lastSignature && signature !== lastSignature) {
@@ -127,7 +130,7 @@ export function createMokupPlugin(options: MokupViteOptionsInput = {}): Plugin {
       currentServer = server
       await refreshRoutes(server)
       server.middlewares.use(playgroundMiddleware)
-      server.middlewares.use(createMiddleware(() => routes, logger))
+      server.middlewares.use(createMiddleware(() => app, logger))
       if (!watchEnabled) {
         return
       }
@@ -154,7 +157,7 @@ export function createMokupPlugin(options: MokupViteOptionsInput = {}): Plugin {
       currentServer = server
       await refreshRoutes(server)
       server.middlewares.use(playgroundMiddleware)
-      server.middlewares.use(createMiddleware(() => routes, logger))
+      server.middlewares.use(createMiddleware(() => app, logger))
       if (!watchEnabled) {
         return
       }

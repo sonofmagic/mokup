@@ -4,19 +4,17 @@
 
 ```ts
 export default {
-  response: async (req, res, ctx) => {
-    res.statusCode = 200
-    res.setHeader('x-mokup', 'handler')
-    await ctx.delay(120)
-    return ctx.json({ ok: true, params: req.params })
+  response: async (c) => {
+    c.status(200)
+    c.header('x-mokup', 'handler')
+    await new Promise(resolve => setTimeout(resolve, 120))
+    return c.json({ ok: true, params: c.req.param() })
   },
 }
 ```
 
 函数签名：
 
-- `req`: 请求信息（`method`, `path`, `query`, `headers`, `body`, `params`）
-- `res`: 响应控制器（`statusCode`, `setHeader`, `removeHeader`）
-- `ctx`: 辅助工具（`delay(ms)`, `json(data)`）
+- `c`: Hono `Context`（`c.req.param()`、`c.req.query()`、`c.req.json()`、`c.status()`、`c.header()`）
 
 在 CLI 构建时，函数处理器会被打包到 `.mokup/mokup-handlers`，并在 manifest 中以 `module` 形式引用。

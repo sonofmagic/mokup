@@ -1,9 +1,10 @@
 export { createMokupPlugin as default } from './vite/plugin'
 
 export type {
+  DirectoryConfig,
   HttpMethod,
   MockContext,
-  MockRequest,
+  MockMiddleware,
   MockResponse,
   MockResponseHandler,
   MockRule,

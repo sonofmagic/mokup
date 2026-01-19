@@ -1,12 +1,9 @@
 import type {
   ManifestModuleRef,
   ManifestResponse,
-  MockContext,
   MockMiddleware,
-  MockResponder,
   MockResponseHandler,
   ModuleMap,
-  RuntimeRequest,
 } from './types'
 
 export interface RuntimeRule {
@@ -62,9 +59,7 @@ export function normalizeRules(value: unknown): RuntimeRule[] {
 
 export async function executeRule(
   rule: RuntimeRule | undefined,
-  req: RuntimeRequest,
-  responder: MockResponder,
-  ctx: MockContext,
+  context: Parameters<MockResponseHandler>[0],
 ) {
   if (!rule) {
     return undefined
@@ -72,7 +67,7 @@ export async function executeRule(
   const value = rule.response
   if (typeof value === 'function') {
     const handler = value as MockResponseHandler
-    return handler(req, responder, ctx)
+    return handler(context)
   }
   return value
 }

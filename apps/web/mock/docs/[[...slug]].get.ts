@@ -1,12 +1,8 @@
-import type { MockRequest, MockResponseHandler, MockRule } from 'mokup'
+import type { MockResponseHandler, MockRule } from 'mokup'
 
-const handler: MockResponseHandler = (req: MockRequest) => {
-  const slugValue = req.params ? req.params.slug : undefined
-  const slug = Array.isArray(slugValue)
-    ? slugValue
-    : typeof slugValue === 'string'
-      ? [slugValue]
-      : []
+const handler: MockResponseHandler = (c) => {
+  const slugValue = c.req.param('slug')
+  const slug = slugValue ? slugValue.split('/') : []
   return {
     ok: true,
     slug,

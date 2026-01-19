@@ -1,12 +1,14 @@
 import type { DocsMockResponseHandler } from '../../../types'
 
-const handler: DocsMockResponseHandler = (req, res) => {
-  const rawId = req.params?.id ?? 'ord_unknown'
+const handler: DocsMockResponseHandler = async (c) => {
+  const rawId = c.req.param('id') ?? 'ord_unknown'
   const id = Array.isArray(rawId) ? rawId.join('-') : rawId
-  const rawStatus = req.query?.status ?? req.body?.status
+  const payload = await c.req.json().catch(() => ({}))
+  const body = payload && typeof payload === 'object' ? payload : {}
+  const rawStatus = c.req.query('status') ?? (body as { status?: unknown }).status
   const statusValue = Array.isArray(rawStatus) ? rawStatus[0] : rawStatus
   if (statusValue === 'shipped') {
-    res.statusCode = 409
+    c.status(409)
     return {
       ok: false,
       error: 'order_already_shipped',

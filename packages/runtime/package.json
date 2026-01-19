@@ -32,7 +32,9 @@
     "lint": "eslint .",
     "typecheck": "tsc -p tsconfig.json --noEmit"
   },
-  "dependencies": {},
+  "dependencies": {
+    "hono": "^4.11.4"
+  },
   "devDependencies": {
     "typescript": "^5.9.3",
     "unbuild": "^3.6.1"

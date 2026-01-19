@@ -1,11 +1,11 @@
 import type { MockResponseHandler, MockRule } from 'mokup'
 
-const handler: MockResponseHandler = (req) => {
-  const id = typeof req.params?.id === 'string' ? req.params.id : undefined
+const handler: MockResponseHandler = (c) => {
+  const id = c.req.param('id')
   return {
     ok: true,
     id,
-    params: req.params ?? {},
+    params: c.req.param() ?? {},
   }
 }
 

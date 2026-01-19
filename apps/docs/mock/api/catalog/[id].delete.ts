@@ -1,7 +1,7 @@
 import type { DocsMockResponseHandler } from '../../types'
 
-const handler: DocsMockResponseHandler = (req) => {
-  const rawId = req.params?.id ?? 'prd_unknown'
+const handler: DocsMockResponseHandler = (c) => {
+  const rawId = c.req.param('id') ?? 'prd_unknown'
   const id = Array.isArray(rawId) ? rawId.join('-') : rawId
   return {
     ok: true,

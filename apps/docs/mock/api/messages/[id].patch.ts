@@ -1,7 +1,7 @@
 import type { DocsMockResponseHandler } from '../../types'
 
-const handler: DocsMockResponseHandler = (req) => {
-  const rawId = req.params?.id ?? 'msg_unknown'
+const handler: DocsMockResponseHandler = (c) => {
+  const rawId = c.req.param('id') ?? 'msg_unknown'
   const id = Array.isArray(rawId) ? rawId.join('-') : rawId
   const displayValue = `Message ${id}`
   const defaults = {

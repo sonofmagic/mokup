@@ -1,12 +1,10 @@
 import type { MockResponseHandler, MockRule } from 'mokup'
 
-const handler: MockResponseHandler = async (req, res, ctx) => {
-  await ctx.delay(220)
-  const query = req.query.q
-  const term = Array.isArray(query) ? query[0] : query
-  res.setHeader('x-mokup-query', String(term ?? ''))
-  const pageValue = req.query.page
-  const pageText = Array.isArray(pageValue) ? pageValue[0] : pageValue
+const handler: MockResponseHandler = async (c) => {
+  await new Promise(resolve => setTimeout(resolve, 220))
+  const term = c.req.query('q')
+  c.header('x-mokup-query', String(term ?? ''))
+  const pageText = c.req.query('page')
   return {
     term: term ?? 'none',
     page: Number(pageText ?? 1),

@@ -4,7 +4,7 @@ import { Buffer } from 'node:buffer'
 import { EventEmitter } from 'node:events'
 import { parseRouteTemplate } from '@mokup/runtime'
 import { describe, expect, it } from 'vitest'
-import { createMiddleware } from '../src/vite/middleware'
+import { createHonoApp, createMiddleware } from '../src/vite/middleware'
 
 function createRouteTable(): RouteTable {
   const parsed = parseRouteTemplate('/users/[id]')
@@ -15,7 +15,7 @@ function createRouteTable(): RouteTable {
       method: 'GET',
       tokens: parsed.tokens,
       score: parsed.score,
-      response: req => ({ id: req.params?.id ?? null }),
+      response: c => ({ id: c.req.param('id') ?? null }),
     },
   ]
 }
@@ -23,7 +23,8 @@ function createRouteTable(): RouteTable {
 describe('dev middleware params', () => {
   it('passes params to handlers', async () => {
     const routes = createRouteTable()
-    const middleware = createMiddleware(() => routes, console)
+    const app = createHonoApp(routes)
+    const middleware = createMiddleware(() => app, console)
 
     const req = new EventEmitter() as IncomingMessage
     req.url = '/users/123'

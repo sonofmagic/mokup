@@ -1,5 +1,5 @@
 import type { RouteToken } from '@mokup/runtime'
-import type { IncomingMessage, ServerResponse } from 'node:http'
+import type { Context, MiddlewareHandler } from 'hono'
 
 export type HttpMethod
   = | 'GET'
@@ -10,33 +10,13 @@ export type HttpMethod
     | 'OPTIONS'
     | 'HEAD'
 
-export interface MockRequest {
-  url: string
-  method: HttpMethod
-  headers: IncomingMessage['headers']
-  query: Record<string, string | string[]>
-  body: unknown
-  rawBody?: string
-  params?: Record<string, string | string[]>
-}
+export type MockContext = Context
 
-export interface MockContext {
-  delay: (ms: number) => Promise<void>
-  json: (data: unknown) => unknown
-}
-
-export type MockMiddleware = (
-  req: MockRequest,
-  res: ServerResponse,
-  ctx: MockContext,
-  next: () => Promise<unknown>,
-) => unknown | Promise<unknown>
+export type MockMiddleware = MiddlewareHandler
 
 export type MockResponseHandler = (
-  req: MockRequest,
-  res: ServerResponse,
-  ctx: MockContext,
-) => unknown | Promise<unknown>
+  context: Context,
+) => Response | Promise<Response> | unknown
 
 export type MockResponse = unknown | MockResponseHandler
 

@@ -1,8 +1,11 @@
 const rule = {
-  response: req => ({
-    ok: true,
-    received: req.body ?? null,
-  }),
+  response: async (c) => {
+    const body = await c.req.json().catch(() => null)
+    return {
+      ok: true,
+      received: body,
+    }
+  },
 }
 
 export default rule

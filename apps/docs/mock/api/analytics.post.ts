@@ -1,7 +1,7 @@
 import type { DocsMockResponseHandler } from '../types'
 
-const handler: DocsMockResponseHandler = (_req, res) => {
-  res.statusCode = 201
+const handler: DocsMockResponseHandler = (c) => {
+  c.status(201)
   return {
     ok: true,
     data: {

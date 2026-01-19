@@ -78,7 +78,7 @@ const coreRoutes: RouteSpec[] = [
     method: 'POST',
     path: '/login',
     source: 'mock/login.post.ts',
-    description: 'Uses req.body and res.statusCode.',
+    description: 'Uses c.req.json() and c.status().',
     features: ['mock-ts', 'body', 'status', 'response-fn'],
     request: {
       body: { username: 'mokup', password: '123456' },
@@ -88,12 +88,12 @@ const coreRoutes: RouteSpec[] = [
   },
   {
     id: 'search-query',
-    title: 'Query + ctx.delay',
+    title: 'Query + handler delay',
     method: 'GET',
     path: '/search',
     source: 'mock/search.get.ts',
-    description: 'Reads req.query and uses ctx.delay.',
-    features: ['query', 'ctx-delay', 'response-fn'],
+    description: 'Reads c.req.query() and uses async delay.',
+    features: ['query', 'handler-delay', 'response-fn'],
     request: {
       query: { q: 'nova', page: 1 },
     },
@@ -139,7 +139,7 @@ const coreRoutes: RouteSpec[] = [
     method: 'GET',
     path: '/users/42',
     source: 'mock/users/[id].get.ts',
-    description: 'Reads req.params from a [id] segment.',
+    description: 'Reads c.req.param() from a [id] segment.',
     features: ['dynamic', 'params'],
     group: 'mock',
   },

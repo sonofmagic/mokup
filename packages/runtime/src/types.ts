@@ -1,3 +1,4 @@
+import type { Context, MiddlewareHandler } from 'hono'
 import type { RouteToken } from './router'
 
 export type HttpMethod
@@ -65,30 +66,13 @@ export interface RuntimeResult {
   body: string | Uint8Array | null
 }
 
-export interface MockContext {
-  delay: (ms: number) => Promise<void>
-  json: <T>(data: T) => T
-}
+export type MockContext = Context
 
-export interface MockResponder {
-  statusCode: number
-  setHeader: (key: string, value: string) => void
-  getHeader: (key: string) => string | undefined
-  removeHeader: (key: string) => void
-}
-
-export type MockMiddleware = (
-  req: RuntimeRequest,
-  res: MockResponder,
-  ctx: MockContext,
-  next: () => Promise<unknown>,
-) => unknown | Promise<unknown>
+export type MockMiddleware = MiddlewareHandler
 
 export type MockResponseHandler = (
-  req: RuntimeRequest,
-  res: MockResponder,
-  ctx: MockContext,
-) => unknown | Promise<unknown>
+  context: Context,
+) => Response | Promise<Response> | unknown
 
 export interface RuntimeOptions {
   manifest: Manifest | (() => Promise<Manifest>)

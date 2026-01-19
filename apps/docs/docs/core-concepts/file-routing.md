@@ -30,11 +30,11 @@ Use brackets:
 mock/users/[id].get.ts    -> GET /users/:id
 ```
 
-Access via `req.params`:
+Access via `c.req.param('id')`:
 
 ```ts
 export default {
-  response: req => ({ id: req.params?.id }),
+  response: c => ({ id: c.req.param('id') }),
 }
 ```
 
