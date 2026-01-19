@@ -3,8 +3,7 @@
   "name": "mokup-website",
   "compatibility_date": "2025-01-15",
   "assets": {
-    "directory": "docs/.vitepress/dist",
-    "binding": "ASSETS"
+    "directory": "docs/.vitepress/dist"
   },
   "routes": [
     {
