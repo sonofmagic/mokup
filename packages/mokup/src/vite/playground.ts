@@ -228,7 +228,7 @@ function toPlaygroundRoute(
     method: route.method,
     url: route.template,
     file: formatRouteFile(route.file, root),
-    type: typeof route.response === 'function' ? 'handler' : 'static',
+    type: typeof route.handler === 'function' ? 'handler' : 'static',
     status: route.status,
     delay: route.delay,
     middlewareCount: middlewareSources?.length ?? 0,

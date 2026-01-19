@@ -66,7 +66,7 @@ export async function loadRules(file: string): Promise<MockRule[]> {
     }
     return [
       {
-        response: json,
+        handler: json,
       },
     ]
   }
@@ -82,7 +82,7 @@ export async function loadRules(file: string): Promise<MockRule[]> {
   if (typeof value === 'function') {
     return [
       {
-        response: value,
+        handler: value,
       },
     ]
   }

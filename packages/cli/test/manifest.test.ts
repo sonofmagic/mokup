@@ -31,7 +31,7 @@ describe('buildManifest', () => {
         path.join(mockDir, 'profile.ts'),
         [
           'export default {',
-          '  response: { skip: true },',
+          '  handler: { skip: true },',
           '}',
         ].join('\n'),
       )
@@ -99,7 +99,7 @@ describe('buildManifest', () => {
         path.join(mockDir, 'users.post.ts'),
         [
           'export default {',
-          '  response: { ok: true },',
+          '  handler: { ok: true },',
           '}',
         ].join('\n'),
       )
@@ -120,7 +120,7 @@ describe('buildManifest', () => {
     }
   })
 
-  it('bundles handler modules when response is a function', async () => {
+  it('bundles handler modules when handler is a function', async () => {
     const { root, mockDir } = await createTempRoot()
     try {
       await writeFile(

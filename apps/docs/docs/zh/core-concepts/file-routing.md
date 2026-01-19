@@ -34,7 +34,7 @@ mock/users/[id].get.ts    -> GET /users/:id
 
 ```ts
 export default {
-  response: c => ({ id: c.req.param('id') }),
+  handler: c => ({ id: c.req.param('id') }),
 }
 ```
 

@@ -16,7 +16,7 @@ const handler: MockResponseHandler = async (c) => {
 }
 
 const rule: MockRule = {
-  response: handler,
+  handler,
 }
 
 export default rule

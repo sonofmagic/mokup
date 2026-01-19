@@ -85,7 +85,7 @@ export async function loadRules(
     }
     return [
       {
-        response: json,
+        handler: json,
       },
     ]
   }
@@ -101,7 +101,7 @@ export async function loadRules(
   if (typeof value === 'function') {
     return [
       {
-        response: value,
+        handler: value,
       },
     ]
   }

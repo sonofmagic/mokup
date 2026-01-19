@@ -1,5 +1,5 @@
 const rule = {
-  response: () => ({
+  handler: () => ({
     now: new Date().toISOString(),
   }),
 }

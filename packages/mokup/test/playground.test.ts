@@ -26,7 +26,7 @@ function createRoute(params: {
     method: params.method,
     tokens: parsed.tokens,
     score: parsed.score,
-    response: {},
+    handler: {},
   }
 }
 

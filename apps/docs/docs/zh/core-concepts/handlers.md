@@ -1,10 +1,10 @@
 # 函数处理器
 
-当 `response` 是函数时，Mokup 会把它视为可执行的处理器：
+当 `handler` 是函数时，Mokup 会把它视为可执行的处理器：
 
 ```ts
 export default {
-  response: async (c) => {
+  handler: async (c) => {
     c.status(200)
     c.header('x-mokup', 'handler')
     await new Promise(resolve => setTimeout(resolve, 120))

@@ -28,7 +28,7 @@ describe('loadRules json parsing', () => {
 
       const rules = await loadRules(file, undefined, logger)
       expect(rules).toHaveLength(1)
-      expect(rules[0]?.response).toEqual({ status: 'ok' })
+      expect(rules[0]?.handler).toEqual({ status: 'ok' })
       expect(logger.warn).not.toHaveBeenCalled()
     }
     finally {

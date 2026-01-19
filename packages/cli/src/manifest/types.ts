@@ -10,7 +10,7 @@ export interface BuildOptions {
 }
 
 export interface MockRule {
-  response: unknown
+  handler: unknown
   status?: number
   headers?: Record<string, string>
   delay?: number

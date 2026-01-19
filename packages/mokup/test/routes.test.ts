@@ -81,7 +81,7 @@ describe('route sorting', () => {
         method: 'GET',
         tokens: dynamicRoute.tokens,
         score: dynamicRoute.score,
-        response: {},
+        handler: {},
       },
       {
         file: 'c',
@@ -89,7 +89,7 @@ describe('route sorting', () => {
         method: 'GET',
         tokens: catchallRoute.tokens,
         score: catchallRoute.score,
-        response: {},
+        handler: {},
       },
       {
         file: 'a',
@@ -97,7 +97,7 @@ describe('route sorting', () => {
         method: 'GET',
         tokens: staticRoute.tokens,
         score: staticRoute.score,
-        response: {},
+        handler: {},
       },
     ])
 

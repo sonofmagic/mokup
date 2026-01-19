@@ -118,7 +118,7 @@ export function resolveRule(params: {
     method,
     tokens: parsed.tokens,
     score: parsed.score,
-    response: params.rule.response,
+    handler: params.rule.handler,
   }
   if (typeof params.rule.status === 'number') {
     route.status = params.rule.status

@@ -34,7 +34,7 @@ Access via `c.req.param('id')`:
 
 ```ts
 export default {
-  response: c => ({ id: c.req.param('id') }),
+  handler: c => ({ id: c.req.param('id') }),
 }
 ```
 

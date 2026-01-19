@@ -1,10 +1,9 @@
 import type { MockRule } from 'mokup'
 
 const rule: MockRule = {
-  url: '/override/target',
-  response: {
+  handler: {
     ok: true,
-    source: 'url override',
+    source: 'file routing',
   },
 }
 

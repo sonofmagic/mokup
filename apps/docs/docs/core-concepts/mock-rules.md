@@ -2,12 +2,10 @@
 
 A mock file can export a single rule or an array. Rule fields:
 
-- `response`: response content (required)
+- `handler`: response content or handler function (required)
 - `status`: status code
 - `headers`: response headers
 - `delay`: delay in ms
-- `method`: override file method
-- `url`: override route path
 
 ## JSON / JSONC
 
@@ -29,25 +27,8 @@ Export an object or array:
 export default {
   status: 201,
   headers: { 'x-mock': 'ok' },
-  response: { ok: true },
+  handler: { ok: true },
 }
 ```
 
-Multiple rules:
-
-```ts
-export default [
-  { method: 'get', url: '/users', response: [] },
-  { method: 'post', url: '/users', response: { ok: true } },
-]
-```
-
-## Override route
-
-```ts
-export default {
-  method: 'post',
-  url: '/auth/login',
-  response: { ok: true },
-}
-```
+Array exports are supported, but each entry still uses file-based routing.

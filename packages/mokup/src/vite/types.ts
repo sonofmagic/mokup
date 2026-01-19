@@ -21,7 +21,7 @@ export type MockResponseHandler = (
 export type MockResponse = unknown | MockResponseHandler
 
 export interface MockRule {
-  response: MockResponse
+  handler: MockResponse
   status?: number
   headers?: Record<string, string>
   delay?: number
@@ -61,7 +61,7 @@ export interface ResolvedRoute {
   method: HttpMethod
   tokens: RouteToken[]
   score: number[]
-  response: MockResponse
+  handler: MockResponse
   middlewares?: ResolvedMiddleware[]
   status?: number
   headers?: Record<string, string>

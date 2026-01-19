@@ -1,7 +1,10 @@
 import type { MockRule } from 'mokup'
 
 const rule: MockRule = {
-  handler: 'OK',
+  handler: {
+    ok: true,
+    lane: 'one',
+  },
 }
 
 export default rule

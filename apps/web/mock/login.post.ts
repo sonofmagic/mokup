@@ -22,9 +22,7 @@ const handler: MockResponseHandler = async (c) => {
 }
 
 const rule: MockRule = {
-  url: '/login',
-  method: 'post',
-  response: handler,
+  handler,
 }
 
 export default rule

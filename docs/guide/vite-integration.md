@@ -49,7 +49,15 @@ mock/
   _ignored/
     excluded.get.ts
 mock-extra/
-  batch.get.ts
+  batch/
+    one.get.ts
+    two.post.ts
+  status/
+    accepted.get.ts
+  override/
+    target.get.ts
+  delay.get.ts
+  binary.get.ts
 ```
 
 ## 文件路由规则（UVR 风格）
@@ -99,11 +107,12 @@ mock-extra/
 
 ### TS/JS 模块
 
-支持导出对象、数组、函数。函数式响应建议显式声明 `MockResponseHandler`。
+支持导出对象、数组、函数。规则字段使用 `handler`，`response` 不再支持。
+函数式响应建议显式声明 `MockResponseHandler`。
 
 ## Handler 约定（强烈推荐）
 
-函数响应必须明确类型，避免 `req` 隐式 `any`：
+函数响应必须明确类型，避免 `c` 隐式 `any`：
 
 ```ts
 import type { MockResponseHandler, MockRule } from 'mokup'
@@ -114,7 +123,7 @@ const handler: MockResponseHandler = (c) => {
 }
 
 const rule: MockRule = {
-  response: handler,
+  handler,
 }
 
 export default rule
@@ -130,7 +139,7 @@ export default rule
 import type { MockRule } from 'mokup'
 
 const rule: MockRule = {
-  response: 'OK',
+  handler: 'OK',
 }
 
 export default rule
@@ -153,7 +162,7 @@ const handler: MockResponseHandler = (c) => {
 }
 
 const rule: MockRule = {
-  response: handler,
+  handler,
 }
 
 export default rule
@@ -177,7 +186,7 @@ const handler: MockResponseHandler = (c) => {
 }
 
 const rule: MockRule = {
-  response: handler,
+  handler,
 }
 
 export default rule
@@ -201,7 +210,7 @@ const handler: MockResponseHandler = (c) => {
 }
 
 const rule: MockRule = {
-  response: handler,
+  handler,
 }
 
 export default rule
@@ -232,7 +241,7 @@ const handler: MockResponseHandler = async (c) => {
 }
 
 const rule: MockRule = {
-  response: handler,
+  handler,
 }
 
 export default rule
@@ -268,26 +277,7 @@ const handler: MockResponseHandler = async (c) => {
 }
 
 const rule: MockRule = {
-  url: '/login',
-  method: 'post',
-  response: handler,
-}
-
-export default rule
-```
-
-### 规则覆盖（method/url）
-
-```ts
-import type { MockRule } from 'mokup'
-
-const rule: MockRule = {
-  method: 'patch',
-  url: '/override',
-  response: {
-    ok: true,
-    message: 'Method overridden by rule.method.',
-  },
+  handler,
 }
 
 export default rule
@@ -299,20 +289,22 @@ export default rule
 import type { MockRule } from 'mokup'
 
 const rule: MockRule = {
-  response: new Uint8Array([1, 2, 3, 4]),
+  handler: new Uint8Array([1, 2, 3, 4]),
 }
 
 export default rule
 ```
 
-### 多规则导出
+### 数组导出（可选）
+
+支持导出数组，但每条规则仍使用文件路由，重复路由会告警：
 
 ```ts
 import type { MockRule } from 'mokup'
 
 const rules: MockRule[] = [
-  { method: 'get', response: { ok: true } },
-  { method: 'post', response: { created: true } },
+  { handler: { ok: true, step: 'one' } },
+  { handler: { ok: true, step: 'two' } },
 ]
 
 export default rules

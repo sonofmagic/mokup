@@ -1,10 +1,9 @@
 import type { MockRule } from 'mokup'
 
 const rule: MockRule = {
-  method: 'patch',
-  response: {
+  handler: {
     ok: true,
-    message: 'Method overridden by rule.method.',
+    message: 'Rule-based handler response.',
   },
 }
 

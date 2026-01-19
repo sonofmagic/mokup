@@ -1,10 +1,10 @@
 # Handlers
 
-When `response` is a function, Mokup treats it as an executable handler:
+When `handler` is a function, Mokup treats it as an executable handler:
 
 ```ts
 export default {
-  response: async (c) => {
+  handler: async (c) => {
     c.status(200)
     c.header('x-mokup', 'handler')
     await new Promise(resolve => setTimeout(resolve, 120))

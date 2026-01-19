@@ -50,8 +50,18 @@ export async function scanRoutes(params: {
       if (!rule || typeof rule !== 'object') {
         continue
       }
-      if (typeof rule.response === 'undefined') {
-        params.logger.warn(`Skip mock without response: ${fileInfo.file}`)
+      const ruleValue = rule as unknown as Record<string, unknown>
+      const unsupportedKeys = ['response', 'url', 'method'].filter(
+        key => key in ruleValue,
+      )
+      if (unsupportedKeys.length > 0) {
+        params.logger.warn(
+          `Skip mock with unsupported fields (${unsupportedKeys.join(', ')}): ${fileInfo.file}`,
+        )
+        continue
+      }
+      if (typeof rule.handler === 'undefined') {
+        params.logger.warn(`Skip mock without handler: ${fileInfo.file}`)
         continue
       }
       const resolved = resolveRule({

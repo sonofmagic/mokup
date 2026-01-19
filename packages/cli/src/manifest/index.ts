@@ -57,7 +57,17 @@ export async function buildManifest(options: BuildOptions = {}) {
       if (!rule || typeof rule !== 'object') {
         continue
       }
-      if (typeof rule.response === 'undefined') {
+      const ruleValue = rule as unknown as Record<string, unknown>
+      const unsupportedKeys = ['response', 'url', 'method'].filter(
+        key => key in ruleValue,
+      )
+      if (unsupportedKeys.length > 0) {
+        options.log?.(
+          `Skip mock with unsupported fields (${unsupportedKeys.join(', ')}): ${fileInfo.file}`,
+        )
+        continue
+      }
+      if (typeof rule.handler === 'undefined') {
         continue
       }
       const resolveParams: {
@@ -87,7 +97,7 @@ export async function buildManifest(options: BuildOptions = {}) {
       }
       seen.add(key)
       const response = buildResponse(
-        rule.response,
+        rule.handler,
         {
           file: fileInfo.file,
           handlers: options.handlers !== false,

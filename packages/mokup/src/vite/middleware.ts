@@ -62,16 +62,17 @@ function normalizeHandlerValue(c: Context, value: unknown): Response {
     if (!c.res.headers.get('content-type')) {
       c.header('content-type', 'application/octet-stream')
     }
-    return c.body(value)
+    const data = value instanceof ArrayBuffer ? new Uint8Array(value) : new Uint8Array(value)
+    return c.body(data)
   }
   return c.json(value)
 }
 
 function createRouteHandler(route: ResolvedRoute) {
   return async (c: Context) => {
-    const value = typeof route.response === 'function'
-      ? await route.response(c)
-      : route.response
+    const value = typeof route.handler === 'function'
+      ? await route.handler(c)
+      : route.handler
     return normalizeHandlerValue(c, value)
   }
 }
@@ -87,11 +88,20 @@ function createFinalizeMiddleware(route: ResolvedRoute) {
   }
 }
 
+function wrapMiddleware(
+  handler: (c: Context, next: () => Promise<void>) => Promise<Response | void>,
+) {
+  return async (c: Context, next: () => Promise<void>) => {
+    const response = await handler(c, next)
+    return response ?? c.res
+  }
+}
+
 export function createHonoApp(routes: RouteTable): Hono {
   const app = new Hono({ router: new PatternRouter(), strict: false })
 
   for (const route of routes) {
-    const middlewares = route.middlewares?.map(entry => entry.handle) ?? []
+    const middlewares = route.middlewares?.map(entry => wrapMiddleware(entry.handle)) ?? []
     app.on(
       route.method,
       toHonoPath(route),
@@ -152,7 +162,7 @@ async function toRequest(req: IncomingMessage) {
   const init: RequestInit = { method, headers }
   const rawBody = await readRawBody(req)
   if (rawBody && method !== 'GET' && method !== 'HEAD') {
-    init.body = rawBody
+    init.body = rawBody as BodyInit
   }
   return new Request(url.toString(), init)
 }

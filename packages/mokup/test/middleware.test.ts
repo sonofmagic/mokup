@@ -15,7 +15,7 @@ function createRouteTable(): RouteTable {
       method: 'GET',
       tokens: parsed.tokens,
       score: parsed.score,
-      response: c => ({ id: c.req.param('id') ?? null }),
+      handler: c => ({ id: c.req.param('id') ?? null }),
     },
   ]
 }

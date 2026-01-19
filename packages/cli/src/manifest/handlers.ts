@@ -69,10 +69,10 @@ export async function writeHandlerIndex(
 }
 
 export function buildResponse(
-  response: unknown,
+  handler: unknown,
   options: BuildResponseOptions,
 ): ManifestResponse | null {
-  if (typeof response === 'function') {
+  if (typeof handler === 'function') {
     if (!options.handlers) {
       return null
     }
@@ -89,29 +89,29 @@ export function buildResponse(
       ruleIndex: options.ruleIndex,
     }
   }
-  if (typeof response === 'string') {
+  if (typeof handler === 'string') {
     return {
       type: 'text',
-      body: response,
+      body: handler,
     }
   }
-  if (response instanceof Uint8Array || response instanceof ArrayBuffer) {
+  if (handler instanceof Uint8Array || handler instanceof ArrayBuffer) {
     return {
       type: 'binary',
-      body: Buffer.from(response as Uint8Array).toString('base64'),
+      body: Buffer.from(handler as Uint8Array).toString('base64'),
       encoding: 'base64',
     }
   }
-  if (Buffer.isBuffer(response)) {
+  if (Buffer.isBuffer(handler)) {
     return {
       type: 'binary',
-      body: response.toString('base64'),
+      body: handler.toString('base64'),
       encoding: 'base64',
     }
   }
   return {
     type: 'json',
-    body: response,
+    body: handler,
   }
 }
 

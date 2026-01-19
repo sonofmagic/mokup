@@ -19,7 +19,7 @@ function buildRouteSignature(routes: RouteTable) {
         route.method,
         route.template,
         route.file,
-        typeof route.response === 'function' ? 'handler' : 'static',
+        typeof route.handler === 'function' ? 'handler' : 'static',
         route.status ?? '',
         route.delay ?? '',
       ].join('|'),

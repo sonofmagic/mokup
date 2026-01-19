@@ -153,7 +153,8 @@ function normalizeHandlerValue(c: Context, value: unknown): Response {
     if (!c.res.headers.get('content-type')) {
       c.header('content-type', 'application/octet-stream')
     }
-    return c.body(value)
+    const data = value instanceof ArrayBuffer ? value : new Uint8Array(value)
+    return c.body(data)
   }
   return c.json(value)
 }
@@ -177,7 +178,7 @@ function createRouteHandler(params: {
       return c.text(route.response.body)
     }
     if (route.response.type === 'binary') {
-      const data = decodeBase64(route.response.body)
+      const data = new Uint8Array(decodeBase64(route.response.body))
       c.header('content-type', 'application/octet-stream')
       return c.body(data)
     }
@@ -232,8 +233,8 @@ async function buildApp(params: {
     const handler = createRouteHandler({
       route: entry.route,
       moduleCache,
-      moduleBase,
-      moduleMap,
+      ...(typeof moduleBase !== 'undefined' ? { moduleBase } : {}),
+      ...(typeof moduleMap !== 'undefined' ? { moduleMap } : {}),
     })
 
     app.on(
@@ -300,7 +301,7 @@ function toFetchRequest(req: RuntimeRequest): Request {
 
   const init: RequestInit = { method, headers }
   if (typeof body !== 'undefined' && method !== 'GET' && method !== 'HEAD') {
-    init.body = body
+    init.body = body as BodyInit
   }
 
   return new Request(url.toString(), init)
@@ -329,8 +330,12 @@ export function createRuntime(options: RuntimeOptions) {
           manifest,
           moduleCache,
           middlewareCache,
-          moduleBase: options.moduleBase,
-          moduleMap: options.moduleMap,
+          ...(typeof options.moduleBase !== 'undefined'
+            ? { moduleBase: options.moduleBase }
+            : {}),
+          ...(typeof options.moduleMap !== 'undefined'
+            ? { moduleMap: options.moduleMap }
+            : {}),
         })
       })()
     }
