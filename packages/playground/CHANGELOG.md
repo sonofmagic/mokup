@@ -1,5 +1,11 @@
 # @mokup/playground
 
+## 0.0.3
+
+### Patch Changes
+
+- 🐛 **Fix playground build by ensuring the runtime dependency resolves in CI.** [`a16fd2c`](https://github.com/sonofmagic/mokup/commit/a16fd2cdc1a6157fe238cb3a853ed90f7b107b3b) by @sonofmagic
+
 ## 0.0.2
 
 ### Patch Changes
