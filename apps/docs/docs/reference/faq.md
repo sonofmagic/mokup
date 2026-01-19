@@ -6,7 +6,7 @@ CLI builds use file names to determine HTTP methods. The Vite plugin defaults `.
 
 ## Worker shows node builtin warnings
 
-Use `@mokup/server/worker` instead of `@mokup/server` to avoid Node-only dependencies.
+Use `mokup/server/worker` instead of `mokup/server` to avoid Node-only dependencies.
 
 ## Playground shows no data
 

@@ -16,7 +16,6 @@
   },
   "dependencies": {},
   "devDependencies": {
-    "@mokup/cli": "workspace:*",
     "@tailwindcss/vite": "^4.1.13",
     "mokup": "workspace:*",
     "tailwindcss": "^4.1.13",

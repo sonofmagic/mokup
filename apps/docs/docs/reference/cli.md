@@ -1,6 +1,6 @@
 # CLI
 
-`@mokup/cli` provides the `mokup build` command to generate `.mokup` outputs.
+`mokup` provides the `mokup build` command to generate `.mokup` outputs.
 
 ## Usage
 
@@ -18,6 +18,19 @@ pnpm exec mokup build --dir mock --out .mokup
 | `--include`     | Include regex                        |
 | `--exclude`     | Exclude regex                        |
 | `--no-handlers` | Skip handler output                  |
+
+## API
+
+If you prefer programmatic usage, import `buildManifest`:
+
+```ts
+import { buildManifest } from 'mokup/cli'
+
+await buildManifest({
+  dir: 'mock',
+  outDir: '.mokup',
+})
+```
 
 ## Notes
 

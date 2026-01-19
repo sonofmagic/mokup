@@ -1,6 +1,6 @@
 # Cloudflare Worker
 
-Run Mokup in Workers with `@mokup/server/worker`.
+Run Mokup in Workers with `mokup/server/worker`.
 
 ## 1. Build outputs
 
@@ -11,7 +11,7 @@ pnpm exec mokup build --dir mock --out worker/src/.mokup
 ## 2. Worker entry
 
 ```ts
-import { createMokupWorker } from '@mokup/server/worker'
+import { createMokupWorker } from 'mokup/server/worker'
 import mokupBundle from './.mokup/mokup.bundle.mjs'
 
 export default createMokupWorker(mokupBundle)

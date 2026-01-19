@@ -1,6 +1,6 @@
 # Cloudflare Worker
 
-Mokup 可以直接运行在 Worker 中，推荐使用 `@mokup/server/worker`：
+Mokup 可以直接运行在 Worker 中，推荐使用 `mokup/server/worker`：
 
 ## 1. 生成 Worker 产物
 
@@ -11,7 +11,7 @@ pnpm exec mokup build --dir mock --out worker/src/.mokup
 ## 2. Worker 入口
 
 ```ts
-import { createMokupWorker } from '@mokup/server/worker'
+import { createMokupWorker } from 'mokup/server/worker'
 import mokupBundle from './.mokup/mokup.bundle.mjs'
 
 export default createMokupWorker(mokupBundle)

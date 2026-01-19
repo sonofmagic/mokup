@@ -1,6 +1,6 @@
 # CLI
 
-`@mokup/cli` 提供 `mokup build` 命令，用于生成 `.mokup` 产物。
+`mokup` 提供 `mokup build` 命令，用于生成 `.mokup` 产物。
 
 ## 基本用法
 
@@ -18,6 +18,19 @@ pnpm exec mokup build --dir mock --out .mokup
 | `--include`     | 仅包含匹配的正则          |
 | `--exclude`     | 排除匹配的正则            |
 | `--no-handlers` | 不生成函数处理器          |
+
+## API
+
+如果更喜欢编程式用法，可直接调用 `buildManifest`：
+
+```ts
+import { buildManifest } from 'mokup/cli'
+
+await buildManifest({
+  dir: 'mock',
+  outDir: '.mokup',
+})
+```
 
 ## 说明
 

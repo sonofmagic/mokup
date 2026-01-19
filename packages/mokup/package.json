@@ -16,6 +16,21 @@
       "import": "./dist/index.mjs",
       "require": "./dist/index.cjs"
     },
+    "./cli": {
+      "types": "./dist/cli.d.ts",
+      "import": "./dist/cli.mjs",
+      "require": "./dist/cli.cjs"
+    },
+    "./server": {
+      "types": "./dist/server.d.ts",
+      "import": "./dist/server.mjs",
+      "require": "./dist/server.cjs"
+    },
+    "./server/worker": {
+      "types": "./dist/server/worker.d.ts",
+      "import": "./dist/server/worker.mjs",
+      "require": "./dist/server/worker.cjs"
+    },
     "./vite": {
       "types": "./dist/vite.d.ts",
       "import": "./dist/vite.mjs",
@@ -38,6 +53,9 @@
   "main": "./dist/index.cjs",
   "module": "./dist/index.mjs",
   "types": "./dist/index.d.ts",
+  "bin": {
+    "mokup": "./dist/cli-bin.mjs"
+  },
   "files": [
     "dist"
   ],
@@ -51,8 +69,10 @@
     "vite": "^5.0.0 || ^6.0.0 || ^7.0.0"
   },
   "dependencies": {
+    "@mokup/cli": "workspace:*",
     "@mokup/playground": "workspace:*",
     "@mokup/runtime": "workspace:*",
+    "@mokup/server": "workspace:*",
     "chokidar": "^5.0.0",
     "esbuild": "^0.27.2",
     "hono": "^4.11.4",

@@ -10,12 +10,14 @@
 </p>
 
 ## Why mokup
+
 - File-based routing via filename suffixes like `users.get.json`.
 - JSON/JSONC and TS/JS handlers powered by Hono Context.
 - Works in Vite dev, CLI builds (workers), and runtime adapters.
 - Built-in headers, status, delays, and middleware hooks.
 
 ## Quick start
+
 Create `mock/users.get.json`:
 
 ```json
@@ -34,12 +36,15 @@ export default async (c) => {
 Follow the docs at http://mokup.icebreaker.top/ for Vite and CLI setup.
 
 ## Contributing
+
 Issues and pull requests are welcome. See [CONTRIBUTING.md](CONTRIBUTING.md).
 
 ## Contributors
+
 Thanks to [all contributors](https://github.com/sonofmagic/mokup/graphs/contributors)!
 
 ## Authors
+
 ice breaker <1324318532@qq.com>
 
 ## License

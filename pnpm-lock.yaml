@@ -116,9 +116,6 @@ importers:
 
   apps/docs:
     devDependencies:
-      '@mokup/cli':
-        specifier: workspace:*
-        version: link:../../packages/cli
       '@tailwindcss/vite':
         specifier: ^4.1.13
         version: 4.1.18(vite@7.3.1(@types/node@25.0.9)(jiti@2.6.1)(lightningcss@1.30.2)(tsx@4.21.0)(yaml@2.8.2))
@@ -143,19 +140,13 @@ importers:
       '@hono/node-server':
         specifier: ^1.12.0
         version: 1.19.9(hono@4.11.4)
-      '@mokup/server':
-        specifier: workspace:*
-        version: link:../../packages/server
       hono:
         specifier: ^4.9.0
         version: 4.11.4
+      mokup:
+        specifier: workspace:*
+        version: link:../../packages/mokup
     devDependencies:
-      '@mokup/cli':
-        specifier: workspace:*
-        version: link:../../packages/cli
-      '@mokup/runtime':
-        specifier: workspace:*
-        version: link:../../packages/runtime
       tsx:
         specifier: ^4.21.0
         version: 4.21.0
@@ -165,22 +156,16 @@ importers:
 
   apps/mock-worker:
     dependencies:
-      '@mokup/server':
-        specifier: workspace:*
-        version: link:../../packages/server
       hono:
         specifier: ^4.9.0
         version: 4.11.4
+      mokup:
+        specifier: workspace:*
+        version: link:../../packages/mokup
     devDependencies:
       '@cloudflare/workers-types':
         specifier: ^4.20260118.0
         version: 4.20260118.0
-      '@mokup/cli':
-        specifier: workspace:*
-        version: link:../../packages/cli
-      '@mokup/runtime':
-        specifier: workspace:*
-        version: link:../../packages/runtime
       typescript:
         specifier: ^5.9.3
         version: 5.9.3
@@ -190,12 +175,12 @@ importers:
 
   apps/web:
     dependencies:
-      '@mokup/server':
-        specifier: workspace:*
-        version: link:../../packages/server
       axios:
         specifier: ^1.13.2
         version: 1.13.2
+      mokup:
+        specifier: workspace:*
+        version: link:../../packages/mokup
       vue:
         specifier: ^3.5.26
         version: 3.5.26(typescript@5.9.3)
@@ -203,18 +188,12 @@ importers:
         specifier: ^4.6.0
         version: 4.6.4(vue@3.5.26(typescript@5.9.3))
     devDependencies:
-      '@mokup/cli':
-        specifier: workspace:*
-        version: link:../../packages/cli
       '@tailwindcss/vite':
         specifier: ^4.1.13
         version: 4.1.18(vite@7.3.1(@types/node@25.0.9)(jiti@2.6.1)(lightningcss@1.30.2)(tsx@4.21.0)(yaml@2.8.2))
       '@vitejs/plugin-vue':
         specifier: ^6.0.3
         version: 6.0.3(vite@7.3.1(@types/node@25.0.9)(jiti@2.6.1)(lightningcss@1.30.2)(tsx@4.21.0)(yaml@2.8.2))(vue@3.5.26(typescript@5.9.3))
-      mokup:
-        specifier: workspace:*
-        version: link:../../packages/mokup
       tailwindcss:
         specifier: ^4.1.13
         version: 4.1.18
@@ -255,12 +234,18 @@ importers:
 
   packages/mokup:
     dependencies:
+      '@mokup/cli':
+        specifier: workspace:*
+        version: link:../cli
       '@mokup/playground':
         specifier: workspace:*
         version: link:../playground
       '@mokup/runtime':
         specifier: workspace:*
         version: link:../runtime
+      '@mokup/server':
+        specifier: workspace:*
+        version: link:../server
       chokidar:
         specifier: ^5.0.0
         version: 5.0.0

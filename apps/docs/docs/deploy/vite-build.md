@@ -43,4 +43,4 @@ export default {
 }
 ```
 
-This is ideal for static hosting because mock requests are handled in the browser. If you also ship the playground, make sure `/_mokup/routes` is available as a static JSON file (generate it during build with the CLI or a small script).
+This is ideal for static hosting because mock requests are handled in the browser. If you also ship the playground, make sure `/_mokup/routes` is available as a static JSON file (generate it during build with `mokup build` or a small script).

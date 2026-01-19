@@ -5,18 +5,16 @@
   "private": true,
   "homepage": "https://mokup.icebreaker.top",
   "scripts": {
-    "build:manifest": "pnpm --filter @mokup/cli build && node ../../packages/cli/dist/cli.mjs build --dir mock --out dist",
+    "build:manifest": "pnpm --filter mokup build && pnpm exec mokup build --dir mock --out dist",
     "dev": "tsx src/index.ts",
     "typecheck": "tsc -p tsconfig.json --noEmit"
   },
   "dependencies": {
     "@hono/node-server": "^1.12.0",
-    "@mokup/server": "workspace:*",
-    "hono": "^4.9.0"
+    "hono": "^4.9.0",
+    "mokup": "workspace:*"
   },
   "devDependencies": {
-    "@mokup/cli": "workspace:*",
-    "@mokup/runtime": "workspace:*",
     "tsx": "^4.21.0",
     "typescript": "^5.9.3"
   }

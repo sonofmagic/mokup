@@ -7,22 +7,16 @@
 
 ## Packages
 
-Vite plugin (dev mocks):
+Dev tooling (Vite plugin + CLI):
 
 ```bash
 pnpm add -D mokup
 ```
 
-CLI (generate `.mokup` output):
+Runtime / server adapters (deploy or middleware):
 
 ```bash
-pnpm add -D @mokup/cli
+pnpm add mokup
 ```
 
-Server/Worker runtime (deploy or middleware):
-
-```bash
-pnpm add mokup @mokup/server
-```
-
-If you only need Vite dev mocks, `mokup` is enough.
+If you only need Vite dev mocks, install `mokup` as a dev dependency.

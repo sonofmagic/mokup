@@ -6,7 +6,7 @@
   "homepage": "https://mokup.icebreaker.top",
   "scripts": {
     "dev": "vite --host",
-    "build:manifest": "pnpm --filter @mokup/cli build && node ../../packages/cli/dist/cli.mjs build --dir mock --out worker/src/.mokup",
+    "build:manifest": "pnpm --filter mokup build && pnpm exec mokup build --dir mock --out worker/src/.mokup",
     "worker:dev": "pnpm build:manifest && wrangler dev",
     "worker:deploy": "pnpm build:manifest && wrangler deploy",
     "build": "vite build",
@@ -15,16 +15,14 @@
     "typecheck": "tsc -p tsconfig.json --noEmit"
   },
   "dependencies": {
-    "@mokup/server": "workspace:*",
     "axios": "^1.13.2",
+    "mokup": "workspace:*",
     "vue": "^3.5.26",
     "vue-router": "^4.6.0"
   },
   "devDependencies": {
-    "@mokup/cli": "workspace:*",
     "@tailwindcss/vite": "^4.1.13",
     "@vitejs/plugin-vue": "^6.0.3",
-    "mokup": "workspace:*",
     "tailwindcss": "^4.1.13",
     "typescript": "^5.9.3",
     "vite": "^7.3.1",

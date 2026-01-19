@@ -1,7 +1,7 @@
 #!/usr/bin/env node
-import type { BuildOptions } from './index'
+import type { BuildOptions } from './cli'
 import { argv, exit } from 'node:process'
-import { buildManifest } from './index'
+import { buildManifest } from './cli'
 
 function parseBuildOptions(argv: string[]) {
   const dirs: string[] = []

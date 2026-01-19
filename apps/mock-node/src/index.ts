@@ -1,10 +1,10 @@
-import type { MokupServerOptions } from '@mokup/server'
+import type { MokupServerOptions } from 'mokup/server'
 
 import { readFile } from 'node:fs/promises'
 import * as nodeProcess from 'node:process'
 import { serve } from '@hono/node-server'
-import { createHonoMiddleware } from '@mokup/server'
 import { Hono } from 'hono'
+import { createHonoMiddleware } from 'mokup/server'
 
 async function start() {
   const manifestPath = new URL('../dist/mokup.manifest.json', import.meta.url)

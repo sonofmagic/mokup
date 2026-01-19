@@ -5,19 +5,17 @@
   "private": true,
   "homepage": "https://mokup.icebreaker.top",
   "scripts": {
-    "build:manifest": "pnpm --filter @mokup/cli build && node ../../packages/cli/dist/cli.mjs build --dir mock --out src/.mokup",
+    "build:manifest": "pnpm --filter mokup build && pnpm exec mokup build --dir mock --out src/.mokup",
     "dev": "wrangler dev src/index.ts",
     "deploy": "wrangler deploy src/index.ts",
     "typecheck": "tsc -p tsconfig.json --noEmit"
   },
   "dependencies": {
-    "@mokup/server": "workspace:*",
-    "hono": "^4.9.0"
+    "hono": "^4.9.0",
+    "mokup": "workspace:*"
   },
   "devDependencies": {
     "@cloudflare/workers-types": "^4.20260118.0",
-    "@mokup/cli": "workspace:*",
-    "@mokup/runtime": "workspace:*",
     "typescript": "^5.9.3",
     "wrangler": "^4.0.0"
   }
