@@ -20,6 +20,11 @@
       "types": "./dist/vite.d.ts",
       "import": "./dist/vite.mjs",
       "require": "./dist/vite.cjs"
+    },
+    "./sw": {
+      "types": "./dist/sw.d.ts",
+      "import": "./dist/sw.mjs",
+      "require": "./dist/sw.cjs"
     }
   },
   "publishConfig": {

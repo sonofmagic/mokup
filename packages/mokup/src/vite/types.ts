@@ -27,6 +27,15 @@ export interface MockRule {
   delay?: number
 }
 
+export type MokupMockMode = 'server' | 'sw'
+
+export interface MokupSwOptions {
+  path?: string
+  scope?: string
+  register?: boolean
+  fallback?: boolean
+}
+
 export interface DirectoryConfig {
   headers?: Record<string, string>
   status?: number
@@ -38,6 +47,7 @@ export interface DirectoryConfig {
 export interface ResolvedMiddleware {
   handle: MockMiddleware
   source: string
+  index: number
 }
 
 export interface MokupViteOptions {
@@ -47,6 +57,8 @@ export interface MokupViteOptions {
   exclude?: RegExp | RegExp[]
   watch?: boolean
   log?: boolean
+  mode?: MokupMockMode
+  sw?: MokupSwOptions
   playground?: boolean | {
     path?: string
     enabled?: boolean
@@ -66,6 +78,7 @@ export interface ResolvedRoute {
   status?: number
   headers?: Record<string, string>
   delay?: number
+  ruleIndex?: number
 }
 
 export type RouteTable = ResolvedRoute[]

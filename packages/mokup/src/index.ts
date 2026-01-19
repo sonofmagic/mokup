@@ -6,6 +6,8 @@ export type {
   MockResponse,
   MockResponseHandler,
   MockRule,
+  MokupMockMode,
+  MokupSwOptions,
   MokupViteOptions,
   MokupViteOptionsInput,
 } from './vite'

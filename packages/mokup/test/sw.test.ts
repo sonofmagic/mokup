@@ -1,0 +1,139 @@
+import type { Manifest } from '@mokup/runtime'
+import type { ResolvedRoute } from '../src/vite/types'
+import path from 'node:path'
+import { parseRouteTemplate } from '@mokup/runtime'
+import { describe, expect, it } from 'vitest'
+import { buildSwScript, resolveSwConfig } from '../src/vite/sw'
+
+function extractManifest(code: string): Manifest {
+  const marker = 'const manifest = '
+  const start = code.indexOf(marker)
+  expect(start).toBeGreaterThan(-1)
+  const rest = code.slice(start + marker.length)
+  const end = rest.indexOf('\n\n')
+  expect(end).toBeGreaterThan(0)
+  const json = rest.slice(0, end).trim()
+  return JSON.parse(json) as Manifest
+}
+
+function createLogger(warnings: string[]) {
+  return {
+    info: () => undefined,
+    warn: (...args: unknown[]) => warnings.push(args.map(String).join(' ')),
+    error: () => undefined,
+  }
+}
+
+describe('mokup SW', () => {
+  it('builds module-based SW routes with middleware refs', () => {
+    const root = path.join('/tmp', 'mokup-sw')
+    const file = path.join(root, 'mock', 'users.get.ts')
+    const configFile = path.join(root, 'mock', 'index.config.ts')
+    const parsed = parseRouteTemplate('/api/users')
+    const route: ResolvedRoute = {
+      file,
+      template: parsed.template,
+      method: 'GET',
+      tokens: parsed.tokens,
+      score: parsed.score,
+      handler: () => ({ ok: true }),
+      middlewares: [
+        {
+          handle: async () => undefined,
+          source: configFile,
+          index: 0,
+        },
+      ],
+      status: 201,
+      headers: { 'x-mokup': '1' },
+      delay: 120,
+      ruleIndex: 3,
+    }
+
+    const code = buildSwScript({ routes: [route], root })
+    const manifest = extractManifest(code)
+    const manifestRoute = manifest.routes[0]
+
+    expect(manifestRoute?.response.type).toBe('module')
+    expect(manifestRoute?.response.module).toBe('/mock/users.get.ts')
+    expect(manifestRoute?.response.ruleIndex).toBe(3)
+    expect(manifestRoute?.status).toBe(201)
+    expect(manifestRoute?.headers).toEqual({ 'x-mokup': '1' })
+    expect(manifestRoute?.delay).toBe(120)
+    expect(manifestRoute?.middleware?.[0]?.module).toBe('/mock/index.config.ts')
+    expect(manifestRoute?.middleware?.[0]?.ruleIndex).toBe(0)
+    expect(code).toContain(
+      '"/mock/users.get.ts": { default: toRuntimeRules(resolveModuleExport(module0)) },',
+    )
+    expect(code).toContain(
+      '"/mock/index.config.ts": module1,',
+    )
+  })
+
+  it('inlines non-function handlers into the manifest', () => {
+    const root = path.join('/tmp', 'mokup-sw')
+    const file = path.join(root, 'mock', 'health.get.json')
+    const parsed = parseRouteTemplate('/health')
+    const route: ResolvedRoute = {
+      file,
+      template: parsed.template,
+      method: 'GET',
+      tokens: parsed.tokens,
+      score: parsed.score,
+      handler: { ok: true },
+    }
+
+    const code = buildSwScript({ routes: [route], root })
+    const manifest = extractManifest(code)
+    const manifestRoute = manifest.routes[0]
+
+    expect(manifestRoute?.response.type).toBe('json')
+    expect(manifestRoute?.response.body).toEqual({ ok: true })
+    expect(code).not.toContain('const moduleMap =')
+  })
+
+  it('uses defaults when SW config is missing overrides', () => {
+    const warnings: string[] = []
+    const logger = createLogger(warnings)
+    const result = resolveSwConfig([{ mode: 'sw' }], logger)
+
+    expect(result).toEqual({
+      path: '/mokup-sw.js',
+      scope: '/',
+      register: true,
+    })
+    expect(warnings).toHaveLength(0)
+  })
+
+  it('keeps the first SW config and warns on conflicts', () => {
+    const warnings: string[] = []
+    const logger = createLogger(warnings)
+    const result = resolveSwConfig([
+      {
+        mode: 'sw',
+        sw: {
+          path: 'mock-sw.js',
+          scope: 'api',
+          register: false,
+        },
+      },
+      {
+        mode: 'sw',
+        sw: {
+          path: '/other.js',
+          scope: '/other',
+          register: true,
+        },
+      },
+    ], logger)
+
+    expect(result).toEqual({
+      path: '/mock-sw.js',
+      scope: '/api',
+      register: false,
+    })
+    expect(warnings.some(message => message.includes('SW path'))).toBe(true)
+    expect(warnings.some(message => message.includes('SW scope'))).toBe(true)
+    expect(warnings.some(message => message.includes('SW register'))).toBe(true)
+  })
+})

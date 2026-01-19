@@ -19,6 +19,8 @@ import { delay, normalizeMethod } from './normalize'
 import { decodeBase64 } from './response'
 import {
   compareRouteScore,
+  matchRouteTokens,
+  normalizePathname,
   parseRouteTemplate,
   scoreRouteTokens,
 } from './router'
@@ -287,7 +289,7 @@ function resolveRequestBody(req: RuntimeRequest, contentType: string) {
 }
 
 function toFetchRequest(req: RuntimeRequest): Request {
-  const url = new URL(req.path, 'http://mokup.local')
+  const url = new URL(normalizePathname(req.path), 'http://mokup.local')
   appendQueryParams(url, req.query)
 
   const headers = new Headers()
@@ -307,9 +309,44 @@ function toFetchRequest(req: RuntimeRequest): Request {
   return new Request(url.toString(), init)
 }
 
+function isRelativeModulePath(modulePath: string) {
+  return !/^(?:data|http|https|file):/.test(modulePath)
+}
+
+function requiresModuleBase(
+  modulePath: string,
+  moduleMap: ModuleMap | undefined,
+) {
+  if (!isRelativeModulePath(modulePath)) {
+    return false
+  }
+  if (moduleMap && Object.prototype.hasOwnProperty.call(moduleMap, modulePath)) {
+    return false
+  }
+  return true
+}
+
+function routeNeedsModuleBase(route: ManifestRoute, moduleMap: ModuleMap | undefined) {
+  if (
+    route.response.type === 'module'
+    && requiresModuleBase(route.response.module, moduleMap)
+  ) {
+    return true
+  }
+  if (route.middleware) {
+    for (const middleware of route.middleware) {
+      if (requiresModuleBase(middleware.module, moduleMap)) {
+        return true
+      }
+    }
+  }
+  return false
+}
+
 export function createRuntime(options: RuntimeOptions) {
   let manifestCache: Manifest | null = null
   let appPromise: Promise<Hono> | null = null
+  let compiledCache: CompiledRoute[] | null = null
   const moduleCache = new Map<string, RuntimeRule[]>()
   const middlewareCache = new Map<string, MockMiddleware[]>()
 
@@ -342,14 +379,38 @@ export function createRuntime(options: RuntimeOptions) {
     return appPromise
   }
 
+  const getCompiled = async () => {
+    if (!compiledCache) {
+      compiledCache = compileRoutes(await getManifest())
+    }
+    return compiledCache
+  }
+
   const handle = async (req: RuntimeRequest): Promise<RuntimeResult | null> => {
-    const app = await getApp()
     const method = normalizeMethod(req.method) ?? 'GET'
     const matchMethod = method === 'HEAD' ? 'GET' : method
-    const match = app.router.match(matchMethod, req.path)
-    if (!match || match[0].length === 0) {
+    const pathname = normalizePathname(req.path)
+    const compiled = await getCompiled()
+    let matchedRoute: ManifestRoute | null = null
+    for (const entry of compiled) {
+      if (entry.method !== matchMethod) {
+        continue
+      }
+      if (matchRouteTokens(entry.tokens, pathname)) {
+        matchedRoute = entry.route
+        break
+      }
+    }
+    if (!matchedRoute) {
       return null
     }
+    if (
+      typeof options.moduleBase === 'undefined'
+      && routeNeedsModuleBase(matchedRoute, options.moduleMap)
+    ) {
+      throw new Error('moduleBase is required for relative module paths.')
+    }
+    const app = await getApp()
     const response = await app.fetch(toFetchRequest(req))
     return await toRuntimeResult(response)
   }

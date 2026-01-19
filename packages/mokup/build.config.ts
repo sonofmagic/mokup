@@ -6,6 +6,7 @@ export default defineBuildConfig({
   entries: [
     'src/index',
     'src/vite',
+    'src/sw',
   ],
   rollup: {
     emitCJS: true,

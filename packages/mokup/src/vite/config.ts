@@ -104,12 +104,12 @@ function normalizeMiddlewares(
   }
   const list = Array.isArray(value) ? value : [value]
   const middlewares: ResolvedMiddleware[] = []
-  for (const entry of list) {
+  for (const [index, entry] of list.entries()) {
     if (typeof entry !== 'function') {
       logger.warn(`Invalid middleware in ${source}`)
       continue
     }
-    middlewares.push({ handle: entry as MockMiddleware, source })
+    middlewares.push({ handle: entry as MockMiddleware, source, index })
   }
   return middlewares
 }

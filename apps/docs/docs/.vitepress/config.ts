@@ -19,6 +19,10 @@ const vitePlugins = [
   mokup({
     dir: '../mock',
     prefix: '/api',
+    mode: 'sw',
+    sw: {
+      fallback: false,
+    },
     playground: {
       path: '/_mokup',
     },

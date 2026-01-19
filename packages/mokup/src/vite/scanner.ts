@@ -46,7 +46,7 @@ export async function scanRoutes(params: {
       continue
     }
     const rules = await loadRules(fileInfo.file, params.server, params.logger)
-    for (const rule of rules) {
+    for (const [index, rule] of rules.entries()) {
       if (!rule || typeof rule !== 'object') {
         continue
       }
@@ -75,6 +75,7 @@ export async function scanRoutes(params: {
       if (!resolved) {
         continue
       }
+      resolved.ruleIndex = index
       if (config.headers) {
         resolved.headers = { ...config.headers, ...(resolved.headers ?? {}) }
       }
