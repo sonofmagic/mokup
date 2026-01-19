@@ -119,6 +119,23 @@ async function toRuntimeResult(response: Response): Promise<RuntimeResult> {
   }
 }
 
+function isValidStatus(status: unknown): status is number {
+  return typeof status === 'number'
+    && Number.isFinite(status)
+    && status >= 200
+    && status <= 599
+}
+
+function resolveStatus(routeStatus: number | undefined, responseStatus: number) {
+  if (isValidStatus(routeStatus)) {
+    return routeStatus
+  }
+  if (isValidStatus(responseStatus)) {
+    return responseStatus
+  }
+  return 200
+}
+
 function applyRouteOverrides(response: Response, route: ManifestRoute) {
   const headers = new Headers(response.headers)
   const hasHeaders = !!route.headers && Object.keys(route.headers).length > 0
@@ -127,7 +144,7 @@ function applyRouteOverrides(response: Response, route: ManifestRoute) {
       headers.set(key, value)
     }
   }
-  const status = route.status ?? response.status
+  const status = resolveStatus(route.status, response.status)
   if (status === response.status && !hasHeaders) {
     return response
   }
