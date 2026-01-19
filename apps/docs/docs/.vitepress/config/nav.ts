@@ -6,7 +6,12 @@ export const zhNav: DefaultTheme.NavItem[] = [
   { text: '进阶', link: '/zh/advanced/multi-dir-prefix' },
   { text: 'AI 提示词', link: '/zh/ai/' },
   { text: '部署', link: '/zh/deploy/vite-build' },
-  { text: 'Playground', link: '/_mokup' },
+  {
+    text: 'Playground',
+    link: '/_mokup/',
+    target: '_blank',
+    rel: 'noreferrer',
+  },
   { text: '参考', link: '/zh/reference/cli' },
 ]
 
@@ -16,6 +21,11 @@ export const enNav: DefaultTheme.NavItem[] = [
   { text: 'Advanced', link: '/advanced/multi-dir-prefix' },
   { text: 'AI Prompts', link: '/ai/' },
   { text: 'Deploy', link: '/deploy/vite-build' },
-  { text: 'Playground', link: '/_mokup' },
+  {
+    text: 'Playground',
+    link: '/_mokup/',
+    target: '_blank',
+    rel: 'noreferrer',
+  },
   { text: 'Reference', link: '/reference/cli' },
 ]

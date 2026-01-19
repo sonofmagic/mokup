@@ -35,6 +35,9 @@ export default defineConfig({
   lang: 'en-US',
   cleanUrls: true,
   lastUpdated: true,
+  head: [
+    ['link', { rel: 'icon', href: '/favicon.ico' }],
+  ],
   vite: {
     plugins: vitePlugins,
   },

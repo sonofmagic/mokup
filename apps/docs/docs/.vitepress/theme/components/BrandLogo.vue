@@ -1,4 +1,6 @@
 <script setup lang="ts">
+import { withBase } from 'vitepress'
+
 type LogoSize = 'small' | 'large'
 
 withDefaults(
@@ -15,7 +17,11 @@ withDefaults(
 
 <template>
   <span class="mokup-brand" :class="`mokup-brand--${size}`">
-    <img class="mokup-brand__logo" src="/brand/mokup-logo.svg" alt="Mokup mascot">
+    <img
+      class="mokup-brand__logo"
+      :src="withBase('/brand/mokup-logo.svg')"
+      alt="Mokup mascot"
+    >
     <span v-if="showText" class="mokup-brand__text">Mokup</span>
   </span>
 </template>
