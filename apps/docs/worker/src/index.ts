@@ -12,7 +12,8 @@ interface AssetEnv {
   }
 }
 
-const playgroundBase = '/playground'
+const playgroundBase = '/_mokup'
+const legacyPlaygroundBase = '/playground'
 const apiPrefix = '/api'
 const bundle = mokupBundle as MokupWorkerBundle
 const mockHandler = createMokupWorker(bundle).fetch
@@ -24,6 +25,12 @@ function buildAssetRequest(request: Request, pathname: string) {
   url.pathname = pathname
   url.search = ''
   return new Request(url.toString(), request)
+}
+
+function buildRedirect(request: Request, pathname: string, status = 302) {
+  const url = new URL(request.url)
+  url.pathname = pathname
+  return Response.redirect(url.toString(), status)
 }
 
 function jsonResponse(data: unknown, status = 200) {
@@ -79,6 +86,15 @@ export default {
   async fetch(request: Request, env: AssetEnv) {
     const url = new URL(request.url)
     const pathname = url.pathname
+
+    if (pathname === legacyPlaygroundBase || pathname === `${legacyPlaygroundBase}/`) {
+      return buildRedirect(request, `${playgroundBase}/`)
+    }
+
+    if (pathname.startsWith(`${legacyPlaygroundBase}/`)) {
+      const nextPath = `${playgroundBase}${pathname.slice(legacyPlaygroundBase.length)}`
+      return buildRedirect(request, nextPath)
+    }
 
     if (pathname.startsWith(apiPrefix)) {
       const response = await mockHandler(request)

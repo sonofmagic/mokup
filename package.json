@@ -19,6 +19,8 @@
   "scripts": {
     "build": "turbo run build",
     "dev": "turbo run dev --parallel",
+    "docs:build": "pnpm --filter docs build",
+    "docs:deploy": "pnpm --filter docs worker:deploy",
     "test": "vitest run",
     "test:dev": "vitest",
     "lint": "turbo run lint",

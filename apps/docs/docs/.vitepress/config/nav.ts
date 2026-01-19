@@ -5,7 +5,7 @@ export const zhNav: DefaultTheme.NavItem[] = [
   { text: '核心概念', link: '/zh/core-concepts/file-routing' },
   { text: '进阶', link: '/zh/advanced/multi-dir-prefix' },
   { text: '部署', link: '/zh/deploy/vite-build' },
-  { text: 'Playground', link: '/playground' },
+  { text: 'Playground', link: '/_mokup' },
   { text: '参考', link: '/zh/reference/cli' },
 ]
 
@@ -14,6 +14,6 @@ export const enNav: DefaultTheme.NavItem[] = [
   { text: 'Core Concepts', link: '/core-concepts/file-routing' },
   { text: 'Advanced', link: '/advanced/multi-dir-prefix' },
   { text: 'Deploy', link: '/deploy/vite-build' },
-  { text: 'Playground', link: '/playground' },
+  { text: 'Playground', link: '/_mokup' },
   { text: 'Reference', link: '/reference/cli' },
 ]

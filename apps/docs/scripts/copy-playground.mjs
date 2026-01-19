@@ -6,7 +6,7 @@ const __dirname = path.dirname(fileURLToPath(import.meta.url))
 const rootDir = path.resolve(__dirname, '..')
 const playgroundDist = path.resolve(rootDir, '..', '..', 'packages', 'playground', 'dist')
 const docsDist = path.resolve(rootDir, 'docs', '.vitepress', 'dist')
-const targetDir = path.join(docsDist, 'playground')
+const targetDir = path.join(docsDist, '_mokup')
 
 await stat(playgroundDist)
 
