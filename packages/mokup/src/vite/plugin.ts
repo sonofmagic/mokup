@@ -81,6 +81,11 @@ function resolveRegisterScope(base: string, scope: string) {
   return `${normalizedBase}${normalizedScope.slice(1)}`
 }
 
+function resolveSwImportPath(base: string) {
+  const normalizedBase = normalizeBase(base)
+  return `${normalizedBase}@id/mokup/sw`
+}
+
 type MiddlewareHandler = (
   req: IncomingMessage,
   res: ServerResponse,
@@ -156,6 +161,7 @@ export function createMokupPlugin(options: MokupViteOptionsInput = {}): Plugin {
     logger,
     getServer: () => currentServer,
     getDirs: () => resolveAllDirs(),
+    getSwScript: () => buildSwLifecycleScript(resolveSwImportPath(base)),
   })
 
   const hasSwRoutes = () => !!swConfig && swRoutes.length > 0
@@ -165,13 +171,13 @@ export function createMokupPlugin(options: MokupViteOptionsInput = {}): Plugin {
   const swVirtualId = 'virtual:mokup-sw'
   const resolvedSwVirtualId = `\0${swVirtualId}`
 
-  const buildSwLifecycleScript = () => {
+  function buildSwLifecycleScript(importPath = 'mokup/sw') {
     const shouldUnregister = unregisterConfig.unregister === true || !hasSwEntries
     if (shouldUnregister) {
       const path = resolveSwRequestPath(unregisterConfig.path)
       const scope = resolveSwRegisterScope(unregisterConfig.scope)
       return [
-        'import { unregisterMokupServiceWorker } from \'mokup/sw\'',
+        `import { unregisterMokupServiceWorker } from ${JSON.stringify(importPath)}`,
         '(async () => {',
         `  await unregisterMokupServiceWorker({ path: ${JSON.stringify(path)}, scope: ${JSON.stringify(scope)} })`,
         '})()',
@@ -186,7 +192,7 @@ export function createMokupPlugin(options: MokupViteOptionsInput = {}): Plugin {
     const path = resolveSwRequestPath(swConfig.path)
     const scope = resolveSwRegisterScope(swConfig.scope)
     return [
-      'import { registerMokupServiceWorker } from \'mokup/sw\'',
+      `import { registerMokupServiceWorker } from ${JSON.stringify(importPath)}`,
       '(async () => {',
       `  const registration = await registerMokupServiceWorker({ path: ${JSON.stringify(path)}, scope: ${JSON.stringify(scope)} })`,
       '  if (import.meta.hot && registration) {',

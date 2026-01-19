@@ -82,6 +82,27 @@ function injectPlaygroundHmr(html: string, base: string) {
   return `${html}\n${snippet}`
 }
 
+function injectPlaygroundSw(html: string, script: string | null | undefined) {
+  if (!script) {
+    return html
+  }
+  if (html.includes('mokup-playground-sw')) {
+    return html
+  }
+  const snippet = [
+    '<script type="module" id="mokup-playground-sw">',
+    script,
+    '</script>',
+  ].join('\n')
+  if (html.includes('</head>')) {
+    return html.replace('</head>', `${snippet}\n</head>`)
+  }
+  if (html.includes('</body>')) {
+    return html.replace('</body>', `${snippet}\n</body>`)
+  }
+  return `${html}\n${snippet}`
+}
+
 function isViteDevServer(
   server: ViteDevServer | PreviewServer | undefined | null,
 ): server is ViteDevServer {
@@ -256,6 +277,7 @@ export function createPlaygroundMiddleware(params: {
   logger: Logger
   getServer?: () => ViteDevServer | PreviewServer | null
   getDirs?: () => string[]
+  getSwScript?: () => string | null
 }) {
   const distDir = resolvePlaygroundDist()
   const playgroundPath = params.config.path
@@ -290,9 +312,11 @@ export function createPlaygroundMiddleware(params: {
     if (subPath === '' || subPath === '/' || subPath === '/index.html') {
       try {
         const html = await fs.readFile(indexPath, 'utf8')
-        const output = isViteDevServer(server)
-          ? injectPlaygroundHmr(html, server.config.base ?? '/')
-          : html
+        let output = html
+        if (isViteDevServer(server)) {
+          output = injectPlaygroundHmr(output, server.config.base ?? '/')
+          output = injectPlaygroundSw(output, params.getSwScript?.())
+        }
         const contentType = mimeTypes['.html'] ?? 'text/html; charset=utf-8'
         sendFile(res, output, contentType)
       }
