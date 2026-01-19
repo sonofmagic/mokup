@@ -193,8 +193,10 @@ function buildManifestResponse(
 export function buildSwScript(params: {
   routes: RouteTable
   root: string
+  runtimeImportPath?: string
 }) {
   const { routes, root } = params
+  const runtimeImportPath = params.runtimeImportPath ?? 'mokup/runtime'
   const ruleModules = new Map<string, string>()
   const middlewareModules = new Map<string, string>()
 
@@ -238,7 +240,7 @@ export function buildSwScript(params: {
   }
 
   const imports: string[] = [
-    'import { createRuntime } from \'mokup/runtime\'',
+    `import { createRuntime } from ${JSON.stringify(runtimeImportPath)}`,
   ]
   const moduleEntries: Array<{ id: string, name: string, kind: 'rule' | 'middleware' }> = []
   let moduleIndex = 0

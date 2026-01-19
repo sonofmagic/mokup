@@ -86,6 +86,11 @@ function resolveSwImportPath(base: string) {
   return `${normalizedBase}@id/mokup/sw`
 }
 
+function resolveSwRuntimeImportPath(base: string) {
+  const normalizedBase = normalizeBase(base)
+  return `${normalizedBase}@id/mokup/runtime`
+}
+
 type MiddlewareHandler = (
   req: IncomingMessage,
   res: ServerResponse,
@@ -326,7 +331,11 @@ export function createMokupPlugin(options: MokupViteOptionsInput = {}): Plugin {
             return next()
           }
           try {
-            const code = buildSwScript({ routes: swRoutes, root })
+            const code = buildSwScript({
+              routes: swRoutes,
+              root,
+              runtimeImportPath: resolveSwRuntimeImportPath(base),
+            })
             res.statusCode = 200
             res.setHeader('Content-Type', 'application/javascript; charset=utf-8')
             res.setHeader('Cache-Control', 'no-cache')
