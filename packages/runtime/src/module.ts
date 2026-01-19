@@ -105,7 +105,10 @@ async function loadModuleExport(
     : resolveModuleUrl(modulePath, moduleBase)
   const resolvedMapValue = resolvedUrl ? moduleMap?.[resolvedUrl] : undefined
   const moduleValue = directMapValue ?? resolvedMapValue
-  const module = moduleValue ?? await import(resolvedUrl ?? modulePath)
+  const module = moduleValue ?? await import(
+    /* @vite-ignore */
+    (resolvedUrl ?? modulePath),
+  )
   return module[exportName] ?? module.default ?? module
 }
 
