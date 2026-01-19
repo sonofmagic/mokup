@@ -1,5 +1,16 @@
 # mokup
 
+## 0.1.0
+
+### Minor Changes
+
+- ✨ **Switch mock handlers to Hono Context, rename MockRule.response to handler, and remove rule-level url/method overrides for TS/JS mocks.** [`0f73eac`](https://github.com/sonofmagic/mokup/commit/0f73eaca4c02c2d29f8ff386a768fe179da932ac) by @sonofmagic
+
+### Patch Changes
+
+- 📦 **Dependencies** [`0f73eac`](https://github.com/sonofmagic/mokup/commit/0f73eaca4c02c2d29f8ff386a768fe179da932ac)
+  → `@mokup/runtime@0.1.0`
+
 ## 0.0.1
 
 ### Patch Changes
