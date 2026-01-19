@@ -5,6 +5,7 @@ export default defineBuildConfig({
   declaration: true,
   entries: [
     'src/index',
+    'src/runtime',
     'src/vite',
     'src/sw',
   ],

@@ -21,6 +21,11 @@
       "import": "./dist/vite.mjs",
       "require": "./dist/vite.cjs"
     },
+    "./runtime": {
+      "types": "./dist/runtime.d.ts",
+      "import": "./dist/runtime.mjs",
+      "require": "./dist/runtime.cjs"
+    },
     "./sw": {
       "types": "./dist/sw.d.ts",
       "import": "./dist/sw.mjs",

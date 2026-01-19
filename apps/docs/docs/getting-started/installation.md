@@ -22,7 +22,7 @@ pnpm add -D @mokup/cli
 Server/Worker runtime (deploy or middleware):
 
 ```bash
-pnpm add @mokup/server @mokup/runtime
+pnpm add mokup @mokup/server
 ```
 
 If you only need Vite dev mocks, `mokup` is enough.

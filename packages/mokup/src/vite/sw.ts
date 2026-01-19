@@ -238,7 +238,7 @@ export function buildSwScript(params: {
   }
 
   const imports: string[] = [
-    'import { createRuntime } from \'@mokup/runtime\'',
+    'import { createRuntime } from \'mokup/runtime\'',
   ]
   const moduleEntries: Array<{ id: string, name: string, kind: 'rule' | 'middleware' }> = []
   let moduleIndex = 0

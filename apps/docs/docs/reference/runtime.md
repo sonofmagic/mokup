@@ -1,11 +1,11 @@
 # Runtime API
 
-`@mokup/runtime` is the core matcher and response executor.
+`mokup/runtime` is the core matcher and response executor.
 
 ## createRuntime
 
 ```ts
-import { createRuntime } from '@mokup/runtime'
+import { createRuntime } from 'mokup/runtime'
 
 const runtime = createRuntime({ manifest })
 const result = await runtime.handle({

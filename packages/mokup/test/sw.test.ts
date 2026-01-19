@@ -54,6 +54,7 @@ describe('mokup SW', () => {
     const manifest = extractManifest(code)
     const manifestRoute = manifest.routes[0]
 
+    expect(code).toContain('import { createRuntime } from \'mokup/runtime\'')
     expect(manifestRoute?.response.type).toBe('module')
     expect(manifestRoute?.response.module).toBe('/mock/users.get.ts')
     expect(manifestRoute?.response.ruleIndex).toBe(3)

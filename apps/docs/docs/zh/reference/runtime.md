@@ -1,11 +1,11 @@
 # Runtime API
 
-`@mokup/runtime` 是路由匹配与响应处理的核心。
+`mokup/runtime` 是路由匹配与响应处理的核心。
 
 ## createRuntime
 
 ```ts
-import { createRuntime } from '@mokup/runtime'
+import { createRuntime } from 'mokup/runtime'
 
 const runtime = createRuntime({ manifest })
 const result = await runtime.handle({

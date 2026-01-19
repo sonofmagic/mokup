@@ -22,7 +22,7 @@ pnpm add -D @mokup/cli
 Server/Worker 运行时（部署或中间件）：
 
 ```bash
-pnpm add @mokup/server @mokup/runtime
+pnpm add mokup @mokup/server
 ```
 
 如果你只做本地 Vite 开发，只需要 `mokup` 即可。
