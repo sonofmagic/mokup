@@ -43,6 +43,18 @@ function normalizeBase(base: string) {
   return base.endsWith('/') ? base.slice(0, -1) : base
 }
 
+function resolvePlaygroundRequestPath(base: string, playgroundPath: string) {
+  const normalizedBase = normalizeBase(base)
+  const normalizedPath = normalizePlaygroundPath(playgroundPath)
+  if (!normalizedBase) {
+    return normalizedPath
+  }
+  if (normalizedPath.startsWith(normalizedBase)) {
+    return normalizedPath
+  }
+  return `${normalizedBase}${normalizedPath}`
+}
+
 function injectPlaygroundHmr(html: string, base: string) {
   if (html.includes('mokup-playground-hmr')) {
     return html
@@ -253,25 +265,31 @@ export function createPlaygroundMiddleware(params: {
     if (!params.config.enabled) {
       return next()
     }
+    const server = params.getServer?.()
+    const requestPath = resolvePlaygroundRequestPath(server?.config?.base ?? '/', playgroundPath)
     const requestUrl = req.url ?? '/'
     const url = new URL(requestUrl, 'http://mokup.local')
     const pathname = url.pathname
-    if (!pathname.startsWith(playgroundPath)) {
+    const matchedPath = pathname.startsWith(requestPath)
+      ? requestPath
+      : pathname.startsWith(playgroundPath)
+        ? playgroundPath
+        : null
+    if (!matchedPath) {
       return next()
     }
 
-    const subPath = pathname.slice(playgroundPath.length)
+    const subPath = pathname.slice(matchedPath.length)
     if (subPath === '') {
       const suffix = url.search ?? ''
       res.statusCode = 302
-      res.setHeader('Location', `${playgroundPath}/${suffix}`)
+      res.setHeader('Location', `${matchedPath}/${suffix}`)
       res.end()
       return
     }
     if (subPath === '' || subPath === '/' || subPath === '/index.html') {
       try {
         const html = await fs.readFile(indexPath, 'utf8')
-        const server = params.getServer?.()
         const output = isViteDevServer(server)
           ? injectPlaygroundHmr(html, server.config.base ?? '/')
           : html
@@ -287,13 +305,12 @@ export function createPlaygroundMiddleware(params: {
     }
 
     if (subPath === '/routes') {
-      const server = params.getServer?.()
       const dirs = params.getDirs?.() ?? []
       const baseRoot = resolveGroupRoot(dirs, server?.config?.root)
       const groups = resolveGroups(dirs, baseRoot)
       const routes = params.getRoutes()
       sendJson(res, {
-        basePath: playgroundPath,
+        basePath: matchedPath,
         count: routes.length,
         groups: groups.map(group => ({ key: group.key, label: group.label })),
         routes: routes.map(route => toPlaygroundRoute(route, baseRoot, groups)),
