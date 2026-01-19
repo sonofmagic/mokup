@@ -1,7 +1,7 @@
 {
   "name": "@mokup/playground",
   "type": "module",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "description": "Static playground UI for mokup mock APIs.",
   "license": "MIT",
   "homepage": "https://mokup.icebreaker.top",
