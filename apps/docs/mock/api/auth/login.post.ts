@@ -1,4 +1,6 @@
-export default (req, res) => {
+import type { DocsMockResponseHandler } from '../../types'
+
+const handler: DocsMockResponseHandler = (req, res) => {
   const body = req.body && typeof req.body === 'object' ? req.body : {}
   const username = body.username
   const password = body.password
@@ -19,3 +21,5 @@ export default (req, res) => {
     },
   }
 }
+
+export default handler

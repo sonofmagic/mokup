@@ -1,4 +1,6 @@
-export default (_req, res) => {
+import type { DocsMockResponseHandler } from '../types'
+
+const handler: DocsMockResponseHandler = (_req, res) => {
   res.statusCode = 201
   return {
     ok: true,
@@ -12,3 +14,5 @@ export default (_req, res) => {
     },
   }
 }
+
+export default handler

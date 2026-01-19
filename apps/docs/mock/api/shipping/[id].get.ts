@@ -1,4 +1,6 @@
-export default (req) => {
+import type { DocsMockResponseHandler } from '../../types'
+
+const handler: DocsMockResponseHandler = (req) => {
   const rawId = req.params?.id ?? 'shp_unknown'
   const id = Array.isArray(rawId) ? rawId.join('-') : rawId
   const displayValue = `TRK ${id}`
@@ -15,3 +17,5 @@ export default (req) => {
     ...defaults,
   }
 }
+
+export default handler
