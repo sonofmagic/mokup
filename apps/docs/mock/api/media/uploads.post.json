@@ -1,0 +1,5 @@
+{
+  "ok": true,
+  "action": "upload_created",
+  "uploadUrl": "https://cdn.example.com/upload"
+}

@@ -1,0 +1,35 @@
+{
+  "items": [
+    {
+      "id": "inv_1001",
+      "sku": "SKU 1001",
+      "status": "available",
+      "createdAt": "2026-01-01T12:00:00.000Z",
+      "updatedAt": "2026-01-18T12:00:00.000Z",
+      "quantity": 120,
+      "location": "wh-1"
+    },
+    {
+      "id": "inv_1002",
+      "sku": "SKU 1002",
+      "status": "available",
+      "createdAt": "2026-01-01T12:00:00.000Z",
+      "updatedAt": "2026-01-18T12:00:00.000Z",
+      "quantity": 120,
+      "location": "wh-1"
+    },
+    {
+      "id": "inv_1003",
+      "sku": "SKU 1003",
+      "status": "available",
+      "createdAt": "2026-01-01T12:00:00.000Z",
+      "updatedAt": "2026-01-18T12:00:00.000Z",
+      "quantity": 120,
+      "location": "wh-1"
+    }
+  ],
+  "page": 1,
+  "pageSize": 3,
+  "total": 3,
+  "query": "demo"
+}

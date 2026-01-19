@@ -1,0 +1,38 @@
+{
+  "items": [
+    {
+      "id": "msg_1001",
+      "subject": "Message 1001",
+      "status": "unread",
+      "createdAt": "2026-01-01T12:00:00.000Z",
+      "updatedAt": "2026-01-18T12:00:00.000Z",
+      "fromId": "usr_1001",
+      "toId": "usr_1002",
+      "body": "Hello!"
+    },
+    {
+      "id": "msg_1002",
+      "subject": "Message 1002",
+      "status": "unread",
+      "createdAt": "2026-01-01T12:00:00.000Z",
+      "updatedAt": "2026-01-18T12:00:00.000Z",
+      "fromId": "usr_1001",
+      "toId": "usr_1002",
+      "body": "Hello!"
+    },
+    {
+      "id": "msg_1003",
+      "subject": "Message 1003",
+      "status": "unread",
+      "createdAt": "2026-01-01T12:00:00.000Z",
+      "updatedAt": "2026-01-18T12:00:00.000Z",
+      "fromId": "usr_1001",
+      "toId": "usr_1002",
+      "body": "Hello!"
+    }
+  ],
+  "page": 1,
+  "pageSize": 3,
+  "total": 3,
+  "query": "demo"
+}

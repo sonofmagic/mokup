@@ -1,0 +1,37 @@
+{
+  "items": [
+    {
+      "id": "not_1001",
+      "title": "Notification 1001",
+      "status": "unread",
+      "createdAt": "2026-01-01T12:00:00.000Z",
+      "updatedAt": "2026-01-18T12:00:00.000Z",
+      "type": "system",
+      "read": false,
+      "channel": "email"
+    },
+    {
+      "id": "not_1002",
+      "title": "Notification 1002",
+      "status": "unread",
+      "createdAt": "2026-01-01T12:00:00.000Z",
+      "updatedAt": "2026-01-18T12:00:00.000Z",
+      "type": "system",
+      "read": false,
+      "channel": "email"
+    },
+    {
+      "id": "not_1003",
+      "title": "Notification 1003",
+      "status": "unread",
+      "createdAt": "2026-01-01T12:00:00.000Z",
+      "updatedAt": "2026-01-18T12:00:00.000Z",
+      "type": "system",
+      "read": false,
+      "channel": "email"
+    }
+  ],
+  "page": 1,
+  "pageSize": 3,
+  "total": 3
+}

@@ -1,0 +1,6 @@
+{
+  "id": "crt_1001",
+  "ok": true,
+  "action": "checkout_started",
+  "redirectUrl": "https://pay.example.com/checkout"
+}

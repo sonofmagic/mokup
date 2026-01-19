@@ -1,0 +1,8 @@
+{
+  "module": "settings",
+  "generatedAt": "2026-01-18T12:00:00.000Z",
+  "flags": {
+    "betaDashboard": true,
+    "newBilling": false
+  }
+}

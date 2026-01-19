@@ -1,0 +1,37 @@
+{
+  "items": [
+    {
+      "id": "pst_1001",
+      "title": "Post 1001",
+      "status": "published",
+      "createdAt": "2026-01-01T12:00:00.000Z",
+      "updatedAt": "2026-01-18T12:00:00.000Z",
+      "authorId": "usr_1001",
+      "content": "Sample post content",
+      "likes": 12
+    },
+    {
+      "id": "pst_1002",
+      "title": "Post 1002",
+      "status": "published",
+      "createdAt": "2026-01-01T12:00:00.000Z",
+      "updatedAt": "2026-01-18T12:00:00.000Z",
+      "authorId": "usr_1001",
+      "content": "Sample post content",
+      "likes": 12
+    },
+    {
+      "id": "pst_1003",
+      "title": "Post 1003",
+      "status": "published",
+      "createdAt": "2026-01-01T12:00:00.000Z",
+      "updatedAt": "2026-01-18T12:00:00.000Z",
+      "authorId": "usr_1001",
+      "content": "Sample post content",
+      "likes": 12
+    }
+  ],
+  "page": 1,
+  "pageSize": 3,
+  "total": 3
+}

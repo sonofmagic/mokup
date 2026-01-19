@@ -1,0 +1,38 @@
+{
+  "items": [
+    {
+      "id": "org_1001",
+      "name": "Org 1001",
+      "status": "active",
+      "createdAt": "2026-01-01T12:00:00.000Z",
+      "updatedAt": "2026-01-18T12:00:00.000Z",
+      "domain": "example.com",
+      "plan": "pro",
+      "membersCount": 12
+    },
+    {
+      "id": "org_1002",
+      "name": "Org 1002",
+      "status": "active",
+      "createdAt": "2026-01-01T12:00:00.000Z",
+      "updatedAt": "2026-01-18T12:00:00.000Z",
+      "domain": "example.com",
+      "plan": "pro",
+      "membersCount": 12
+    },
+    {
+      "id": "org_1003",
+      "name": "Org 1003",
+      "status": "active",
+      "createdAt": "2026-01-01T12:00:00.000Z",
+      "updatedAt": "2026-01-18T12:00:00.000Z",
+      "domain": "example.com",
+      "plan": "pro",
+      "membersCount": 12
+    }
+  ],
+  "page": 1,
+  "pageSize": 3,
+  "total": 3,
+  "query": "demo"
+}

@@ -1,0 +1,40 @@
+{
+  "items": [
+    {
+      "id": "met_1001",
+      "name": "Metric 1001",
+      "status": "ready",
+      "createdAt": "2026-01-01T12:00:00.000Z",
+      "updatedAt": "2026-01-18T12:00:00.000Z",
+      "period": "30d",
+      "value": 1280,
+      "trend": "up",
+      "type": "event"
+    },
+    {
+      "id": "met_1002",
+      "name": "Metric 1002",
+      "status": "ready",
+      "createdAt": "2026-01-01T12:00:00.000Z",
+      "updatedAt": "2026-01-18T12:00:00.000Z",
+      "period": "30d",
+      "value": 1280,
+      "trend": "up",
+      "type": "event"
+    },
+    {
+      "id": "met_1003",
+      "name": "Metric 1003",
+      "status": "ready",
+      "createdAt": "2026-01-01T12:00:00.000Z",
+      "updatedAt": "2026-01-18T12:00:00.000Z",
+      "period": "30d",
+      "value": 1280,
+      "trend": "up",
+      "type": "event"
+    }
+  ],
+  "page": 1,
+  "pageSize": 3,
+  "total": 3
+}

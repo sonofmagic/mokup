@@ -1,0 +1,46 @@
+{
+  "items": [
+    {
+      "id": "bil_1001",
+      "name": "Billing Account 1001",
+      "status": "paid",
+      "createdAt": "2026-01-01T12:00:00.000Z",
+      "updatedAt": "2026-01-18T12:00:00.000Z",
+      "plan": "pro",
+      "balance": {
+        "amount": 120,
+        "currency": "USD"
+      },
+      "currency": "USD"
+    },
+    {
+      "id": "bil_1002",
+      "name": "Billing Account 1002",
+      "status": "paid",
+      "createdAt": "2026-01-01T12:00:00.000Z",
+      "updatedAt": "2026-01-18T12:00:00.000Z",
+      "plan": "pro",
+      "balance": {
+        "amount": 120,
+        "currency": "USD"
+      },
+      "currency": "USD"
+    },
+    {
+      "id": "bil_1003",
+      "name": "Billing Account 1003",
+      "status": "paid",
+      "createdAt": "2026-01-01T12:00:00.000Z",
+      "updatedAt": "2026-01-18T12:00:00.000Z",
+      "plan": "pro",
+      "balance": {
+        "amount": 120,
+        "currency": "USD"
+      },
+      "currency": "USD"
+    }
+  ],
+  "page": 1,
+  "pageSize": 3,
+  "total": 3
+}

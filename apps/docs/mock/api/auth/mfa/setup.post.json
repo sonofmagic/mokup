@@ -1,0 +1,6 @@
+{
+  "ok": true,
+  "action": "mfa_setup",
+  "qr": "otpauth://totp/mokup",
+  "secret": "ABC123"
+}

@@ -1,0 +1,19 @@
+export default (req) => {
+  const rawId = req.params?.id ?? 'frd_unknown'
+  const id = Array.isArray(rawId) ? rawId.join('-') : rawId
+  const displayValue = `Friend ${id}`
+  const defaults = {
+    since: '2025-12-20',
+  }
+  return {
+    ok: true,
+    data: {
+      id,
+      name: displayValue,
+      status: 'accepted',
+      createdAt: '2026-01-01T12:00:00.000Z',
+      updatedAt: '2026-01-19T12:00:00.000Z',
+      ...defaults,
+    },
+  }
+}

@@ -1,0 +1,43 @@
+{
+  "items": [
+    {
+      "id": "pay_1001",
+      "reference": "PAY 1001",
+      "status": "authorized",
+      "createdAt": "2026-01-01T12:00:00.000Z",
+      "updatedAt": "2026-01-18T12:00:00.000Z",
+      "amount": {
+        "amount": 120,
+        "currency": "USD"
+      },
+      "provider": "stripe"
+    },
+    {
+      "id": "pay_1002",
+      "reference": "PAY 1002",
+      "status": "authorized",
+      "createdAt": "2026-01-01T12:00:00.000Z",
+      "updatedAt": "2026-01-18T12:00:00.000Z",
+      "amount": {
+        "amount": 120,
+        "currency": "USD"
+      },
+      "provider": "stripe"
+    },
+    {
+      "id": "pay_1003",
+      "reference": "PAY 1003",
+      "status": "authorized",
+      "createdAt": "2026-01-01T12:00:00.000Z",
+      "updatedAt": "2026-01-18T12:00:00.000Z",
+      "amount": {
+        "amount": 120,
+        "currency": "USD"
+      },
+      "provider": "stripe"
+    }
+  ],
+  "page": 1,
+  "pageSize": 3,
+  "total": 3
+}

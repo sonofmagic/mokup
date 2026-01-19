@@ -1,0 +1,31 @@
+{
+  "items": [
+    {
+      "id": "frd_1001",
+      "name": "Friend 1001",
+      "status": "accepted",
+      "createdAt": "2026-01-01T12:00:00.000Z",
+      "updatedAt": "2026-01-18T12:00:00.000Z",
+      "since": "2025-12-20"
+    },
+    {
+      "id": "frd_1002",
+      "name": "Friend 1002",
+      "status": "accepted",
+      "createdAt": "2026-01-01T12:00:00.000Z",
+      "updatedAt": "2026-01-18T12:00:00.000Z",
+      "since": "2025-12-20"
+    },
+    {
+      "id": "frd_1003",
+      "name": "Friend 1003",
+      "status": "accepted",
+      "createdAt": "2026-01-01T12:00:00.000Z",
+      "updatedAt": "2026-01-18T12:00:00.000Z",
+      "since": "2025-12-20"
+    }
+  ],
+  "page": 1,
+  "pageSize": 3,
+  "total": 3
+}

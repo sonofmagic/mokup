@@ -1,0 +1,38 @@
+{
+  "items": [
+    {
+      "id": "prj_1001",
+      "name": "Project 1001",
+      "status": "active",
+      "createdAt": "2026-01-01T12:00:00.000Z",
+      "updatedAt": "2026-01-18T12:00:00.000Z",
+      "key": "PRJ",
+      "visibility": "private",
+      "repoUrl": "https://git.example.com/prj"
+    },
+    {
+      "id": "prj_1002",
+      "name": "Project 1002",
+      "status": "active",
+      "createdAt": "2026-01-01T12:00:00.000Z",
+      "updatedAt": "2026-01-18T12:00:00.000Z",
+      "key": "PRJ",
+      "visibility": "private",
+      "repoUrl": "https://git.example.com/prj"
+    },
+    {
+      "id": "prj_1003",
+      "name": "Project 1003",
+      "status": "active",
+      "createdAt": "2026-01-01T12:00:00.000Z",
+      "updatedAt": "2026-01-18T12:00:00.000Z",
+      "key": "PRJ",
+      "visibility": "private",
+      "repoUrl": "https://git.example.com/prj"
+    }
+  ],
+  "page": 1,
+  "pageSize": 3,
+  "total": 3,
+  "query": "demo"
+}

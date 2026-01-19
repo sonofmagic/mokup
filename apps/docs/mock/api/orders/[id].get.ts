@@ -1,0 +1,21 @@
+export default (req) => {
+  const rawId = req.params?.id ?? 'ord_unknown'
+  const id = Array.isArray(rawId) ? rawId.join('-') : rawId
+  const displayValue = `ORD ${id}`
+  const defaults = {
+    total: {
+      amount: 240,
+      currency: 'USD',
+    },
+    currency: 'USD',
+    customerId: 'usr_1001',
+  }
+  return {
+    id,
+    number: displayValue,
+    status: 'processing',
+    createdAt: '2026-01-01T12:00:00.000Z',
+    updatedAt: '2026-01-18T12:00:00.000Z',
+    ...defaults,
+  }
+}

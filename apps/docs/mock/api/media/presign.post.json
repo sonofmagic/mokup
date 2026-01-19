@@ -1,0 +1,5 @@
+{
+  "ok": true,
+  "action": "presigned",
+  "url": "https://cdn.example.com/presign"
+}

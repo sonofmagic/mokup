@@ -1,0 +1,46 @@
+{
+  "items": [
+    {
+      "id": "ord_1001",
+      "number": "ORD 1001",
+      "status": "processing",
+      "createdAt": "2026-01-01T12:00:00.000Z",
+      "updatedAt": "2026-01-18T12:00:00.000Z",
+      "total": {
+        "amount": 240,
+        "currency": "USD"
+      },
+      "currency": "USD",
+      "customerId": "usr_1001"
+    },
+    {
+      "id": "ord_1002",
+      "number": "ORD 1002",
+      "status": "processing",
+      "createdAt": "2026-01-01T12:00:00.000Z",
+      "updatedAt": "2026-01-18T12:00:00.000Z",
+      "total": {
+        "amount": 240,
+        "currency": "USD"
+      },
+      "currency": "USD",
+      "customerId": "usr_1001"
+    },
+    {
+      "id": "ord_1003",
+      "number": "ORD 1003",
+      "status": "processing",
+      "createdAt": "2026-01-01T12:00:00.000Z",
+      "updatedAt": "2026-01-18T12:00:00.000Z",
+      "total": {
+        "amount": 240,
+        "currency": "USD"
+      },
+      "currency": "USD",
+      "customerId": "usr_1001"
+    }
+  ],
+  "page": 1,
+  "pageSize": 3,
+  "total": 3
+}

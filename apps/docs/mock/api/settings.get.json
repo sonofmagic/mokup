@@ -1,0 +1,34 @@
+{
+  "items": [
+    {
+      "id": "set_1001",
+      "key": "Setting 1001",
+      "status": "active",
+      "createdAt": "2026-01-01T12:00:00.000Z",
+      "updatedAt": "2026-01-18T12:00:00.000Z",
+      "value": "enabled",
+      "scope": "org"
+    },
+    {
+      "id": "set_1002",
+      "key": "Setting 1002",
+      "status": "active",
+      "createdAt": "2026-01-01T12:00:00.000Z",
+      "updatedAt": "2026-01-18T12:00:00.000Z",
+      "value": "enabled",
+      "scope": "org"
+    },
+    {
+      "id": "set_1003",
+      "key": "Setting 1003",
+      "status": "active",
+      "createdAt": "2026-01-01T12:00:00.000Z",
+      "updatedAt": "2026-01-18T12:00:00.000Z",
+      "value": "enabled",
+      "scope": "org"
+    }
+  ],
+  "page": 1,
+  "pageSize": 3,
+  "total": 3
+}

@@ -1,0 +1,34 @@
+{
+  "items": [
+    {
+      "id": "grp_1001",
+      "name": "Group 1001",
+      "status": "active",
+      "createdAt": "2026-01-01T12:00:00.000Z",
+      "updatedAt": "2026-01-18T12:00:00.000Z",
+      "membersCount": 12,
+      "privacy": "private"
+    },
+    {
+      "id": "grp_1002",
+      "name": "Group 1002",
+      "status": "active",
+      "createdAt": "2026-01-01T12:00:00.000Z",
+      "updatedAt": "2026-01-18T12:00:00.000Z",
+      "membersCount": 12,
+      "privacy": "private"
+    },
+    {
+      "id": "grp_1003",
+      "name": "Group 1003",
+      "status": "active",
+      "createdAt": "2026-01-01T12:00:00.000Z",
+      "updatedAt": "2026-01-18T12:00:00.000Z",
+      "membersCount": 12,
+      "privacy": "private"
+    }
+  ],
+  "page": 1,
+  "pageSize": 3,
+  "total": 3
+}

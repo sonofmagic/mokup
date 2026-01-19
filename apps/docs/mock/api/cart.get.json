@@ -1,0 +1,46 @@
+{
+  "items": [
+    {
+      "id": "crt_1001",
+      "name": "Cart 1001",
+      "status": "open",
+      "createdAt": "2026-01-01T12:00:00.000Z",
+      "updatedAt": "2026-01-18T12:00:00.000Z",
+      "subtotal": {
+        "amount": 120,
+        "currency": "USD"
+      },
+      "itemCount": 3,
+      "currency": "USD"
+    },
+    {
+      "id": "crt_1002",
+      "name": "Cart 1002",
+      "status": "open",
+      "createdAt": "2026-01-01T12:00:00.000Z",
+      "updatedAt": "2026-01-18T12:00:00.000Z",
+      "subtotal": {
+        "amount": 120,
+        "currency": "USD"
+      },
+      "itemCount": 3,
+      "currency": "USD"
+    },
+    {
+      "id": "crt_1003",
+      "name": "Cart 1003",
+      "status": "open",
+      "createdAt": "2026-01-01T12:00:00.000Z",
+      "updatedAt": "2026-01-18T12:00:00.000Z",
+      "subtotal": {
+        "amount": 120,
+        "currency": "USD"
+      },
+      "itemCount": 3,
+      "currency": "USD"
+    }
+  ],
+  "page": 1,
+  "pageSize": 3,
+  "total": 3
+}

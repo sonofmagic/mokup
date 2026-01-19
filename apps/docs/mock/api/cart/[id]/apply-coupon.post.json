@@ -1,0 +1,10 @@
+{
+  "id": "crt_1001",
+  "ok": true,
+  "action": "coupon_applied",
+  "code": "SAVE10",
+  "discount": {
+    "amount": 10,
+    "currency": "USD"
+  }
+}

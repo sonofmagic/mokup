@@ -1,0 +1,38 @@
+{
+  "items": [
+    {
+      "id": "rev_1001",
+      "title": "Review 1001",
+      "status": "pending",
+      "createdAt": "2026-01-01T12:00:00.000Z",
+      "updatedAt": "2026-01-18T12:00:00.000Z",
+      "rating": 4,
+      "productId": "prd_1001",
+      "authorId": "usr_1002"
+    },
+    {
+      "id": "rev_1002",
+      "title": "Review 1002",
+      "status": "pending",
+      "createdAt": "2026-01-01T12:00:00.000Z",
+      "updatedAt": "2026-01-18T12:00:00.000Z",
+      "rating": 4,
+      "productId": "prd_1001",
+      "authorId": "usr_1002"
+    },
+    {
+      "id": "rev_1003",
+      "title": "Review 1003",
+      "status": "pending",
+      "createdAt": "2026-01-01T12:00:00.000Z",
+      "updatedAt": "2026-01-18T12:00:00.000Z",
+      "rating": 4,
+      "productId": "prd_1001",
+      "authorId": "usr_1002"
+    }
+  ],
+  "page": 1,
+  "pageSize": 3,
+  "total": 3,
+  "query": "demo"
+}

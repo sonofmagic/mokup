@@ -1,0 +1,7 @@
+{
+  "module": "notifications",
+  "generatedAt": "2026-01-18T12:00:00.000Z",
+  "email": true,
+  "sms": false,
+  "push": true
+}

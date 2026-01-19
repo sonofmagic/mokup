@@ -1,0 +1,17 @@
+export default (req) => {
+  const rawId = req.params?.id ?? 'shp_unknown'
+  const id = Array.isArray(rawId) ? rawId.join('-') : rawId
+  const displayValue = `TRK ${id}`
+  const defaults = {
+    carrier: 'DHL',
+    eta: '2026-01-22',
+  }
+  return {
+    id,
+    tracking: displayValue,
+    status: 'in_transit',
+    createdAt: '2026-01-01T12:00:00.000Z',
+    updatedAt: '2026-01-18T12:00:00.000Z',
+    ...defaults,
+  }
+}

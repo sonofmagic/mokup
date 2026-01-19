@@ -1,0 +1,5 @@
+{
+  "ok": true,
+  "action": "reset_email_sent",
+  "delivery": "email"
+}

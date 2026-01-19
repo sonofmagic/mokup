@@ -1,0 +1,21 @@
+export default (req) => {
+  const rawId = req.params?.id ?? 'not_unknown'
+  const id = Array.isArray(rawId) ? rawId.join('-') : rawId
+  const displayValue = `Notification ${id}`
+  const defaults = {
+    type: 'system',
+    read: false,
+    channel: 'email',
+  }
+  return {
+    ok: true,
+    data: {
+      id,
+      title: displayValue,
+      status: 'unread',
+      createdAt: '2026-01-01T12:00:00.000Z',
+      updatedAt: '2026-01-19T12:00:00.000Z',
+      ...defaults,
+    },
+  }
+}

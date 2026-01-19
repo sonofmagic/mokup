@@ -1,0 +1,6 @@
+{
+  "id": "usr_1001",
+  "name": "Demo User",
+  "email": "demo@example.com",
+  "role": "admin"
+}

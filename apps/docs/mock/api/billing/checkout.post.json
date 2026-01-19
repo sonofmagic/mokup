@@ -1,0 +1,5 @@
+{
+  "ok": true,
+  "action": "checkout",
+  "redirectUrl": "https://pay.example.com/checkout"
+}
