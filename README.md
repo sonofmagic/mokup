@@ -1,25 +1,45 @@
-# mokup
+<p align="center">
+  <img src="docs/assets/mokup-logo.svg" width="180" alt="Mokup logo">
+</p>
+<h1 align="center">mokup</h1>
+<p align="center">File-based mock toolkit for Vite, CLI builds, and runtime usage.</p>
+<p align="center">
+  <a href="http://mokup.icebreaker.top/">Website</a> ·
+  <a href="http://mokup.icebreaker.top/_mokup">Playground</a> ·
+  <a href="https://github.com/sonofmagic/mokup">GitHub</a>
+</p>
 
-## Packages
+## Why mokup
+- File-based routing via filename suffixes like `users.get.json`.
+- JSON/JSONC and TS/JS handlers powered by Hono Context.
+- Works in Vite dev, CLI builds (workers), and runtime adapters.
+- Built-in headers, status, delays, and middleware hooks.
+
+## Quick start
+Create `mock/users.get.json`:
+
+```json
+{ "ok": true }
+```
+
+Create `mock/login.post.ts`:
+
+```ts
+export default async (c) => {
+  const body = await c.req.json().catch(() => ({}))
+  return { ok: true, user: body }
+}
+```
+
+Follow the docs at http://mokup.icebreaker.top/ for Vite and CLI setup.
 
 ## Contributing
-
-Contributions Welcome! You can contribute in the following ways.
-
-- Create an Issue - Propose a new feature. Report a bug.
-- Pull Request - Fix a bug and typo. Refactor the code.
-- Create third-party middleware - Instruct below.
-- Share - Share your thoughts on the Blog, X, and others.
-- Make your application - Please try to use mokup.
-
-For more details, see [CONTRIBUTING.md](CONTRIBUTING.md).
+Issues and pull requests are welcome. See [CONTRIBUTING.md](CONTRIBUTING.md).
 
 ## Contributors
-
 Thanks to [all contributors](https://github.com/sonofmagic/mokup/graphs/contributors)!
 
 ## Authors
-
 ice breaker <1324318532@qq.com>
 
 ## License
