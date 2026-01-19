@@ -1,5 +1,12 @@
 # docs
 
+## 0.0.2
+
+### Patch Changes
+
+- 📦 **Dependencies**
+  → `@mokup/server@0.0.2`
+
 ## 0.0.1
 
 ### Patch Changes
