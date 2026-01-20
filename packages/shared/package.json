@@ -1,7 +1,7 @@
 {
   "name": "@mokup/shared",
   "type": "module",
-  "version": "0.0.0",
+  "version": "0.1.0",
   "description": "Shared dependency exports for mokup.",
   "license": "MIT",
   "homepage": "https://mokup.icebreaker.top",

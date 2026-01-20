@@ -1,5 +1,16 @@
 # @mokup/cli
 
+## 0.3.0
+
+### Minor Changes
+
+- ✨ **Add a commander-based CLI in @mokup/cli with the new `serve` command, expose the Node dev server from @mokup/server, and have the mokup binary delegate to @mokup/cli.** [`ce04fe9`](https://github.com/sonofmagic/mokup/commit/ce04fe99ce918a3705d2341183adaf84c5d36cd0) by @sonofmagic
+
+### Patch Changes
+
+- 📦 **Dependencies** [`ce04fe9`](https://github.com/sonofmagic/mokup/commit/ce04fe99ce918a3705d2341183adaf84c5d36cd0)
+  → `@mokup/server@1.0.0`, `@mokup/shared@0.1.0`, `@mokup/runtime@0.1.1`
+
 ## 0.2.0
 
 ### Minor Changes
