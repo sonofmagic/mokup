@@ -246,7 +246,7 @@ onBeforeUnmount(() => {
             <div class="relative hidden w-4 flex-none items-center justify-center lg:flex">
               <div class="h-full w-px bg-pg-divider" />
               <button
-                class="group absolute flex h-10 w-10 items-center justify-center rounded-full border shadow-sm transition hover:-translate-y-0.5 border-pg-border bg-pg-surface-strong text-pg-text-muted hover:text-pg-text-soft"
+                class="group absolute flex h-10 w-10 cursor-col-resize items-center justify-center rounded-full border shadow-sm transition hover:-translate-y-0.5 border-pg-border bg-pg-surface-strong text-pg-text-muted hover:text-pg-text-soft"
                 type="button"
                 aria-label="Resize panels"
                 @pointerdown="handleDragStart"
