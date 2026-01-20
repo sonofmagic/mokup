@@ -223,16 +223,18 @@ export function buildSwScript(params: {
   root: string
   runtimeImportPath?: string
   basePaths?: string[]
+  resolveModulePath?: (file: string, root: string) => string
 }) {
   const { routes, root } = params
   const runtimeImportPath = params.runtimeImportPath ?? 'mokup/runtime'
   const basePaths = params.basePaths ?? []
+  const resolveModulePath = params.resolveModulePath ?? toViteImportPath
   const ruleModules = new Map<string, string>()
   const middlewareModules = new Map<string, string>()
 
   const manifestRoutes = routes.map((route) => {
     const moduleId = shouldModuleize(route.handler)
-      ? toViteImportPath(route.file, root)
+      ? resolveModulePath(route.file, root)
       : null
 
     if (moduleId) {
@@ -240,7 +242,7 @@ export function buildSwScript(params: {
     }
 
     const middleware = route.middlewares?.map((entry) => {
-      const modulePath = toViteImportPath(entry.source, root)
+      const modulePath = resolveModulePath(entry.source, root)
       middlewareModules.set(modulePath, modulePath)
       return {
         module: modulePath,

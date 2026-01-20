@@ -62,6 +62,7 @@ export async function registerMokupServiceWorker(
     })
   }
   catch (error) {
+    // eslint-disable-next-line no-console
     console.warn('[mokup] Failed to register service worker:', error)
     return null
   }
@@ -104,6 +105,7 @@ export async function unregisterMokupServiceWorker(
     return removed
   }
   catch (error) {
+    // eslint-disable-next-line no-console
     console.warn('[mokup] Failed to unregister service worker:', error)
     return []
   }

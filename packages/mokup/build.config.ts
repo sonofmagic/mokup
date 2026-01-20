@@ -11,6 +11,7 @@ export default defineBuildConfig({
     'src/server',
     'src/server/worker',
     'src/vite',
+    'src/webpack',
     'src/sw',
   ],
   rollup: {

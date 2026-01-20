@@ -93,6 +93,28 @@ describe('mokup SW', () => {
     expect(code).not.toContain('const moduleMap =')
   })
 
+  it('allows custom module path resolution', () => {
+    const root = path.join('/tmp', 'mokup-sw')
+    const file = path.join(root, 'mock', 'users.get.ts')
+    const parsed = parseRouteTemplate('/users')
+    const route: ResolvedRoute = {
+      file,
+      template: parsed.template,
+      method: 'GET',
+      tokens: parsed.tokens,
+      score: parsed.score,
+      handler: () => ({ ok: true }),
+    }
+
+    const code = buildSwScript({
+      routes: [route],
+      root,
+      resolveModulePath: () => '/abs/mock/users.get.ts',
+    })
+
+    expect(code).toContain('import * as module0 from \'/abs/mock/users.get.ts\'')
+  })
+
   it('uses defaults when SW config is missing overrides', () => {
     const warnings: string[] = []
     const logger = createLogger(warnings)

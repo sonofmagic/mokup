@@ -61,7 +61,10 @@ function parseBuildOptions(argv: string[]) {
 
   const options: BuildOptions = {
     handlers,
-    log: (message: string) => console.log(message),
+    log: (message: string) => {
+      // eslint-disable-next-line no-console
+      console.log(message)
+    },
   }
   if (dirs.length > 0) {
     options.dir = dirs
@@ -82,6 +85,7 @@ function parseBuildOptions(argv: string[]) {
 }
 
 function printHelp() {
+  // eslint-disable-next-line no-console
   console.log(
     `mokup build [options]\n\nOptions:\n  --dir, -d       Mock directory (repeatable)\n  --out, -o       Output directory (default: .mokup)\n  --prefix        URL prefix\n  --include       Include regex (repeatable)\n  --exclude       Exclude regex (repeatable)\n  --no-handlers   Skip function handler output`,
   )
@@ -96,6 +100,7 @@ if (!command || command === 'help' || command === '--help' || command === '-h') 
 }
 
 if (command !== 'build') {
+  // eslint-disable-next-line no-console
   console.error(`Unknown command: ${command}`)
   printHelp()
   exit(1)
@@ -105,6 +110,7 @@ const options = parseBuildOptions(args.slice(1))
 
 buildManifest(options)
   .catch((error) => {
+    // eslint-disable-next-line no-console
     console.error(error instanceof Error ? error.message : String(error))
     exit(1)
   })
