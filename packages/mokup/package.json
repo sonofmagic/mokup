@@ -78,6 +78,12 @@
   "peerDependenciesMeta": {
     "html-webpack-plugin": {
       "optional": true
+    },
+    "vite": {
+      "optional": true
+    },
+    "webpack": {
+      "optional": true
     }
   },
   "dependencies": {
