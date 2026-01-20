@@ -170,16 +170,16 @@ onBeforeUnmount(() => {
 </script>
 
 <template>
-  <div class="h-screen overflow-hidden bg-[radial-gradient(circle_at_top,_rgba(209,226,245,0.45),_transparent_55%),radial-gradient(circle_at_85%_20%,_rgba(200,230,222,0.35),_transparent_50%),radial-gradient(circle_at_12%_80%,_rgba(245,238,226,0.4),_transparent_55%)] dark:bg-[radial-gradient(circle_at_top,_rgba(38,60,92,0.55),_transparent_55%),radial-gradient(circle_at_85%_20%,_rgba(24,78,96,0.4),_transparent_50%),radial-gradient(circle_at_12%_80%,_rgba(70,58,44,0.45),_transparent_55%)]">
+  <div class="h-screen overflow-hidden pg-app-bg">
     <div class="flex h-full w-full flex-col">
       <main class="flex min-h-0 flex-1 flex-col overflow-hidden">
-        <div class="flex flex-1 flex-col overflow-hidden bg-white/60 dark:bg-slate-950/70">
+        <div class="flex flex-1 flex-col overflow-hidden bg-pg-surface-shell">
           <div
             class="flex min-h-0 flex-1 flex-col lg:flex-row"
             :class="isDragging ? 'select-none' : ''"
             :style="splitStyle"
           >
-            <aside class="flex min-h-0 w-full max-w-none flex-col gap-3 overflow-hidden border-b border-slate-200/70 p-3 dark:border-slate-700/50 lg:w-[var(--left-width)] lg:min-w-[240px] lg:max-w-[560px] lg:flex-none lg:border-b-0 lg:border-r">
+            <aside class="flex min-h-0 w-full max-w-none flex-col gap-3 overflow-hidden border-b p-3 border-pg-border lg:w-[var(--left-width)] lg:min-w-[240px] lg:max-w-[560px] lg:flex-none lg:border-b-0 lg:border-r">
               <div class="relative">
                 <div class="flex items-end gap-2">
                   <PlaygroundFilters
@@ -191,7 +191,7 @@ onBeforeUnmount(() => {
                   />
                   <button
                     ref="moreButtonRef"
-                    class="flex h-9 items-center gap-2 rounded-full border border-slate-200/70 bg-white/80 px-3 text-[0.55rem] uppercase tracking-[0.25em] text-slate-700 transition hover:-translate-y-0.5 dark:border-slate-700/50 dark:bg-slate-900/80 dark:text-slate-100"
+                    class="flex h-9 items-center gap-2 rounded-full border px-3 text-[0.55rem] uppercase tracking-[0.25em] transition hover:-translate-y-0.5 border-pg-border bg-pg-surface-strong text-pg-text-soft"
                     type="button"
                     :aria-expanded="showMore"
                     aria-haspopup="true"
@@ -206,15 +206,15 @@ onBeforeUnmount(() => {
                   v-if="showMore"
                   id="playground-more-panel"
                   ref="morePanelRef"
-                  class="absolute left-0 right-0 z-30 mt-2 rounded-2xl border border-slate-200/70 bg-white/95 p-3 shadow-xl dark:border-slate-700/50 dark:bg-slate-950/95"
+                  class="absolute left-0 right-0 z-30 mt-2 rounded-2xl border p-3 shadow-xl border-pg-border bg-pg-surface-panel"
                 >
                   <div class="grid gap-3">
-                    <label class="flex flex-col gap-1 text-[0.55rem] uppercase tracking-[0.25em] text-slate-600/70 dark:text-slate-200/60">
+                    <label class="flex flex-col gap-1 text-[0.55rem] uppercase tracking-[0.25em] text-pg-text-muted">
                       {{ t('filters.base') }}
                       <input
                         :value="basePath || '/'"
                         readonly
-                        class="rounded-lg border border-slate-200/70 bg-white/80 px-2.5 py-1.5 text-[0.8rem] text-slate-800 dark:border-slate-700/50 dark:bg-slate-900/80 dark:text-slate-50"
+                        class="rounded-lg border px-2.5 py-1.5 text-[0.8rem] border-pg-border bg-pg-surface-strong text-pg-text"
                       >
                     </label>
                     <PlaygroundTabs :groups="groups" :active-group="activeGroup" @select="setActiveGroup" />
@@ -224,13 +224,13 @@ onBeforeUnmount(() => {
               </div>
 
               <div class="flex-1 min-h-0 overflow-auto">
-                <div v-if="error" class="rounded-2xl border border-rose-500/40 bg-rose-50/80 px-4 py-3 text-sm text-rose-700 dark:border-rose-300/40 dark:bg-rose-950/40 dark:text-rose-100/80">
+                <div v-if="error" class="rounded-2xl border px-4 py-3 text-sm border-pg-danger-border bg-pg-danger-bg text-pg-danger-text">
                   {{ error }}
                 </div>
-                <div v-else-if="loading" class="rounded-2xl border border-slate-200/70 bg-white/60 px-4 py-6 text-sm text-slate-500 dark:border-slate-700/50 dark:bg-slate-900/60 dark:text-slate-200/70">
+                <div v-else-if="loading" class="rounded-2xl border px-4 py-6 text-sm border-pg-border bg-pg-surface-soft text-pg-text-muted">
                   {{ t('states.loadingRoutes') }}
                 </div>
-                <div v-else-if="!filtered.length" class="rounded-2xl border border-slate-200/70 bg-white/60 px-4 py-6 text-sm text-slate-500 dark:border-slate-700/50 dark:bg-slate-900/60 dark:text-slate-200/70">
+                <div v-else-if="!filtered.length" class="rounded-2xl border px-4 py-6 text-sm border-pg-border bg-pg-surface-soft text-pg-text-muted">
                   {{ t('states.emptyRoutes') }}
                 </div>
                 <RouteTree
@@ -244,9 +244,9 @@ onBeforeUnmount(() => {
             </aside>
 
             <div class="relative hidden w-4 flex-none items-center justify-center lg:flex">
-              <div class="h-full w-px bg-slate-200/70 dark:bg-slate-700/50" />
+              <div class="h-full w-px bg-pg-divider" />
               <button
-                class="group absolute flex h-10 w-10 items-center justify-center rounded-full border border-slate-200/70 bg-white/80 text-slate-500 shadow-sm transition hover:-translate-y-0.5 hover:text-slate-600 dark:border-slate-700/50 dark:bg-slate-950/80 dark:text-slate-200/70"
+                class="group absolute flex h-10 w-10 items-center justify-center rounded-full border shadow-sm transition hover:-translate-y-0.5 border-pg-border bg-pg-surface-strong text-pg-text-muted hover:text-pg-text-soft"
                 type="button"
                 aria-label="Resize panels"
                 @pointerdown="handleDragStart"
@@ -256,14 +256,14 @@ onBeforeUnmount(() => {
             </div>
 
             <section class="flex min-h-0 flex-1 flex-col overflow-hidden p-4 lg:p-6">
-              <div class="flex flex-none flex-wrap items-center justify-between gap-2 rounded-2xl border border-slate-200/70 bg-white/70 px-3 py-2 text-[0.55rem] uppercase tracking-[0.25em] text-slate-700 shadow-sm dark:border-slate-700/50 dark:bg-slate-900/70 dark:text-slate-100">
-                <span class="flex items-center gap-2 rounded-full border border-slate-200/70 bg-white/80 px-2.5 py-1 text-[0.55rem] uppercase tracking-[0.25em] text-slate-700 dark:border-slate-700/50 dark:bg-slate-900/80 dark:text-slate-100">
+              <div class="flex flex-none flex-wrap items-center justify-between gap-2 rounded-2xl border px-3 py-2 text-[0.55rem] uppercase tracking-[0.25em] shadow-sm border-pg-border bg-pg-surface-card text-pg-text-soft">
+                <span class="flex items-center gap-2 rounded-full border px-2.5 py-1 text-[0.55rem] uppercase tracking-[0.25em] border-pg-border bg-pg-surface-strong text-pg-text-soft">
                   <span class="i-[carbon--map] h-3.5 w-3.5" aria-hidden="true" />
                   <span>{{ t('header.routes', { count: routeCount }) }}</span>
                 </span>
                 <div class="flex flex-wrap items-center gap-2">
                   <button
-                    class="flex items-center gap-2 rounded-full border border-slate-200/70 bg-white/80 px-2.5 py-1 text-[0.55rem] uppercase tracking-[0.25em] text-slate-700 transition hover:-translate-y-0.5 dark:border-slate-700/50 dark:bg-slate-900/80 dark:text-slate-100"
+                    class="flex items-center gap-2 rounded-full border px-2.5 py-1 text-[0.55rem] uppercase tracking-[0.25em] transition hover:-translate-y-0.5 border-pg-border bg-pg-surface-strong text-pg-text-soft"
                     :title="t('header.languageToggle')"
                     @click="toggleLocale"
                   >
@@ -271,7 +271,7 @@ onBeforeUnmount(() => {
                     <span>{{ localeLabel }}</span>
                   </button>
                   <button
-                    class="flex items-center gap-2 rounded-full border border-slate-200/70 bg-white/80 px-2.5 py-1 text-[0.55rem] uppercase tracking-[0.25em] text-slate-700 transition hover:-translate-y-0.5 dark:border-slate-700/50 dark:bg-slate-900/80 dark:text-slate-100"
+                    class="flex items-center gap-2 rounded-full border px-2.5 py-1 text-[0.55rem] uppercase tracking-[0.25em] transition hover:-translate-y-0.5 border-pg-border bg-pg-surface-strong text-pg-text-soft"
                     :title="t('header.themeToggle')"
                     @click="cycleThemeMode"
                   >
@@ -279,7 +279,7 @@ onBeforeUnmount(() => {
                     <span>{{ themeLabel }}</span>
                   </button>
                   <button
-                    class="flex items-center gap-2 rounded-full border border-slate-200/70 bg-white/80 px-2.5 py-1 text-[0.55rem] uppercase tracking-[0.25em] text-slate-700 transition hover:-translate-y-0.5 dark:border-slate-700/50 dark:bg-slate-900/80 dark:text-slate-100"
+                    class="flex items-center gap-2 rounded-full border px-2.5 py-1 text-[0.55rem] uppercase tracking-[0.25em] transition hover:-translate-y-0.5 border-pg-border bg-pg-surface-strong text-pg-text-soft"
                     @click="loadRoutes"
                   >
                     <span class="i-[carbon--rotate] h-3.5 w-3.5" aria-hidden="true" />

@@ -26,23 +26,23 @@ const localeLabel = computed(() => (props.locale === 'zh-CN' ? '中文' : 'EN'))
 </script>
 
 <template>
-  <header class="flex flex-wrap items-center justify-between gap-4 border-b border-slate-200/70 bg-white/60 px-6 py-4 shadow-sm dark:border-slate-700/50 dark:bg-slate-950/70">
+  <header class="flex flex-wrap items-center justify-between gap-4 border-b px-6 py-4 shadow-sm border-pg-border bg-pg-surface-shell">
     <div class="flex min-w-0 items-center gap-4">
       <div>
-        <p class="text-[0.6rem] uppercase tracking-[0.35em] text-slate-500/60 dark:text-slate-200/60">
+        <p class="text-[0.6rem] uppercase tracking-[0.35em] text-pg-text-subtle">
           Mokup
         </p>
-        <h1 class="mt-1 font-display text-lg text-slate-900 dark:text-slate-50">
+        <h1 class="mt-1 font-display text-lg text-pg-text-strong">
           {{ t('header.title') }}
         </h1>
       </div>
-      <p class="hidden max-w-lg text-xs text-slate-500/60 dark:text-slate-300/60 lg:block">
+      <p class="hidden max-w-lg text-xs text-pg-text-subtle lg:block">
         {{ t('header.subtitle') }}
       </p>
     </div>
     <div class="flex flex-wrap items-center gap-2">
       <button
-        class="flex items-center gap-2 rounded-full border border-slate-200/70 bg-white/70 px-3 py-1.5 text-[0.65rem] uppercase tracking-[0.25em] text-slate-700 transition hover:-translate-y-0.5 dark:border-slate-700/50 dark:bg-slate-900/70 dark:text-slate-100"
+        class="flex items-center gap-2 rounded-full border px-3 py-1.5 text-[0.65rem] uppercase tracking-[0.25em] transition hover:-translate-y-0.5 border-pg-border bg-pg-surface-card text-pg-text-soft"
         :title="t('header.languageToggle')"
         @click="emit('toggle-locale')"
       >
@@ -50,7 +50,7 @@ const localeLabel = computed(() => (props.locale === 'zh-CN' ? '中文' : 'EN'))
         <span>{{ localeLabel }}</span>
       </button>
       <button
-        class="flex items-center gap-2 rounded-full border border-slate-200/70 bg-white/70 px-3 py-1.5 text-[0.65rem] uppercase tracking-[0.25em] text-slate-700 transition hover:-translate-y-0.5 dark:border-slate-700/50 dark:bg-slate-900/70 dark:text-slate-100"
+        class="flex items-center gap-2 rounded-full border px-3 py-1.5 text-[0.65rem] uppercase tracking-[0.25em] transition hover:-translate-y-0.5 border-pg-border bg-pg-surface-card text-pg-text-soft"
         :title="t('header.themeToggle')"
         @click="emit('toggle-theme')"
       >
@@ -58,13 +58,13 @@ const localeLabel = computed(() => (props.locale === 'zh-CN' ? '中文' : 'EN'))
         <span>{{ themeLabel }}</span>
       </button>
       <button
-        class="flex items-center gap-2 rounded-full border border-slate-200/70 bg-white/70 px-3 py-1.5 text-[0.65rem] uppercase tracking-[0.25em] text-slate-700 transition hover:-translate-y-0.5 dark:border-slate-700/50 dark:bg-slate-900/70 dark:text-slate-100"
+        class="flex items-center gap-2 rounded-full border px-3 py-1.5 text-[0.65rem] uppercase tracking-[0.25em] transition hover:-translate-y-0.5 border-pg-border bg-pg-surface-card text-pg-text-soft"
         @click="emit('refresh')"
       >
         <span class="i-[carbon--rotate] h-4 w-4" aria-hidden="true" />
         <span>{{ t('header.refresh') }}</span>
       </button>
-      <span class="flex items-center gap-2 rounded-full border border-slate-200/70 bg-white/70 px-3 py-1.5 text-[0.65rem] uppercase tracking-[0.25em] text-slate-700 dark:border-slate-700/50 dark:bg-slate-900/70 dark:text-slate-100">
+      <span class="flex items-center gap-2 rounded-full border px-3 py-1.5 text-[0.65rem] uppercase tracking-[0.25em] border-pg-border bg-pg-surface-card text-pg-text-soft">
         <span class="i-[carbon--map] h-4 w-4" aria-hidden="true" />
         <span>{{ t('header.routes', { count: routeCount }) }}</span>
       </span>

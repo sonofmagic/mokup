@@ -65,8 +65,8 @@ function handleRowClick(row: TreeRow) {
     <div
       v-for="row in rows"
       :key="row.id"
-      class="group flex items-center gap-2 rounded-lg border border-transparent px-2 py-1 text-left text-slate-800 transition hover:bg-sky-50/70 dark:text-slate-100 dark:hover:bg-slate-900/70"
-      :class="row.selected ? '!border-sky-500 !bg-sky-500 !text-white shadow-sm dark:!border-sky-400 dark:!bg-sky-400' : ''"
+      class="group flex items-center gap-2 rounded-lg border border-transparent px-2 py-1 text-left transition text-pg-text hover:bg-pg-hover"
+      :class="row.selected ? 'bg-pg-accent text-pg-on-accent border-pg-accent shadow-sm' : ''"
     >
       <button
         class="flex min-w-0 flex-1 items-center gap-2 text-left"
@@ -77,7 +77,7 @@ function handleRowClick(row: TreeRow) {
         <div class="flex items-center gap-2" :style="{ paddingLeft: `${row.depth * 12}px` }">
           <span
             class="flex h-3.5 w-3.5 items-center justify-center"
-            :class="row.selected ? 'text-white/90' : 'text-slate-500/70 dark:text-slate-300/70'"
+            :class="row.selected ? 'text-pg-on-accent-soft' : 'text-pg-text-muted'"
           >
             <span
               v-if="row.kind === 'folder'"
@@ -100,8 +100,8 @@ function handleRowClick(row: TreeRow) {
       </button>
       <button
         v-if="row.kind === 'route' && row.route && resolveEditorPath(row.route)"
-        class="flex h-6 w-6 items-center justify-center rounded-md text-slate-500/70 transition hover:bg-slate-200/60 hover:text-slate-700 dark:text-slate-300/70 dark:hover:bg-slate-800/70 dark:hover:text-slate-100"
-        :class="row.selected ? 'text-white/90 hover:text-white' : ''"
+        class="flex h-6 w-6 items-center justify-center rounded-md transition text-pg-text-muted hover:bg-pg-hover-strong hover:text-pg-text-soft"
+        :class="row.selected ? 'text-pg-on-accent-soft' : ''"
         type="button"
         :aria-label="`Open ${row.route.file} in VS Code`"
         @click="openInEditor(row.route)"
