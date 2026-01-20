@@ -17,6 +17,27 @@ const result = await runtime.handle({
 })
 ```
 
+## Node.js direct usage
+
+Use the CLI bundle to load a manifest and handler module map in Node.js:
+
+```bash
+pnpm exec mokup build --dir mock --out .mokup
+```
+
+```ts
+import { createRuntime } from 'mokup/runtime'
+import mokupBundle from './.mokup/mokup.bundle.mjs'
+
+const runtime = createRuntime({
+  manifest: mokupBundle.manifest,
+  moduleMap: mokupBundle.moduleMap,
+  moduleBase: new URL('./.mokup/', import.meta.url),
+})
+```
+
+If you are not bundling handlers, you can omit `moduleMap` and `moduleBase`.
+
 ## createRuntimeApp
 
 Build a Hono app from the manifest (useful for Service Worker or custom fetch handlers).

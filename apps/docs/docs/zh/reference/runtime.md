@@ -17,6 +17,27 @@ const result = await runtime.handle({
 })
 ```
 
+## Node.js 直接使用
+
+在 Node.js 中可以直接加载 CLI 生成的 bundle：
+
+```bash
+pnpm exec mokup build --dir mock --out .mokup
+```
+
+```ts
+import { createRuntime } from 'mokup/runtime'
+import mokupBundle from './.mokup/mokup.bundle.mjs'
+
+const runtime = createRuntime({
+  manifest: mokupBundle.manifest,
+  moduleMap: mokupBundle.moduleMap,
+  moduleBase: new URL('./.mokup/', import.meta.url),
+})
+```
+
+如果没有打包函数处理器，可以省略 `moduleMap` 与 `moduleBase`。
+
 ## createRuntimeApp
 
 根据 manifest 构建 Hono app（适用于 Service Worker 或自定义 fetch 处理）。

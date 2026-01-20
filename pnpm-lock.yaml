@@ -212,6 +212,12 @@ importers:
       '@mokup/runtime':
         specifier: workspace:*
         version: link:../runtime
+      '@mokup/server':
+        specifier: workspace:*
+        version: link:../server
+      commander:
+        specifier: ^14.0.0
+        version: 14.0.2
       esbuild:
         specifier: ^0.27.2
         version: 0.27.2
@@ -330,10 +336,31 @@ importers:
 
   packages/server:
     dependencies:
+      '@mokup/playground':
+        specifier: workspace:*
+        version: link:../playground
       '@mokup/runtime':
         specifier: workspace:*
         version: link:../runtime
+      chokidar:
+        specifier: ^5.0.0
+        version: 5.0.0
+      esbuild:
+        specifier: ^0.27.2
+        version: 0.27.2
+      hono:
+        specifier: ^4.11.4
+        version: 4.11.4
+      jsonc-parser:
+        specifier: ^3.3.1
+        version: 3.3.1
+      pathe:
+        specifier: ^2.0.3
+        version: 2.0.3
     devDependencies:
+      '@types/node':
+        specifier: ^25.0.9
+        version: 25.0.9
       typescript:
         specifier: ^5.9.3
         version: 5.9.3

@@ -57,6 +57,7 @@ export const zhSidebar: DefaultTheme.Sidebar = {
       items: [
         { text: 'CLI', link: '/zh/reference/cli' },
         { text: 'Vite 插件', link: '/zh/reference/vite-plugin' },
+        { text: 'Webpack 插件', link: '/zh/reference/webpack-plugin' },
         { text: 'Server 适配器', link: '/zh/reference/server' },
         { text: 'Runtime API', link: '/zh/reference/runtime' },
         { text: 'Manifest 结构', link: '/zh/reference/manifest-schema' },
@@ -123,6 +124,7 @@ export const enSidebar: DefaultTheme.Sidebar = {
       items: [
         { text: 'CLI', link: '/reference/cli' },
         { text: 'Vite Plugin', link: '/reference/vite-plugin' },
+        { text: 'Webpack Plugin', link: '/reference/webpack-plugin' },
         { text: 'Server Adapters', link: '/reference/server' },
         { text: 'Runtime API', link: '/reference/runtime' },
         { text: 'Manifest Schema', link: '/reference/manifest-schema' },

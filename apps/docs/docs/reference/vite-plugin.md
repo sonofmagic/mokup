@@ -2,6 +2,12 @@
 
 Use `mokup/vite` as the Vite plugin entry.
 
+## Install
+
+```bash
+pnpm add -D mokup
+```
+
 ## Usage
 
 ```ts

@@ -2,6 +2,12 @@
 
 Mokup 的 Vite 插件入口为 `mokup/vite`。
 
+## 安装
+
+```bash
+pnpm add -D mokup
+```
+
 ## 基本用法
 
 ```ts
