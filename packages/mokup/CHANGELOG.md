@@ -1,5 +1,12 @@
 # mokup
 
+## 1.0.1
+
+### Patch Changes
+
+- 📦 **Dependencies** [`a7b9387`](https://github.com/sonofmagic/mokup/commit/a7b9387b48f949a53cc3274f5a461adfdd123894)
+  → `@mokup/playground@0.0.5`, `@mokup/server@1.0.1`, `@mokup/cli@0.3.1`
+
 ## 1.0.0
 
 ### Major Changes
