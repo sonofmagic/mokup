@@ -43,6 +43,32 @@ export const zhSidebar: DefaultTheme.Sidebar = {
       ],
     },
   ],
+  '/zh/ai/': [
+    {
+      text: 'AI 提示词',
+      collapsed: false,
+      items: [
+        { text: '概览', link: '/zh/ai/' },
+        { text: 'DTS 模板', link: '/zh/ai/prompt-templates-dts' },
+        { text: 'OpenAPI 模板', link: '/zh/ai/prompt-templates-openapi' },
+      ],
+    },
+  ],
+  '/zh/reference/': [
+    {
+      text: '参考',
+      collapsed: false,
+      items: [
+        { text: 'CLI', link: '/zh/reference/cli' },
+        { text: 'Vite 插件', link: '/zh/reference/vite-plugin' },
+        { text: 'Webpack 插件', link: '/zh/reference/webpack-plugin' },
+        { text: 'Server 适配器', link: '/zh/reference/server' },
+        { text: 'Runtime API', link: '/zh/reference/runtime' },
+        { text: 'Manifest 结构', link: '/zh/reference/manifest-schema' },
+        { text: '常见问题', link: '/zh/reference/faq' },
+      ],
+    },
+  ],
 }
 
 export const enSidebar: DefaultTheme.Sidebar = {
@@ -85,6 +111,32 @@ export const enSidebar: DefaultTheme.Sidebar = {
       items: [
         { text: 'Vite Build Output', link: '/deploy/vite-build' },
         { text: 'Cloudflare Worker', link: '/deploy/cloudflare-worker' },
+      ],
+    },
+  ],
+  '/ai/': [
+    {
+      text: 'AI Prompts',
+      collapsed: false,
+      items: [
+        { text: 'Overview', link: '/ai/' },
+        { text: 'DTS Templates', link: '/ai/prompt-templates-dts' },
+        { text: 'OpenAPI Templates', link: '/ai/prompt-templates-openapi' },
+      ],
+    },
+  ],
+  '/reference/': [
+    {
+      text: 'Reference',
+      collapsed: false,
+      items: [
+        { text: 'CLI', link: '/reference/cli' },
+        { text: 'Vite Plugin', link: '/reference/vite-plugin' },
+        { text: 'Webpack Plugin', link: '/reference/webpack-plugin' },
+        { text: 'Server Adapters', link: '/reference/server' },
+        { text: 'Runtime API', link: '/reference/runtime' },
+        { text: 'Manifest Schema', link: '/reference/manifest-schema' },
+        { text: 'FAQ', link: '/reference/faq' },
       ],
     },
   ],
