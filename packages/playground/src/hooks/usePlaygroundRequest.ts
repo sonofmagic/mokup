@@ -4,6 +4,73 @@ import { ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { applyQuery, parseJsonInput } from '../utils/request'
 
+let swReadyPromise: Promise<void> | null = null
+
+function isMokupRegistration(registration: ServiceWorkerRegistration) {
+  const scriptUrls = [
+    registration.active?.scriptURL,
+    registration.waiting?.scriptURL,
+    registration.installing?.scriptURL,
+  ].filter((entry): entry is string => typeof entry === 'string')
+  return scriptUrls.some((url) => {
+    try {
+      return new URL(url).pathname.includes('mokup-sw')
+    }
+    catch {
+      return url.includes('mokup-sw')
+    }
+  })
+}
+
+async function waitForServiceWorkerControl(timeoutMs = 2000) {
+  if (typeof window === 'undefined' || !('serviceWorker' in navigator)) {
+    return
+  }
+  if (navigator.serviceWorker.controller) {
+    return
+  }
+  if (swReadyPromise) {
+    await swReadyPromise
+    return
+  }
+
+  swReadyPromise = (async () => {
+    let registration: ServiceWorkerRegistration | undefined | null = null
+    try {
+      registration = await navigator.serviceWorker.getRegistration()
+    }
+    catch {
+      registration = null
+    }
+    if (!registration || !isMokupRegistration(registration) || navigator.serviceWorker.controller) {
+      return
+    }
+
+    let controllerHandler: (() => void) | null = null
+    const controllerPromise = new Promise<void>((resolve) => {
+      const handler = () => resolve()
+      controllerHandler = handler
+      navigator.serviceWorker.addEventListener('controllerchange', handler)
+    })
+    const readyPromise = navigator.serviceWorker.ready
+      .then(() => undefined)
+      .catch(() => undefined)
+    const timeoutPromise = new Promise<void>((resolve) => {
+      window.setTimeout(resolve, timeoutMs)
+    })
+
+    await Promise.race([controllerPromise, readyPromise, timeoutPromise])
+    if (controllerHandler) {
+      navigator.serviceWorker.removeEventListener('controllerchange', controllerHandler)
+    }
+  })()
+
+  await swReadyPromise
+  if (!navigator.serviceWorker.controller) {
+    swReadyPromise = null
+  }
+}
+
 export function usePlaygroundRequest(selected: Ref<PlaygroundRoute | null>) {
   const { t } = useI18n()
   const queryText = ref('')
@@ -71,6 +138,7 @@ export function usePlaygroundRequest(selected: Ref<PlaygroundRoute | null>) {
     responseTime.value = ''
     responseText.value = t('response.waiting')
 
+    await waitForServiceWorkerControl()
     const startedAt = performance.now()
     try {
       const response = await fetch(url.toString(), init)
