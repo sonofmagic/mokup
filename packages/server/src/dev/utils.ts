@@ -1,6 +1,6 @@
 import type { HttpMethod } from './types'
 
-import { isAbsolute, resolve } from 'pathe'
+import { isAbsolute, resolve } from '@mokup/shared/pathe'
 import { methodSet } from './constants'
 
 export type DirInput = string | string[] | ((root: string) => string | string[]) | undefined

@@ -21,4 +21,4 @@ export type {
   RuntimeRequest,
   RuntimeResult,
 } from './types'
-export { handle } from 'hono/service-worker'
+export { handle } from '@mokup/shared/hono'

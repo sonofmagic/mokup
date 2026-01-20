@@ -1,5 +1,5 @@
 import type { RouteToken } from '@mokup/runtime'
-import type { Context, MiddlewareHandler } from 'hono'
+import type { Context, MiddlewareHandler } from '@mokup/shared/hono'
 
 export type HttpMethod
   = | 'GET'

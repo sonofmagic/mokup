@@ -3,8 +3,8 @@ import type { ManifestResponse } from '@mokup/runtime'
 import { Buffer } from 'node:buffer'
 import { promises as fs } from 'node:fs'
 
-import { build as esbuild } from 'esbuild'
-import { dirname, extname, join, relative, resolve } from 'pathe'
+import { build as esbuild } from '@mokup/shared/esbuild'
+import { dirname, extname, join, relative, resolve } from '@mokup/shared/pathe'
 
 import { toPosix } from './utils'
 

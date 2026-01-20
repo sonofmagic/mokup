@@ -7,7 +7,7 @@ import type {
 } from './types'
 
 import { Buffer } from 'node:buffer'
-import { isAbsolute, relative, resolve } from 'pathe'
+import { isAbsolute, relative, resolve } from '@mokup/shared/pathe'
 import { normalizePrefix, toPosix } from './utils'
 
 export const defaultSwPath = '/mokup-sw.js'

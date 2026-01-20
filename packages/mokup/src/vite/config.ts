@@ -6,8 +6,8 @@ import { promises as fs } from 'node:fs'
 import { createRequire } from 'node:module'
 import { pathToFileURL } from 'node:url'
 
-import { build as esbuild } from 'esbuild'
-import { dirname, join, normalize } from 'pathe'
+import { build as esbuild } from '@mokup/shared/esbuild'
+import { dirname, join, normalize } from '@mokup/shared/pathe'
 
 const configExtensions = ['.ts', '.js', '.mjs', '.cjs']
 

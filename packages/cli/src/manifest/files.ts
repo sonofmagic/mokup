@@ -2,7 +2,7 @@ import type { BuildOptions, FileInfo } from './types'
 
 import { promises as fs } from 'node:fs'
 
-import { basename, extname, isAbsolute, join, resolve } from 'pathe'
+import { basename, extname, isAbsolute, join, resolve } from '@mokup/shared/pathe'
 
 import { toPosix } from './utils'
 

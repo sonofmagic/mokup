@@ -1,0 +1,71 @@
+{
+  "name": "@mokup/shared",
+  "type": "module",
+  "version": "0.0.0",
+  "description": "Shared dependency exports for mokup.",
+  "license": "MIT",
+  "homepage": "https://mokup.icebreaker.top",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/sonofmagic/mokup.git",
+    "directory": "packages/shared"
+  },
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.mjs",
+      "require": "./dist/index.cjs"
+    },
+    "./esbuild": {
+      "types": "./dist/esbuild.d.ts",
+      "import": "./dist/esbuild.mjs",
+      "require": "./dist/esbuild.cjs"
+    },
+    "./chokidar": {
+      "types": "./dist/chokidar.d.ts",
+      "import": "./dist/chokidar.mjs",
+      "require": "./dist/chokidar.cjs"
+    },
+    "./hono": {
+      "types": "./dist/hono.d.ts",
+      "import": "./dist/hono.mjs",
+      "require": "./dist/hono.cjs"
+    },
+    "./pathe": {
+      "types": "./dist/pathe.d.ts",
+      "import": "./dist/pathe.mjs",
+      "require": "./dist/pathe.cjs"
+    },
+    "./jsonc-parser": {
+      "types": "./dist/jsonc-parser.d.ts",
+      "import": "./dist/jsonc-parser.mjs",
+      "require": "./dist/jsonc-parser.cjs"
+    }
+  },
+  "publishConfig": {
+    "access": "public"
+  },
+  "main": "./dist/index.cjs",
+  "module": "./dist/index.mjs",
+  "types": "./dist/index.d.ts",
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "build": "unbuild",
+    "dev": "unbuild --stub",
+    "lint": "eslint .",
+    "typecheck": "tsc -p tsconfig.json --noEmit"
+  },
+  "dependencies": {
+    "chokidar": "^5.0.0",
+    "esbuild": "^0.27.2",
+    "hono": "^4.11.4",
+    "jsonc-parser": "^3.3.1",
+    "pathe": "^2.0.3"
+  },
+  "devDependencies": {
+    "typescript": "^5.9.3",
+    "unbuild": "^3.6.1"
+  }
+}

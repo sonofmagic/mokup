@@ -4,7 +4,7 @@ import type { BuildOptions, DirectoryConfig, MockRule } from './types'
 import { promises as fs } from 'node:fs'
 import { cwd } from 'node:process'
 
-import { join, relative, resolve } from 'pathe'
+import { join, relative, resolve } from '@mokup/shared/pathe'
 
 import { writeBundle, writeManifestModule } from './bundle'
 import { resolveDirectoryConfig } from './config'

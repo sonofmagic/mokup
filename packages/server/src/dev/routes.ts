@@ -1,7 +1,7 @@
 import type { HttpMethod, MockRule, ResolvedRoute } from './types'
 
 import { compareRouteScore, parseRouteTemplate } from '@mokup/runtime'
-import { basename, dirname, extname, join, relative } from 'pathe'
+import { basename, dirname, extname, join, relative } from '@mokup/shared/pathe'
 import { methodSuffixSet } from './constants'
 import { normalizePrefix, toPosix } from './utils'
 

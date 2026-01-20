@@ -4,10 +4,10 @@ import { promises as fs } from 'node:fs'
 
 import { createRequire } from 'node:module'
 import { pathToFileURL } from 'node:url'
-import { build as esbuild } from 'esbuild'
-import { parse as parseJsonc } from 'jsonc-parser'
+import { build as esbuild } from '@mokup/shared/esbuild'
+import { parse as parseJsonc } from '@mokup/shared/jsonc-parser'
 
-import { extname } from 'pathe'
+import { extname } from '@mokup/shared/pathe'
 
 async function loadModule(file: string) {
   const ext = extname(file).toLowerCase()

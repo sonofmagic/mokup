@@ -3,7 +3,7 @@ import type { MockRule } from './types'
 
 import { compareRouteScore, parseRouteTemplate } from '@mokup/runtime'
 
-import { basename, dirname, extname, join, relative } from 'pathe'
+import { basename, dirname, extname, join, relative } from '@mokup/shared/pathe'
 
 import { toPosix } from './utils'
 

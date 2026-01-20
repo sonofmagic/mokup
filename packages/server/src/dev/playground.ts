@@ -1,10 +1,10 @@
-import type { Hono } from 'hono'
+import type { Hono } from '@mokup/shared/hono'
 import type { Logger, RouteTable } from './types'
 
 import { promises as fs } from 'node:fs'
 import { createRequire } from 'node:module'
 import { cwd } from 'node:process'
-import { dirname, extname, join, normalize, relative } from 'pathe'
+import { dirname, extname, join, normalize, relative } from '@mokup/shared/pathe'
 
 interface PlaygroundConfig {
   enabled: boolean

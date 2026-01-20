@@ -1,4 +1,4 @@
-import type { Context, MiddlewareHandler } from 'hono'
+import type { Context, MiddlewareHandler } from '@mokup/shared/hono'
 import type { RouteToken } from './router'
 
 export type HttpMethod

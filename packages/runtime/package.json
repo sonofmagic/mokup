@@ -33,7 +33,7 @@
     "typecheck": "tsc -p tsconfig.json --noEmit"
   },
   "dependencies": {
-    "hono": "^4.11.4"
+    "@mokup/shared": "workspace:*"
   },
   "devDependencies": {
     "typescript": "^5.9.3",

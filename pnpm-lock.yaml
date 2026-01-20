@@ -215,18 +215,12 @@ importers:
       '@mokup/server':
         specifier: workspace:*
         version: link:../server
+      '@mokup/shared':
+        specifier: workspace:*
+        version: link:../shared
       commander:
         specifier: ^14.0.0
         version: 14.0.2
-      esbuild:
-        specifier: ^0.27.2
-        version: 0.27.2
-      jsonc-parser:
-        specifier: ^3.3.1
-        version: 3.3.1
-      pathe:
-        specifier: ^2.0.3
-        version: 2.0.3
     devDependencies:
       '@types/node':
         specifier: ^25.0.9
@@ -252,24 +246,12 @@ importers:
       '@mokup/server':
         specifier: workspace:*
         version: link:../server
-      chokidar:
-        specifier: ^5.0.0
-        version: 5.0.0
-      esbuild:
-        specifier: ^0.27.2
-        version: 0.27.2
-      hono:
-        specifier: ^4.11.4
-        version: 4.11.4
+      '@mokup/shared':
+        specifier: workspace:*
+        version: link:../shared
       html-webpack-plugin:
         specifier: ^5.0.0
         version: 5.6.6(webpack@5.104.1(esbuild@0.27.2))
-      jsonc-parser:
-        specifier: ^3.3.1
-        version: 3.3.1
-      pathe:
-        specifier: ^2.0.3
-        version: 2.0.3
       webpack:
         specifier: ^5.0.0
         version: 5.104.1(esbuild@0.27.2)
@@ -323,9 +305,9 @@ importers:
 
   packages/runtime:
     dependencies:
-      hono:
-        specifier: ^4.11.4
-        version: 4.11.4
+      '@mokup/shared':
+        specifier: workspace:*
+        version: link:../shared
     devDependencies:
       typescript:
         specifier: ^5.9.3
@@ -342,6 +324,22 @@ importers:
       '@mokup/runtime':
         specifier: workspace:*
         version: link:../runtime
+      '@mokup/shared':
+        specifier: workspace:*
+        version: link:../shared
+    devDependencies:
+      '@types/node':
+        specifier: ^25.0.9
+        version: 25.0.9
+      typescript:
+        specifier: ^5.9.3
+        version: 5.9.3
+      unbuild:
+        specifier: ^3.6.1
+        version: 3.6.1(typescript@5.9.3)(vue@3.5.26(typescript@5.9.3))
+
+  packages/shared:
+    dependencies:
       chokidar:
         specifier: ^5.0.0
         version: 5.0.0
@@ -358,9 +356,6 @@ importers:
         specifier: ^2.0.3
         version: 2.0.3
     devDependencies:
-      '@types/node':
-        specifier: ^25.0.9
-        version: 25.0.9
       typescript:
         specifier: ^5.9.3
         version: 5.9.3

@@ -1,6 +1,6 @@
 import type { HttpMethod, MokupViteOptions } from './types'
 
-import { isAbsolute, resolve } from 'pathe'
+import { isAbsolute, resolve } from '@mokup/shared/pathe'
 import { methodSet } from './constants'
 
 export function normalizeMethod(method?: string | null): HttpMethod | undefined {

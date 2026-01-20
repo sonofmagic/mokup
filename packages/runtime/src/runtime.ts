@@ -1,6 +1,7 @@
-import type { Context } from 'hono'
+import type { Context } from '@mokup/shared/hono'
 import type { RuntimeRule } from './module'
 import type { RouteToken } from './router'
+
 import type {
   HttpMethod,
   Manifest,
@@ -11,9 +12,7 @@ import type {
   RuntimeRequest,
   RuntimeResult,
 } from './types'
-
-import { Hono } from 'hono'
-import { PatternRouter } from 'hono/router/pattern-router'
+import { Hono, PatternRouter } from '@mokup/shared/hono'
 import { executeRule, loadModuleMiddleware, loadModuleRule } from './module'
 import { delay, normalizeMethod } from './normalize'
 import { decodeBase64 } from './response'

@@ -91,11 +91,7 @@
     "@mokup/playground": "workspace:*",
     "@mokup/runtime": "workspace:*",
     "@mokup/server": "workspace:*",
-    "chokidar": "^5.0.0",
-    "esbuild": "^0.27.2",
-    "hono": "^4.11.4",
-    "jsonc-parser": "^3.3.1",
-    "pathe": "^2.0.3"
+    "@mokup/shared": "workspace:*"
   },
   "devDependencies": {
     "@types/node": "^25.0.9",

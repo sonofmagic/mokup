@@ -2,7 +2,7 @@ import type { Manifest } from '@mokup/runtime'
 
 import { promises as fs } from 'node:fs'
 
-import { join } from 'pathe'
+import { join } from '@mokup/shared/pathe'
 
 export async function writeBundle(outDir: string, hasHandlers: boolean) {
   const lines = [
