@@ -335,6 +335,7 @@ export function createPlaygroundMiddleware(params: {
       const routes = params.getRoutes()
       sendJson(res, {
         basePath: matchedPath,
+        root: baseRoot,
         count: routes.length,
         groups: groups.map(group => ({ key: group.key, label: group.label })),
         routes: routes.map(route => toPlaygroundRoute(route, baseRoot, groups)),

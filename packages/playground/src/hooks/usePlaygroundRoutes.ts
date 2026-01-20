@@ -12,6 +12,7 @@ export function usePlaygroundRoutes() {
   const error = ref('')
   const search = ref('')
   const basePath = ref('')
+  const workspaceRoot = ref('')
 
   const searchTerm = computed(() => search.value.trim().toLowerCase())
   const routeCount = computed(() => filtered.value.length)
@@ -71,6 +72,7 @@ export function usePlaygroundRoutes() {
       const data = await response.json() as PlaygroundResponse
       routes.value = data.routes ?? []
       groups.value = data.groups ?? []
+      workspaceRoot.value = data.root ?? ''
       if (previousGroup !== 'all') {
         const exists = groups.value.some(group => group.key === previousGroup)
         if (!exists) {
@@ -108,6 +110,7 @@ export function usePlaygroundRoutes() {
     error,
     search,
     basePath,
+    workspaceRoot,
     searchTerm,
     routeCount,
     routeKey,

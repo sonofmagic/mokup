@@ -18,6 +18,7 @@ export interface PlaygroundGroup {
 
 export interface PlaygroundResponse {
   basePath: string
+  root?: string
   count: number
   groups?: PlaygroundGroup[]
   routes: PlaygroundRoute[]

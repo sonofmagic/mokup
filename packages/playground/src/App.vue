@@ -31,6 +31,7 @@ const {
   error,
   search,
   basePath,
+  workspaceRoot,
   searchTerm,
   routeCount,
   routeKey,
@@ -171,8 +172,8 @@ onBeforeUnmount(() => {
 <template>
   <div class="h-screen overflow-hidden bg-[radial-gradient(circle_at_top,_rgba(209,226,245,0.45),_transparent_55%),radial-gradient(circle_at_85%_20%,_rgba(200,230,222,0.35),_transparent_50%),radial-gradient(circle_at_12%_80%,_rgba(245,238,226,0.4),_transparent_55%)] dark:bg-[radial-gradient(circle_at_top,_rgba(38,60,92,0.55),_transparent_55%),radial-gradient(circle_at_85%_20%,_rgba(24,78,96,0.4),_transparent_50%),radial-gradient(circle_at_12%_80%,_rgba(70,58,44,0.45),_transparent_55%)]">
     <div class="flex h-full w-full flex-col">
-      <main class="flex min-h-0 flex-1 flex-col overflow-hidden px-6 py-6 lg:px-10 lg:py-8">
-        <div class="flex flex-1 flex-col overflow-hidden rounded-3xl border border-slate-200/70 bg-white/60 shadow-xl dark:border-slate-700/50 dark:bg-slate-950/70">
+      <main class="flex min-h-0 flex-1 flex-col overflow-hidden">
+        <div class="flex flex-1 flex-col overflow-hidden bg-white/60 dark:bg-slate-950/70">
           <div
             class="flex min-h-0 flex-1 flex-col lg:flex-row"
             :class="isDragging ? 'select-none' : ''"
@@ -235,6 +236,7 @@ onBeforeUnmount(() => {
                 <RouteTree
                   v-else
                   :rows="treeRows"
+                  :workspace-root="workspaceRoot"
                   @toggle="toggleExpanded"
                   @select="handleSelectRow"
                 />
