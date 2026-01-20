@@ -1,14 +1,16 @@
 # CLI
 
-`mokup` 提供 `mokup build` 命令，用于生成 `.mokup` 产物。
+`mokup` 提供 `build` 与 `serve` 两个命令。
 
-## 基本用法
+## Build
+
+生成供服务端适配器与 Worker 使用的 `.mokup` 构建产物。
 
 ```bash
 pnpm exec mokup build --dir mock --out .mokup
 ```
 
-## 参数
+### Build 选项
 
 | 参数            | 说明                      |
 | --------------- | ------------------------- |
@@ -18,6 +20,28 @@ pnpm exec mokup build --dir mock --out .mokup
 | `--include`     | 仅包含匹配的正则          |
 | `--exclude`     | 排除匹配的正则            |
 | `--no-handlers` | 不生成函数处理器          |
+
+## Serve
+
+从目录直接启动独立的 Node.js mock 服务。
+
+```bash
+pnpm exec mokup serve --dir mock --prefix /api --port 3000
+```
+
+### Serve 选项
+
+| 参数              | 说明                       |
+| ----------------- | -------------------------- |
+| `--dir, -d`       | mock 目录（可重复）        |
+| `--prefix`        | 路由前缀                   |
+| `--include`       | 仅包含匹配的正则           |
+| `--exclude`       | 排除匹配的正则             |
+| `--host`          | 主机名（默认 `localhost`） |
+| `--port`          | 端口（默认 `8080`）        |
+| `--no-watch`      | 关闭文件监听               |
+| `--no-playground` | 关闭 Playground            |
+| `--no-log`        | 关闭日志输出               |
 
 ## API
 
@@ -36,3 +60,4 @@ await buildManifest({
 
 - `--dir` 可多次传入，但会在同一份 manifest 中合并。
 - 生成的 `mokup.bundle.mjs` 适合在 Worker 或 Node 运行时直接导入。
+- `mokup serve` 与 Node.js 服务直启行为一致。

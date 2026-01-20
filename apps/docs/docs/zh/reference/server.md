@@ -15,6 +15,26 @@ export interface MokupServerOptions {
 
 `onNotFound` 默认是 `'next'`，设为 `'response'` 会直接返回 404。
 
+## Node.js 服务直启（无需构建）
+
+当你只需要从目录快速启动一个独立服务时，可以直接使用内置的 Node.js 服务。
+
+```ts
+import { startMokupServer } from 'mokup/server'
+
+await startMokupServer({
+  dir: 'mock',
+  prefix: '/api',
+  port: 3000,
+})
+```
+
+或使用 CLI：
+
+```bash
+pnpm exec mokup serve --dir mock --prefix /api --port 3000
+```
+
 ## 准备 manifest
 
 可直接加载 CLI 生成的 bundle：
