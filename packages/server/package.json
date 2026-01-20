@@ -43,6 +43,7 @@
     "@mokup/shared": "workspace:*"
   },
   "devDependencies": {
+    "@hono/node-server": "^1.19.9",
     "@types/node": "^25.0.9",
     "typescript": "^5.9.3",
     "unbuild": "^3.6.1"

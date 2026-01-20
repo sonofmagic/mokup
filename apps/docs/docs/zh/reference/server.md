@@ -2,6 +2,22 @@
 
 `mokup/server` 提供多种框架的适配器，统一使用 `MokupServerOptions`。
 
+## Fetch 入口（Node/Deno/Bun）
+
+```ts
+import { serve } from '@hono/node-server'
+import { createFetchServer } from 'mokup/server'
+
+const app = await createFetchServer({ dir: 'mock', playground: false })
+serve({ fetch: app.fetch, port: 3000 })
+```
+
+在 Deno/Bun 中直接调用 `app.fetch`：
+
+```ts
+const response = await app.fetch(new Request('http://localhost/api/users'))
+```
+
 ## 选项
 
 ```ts

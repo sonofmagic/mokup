@@ -15,7 +15,7 @@
 
 ### Library
 
-- Add `createMokupServer` and `startMokupServer` under `mokup/server`.
+- Add `createFetchServer` under `mokup/server`.
 - Default options:
   - `dir: 'mock'`
   - `prefix: ''`
@@ -28,16 +28,18 @@
 Example:
 
 ```ts
-import { startMokupServer } from 'mokup/server'
+import { serve } from '@hono/node-server'
+import { createFetchServer } from 'mokup/server'
 
-await startMokupServer({ dir: 'mock' })
+const app = await createFetchServer({ dir: 'mock' })
+serve({ fetch: app.fetch, port: 3000 })
 ```
 
 ### CLI
 
 - New command: `mokup serve`.
 - Options: `--dir/-d`, `--prefix`, `--include`, `--exclude`, `--host`, `--port`, `--no-watch`, `--no-playground`, `--log/--no-log`.
-- CLI delegates to `startMokupServer`.
+- CLI delegates to `createFetchServer`.
 
 ## Architecture
 
@@ -67,7 +69,7 @@ await startMokupServer({ dir: 'mock' })
 
 ## Testing
 
-- Unit tests for `createMokupServer`:
+- Unit tests for `createFetchServer`:
   - Responds to a JSON mock route.
   - `/ _mokup/routes` returns entries when playground is enabled.
   - Watch mode refreshes route table after file changes.

@@ -2,6 +2,22 @@
 
 `mokup/server` ships adapters for multiple frameworks, all sharing `MokupServerOptions`.
 
+## Fetch server (Node/Deno/Bun)
+
+```ts
+import { serve } from '@hono/node-server'
+import { createFetchServer } from 'mokup/server'
+
+const app = await createFetchServer({ dir: 'mock', playground: false })
+serve({ fetch: app.fetch, port: 3000 })
+```
+
+In Deno/Bun, call `app.fetch` directly:
+
+```ts
+const response = await app.fetch(new Request('http://localhost/api/users'))
+```
+
 ## Options
 
 ```ts

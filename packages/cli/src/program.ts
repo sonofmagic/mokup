@@ -1,7 +1,8 @@
-import type { MokupNodeServerOptions } from '@mokup/server'
+import type { MokupFetchServerOptions } from '@mokup/server'
 import type { BuildOptions } from './manifest/types'
 import process from 'node:process'
-import { startMokupServer } from '@mokup/server'
+import { serve } from '@hono/node-server'
+import { createFetchServer } from '@mokup/server'
 import { Command } from 'commander'
 import { buildManifest } from './manifest'
 
@@ -57,8 +58,8 @@ function toServeOptions(options: {
   watch?: boolean
   playground?: boolean
   log?: boolean
-}): MokupNodeServerOptions {
-  const serveOptions: MokupNodeServerOptions = {
+}): MokupFetchServerOptions {
+  const serveOptions: MokupFetchServerOptions = {
     watch: options.watch !== false,
     log: options.log !== false,
   }
@@ -125,10 +126,40 @@ export function createCli() {
     .option('--no-log', 'Disable logging')
     .action(async (options) => {
       const serveOptions = toServeOptions(options)
-      const server = await startMokupServer(serveOptions)
+      const host = serveOptions.host ?? 'localhost'
+      const port = serveOptions.port ?? 8080
+      const playgroundEnabled = serveOptions.playground !== false
+      const playgroundPath = '/_mokup'
+      const server = await createFetchServer(serveOptions)
+      const nodeServer = serve(
+        {
+          fetch: server.fetch,
+          hostname: host,
+          port,
+        },
+        (info) => {
+          const resolvedHost = typeof info === 'string' ? host : info?.address ?? host
+          const resolvedPort = typeof info === 'string' ? port : info?.port ?? port
+          console.log(`Mock server ready at http://${resolvedHost}:${resolvedPort}`)
+          if (playgroundEnabled) {
+            console.log(`Playground at http://${resolvedHost}:${resolvedPort}${playgroundPath}`)
+          }
+        },
+      )
       const shutdown = async () => {
         try {
-          await server.close()
+          if (server.close) {
+            await server.close()
+          }
+          await new Promise<void>((resolve, reject) => {
+            nodeServer.close((error?: Error) => {
+              if (error) {
+                reject(error)
+                return
+              }
+              resolve()
+            })
+          })
         }
         finally {
           process.exit(0)

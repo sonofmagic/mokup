@@ -19,5 +19,7 @@ Create `mock/users.get.json`:
 - [Webpack plugin](./webpack) — integrates with webpack-dev-server.
 - [Hono adapter](/reference/server#hono) — run mocks in any Hono runtime.
 - [Cloudflare Worker](/deploy/cloudflare-worker) — deploy with the Worker entry.
+- [Node.js API](../node-api) — call the runtime directly in Node.
+- [Server middleware](../server-middleware) — plug into existing servers.
 
 Playground defaults to `/_mokup` in Vite dev.

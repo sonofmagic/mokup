@@ -11,7 +11,7 @@ const app = await createFetchServer({ dir: 'mock' })
 const response = await app.fetch(new Request('http://localhost/api/users'))
 ```
 
-The API mirrors `createNodeServer` options while remaining runtime-neutral.
+The API mirrors the dev server options while remaining runtime-neutral.
 
 ## Scope
 
@@ -29,7 +29,7 @@ Out of scope:
 
 ```ts
 export async function createFetchServer(
-  options?: MokupNodeServerOptions | MokupNodeServerOptions[],
+  options?: MokupFetchServerOptions | MokupFetchServerOptions[],
 ): Promise<MokupFetchServer>
 
 export interface MokupFetchServer {
@@ -86,4 +86,4 @@ Behavior:
 ## Rollout notes
 
 - Update docs to show `createFetchServer` for Deno/Bun usage.
-- Keep `createNodeServer` as the Node-specific `listen()` convenience.
+- Remove the Node-only `listen()` convenience in favor of `createFetchServer`.

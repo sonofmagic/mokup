@@ -1,8 +1,41 @@
 import { mkdir, mkdtemp, writeFile } from 'node:fs/promises'
 import { tmpdir } from 'node:os'
 import { join } from 'node:path'
+import { createAdaptorServer } from '@hono/node-server'
 import { describe, expect, it } from 'vitest'
-import { createMokupServer } from '../src/node'
+import { createFetchServer } from '../src/fetch-server'
+
+function listenServer(server: ReturnType<typeof createAdaptorServer>) {
+  return new Promise<{ host: string, port: number }>((resolve, reject) => {
+    let onError: (error: Error) => void
+    const onListening = () => {
+      server.off('error', onError)
+      const address = server.address()
+      const host = typeof address === 'string' ? '127.0.0.1' : address?.address ?? '127.0.0.1'
+      const port = typeof address === 'string' ? 0 : address?.port ?? 0
+      resolve({ host, port })
+    }
+    onError = (error: Error) => {
+      server.off('listening', onListening)
+      reject(error)
+    }
+    server.once('error', onError)
+    server.once('listening', onListening)
+    server.listen(0, '127.0.0.1')
+  })
+}
+
+function closeServer(server: ReturnType<typeof createAdaptorServer>) {
+  return new Promise<void>((resolve, reject) => {
+    server.close((error?: Error) => {
+      if (error) {
+        reject(error)
+        return
+      }
+      resolve()
+    })
+  })
+}
 
 describe('node server', () => {
   it('serves mock routes and playground routes', async () => {
@@ -15,15 +48,15 @@ describe('node server', () => {
       'utf8',
     )
 
-    const server = await createMokupServer({
+    const fetchServer = await createFetchServer({
       dir: mockDir,
-      host: '127.0.0.1',
-      port: 0,
       log: false,
+      watch: false,
     })
+    const nodeServer = createAdaptorServer({ fetch: fetchServer.fetch })
 
     try {
-      const { host, port } = await server.listen()
+      const { host, port } = await listenServer(nodeServer)
       const base = `http://${host}:${port}`
 
       const response = await fetch(`${base}/users`)
@@ -37,7 +70,51 @@ describe('node server', () => {
       expect(payload.routes[0]?.url).toBe('/users')
     }
     finally {
-      await server.close()
+      await closeServer(nodeServer)
+      if (fetchServer.close) {
+        await fetchServer.close()
+      }
+    }
+  })
+
+  it('supports multiple dir entries with prefix', async () => {
+    const root = await mkdtemp(join(tmpdir(), 'mokup-node-'))
+    const mockDir = join(root, 'mock')
+    const extraDir = join(root, 'fixtures')
+    await mkdir(mockDir, { recursive: true })
+    await mkdir(extraDir, { recursive: true })
+    await writeFile(
+      join(mockDir, 'users.get.json'),
+      JSON.stringify({ id: 2 }, null, 2),
+      'utf8',
+    )
+    await writeFile(
+      join(extraDir, 'teams.get.json'),
+      JSON.stringify({ id: 3 }, null, 2),
+      'utf8',
+    )
+
+    const fetchServer = await createFetchServer([
+      { dir: mockDir, watch: false, log: false },
+      { dir: extraDir, prefix: '/api', watch: false, log: false },
+    ])
+    const nodeServer = createAdaptorServer({ fetch: fetchServer.fetch })
+
+    try {
+      const { host, port } = await listenServer(nodeServer)
+      const response = await fetch(`http://${host}:${port}/users`)
+      expect(response.status).toBe(200)
+      await expect(response.json()).resolves.toEqual({ id: 2 })
+
+      const prefixed = await fetch(`http://${host}:${port}/api/teams`)
+      expect(prefixed.status).toBe(200)
+      await expect(prefixed.json()).resolves.toEqual({ id: 3 })
+    }
+    finally {
+      await closeServer(nodeServer)
+      if (fetchServer.close) {
+        await fetchServer.close()
+      }
     }
   })
 })
