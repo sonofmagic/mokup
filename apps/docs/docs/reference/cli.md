@@ -23,7 +23,7 @@ pnpm exec mokup build --dir mock --out .mokup
 
 ## Serve
 
-Start a standalone Node.js mock server from a directory.
+Start a standalone mock server from a directory.
 
 ```bash
 pnpm exec mokup serve --dir mock --prefix /api --port 3000
@@ -60,4 +60,4 @@ await buildManifest({
 
 - Multiple `--dir` values are merged into one manifest.
 - `mokup.bundle.mjs` is the recommended runtime entry.
-- `mokup serve` mirrors the Node.js dev server behavior.
+- `mokup serve` mirrors the standalone server behavior.

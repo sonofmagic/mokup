@@ -15,25 +15,7 @@ export interface MokupServerOptions {
 
 `onNotFound` defaults to `'next'`. Use `'response'` to return 404 instead of falling through.
 
-## Node.js dev server (no build)
-
-Use the built-in Node.js server when you want an instant mock server from a directory.
-
-```ts
-import { startMokupServer } from 'mokup/server'
-
-await startMokupServer({
-  dir: 'mock',
-  prefix: '/api',
-  port: 3000,
-})
-```
-
-Or use the CLI:
-
-```bash
-pnpm exec mokup serve --dir mock --prefix /api --port 3000
-```
+The Hono adapter runs anywhere Hono can run. Use the Worker entry for Cloudflare Workers.
 
 ## Prepare manifest
 
@@ -104,35 +86,9 @@ const handler = createFetchHandler({ manifest })
 const response = await handler(new Request('https://example.com/api'))
 ```
 
-## Node.js HTTP server
+## Worker entry
 
-```ts
-import { Buffer } from 'node:buffer'
-import { createServer } from 'node:http'
-import { createFetchHandler } from 'mokup/server'
-
-const handler = createFetchHandler({ manifest })
-
-createServer(async (req, res) => {
-  const host = req.headers.host ?? 'localhost'
-  const url = new URL(req.url ?? '/', `http://${host}`)
-  const request = new Request(url, {
-    method: req.method,
-    headers: req.headers as HeadersInit,
-    body: req.method === 'GET' || req.method === 'HEAD' ? undefined : req,
-  })
-  const response = await handler(request)
-  if (!response) {
-    res.statusCode = 404
-    res.end()
-    return
-  }
-  res.writeHead(response.status, Object.fromEntries(response.headers))
-  res.end(Buffer.from(await response.arrayBuffer()))
-}).listen(3000)
-```
-
-Workers should use:
+For Workers (including Cloudflare Workers), use:
 
 ```ts
 import { createMokupWorker } from 'mokup/server/worker'

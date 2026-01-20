@@ -17,9 +17,9 @@ const result = await runtime.handle({
 })
 ```
 
-## Node.js 直接使用
+## 直接使用 CLI bundle
 
-在 Node.js 中可以直接加载 CLI 生成的 bundle：
+可直接加载 CLI 生成的 bundle：
 
 ```bash
 pnpm exec mokup build --dir mock --out .mokup

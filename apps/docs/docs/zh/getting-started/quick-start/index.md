@@ -17,7 +17,7 @@
 
 - [Vite 插件](./vite) — 适合 Vite 开发与预览。
 - [Webpack 插件](./webpack) — 集成 webpack-dev-server。
-- [Node.js 服务直启](./node-server) — 通过 `dir` 直接启动独立服务。
-- [Node.js 中间件](./node-middleware) — Express/Koa/Hono/Fastify 等接入构建产物。
+- [Hono 适配器](/zh/reference/server#hono) — 在 Hono 运行时中使用。
+- [Cloudflare Worker](/zh/deploy/cloudflare-worker) — 使用 Worker 入口部署。
 
-Playground 默认在 Vite 开发与 Node.js 服务中启用，路径为 `/_mokup`。
+Playground 默认在 Vite 开发中启用，路径为 `/_mokup`。

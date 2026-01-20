@@ -17,9 +17,9 @@ const result = await runtime.handle({
 })
 ```
 
-## Node.js direct usage
+## Direct usage with CLI bundle
 
-Use the CLI bundle to load a manifest and handler module map in Node.js:
+Use the CLI bundle to load a manifest and handler module map in your runtime:
 
 ```bash
 pnpm exec mokup build --dir mock --out .mokup

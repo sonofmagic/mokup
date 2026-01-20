@@ -17,7 +17,7 @@ Create `mock/users.get.json`:
 
 - [Vite plugin](./vite) — recommended for Vite dev and preview.
 - [Webpack plugin](./webpack) — integrates with webpack-dev-server.
-- [Node.js dev server](./node-server) — start a standalone server with `dir`.
-- [Node.js middleware](./node-middleware) — use Express/Koa/Hono/Fastify with build output.
+- [Hono adapter](/reference/server#hono) — run mocks in any Hono runtime.
+- [Cloudflare Worker](/deploy/cloudflare-worker) — deploy with the Worker entry.
 
-Playground defaults to `/_mokup` in Vite dev and the Node.js server.
+Playground defaults to `/_mokup` in Vite dev.

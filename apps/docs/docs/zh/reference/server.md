@@ -15,25 +15,7 @@ export interface MokupServerOptions {
 
 `onNotFound` 默认是 `'next'`，设为 `'response'` 会直接返回 404。
 
-## Node.js 服务直启（无需构建）
-
-当你只需要从目录快速启动一个独立服务时，可以直接使用内置的 Node.js 服务。
-
-```ts
-import { startMokupServer } from 'mokup/server'
-
-await startMokupServer({
-  dir: 'mock',
-  prefix: '/api',
-  port: 3000,
-})
-```
-
-或使用 CLI：
-
-```bash
-pnpm exec mokup serve --dir mock --prefix /api --port 3000
-```
+Hono 适配器可在 Hono 支持的运行时中使用，Cloudflare Worker 请使用专用入口。
 
 ## 准备 manifest
 
@@ -104,35 +86,9 @@ const handler = createFetchHandler({ manifest })
 const response = await handler(new Request('https://example.com/api'))
 ```
 
-## Node.js HTTP Server
+## Worker 入口
 
-```ts
-import { Buffer } from 'node:buffer'
-import { createServer } from 'node:http'
-import { createFetchHandler } from 'mokup/server'
-
-const handler = createFetchHandler({ manifest })
-
-createServer(async (req, res) => {
-  const host = req.headers.host ?? 'localhost'
-  const url = new URL(req.url ?? '/', `http://${host}`)
-  const request = new Request(url, {
-    method: req.method,
-    headers: req.headers as HeadersInit,
-    body: req.method === 'GET' || req.method === 'HEAD' ? undefined : req,
-  })
-  const response = await handler(request)
-  if (!response) {
-    res.statusCode = 404
-    res.end()
-    return
-  }
-  res.writeHead(response.status, Object.fromEntries(response.headers))
-  res.end(Buffer.from(await response.arrayBuffer()))
-}).listen(3000)
-```
-
-Worker 环境请使用专用入口：
+Worker 环境（含 Cloudflare Workers）请使用：
 
 ```ts
 import { createMokupWorker } from 'mokup/server/worker'

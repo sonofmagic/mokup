@@ -23,7 +23,7 @@ pnpm exec mokup build --dir mock --out .mokup
 
 ## Serve
 
-从目录直接启动独立的 Node.js mock 服务。
+从目录直接启动独立的 mock 服务。
 
 ```bash
 pnpm exec mokup serve --dir mock --prefix /api --port 3000
@@ -60,4 +60,4 @@ await buildManifest({
 
 - `--dir` 可多次传入，但会在同一份 manifest 中合并。
 - 生成的 `mokup.bundle.mjs` 适合在 Worker 或 Node 运行时直接导入。
-- `mokup serve` 与 Node.js 服务直启行为一致。
+- `mokup serve` 与内置服务直启行为一致。
