@@ -1,3 +1,4 @@
+import process from 'node:process'
 import { fileURLToPath } from 'node:url'
 import tailwindcss from '@tailwindcss/vite'
 import vue from '@vitejs/plugin-vue'
@@ -6,6 +7,22 @@ import mokup from '../mokup/src/vite'
 
 const mockDir = fileURLToPath(new URL('../../apps/docs/mock', import.meta.url))
 const runtimeEntry = fileURLToPath(new URL('../runtime/src/index.ts', import.meta.url))
+
+function resolveDocsSwRegister(command: string) {
+  const env = process.env as NodeJS.ProcessEnv & { MOKUP_DOCS_SW_REGISTER?: string }
+  const raw = env.MOKUP_DOCS_SW_REGISTER
+  if (!raw) {
+    return command === 'build'
+  }
+  const normalized = raw.trim().toLowerCase()
+  if (['1', 'true', 'yes', 'on'].includes(normalized)) {
+    return true
+  }
+  if (['0', 'false', 'no', 'off'].includes(normalized)) {
+    return false
+  }
+  return command === 'build'
+}
 
 function routesAliasPlugin() {
   return {
@@ -33,7 +50,7 @@ function routesAliasPlugin() {
   }
 }
 
-export default defineConfig({
+export default defineConfig(({ command }) => ({
   base: './',
   resolve: {
     alias: {
@@ -49,7 +66,7 @@ export default defineConfig({
       prefix: '/api',
       mode: 'sw',
       sw: {
-        register: false,
+        register: resolveDocsSwRegister(command),
       },
     }),
   ],
@@ -68,4 +85,4 @@ export default defineConfig({
       },
     },
   },
-})
+}))
