@@ -4,7 +4,9 @@ import type { IncomingMessage, ServerResponse } from 'node:http'
 import type { Plugin, PreviewServer, ViteDevServer } from 'vite'
 import type { MokupViteOptions, MokupViteOptionsInput, RouteTable } from './types'
 
+import { existsSync } from 'node:fs'
 import { cwd } from 'node:process'
+import { fileURLToPath } from 'node:url'
 import chokidar from 'chokidar'
 import { createLogger } from './logger'
 import { createHonoApp, createMiddleware } from './middleware'
@@ -91,11 +93,29 @@ function resolveSwRuntimeImportPath(base: string) {
   return `${normalizedBase}@id/mokup/runtime`
 }
 
+const swModuleCandidates = [
+  new URL('../sw.ts', import.meta.url),
+  new URL('../sw.js', import.meta.url),
+]
+const localSwModulePath = (() => {
+  for (const candidate of swModuleCandidates) {
+    const filePath = fileURLToPath(candidate)
+    if (existsSync(filePath)) {
+      return filePath
+    }
+  }
+  return fileURLToPath(swModuleCandidates[0] ?? new URL('../sw.ts', import.meta.url))
+})()
+
 type MiddlewareHandler = (
   req: IncomingMessage,
   res: ServerResponse,
   next: (err?: unknown) => void,
 ) => void
+
+interface ResolveContext {
+  resolve: (id: string) => Promise<{ id: string } | null>
+}
 
 interface MiddlewareStackEntry {
   route: string
@@ -128,6 +148,7 @@ export function createMokupPlugin(options: MokupViteOptionsInput = {}): Plugin {
   let root = cwd()
   let base = '/'
   let command: 'serve' | 'build' = 'serve'
+  let assetsDir = 'assets'
   let routes: RouteTable = []
   let serverRoutes: RouteTable = []
   let swRoutes: RouteTable = []
@@ -164,19 +185,41 @@ export function createMokupPlugin(options: MokupViteOptionsInput = {}): Plugin {
   const resolveSwRequestPath = (path: string) => resolveRegisterPath(base, path)
   const resolveSwRegisterScope = (scope: string) => resolveRegisterScope(base, scope)
   const resolveHtmlAssetPath = (fileName: string) => {
+    const normalizedFileName = fileName.startsWith('/')
+      ? fileName.slice(1)
+      : fileName
     if (base && base.startsWith('.')) {
-      return fileName
+      return normalizedFileName
     }
     const normalizedBase = normalizeBase(base)
-    return `${normalizedBase}${fileName}`
+    return `${normalizedBase}${normalizedFileName}`
+  }
+  const resolveAssetsFileName = (fileName: string) => {
+    const trimmed = assetsDir.replace(/^\/+|\/+$/g, '')
+    if (!trimmed) {
+      return fileName
+    }
+    return `${trimmed}/${fileName}`
   }
 
   const swVirtualId = 'virtual:mokup-sw'
   const resolvedSwVirtualId = `\0${swVirtualId}`
   const swLifecycleVirtualId = 'virtual:mokup-sw-lifecycle'
   const resolvedSwLifecycleVirtualId = `\0${swLifecycleVirtualId}`
-  let swLifecycleFileId: string | null = null
+  let swLifecycleFileName: string | null = null
   let swLifecycleScript: string | null = null
+
+  async function resolveSwModuleImport(context: ResolveContext) {
+    const resolved = await context.resolve('mokup/sw')
+    if (resolved?.id) {
+      return resolved.id
+    }
+    const fallbackResolved = await context.resolve(localSwModulePath)
+    if (fallbackResolved?.id) {
+      return fallbackResolved.id
+    }
+    return localSwModulePath
+  }
 
   function buildSwLifecycleScript(importPath = 'mokup/sw') {
     const shouldUnregister = unregisterConfig.unregister === true || !hasSwEntries
@@ -290,7 +333,8 @@ export function createMokupPlugin(options: MokupViteOptionsInput = {}): Plugin {
           if (swRoutes.length === 0) {
             await refreshRoutes()
           }
-          swLifecycleScript = buildSwLifecycleScript()
+          const importPath = await resolveSwModuleImport(this)
+          swLifecycleScript = buildSwLifecycleScript(importPath)
         }
         return swLifecycleScript ?? ''
       }
@@ -308,15 +352,18 @@ export function createMokupPlugin(options: MokupViteOptionsInput = {}): Plugin {
         return
       }
       await refreshRoutes()
-      swLifecycleScript = buildSwLifecycleScript()
-      if (swLifecycleScript) {
-        swLifecycleFileId = this.emitFile({
+      const shouldInject = buildSwLifecycleScript() !== null
+      swLifecycleScript = null
+      if (shouldInject) {
+        swLifecycleFileName = resolveAssetsFileName('mokup-sw-lifecycle.js')
+        this.emitFile({
           type: 'chunk',
           id: swLifecycleVirtualId,
+          fileName: swLifecycleFileName,
         })
       }
       else {
-        swLifecycleFileId = null
+        swLifecycleFileName = null
       }
       if (!swConfig || !hasSwRoutes()) {
         return
@@ -339,11 +386,10 @@ export function createMokupPlugin(options: MokupViteOptionsInput = {}): Plugin {
         return html
       }
       if (command === 'build') {
-        if (!swLifecycleFileId) {
+        if (!swLifecycleFileName) {
           return html
         }
-        const fileName = this.getFileName(swLifecycleFileId)
-        const src = resolveHtmlAssetPath(fileName)
+        const src = resolveHtmlAssetPath(swLifecycleFileName)
         return {
           html,
           tags: [
@@ -371,6 +417,7 @@ export function createMokupPlugin(options: MokupViteOptionsInput = {}): Plugin {
       root = config.root
       base = config.base ?? '/'
       command = config.command
+      assetsDir = config.build.assetsDir ?? 'assets'
     },
     async configureServer(server) {
       currentServer = server
