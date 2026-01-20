@@ -1,5 +1,11 @@
 # @mokup/playground
 
+## 0.0.5
+
+### Patch Changes
+
+- 🐛 **Wait for the mokup service worker to take control before running playground requests.** [`a7b9387`](https://github.com/sonofmagic/mokup/commit/a7b9387b48f949a53cc3274f5a461adfdd123894) by @sonofmagic
+
 ## 0.0.4
 
 ### Patch Changes
