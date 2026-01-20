@@ -163,9 +163,20 @@ export function createMokupPlugin(options: MokupViteOptionsInput = {}): Plugin {
   const hasSwRoutes = () => !!swConfig && swRoutes.length > 0
   const resolveSwRequestPath = (path: string) => resolveRegisterPath(base, path)
   const resolveSwRegisterScope = (scope: string) => resolveRegisterScope(base, scope)
+  const resolveHtmlAssetPath = (fileName: string) => {
+    if (base && base.startsWith('.')) {
+      return fileName
+    }
+    const normalizedBase = normalizeBase(base)
+    return `${normalizedBase}${fileName}`
+  }
 
   const swVirtualId = 'virtual:mokup-sw'
   const resolvedSwVirtualId = `\0${swVirtualId}`
+  const swLifecycleVirtualId = 'virtual:mokup-sw-lifecycle'
+  const resolvedSwLifecycleVirtualId = `\0${swLifecycleVirtualId}`
+  let swLifecycleFileId: string | null = null
+  let swLifecycleScript: string | null = null
 
   function buildSwLifecycleScript(importPath = 'mokup/sw') {
     const shouldUnregister = unregisterConfig.unregister === true || !hasSwEntries
@@ -265,11 +276,23 @@ export function createMokupPlugin(options: MokupViteOptionsInput = {}): Plugin {
       if (id === swVirtualId) {
         return resolvedSwVirtualId
       }
+      if (id === swLifecycleVirtualId) {
+        return resolvedSwLifecycleVirtualId
+      }
       return null
     },
     async load(id) {
       if (id !== resolvedSwVirtualId) {
-        return null
+        if (id !== resolvedSwLifecycleVirtualId) {
+          return null
+        }
+        if (!swLifecycleScript) {
+          if (swRoutes.length === 0) {
+            await refreshRoutes()
+          }
+          swLifecycleScript = buildSwLifecycleScript()
+        }
+        return swLifecycleScript ?? ''
       }
       if (swRoutes.length === 0) {
         await refreshRoutes()
@@ -281,11 +304,21 @@ export function createMokupPlugin(options: MokupViteOptionsInput = {}): Plugin {
       })
     },
     async buildStart() {
-      if (!swConfig || command !== 'build') {
+      if (command !== 'build') {
         return
       }
       await refreshRoutes()
-      if (!hasSwRoutes()) {
+      swLifecycleScript = buildSwLifecycleScript()
+      if (swLifecycleScript) {
+        swLifecycleFileId = this.emitFile({
+          type: 'chunk',
+          id: swLifecycleVirtualId,
+        })
+      }
+      else {
+        swLifecycleFileId = null
+      }
+      if (!swConfig || !hasSwRoutes()) {
         return
       }
       const fileName = swConfig.path.startsWith('/')
@@ -304,6 +337,23 @@ export function createMokupPlugin(options: MokupViteOptionsInput = {}): Plugin {
       const script = buildSwLifecycleScript()
       if (!script) {
         return html
+      }
+      if (command === 'build') {
+        if (!swLifecycleFileId) {
+          return html
+        }
+        const fileName = this.getFileName(swLifecycleFileId)
+        const src = resolveHtmlAssetPath(fileName)
+        return {
+          html,
+          tags: [
+            {
+              tag: 'script',
+              attrs: { type: 'module', src },
+              injectTo: 'head',
+            },
+          ],
+        }
       }
       return {
         html,
