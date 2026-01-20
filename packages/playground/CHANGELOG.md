@@ -1,5 +1,11 @@
 # @mokup/playground
 
+## 0.0.4
+
+### Patch Changes
+
+- 🐛 **Enable docs SW registration via env override, expand playground layout to fill the viewport, add a VS Code open shortcut for routes in dev, consolidate playground colors into theme tokens, and fix SW registration injection for built assets.** [`0b33818`](https://github.com/sonofmagic/mokup/commit/0b3381872db9852743902019566632331b3ae63c) by @sonofmagic
+
 ## 0.0.3
 
 ### Patch Changes
