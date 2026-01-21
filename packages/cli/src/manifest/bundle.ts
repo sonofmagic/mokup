@@ -31,12 +31,12 @@ export async function writeBundle(outDir: string, hasHandlers: boolean) {
 
   const dts = [
     'import type { Manifest, ModuleMap } from \'@mokup/runtime\'',
-    'export interface MokupBundle {',
+    'export interface WorkerBundle {',
     '  manifest: Manifest',
     '  moduleMap?: ModuleMap',
     '  moduleBase?: string | URL',
     '}',
-    'declare const mokupBundle: MokupBundle',
+    'declare const mokupBundle: WorkerBundle',
     'export default mokupBundle',
     'export { mokupBundle }',
     '',

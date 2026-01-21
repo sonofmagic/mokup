@@ -1,9 +1,9 @@
 import type {
   ManifestModuleRef,
   ManifestResponse,
-  MockMiddleware,
-  MockResponseHandler,
+  MiddlewareHandler,
   ModuleMap,
+  RequestHandler,
 } from './types'
 
 export interface RuntimeRule {
@@ -59,14 +59,14 @@ export function normalizeRules(value: unknown): RuntimeRule[] {
 
 export async function executeRule(
   rule: RuntimeRule | undefined,
-  context: Parameters<MockResponseHandler>[0],
+  context: Parameters<RequestHandler>[0],
 ) {
   if (!rule) {
     return undefined
   }
   const value = rule.handler
   if (typeof value === 'function') {
-    const handler = value as MockResponseHandler
+    const handler = value as RequestHandler
     return handler(context)
   }
   return value
@@ -79,16 +79,16 @@ function extractMiddlewareSource(value: unknown) {
   return value
 }
 
-function normalizeMiddleware(value: unknown): MockMiddleware[] {
+function normalizeMiddleware(value: unknown): MiddlewareHandler[] {
   const resolved = extractMiddlewareSource(value)
   if (!resolved) {
     return []
   }
   if (Array.isArray(resolved)) {
-    return resolved.filter((entry): entry is MockMiddleware => typeof entry === 'function')
+    return resolved.filter((entry): entry is MiddlewareHandler => typeof entry === 'function')
   }
   if (typeof resolved === 'function') {
-    return [resolved as MockMiddleware]
+    return [resolved as MiddlewareHandler]
   }
   return []
 }
@@ -157,7 +157,7 @@ export async function loadModuleRule(
 
 export async function loadModuleMiddleware(
   middleware: ManifestModuleRef,
-  middlewareCache: Map<string, MockMiddleware[]>,
+  middlewareCache: Map<string, MiddlewareHandler[]>,
   moduleBase?: string | URL,
   moduleMap?: ModuleMap,
 ) {

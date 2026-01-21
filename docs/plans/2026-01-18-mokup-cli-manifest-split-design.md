@@ -17,7 +17,7 @@
 
 - `src/index.ts`: public exports only (`buildManifest`, `BuildOptions`).
 - `src/manifest/index.ts`: orchestration for `buildManifest`.
-- `src/manifest/types.ts`: `BuildOptions`, `MockRule`, and shared internal types.
+- `src/manifest/types.ts`: `BuildOptions`, `RouteRule`, and shared internal types.
 - `src/manifest/routes.ts`: route derivation, prefix/method normalization, and scoring sort.
 - `src/manifest/files.ts`: file discovery, filters, and path helpers.
 - `src/manifest/rules.ts`: reading JSON/TS/JS mocks into normalized rules.

@@ -9,8 +9,8 @@
 
 ## API Surface
 
-- `MokupViteOptions.mode?: 'server' | 'sw'` (default `server`).
-- `MokupViteOptions.sw?: { path?: string; scope?: string; register?: boolean; fallback?: boolean }`
+- `VitePluginOptions.mode?: 'server' | 'sw'` (default `server`).
+- `VitePluginOptions.sw?: { path?: string; scope?: string; register?: boolean; fallback?: boolean }`
   - `path` default `/mokup-sw.js`.
   - `scope` default `/`.
   - `register` default `true` (auto inject registration script).
@@ -25,7 +25,7 @@
 - `serverRoutes` keep current Hono-based middleware handling.
 - `swRoutes` are compiled into a SW script:
   - Generates a runtime manifest from resolved routes.
-  - Builds a `moduleMap` by importing mock modules and converting `MockRule` to runtime rules.
+  - Builds a `moduleMap` by importing mock modules and converting `RouteRule` to runtime rules.
   - Uses `@mokup/runtime` to match requests and respond; falls back to `fetch()` when unmatched.
 
 ## Data Flow

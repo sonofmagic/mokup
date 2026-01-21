@@ -1,4 +1,4 @@
-import type { DirectoryConfig, Logger, RouteTable } from './types'
+import type { Logger, RouteDirectoryConfig, RouteTable } from './types'
 import { resolveDirectoryConfig } from './config'
 import { collectFiles, isSupportedFile } from './files'
 import { loadRules } from './loader'
@@ -15,7 +15,7 @@ export async function scanRoutes(params: {
   const routes: RouteTable = []
   const seen = new Set<string>()
   const files = await collectFiles(params.dirs)
-  const configCache = new Map<string, DirectoryConfig | null>()
+  const configCache = new Map<string, RouteDirectoryConfig | null>()
   const fileCache = new Map<string, string | null>()
   for (const fileInfo of files) {
     if (!isSupportedFile(fileInfo.file)) {

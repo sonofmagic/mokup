@@ -4,11 +4,11 @@
 
 - Provide a webpack 5 plugin with feature parity to `createMokupPlugin` (Vite).
 - Support dev middleware, SW registration/unregister lifecycle, and playground.
-- Keep the public API consistent with `MokupViteOptionsInput`.
+- Keep the public API consistent with `VitePluginOptionsInput`.
 
 ## Public API
 
-- `createMokupWebpackPlugin(options?: MokupViteOptionsInput): WebpackPluginInstance`
+- `createMokupWebpackPlugin(options?: VitePluginOptionsInput): WebpackPluginInstance`
 - Export via `packages/mokup/src/webpack/index.ts` and `mokup/webpack` entry.
 - No separate config object; reuse `dir`, `prefix`, `mode`, `sw`, `playground`, etc.
 

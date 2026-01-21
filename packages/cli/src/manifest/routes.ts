@@ -1,5 +1,5 @@
 import type { HttpMethod, ManifestRoute, RouteToken } from '@mokup/runtime'
-import type { MockRule } from './types'
+import type { RouteRule } from './types'
 
 import { compareRouteScore, parseRouteTemplate } from '@mokup/runtime'
 
@@ -120,7 +120,7 @@ export function deriveRouteFromFile(
 }
 
 export function resolveRule(params: {
-  rule: MockRule
+  rule: RouteRule
   derivedTemplate: string
   derivedMethod?: HttpMethod
   prefix: string

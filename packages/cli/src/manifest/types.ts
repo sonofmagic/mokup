@@ -1,3 +1,5 @@
+import type { MiddlewareHandler } from '@mokup/shared/hono'
+
 export interface BuildOptions {
   dir?: string | string[]
   outDir?: string
@@ -9,26 +11,19 @@ export interface BuildOptions {
   log?: (message: string) => void
 }
 
-export interface MockRule {
+export interface RouteRule {
   handler: unknown
   status?: number
   headers?: Record<string, string>
   delay?: number
 }
 
-export type MockMiddleware = (
-  req: unknown,
-  res: unknown,
-  ctx: unknown,
-  next: () => Promise<unknown>,
-) => unknown | Promise<unknown>
-
-export interface DirectoryConfig {
+export interface RouteDirectoryConfig {
   headers?: Record<string, string>
   status?: number
   delay?: number
   enabled?: boolean
-  middleware?: MockMiddleware | MockMiddleware[]
+  middleware?: MiddlewareHandler | MiddlewareHandler[]
 }
 
 export interface FileInfo {

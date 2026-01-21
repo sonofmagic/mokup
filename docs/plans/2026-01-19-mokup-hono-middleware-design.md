@@ -40,8 +40,8 @@ docs should use Hono-style handlers.
 
 ## Public API updates
 
-- `mokup` handler type becomes `MockHandler = (c: Context) => Response | Promise<Response>`.
-- `MockMiddleware` becomes Hono middleware.
+- `mokup` handler type becomes `RequestHandler = (c: Context) => Response | Promise<Response>`.
+- `MiddlewareHandler` becomes Hono middleware.
 - Examples/docs migrate from `(req, res, ctx)` to Hono `Context` usage:
   - `c.req.param()` for path params
   - `c.req.query()` for query

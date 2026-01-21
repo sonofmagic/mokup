@@ -1,14 +1,14 @@
 import type { ModuleMap } from '@mokup/runtime'
 
-import type { MokupServerOptions, MokupWorkerBundle, MokupWorkerInput } from './types'
+import type { ServerOptions, WorkerBundle, WorkerInput } from './types'
 
 import { createFetchHandler } from './fetch'
 
-export interface MokupWorker {
+export interface FetchWorker {
   fetch: (request: Request) => Promise<Response>
 }
 
-function isManifest(value: MokupWorkerInput): value is MokupWorkerBundle['manifest'] {
+function isManifest(value: WorkerInput): value is WorkerBundle['manifest'] {
   return typeof value === 'object'
     && value !== null
     && !Array.isArray(value)
@@ -16,8 +16,8 @@ function isManifest(value: MokupWorkerInput): value is MokupWorkerBundle['manife
     && 'routes' in value
 }
 
-function normalizeWorkerOptions(bundle: MokupWorkerBundle): MokupServerOptions {
-  const options: MokupServerOptions = {
+function normalizeWorkerOptions(bundle: WorkerBundle): ServerOptions {
+  const options: ServerOptions = {
     manifest: bundle.manifest,
     onNotFound: bundle.onNotFound ?? 'response',
   }
@@ -30,7 +30,7 @@ function normalizeWorkerOptions(bundle: MokupWorkerBundle): MokupServerOptions {
   return options
 }
 
-async function loadBundleFromDir(dir: string): Promise<MokupWorkerBundle> {
+async function loadBundleFromDir(dir: string): Promise<WorkerBundle> {
   const nodeProcess = await import('node:process')
   const isNode = typeof nodeProcess !== 'undefined' && !!nodeProcess.versions?.node
   if (!isNode) {
@@ -43,7 +43,7 @@ async function loadBundleFromDir(dir: string): Promise<MokupWorkerBundle> {
 
   const manifestPath = resolve(dir, 'mokup.manifest.json')
   const manifestRaw = await readFile(manifestPath, 'utf8')
-  const manifest = JSON.parse(manifestRaw) as MokupWorkerBundle['manifest']
+  const manifest = JSON.parse(manifestRaw) as WorkerBundle['manifest']
 
   const handlersIndexPath = resolve(dir, 'mokup-handlers', 'index.mjs')
   let moduleMap: ModuleMap | undefined
@@ -56,7 +56,7 @@ async function loadBundleFromDir(dir: string): Promise<MokupWorkerBundle> {
     moduleMap = undefined
   }
 
-  const bundle: MokupWorkerBundle = {
+  const bundle: WorkerBundle = {
     manifest,
     moduleBase: join(dir, '/'),
   }
@@ -66,7 +66,7 @@ async function loadBundleFromDir(dir: string): Promise<MokupWorkerBundle> {
   return bundle
 }
 
-function createWorker(handlerOptions: MokupServerOptions): MokupWorker {
+function createWorker(handlerOptions: ServerOptions): FetchWorker {
   const handler = createFetchHandler(handlerOptions)
   return {
     fetch: async (request: Request) => {
@@ -75,13 +75,13 @@ function createWorker(handlerOptions: MokupServerOptions): MokupWorker {
   }
 }
 
-export function createMokupWorker(input: string): Promise<MokupWorker>
+export function createMokupWorker(input: string): Promise<FetchWorker>
 export function createMokupWorker(
-  input: Exclude<MokupWorkerInput, string>,
-): MokupWorker
+  input: Exclude<WorkerInput, string>,
+): FetchWorker
 export function createMokupWorker(
-  input: MokupWorkerInput,
-): MokupWorker | Promise<MokupWorker> {
+  input: WorkerInput,
+): FetchWorker | Promise<FetchWorker> {
   if (typeof input === 'string') {
     return loadBundleFromDir(input)
       .then(bundle => createWorker(normalizeWorkerOptions(bundle)))

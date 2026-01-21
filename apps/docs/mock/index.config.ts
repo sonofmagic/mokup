@@ -1,11 +1,11 @@
-import type { DirectoryConfig, MockMiddleware } from 'mokup'
+import type { MiddlewareHandler, RouteDirectoryConfig } from 'mokup'
 
-const middleware: MockMiddleware = async (c, next) => {
+const middleware: MiddlewareHandler = async (c, next) => {
   c.header('x-mokup-middleware', 'enabled')
   return await next()
 }
 
-const config: DirectoryConfig = {
+const config: RouteDirectoryConfig = {
   headers: {
     'x-mokup-scope': 'docs',
   },

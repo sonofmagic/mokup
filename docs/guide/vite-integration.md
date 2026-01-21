@@ -108,21 +108,21 @@ mock-extra/
 ### TS/JS 模块
 
 支持导出对象、数组、函数。规则字段使用 `handler`，`response` 不再支持。
-函数式响应建议显式声明 `MockResponseHandler`。
+函数式响应建议显式声明 `RequestHandler`。
 
 ## Handler 约定（强烈推荐）
 
 函数响应必须明确类型，避免 `c` 隐式 `any`：
 
 ```ts
-import type { MockResponseHandler, MockRule } from 'mokup'
+import type { RequestHandler, RouteRule } from 'mokup'
 
-const handler: MockResponseHandler = (c) => {
+const handler: RequestHandler = (c) => {
   c.header('x-mokup', 'ok')
   return { ok: true }
 }
 
-const rule: MockRule = {
+const rule: RouteRule = {
   handler,
 }
 
@@ -136,9 +136,9 @@ export default rule
 `mock/health.get.ts`
 
 ```ts
-import type { MockRule } from 'mokup'
+import type { RouteRule } from 'mokup'
 
-const rule: MockRule = {
+const rule: RouteRule = {
   handler: 'OK',
 }
 
@@ -150,9 +150,9 @@ export default rule
 `mock/users/[id].get.ts`
 
 ```ts
-import type { MockResponseHandler, MockRule } from 'mokup'
+import type { RequestHandler, RouteRule } from 'mokup'
 
-const handler: MockResponseHandler = (c) => {
+const handler: RequestHandler = (c) => {
   const id = c.req.param('id')
   return {
     ok: true,
@@ -161,7 +161,7 @@ const handler: MockResponseHandler = (c) => {
   }
 }
 
-const rule: MockRule = {
+const rule: RouteRule = {
   handler,
 }
 
@@ -173,9 +173,9 @@ export default rule
 `mock/reports/[...slug].get.ts`
 
 ```ts
-import type { MockResponseHandler, MockRule } from 'mokup'
+import type { RequestHandler, RouteRule } from 'mokup'
 
-const handler: MockResponseHandler = (c) => {
+const handler: RequestHandler = (c) => {
   const slugValue = c.req.param('slug')
   const slug = slugValue ? slugValue.split('/') : []
   return {
@@ -185,7 +185,7 @@ const handler: MockResponseHandler = (c) => {
   }
 }
 
-const rule: MockRule = {
+const rule: RouteRule = {
   handler,
 }
 
@@ -197,9 +197,9 @@ export default rule
 `mock/docs/[[...slug]].get.ts`
 
 ```ts
-import type { MockResponseHandler, MockRule } from 'mokup'
+import type { RequestHandler, RouteRule } from 'mokup'
 
-const handler: MockResponseHandler = (c) => {
+const handler: RequestHandler = (c) => {
   const slugValue = c.req.param('slug')
   const slug = slugValue ? slugValue.split('/') : []
   return {
@@ -209,7 +209,7 @@ const handler: MockResponseHandler = (c) => {
   }
 }
 
-const rule: MockRule = {
+const rule: RouteRule = {
   handler,
 }
 
@@ -223,9 +223,9 @@ export default rule
 `mock/search.get.ts`
 
 ```ts
-import type { MockResponseHandler, MockRule } from 'mokup'
+import type { RequestHandler, RouteRule } from 'mokup'
 
-const handler: MockResponseHandler = async (c) => {
+const handler: RequestHandler = async (c) => {
   await new Promise(resolve => setTimeout(resolve, 220))
   const term = c.req.query('q')
   c.header('x-mokup-query', String(term ?? ''))
@@ -240,7 +240,7 @@ const handler: MockResponseHandler = async (c) => {
   }
 }
 
-const rule: MockRule = {
+const rule: RouteRule = {
   handler,
 }
 
@@ -252,9 +252,9 @@ export default rule
 `mock/login.post.ts`
 
 ```ts
-import type { MockResponseHandler, MockRule } from 'mokup'
+import type { RequestHandler, RouteRule } from 'mokup'
 
-const handler: MockResponseHandler = async (c) => {
+const handler: RequestHandler = async (c) => {
   await new Promise(resolve => setTimeout(resolve, 150))
   const payload = await c.req.json().catch(() => ({})) as {
     username?: string
@@ -276,7 +276,7 @@ const handler: MockResponseHandler = async (c) => {
   }
 }
 
-const rule: MockRule = {
+const rule: RouteRule = {
   handler,
 }
 
@@ -286,9 +286,9 @@ export default rule
 ### 二进制响应
 
 ```ts
-import type { MockRule } from 'mokup'
+import type { RouteRule } from 'mokup'
 
-const rule: MockRule = {
+const rule: RouteRule = {
   handler: new Uint8Array([1, 2, 3, 4]),
 }
 
@@ -300,9 +300,9 @@ export default rule
 支持导出数组，但每条规则仍使用文件路由，重复路由会告警：
 
 ```ts
-import type { MockRule } from 'mokup'
+import type { RouteRule } from 'mokup'
 
-const rules: MockRule[] = [
+const rules: RouteRule[] = [
   { handler: { ok: true, step: 'one' } },
   { handler: { ok: true, step: 'two' } },
 ]
@@ -312,12 +312,12 @@ export default rules
 
 ## 请求对象字段说明
 
-`MockResponseHandler` 的参数如下：
+`RequestHandler` 的参数如下：
 
 ```ts
 import type { Context } from 'hono'
 
-type MockResponseHandler = (context: Context) => Response | Promise<Response> | unknown
+type RequestHandler = (context: Context) => Response | Promise<Response> | unknown
 ```
 
 `Context` 字段重点：
@@ -412,7 +412,7 @@ Playground 会请求 `/_mokup/routes` 获取当前扫描到的 mock 列表，UI 
 
 ### `req` 报 TS7006？
 
-函数响应请显式声明 `MockResponseHandler`，不要直接写 `(c) => ...`。
+函数响应请显式声明 `RequestHandler`，不要直接写 `(c) => ...`。
 
 ## 应用层中间层（useRequest）
 

@@ -1,6 +1,6 @@
-import type { MockRule } from 'mokup'
+import type { RouteRule } from 'mokup'
 
-const rule: MockRule = {
+const rule: RouteRule = {
   status: 202,
   headers: {
     'x-mokup-region': 'delta',

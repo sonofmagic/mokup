@@ -1,6 +1,6 @@
-import type { MockResponseHandler, MockRule } from 'mokup'
+import type { RequestHandler, RouteRule } from 'mokup'
 
-const handler: MockResponseHandler = async (c) => {
+const handler: RequestHandler = async (c) => {
   await new Promise(resolve => setTimeout(resolve, 150))
   const payload = await c.req.json().catch(() => ({}))
   const body = payload && typeof payload === 'object' ? payload : {}
@@ -21,7 +21,7 @@ const handler: MockResponseHandler = async (c) => {
   }
 }
 
-const rule: MockRule = {
+const rule: RouteRule = {
   handler,
 }
 

@@ -1,7 +1,7 @@
 import type { Hono } from '@mokup/shared/hono'
 import type { IncomingMessage, ServerResponse } from 'node:http'
 import type { Plugin, PreviewServer, ViteDevServer } from 'vite'
-import type { MokupViteOptions, MokupViteOptionsInput, RouteTable } from './types'
+import type { RouteTable, VitePluginOptions, VitePluginOptionsInput } from './types'
 
 import { existsSync } from 'node:fs'
 import { cwd } from 'node:process'
@@ -36,12 +36,12 @@ function isViteDevServer(
   return !!server && 'ws' in server
 }
 
-function normalizeOptions(options: MokupViteOptionsInput): MokupViteOptions[] {
+function normalizeOptions(options: VitePluginOptionsInput): VitePluginOptions[] {
   const list = Array.isArray(options) ? options : [options]
   return list.length > 0 ? list : [{}]
 }
 
-function resolvePlaygroundInput(list: MokupViteOptions[]) {
+function resolvePlaygroundInput(list: VitePluginOptions[]) {
   for (const entry of list) {
     if (typeof entry.playground !== 'undefined') {
       return entry.playground
@@ -143,7 +143,7 @@ function addMiddlewareFirst(
   server.middlewares.use(middleware)
 }
 
-export function createMokupPlugin(options: MokupViteOptionsInput = {}): Plugin {
+export function createMokupPlugin(options: VitePluginOptionsInput = {}): Plugin {
   let root = cwd()
   let base = '/'
   let command: 'serve' | 'build' = 'serve'

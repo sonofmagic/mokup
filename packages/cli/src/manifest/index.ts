@@ -1,5 +1,5 @@
 import type { Manifest, ManifestRoute } from '@mokup/runtime'
-import type { BuildOptions, DirectoryConfig, MockRule } from './types'
+import type { BuildOptions, RouteDirectoryConfig, RouteRule } from './types'
 
 import { promises as fs } from 'node:fs'
 import { cwd } from 'node:process'
@@ -25,7 +25,7 @@ export async function buildManifest(options: BuildOptions = {}) {
   const seen = new Set<string>()
   const handlerSources = new Set<string>()
   const handlerModuleMap = new Map<string, string>()
-  const configCache = new Map<string, DirectoryConfig | null>()
+  const configCache = new Map<string, RouteDirectoryConfig | null>()
   const configFileCache = new Map<string, string | null>()
 
   for (const fileInfo of files) {
@@ -71,7 +71,7 @@ export async function buildManifest(options: BuildOptions = {}) {
         continue
       }
       const resolveParams: {
-        rule: MockRule
+        rule: RouteRule
         derivedTemplate: string
         derivedMethod: ManifestRoute['method']
         prefix: string

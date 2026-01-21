@@ -20,7 +20,7 @@ Add an uninstall pathway for Mokup service workers so users can proactively remo
 
 1. Client helper: implement `unregisterMokupServiceWorker({ path, scope })` in `packages/mokup/src/sw.ts`. It uses `navigator.serviceWorker.getRegistrations()` and removes only registrations whose scope matches and whose script URL path equals the configured SW path. Defaults are `/mokup-sw.js` and `/`. Returns the successfully unregistered registrations and handles non-browser contexts gracefully.
 
-2. Vite plugin: extend `MokupSwOptions` with `unregister?: boolean`. If `sw.unregister` is `true`, inject an uninstall script and skip registration. When no SW entries exist, inject an uninstall script using configured `sw.path`/`sw.scope` (or defaults). Registration behavior remains unchanged otherwise.
+2. Vite plugin: extend `ServiceWorkerOptions` with `unregister?: boolean`. If `sw.unregister` is `true`, inject an uninstall script and skip registration. When no SW entries exist, inject an uninstall script using configured `sw.path`/`sw.scope` (or defaults). Registration behavior remains unchanged otherwise.
 
 3. Docs: update the Vite plugin reference in English/Chinese to include `sw.unregister`, the uninstall behavior, and the manual helper API.
 

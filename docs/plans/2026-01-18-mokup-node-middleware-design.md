@@ -23,7 +23,7 @@ Exports:
 - `createConnectMiddleware(options)` -> `(req, res, next)`
 - `createKoaMiddleware(options)` -> `(ctx, next)`
 - `createHonoMiddleware(options)` -> `(c, next)`
-- `MokupNodeOptions` type (extends runtime options + `onNotFound`).
+- `ServerOptions` type (extends runtime options + `onNotFound`).
 
 ## Architecture
 

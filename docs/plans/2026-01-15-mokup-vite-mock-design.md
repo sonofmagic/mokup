@@ -16,7 +16,7 @@
 ## Config
 
 ```ts
-export interface MokupViteOptions {
+export interface VitePluginOptions {
   dir?: string | string[] | ((root: string) => string | string[])
   prefix?: string
   include?: RegExp | RegExp[]

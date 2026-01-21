@@ -30,10 +30,10 @@ Out of scope:
 
 ```ts
 export async function createFetchServer(
-  options?: MokupFetchServerOptions | MokupFetchServerOptions[],
-): Promise<MokupFetchServer>
+  options?: FetchServerOptions | FetchServerOptions[],
+): Promise<FetchServer>
 
-export interface MokupFetchServer {
+export interface FetchServer {
   fetch: (request: Request) => Promise<Response>
   refresh: () => Promise<void>
   getRoutes: () => RouteTable

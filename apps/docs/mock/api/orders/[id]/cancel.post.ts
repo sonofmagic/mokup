@@ -1,6 +1,6 @@
-import type { MockResponseHandler } from 'mokup'
+import type { RequestHandler } from 'mokup'
 
-const handler: MockResponseHandler = async (c) => {
+const handler: RequestHandler = async (c) => {
   const rawId = c.req.param('id') ?? 'ord_unknown'
   const id = Array.isArray(rawId) ? rawId.join('-') : rawId
   const payload = await c.req.json().catch(() => ({}))

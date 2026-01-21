@@ -1,6 +1,6 @@
-import type { MockResponseHandler } from 'mokup'
+import type { RequestHandler } from 'mokup'
 
-const handler: MockResponseHandler = (c) => {
+const handler: RequestHandler = (c) => {
   c.status(201)
   return {
     ok: true,

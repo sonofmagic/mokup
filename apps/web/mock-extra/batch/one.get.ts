@@ -1,6 +1,6 @@
-import type { MockRule } from 'mokup'
+import type { RouteRule } from 'mokup'
 
-const rule: MockRule = {
+const rule: RouteRule = {
   handler: {
     ok: true,
     lane: 'one',

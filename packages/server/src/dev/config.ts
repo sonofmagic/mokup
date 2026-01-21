@@ -1,4 +1,4 @@
-import type { DirectoryConfig, Logger, MockMiddleware, ResolvedMiddleware } from './types'
+import type { Logger, MiddlewareHandler, ResolvedMiddleware, RouteDirectoryConfig } from './types'
 
 import { Buffer } from 'node:buffer'
 import { promises as fs } from 'node:fs'
@@ -68,7 +68,7 @@ async function findConfigFile(
 
 async function loadConfig(
   file: string,
-): Promise<DirectoryConfig | null> {
+): Promise<RouteDirectoryConfig | null> {
   const mod = await loadModule(file)
   if (!mod) {
     return null
@@ -77,11 +77,11 @@ async function loadConfig(
   if (!value || typeof value !== 'object') {
     return null
   }
-  return value as DirectoryConfig
+  return value as RouteDirectoryConfig
 }
 
 function normalizeMiddlewares(
-  value: DirectoryConfig['middleware'],
+  value: RouteDirectoryConfig['middleware'],
   source: string,
   logger: Logger,
 ): ResolvedMiddleware[] {
@@ -95,7 +95,7 @@ function normalizeMiddlewares(
       logger.warn(`Invalid middleware in ${source}`)
       continue
     }
-    middlewares.push({ handle: entry as MockMiddleware, source, index })
+    middlewares.push({ handle: entry as MiddlewareHandler, source, index })
   }
   return middlewares
 }
@@ -104,7 +104,7 @@ export async function resolveDirectoryConfig(params: {
   file: string
   rootDir: string
   logger: Logger
-  configCache: Map<string, DirectoryConfig | null>
+  configCache: Map<string, RouteDirectoryConfig | null>
   fileCache: Map<string, string | null>
 }): Promise<{
   headers?: Record<string, string>

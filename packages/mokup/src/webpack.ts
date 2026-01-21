@@ -1,15 +1,15 @@
 export type {
-  DirectoryConfig,
+  Context,
   HttpMethod,
-  MockContext,
-  MockMiddleware,
-  MockResponse,
-  MockResponseHandler,
-  MockRule,
-  MokupMockMode,
-  MokupSwOptions,
-  MokupViteOptions,
-  MokupViteOptionsInput,
+  MiddlewareHandler,
+  RequestHandler,
+  RouteDirectoryConfig,
+  RouteResponse,
+  RouteRule,
+  RuntimeMode,
+  ServiceWorkerOptions,
+  VitePluginOptions,
+  VitePluginOptionsInput,
 } from './vite/types'
 
 export { createMokupWebpackPlugin, createMokupWebpackPlugin as default } from './webpack/plugin'

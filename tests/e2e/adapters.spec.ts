@@ -1,5 +1,5 @@
 import type { IncomingMessage, ServerResponse } from 'node:http'
-import type { MokupServerOptions } from '../../packages/server/src/index'
+import type { ServerOptions } from '../../packages/server/src/index'
 import { Buffer } from 'node:buffer'
 import { mkdtemp } from 'node:fs/promises'
 import { createServer } from 'node:http'
@@ -23,7 +23,7 @@ import { repoRoot } from './utils/paths'
 const mockDir = 'apps/web/mock'
 
 let outDir = ''
-let options: MokupServerOptions
+let options: ServerOptions
 
 test.beforeAll(async ({ request: _request }) => {
   outDir = await mkdtemp(join(tmpdir(), 'mokup-adapters-'))
@@ -31,7 +31,7 @@ test.beforeAll(async ({ request: _request }) => {
     ['build', '--dir', mockDir, '--out', outDir],
     { cwd: repoRoot },
   )
-  const manifest = await readJson<MokupServerOptions['manifest']>(
+  const manifest = await readJson<ServerOptions['manifest']>(
     join(outDir, 'mokup.manifest.json'),
   )
   options = {

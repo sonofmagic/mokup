@@ -10,26 +10,22 @@ export type HttpMethod
     | 'OPTIONS'
     | 'HEAD'
 
-export type MockContext = Context
-
-export type MockMiddleware = MiddlewareHandler
-
-export type MockResponseHandler = (
+export type RequestHandler = (
   context: Context,
 ) => Response | Promise<Response> | unknown
 
-export type MockResponse = unknown | MockResponseHandler
+export type RouteResponse = unknown | RequestHandler
 
-export interface MockRule {
-  handler: MockResponse
+export interface RouteRule {
+  handler: RouteResponse
   status?: number
   headers?: Record<string, string>
   delay?: number
 }
 
-export type MokupMockMode = 'server' | 'sw'
+export type RuntimeMode = 'server' | 'sw'
 
-export interface MokupSwOptions {
+export interface ServiceWorkerOptions {
   path?: string
   scope?: string
   register?: boolean
@@ -38,36 +34,36 @@ export interface MokupSwOptions {
   basePath?: string | string[]
 }
 
-export interface DirectoryConfig {
+export interface RouteDirectoryConfig {
   headers?: Record<string, string>
   status?: number
   delay?: number
   enabled?: boolean
-  middleware?: MockMiddleware | MockMiddleware[]
+  middleware?: MiddlewareHandler | MiddlewareHandler[]
 }
 
 export interface ResolvedMiddleware {
-  handle: MockMiddleware
+  handle: MiddlewareHandler
   source: string
   index: number
 }
 
-export interface MokupViteOptions {
+export interface VitePluginOptions {
   dir?: string | string[] | ((root: string) => string | string[])
   prefix?: string
   include?: RegExp | RegExp[]
   exclude?: RegExp | RegExp[]
   watch?: boolean
   log?: boolean
-  mode?: MokupMockMode
-  sw?: MokupSwOptions
+  mode?: RuntimeMode
+  sw?: ServiceWorkerOptions
   playground?: boolean | {
     path?: string
     enabled?: boolean
   }
 }
 
-export type MokupViteOptionsInput = MokupViteOptions | MokupViteOptions[]
+export type VitePluginOptionsInput = VitePluginOptions | VitePluginOptions[]
 
 export interface ResolvedRoute {
   file: string
@@ -75,7 +71,7 @@ export interface ResolvedRoute {
   method: HttpMethod
   tokens: RouteToken[]
   score: number[]
-  handler: MockResponse
+  handler: RouteResponse
   middlewares?: ResolvedMiddleware[]
   status?: number
   headers?: Record<string, string>
@@ -90,3 +86,5 @@ export interface Logger {
   warn: (...args: unknown[]) => void
   error: (...args: unknown[]) => void
 }
+
+export type { Context, MiddlewareHandler } from '@mokup/shared/hono'

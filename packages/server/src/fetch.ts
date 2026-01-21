@@ -1,10 +1,10 @@
-import type { FetchHandler, MokupServerOptions } from './types'
+import type { FetchHandler, ServerOptions } from './types'
 
 import { createRuntime } from '@mokup/runtime'
 import { toArrayBuffer, toRuntimeOptions, toRuntimeRequestFromFetch } from './internal'
 
 export function createFetchHandler(
-  options: MokupServerOptions,
+  options: ServerOptions,
 ): FetchHandler {
   const runtime = createRuntime(toRuntimeOptions(options))
   const onNotFound = options.onNotFound ?? 'next'

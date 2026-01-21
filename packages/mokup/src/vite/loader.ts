@@ -1,5 +1,5 @@
 import type { PreviewServer, ViteDevServer } from 'vite'
-import type { Logger, MockRule } from './types'
+import type { Logger, RouteRule } from './types'
 import { Buffer } from 'node:buffer'
 import { promises as fs } from 'node:fs'
 
@@ -76,7 +76,7 @@ export async function loadRules(
   file: string,
   server: ViteDevServer | PreviewServer | undefined,
   logger: Logger,
-): Promise<MockRule[]> {
+): Promise<RouteRule[]> {
   const ext = extname(file).toLowerCase()
   if (ext === '.json' || ext === '.jsonc') {
     const json = await readJsonFile(file, logger)
@@ -96,7 +96,7 @@ export async function loadRules(
     return []
   }
   if (Array.isArray(value)) {
-    return value as MockRule[]
+    return value as RouteRule[]
   }
   if (typeof value === 'function') {
     return [
@@ -105,5 +105,5 @@ export async function loadRules(
       },
     ]
   }
-  return [value as MockRule]
+  return [value as RouteRule]
 }

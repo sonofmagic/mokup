@@ -1,5 +1,5 @@
 import type { NodeRequestLike } from './internal'
-import type { MokupServerOptions } from './types'
+import type { ServerOptions } from './types'
 
 import { createRuntime } from '@mokup/runtime'
 import { toBinaryBody, toRuntimeOptions, toRuntimeRequestFromNode } from './internal'
@@ -25,7 +25,7 @@ interface FastifyInstanceLike {
 }
 
 export function createFastifyPlugin(
-  options: MokupServerOptions,
+  options: ServerOptions,
 ) {
   const runtime = createRuntime(toRuntimeOptions(options))
   const onNotFound = options.onNotFound ?? 'next'

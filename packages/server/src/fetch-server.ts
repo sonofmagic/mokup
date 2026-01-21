@@ -1,5 +1,5 @@
 import type { Logger, RouteTable } from './dev/types'
-import type { MokupFetchServerOptions, MokupFetchServerOptionsInput } from './fetch-options'
+import type { FetchServerOptions, FetchServerOptionsInput } from './fetch-options'
 
 import { cwd as nodeCwd } from 'node:process'
 import { Hono as HonoApp } from '@mokup/shared/hono'
@@ -10,7 +10,7 @@ import { sortRoutes } from './dev/routes'
 import { scanRoutes } from './dev/scanner'
 import { createDebouncer, isInDirs, resolveDirs } from './dev/utils'
 
-export interface MokupFetchServer {
+export interface FetchServer {
   fetch: (request: Request) => Promise<Response>
   refresh: () => Promise<void>
   getRoutes: () => RouteTable
@@ -26,13 +26,13 @@ interface RuntimeDeno {
 }
 
 function normalizeOptions(
-  options: MokupFetchServerOptionsInput,
-): MokupFetchServerOptions[] {
+  options: FetchServerOptionsInput,
+): FetchServerOptions[] {
   const list = Array.isArray(options) ? options : [options]
   return list.length > 0 ? list : [{}]
 }
 
-function resolvePlaygroundInput(list: MokupFetchServerOptions[]) {
+function resolvePlaygroundInput(list: FetchServerOptions[]) {
   for (const entry of list) {
     if (typeof entry.playground !== 'undefined') {
       return entry.playground
@@ -42,8 +42,8 @@ function resolvePlaygroundInput(list: MokupFetchServerOptions[]) {
 }
 
 function resolveFirst<T>(
-  list: MokupFetchServerOptions[],
-  getter: (entry: MokupFetchServerOptions) => T | undefined,
+  list: FetchServerOptions[],
+  getter: (entry: FetchServerOptions) => T | undefined,
 ): T | undefined {
   for (const entry of list) {
     const value = getter(entry)
@@ -54,7 +54,7 @@ function resolveFirst<T>(
   return undefined
 }
 
-function resolveRoot(list: MokupFetchServerOptions[]) {
+function resolveRoot(list: FetchServerOptions[]) {
   const explicit = resolveFirst(list, entry => entry.root)
   if (explicit) {
     return explicit
@@ -66,7 +66,7 @@ function resolveRoot(list: MokupFetchServerOptions[]) {
   return nodeCwd()
 }
 
-function resolveAllDirs(list: MokupFetchServerOptions[], root: string) {
+function resolveAllDirs(list: FetchServerOptions[], root: string) {
   const dirs: string[] = []
   const seen = new Set<string>()
   for (const entry of list) {
@@ -197,8 +197,8 @@ async function createWatcher(params: {
 }
 
 export async function createFetchServer(
-  options: MokupFetchServerOptionsInput = {},
-): Promise<MokupFetchServer> {
+  options: FetchServerOptionsInput = {},
+): Promise<FetchServer> {
   const optionList = normalizeOptions(options)
   const root = resolveRoot(optionList)
   const logEnabled = optionList.every(entry => entry.log !== false)
@@ -264,7 +264,7 @@ export async function createFetchServer(
 
   const fetch = async (request: Request) => await app.fetch(request)
 
-  const server: MokupFetchServer = {
+  const server: FetchServer = {
     fetch,
     refresh: refreshRoutes,
     getRoutes: () => routes,

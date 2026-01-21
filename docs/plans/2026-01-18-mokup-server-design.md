@@ -25,7 +25,7 @@ Exports (function-based API only):
 - `createKoaMiddleware(options)` -> `(ctx, next)`
 - `createHonoMiddleware(options)` -> `MiddlewareHandler & { routes }`
 - `createFastifyPlugin(options)` -> `FastifyPluginAsync`
-- `MokupServerOptions` type
+- `ServerOptions` type
 
 Options shape:
 

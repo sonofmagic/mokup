@@ -1,4 +1,4 @@
-import type { MokupFetchServerOptions } from '@mokup/server'
+import type { FetchServerOptions } from '@mokup/server'
 import type { BuildOptions } from './manifest/types'
 import process from 'node:process'
 import { serve } from '@hono/node-server'
@@ -58,8 +58,8 @@ function toServeOptions(options: {
   watch?: boolean
   playground?: boolean
   log?: boolean
-}): MokupFetchServerOptions {
-  const serveOptions: MokupFetchServerOptions = {
+}): FetchServerOptions {
+  const serveOptions: FetchServerOptions = {
     watch: options.watch !== false,
     log: options.log !== false,
   }

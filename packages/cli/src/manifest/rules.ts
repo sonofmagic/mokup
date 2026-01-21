@@ -1,4 +1,4 @@
-import type { MockRule } from './types'
+import type { RouteRule } from './types'
 
 import { Buffer } from 'node:buffer'
 import { promises as fs } from 'node:fs'
@@ -57,7 +57,7 @@ async function loadModule(file: string) {
   return null
 }
 
-export async function loadRules(file: string): Promise<MockRule[]> {
+export async function loadRules(file: string): Promise<RouteRule[]> {
   const ext = extname(file).toLowerCase()
   if (ext === '.json' || ext === '.jsonc') {
     const json = await readJsonFile(file)
@@ -77,7 +77,7 @@ export async function loadRules(file: string): Promise<MockRule[]> {
     return []
   }
   if (Array.isArray(value)) {
-    return value as MockRule[]
+    return value as RouteRule[]
   }
   if (typeof value === 'function') {
     return [
@@ -86,5 +86,5 @@ export async function loadRules(file: string): Promise<MockRule[]> {
       },
     ]
   }
-  return [value as MockRule]
+  return [value as RouteRule]
 }

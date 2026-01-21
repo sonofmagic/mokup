@@ -1,15 +1,15 @@
 export { createMokupPlugin as default } from './vite/plugin'
 
 export type {
-  DirectoryConfig,
+  Context,
   HttpMethod,
-  MockContext,
-  MockMiddleware,
-  MockResponse,
-  MockResponseHandler,
-  MockRule,
-  MokupMockMode,
-  MokupSwOptions,
-  MokupViteOptions,
-  MokupViteOptionsInput,
+  MiddlewareHandler,
+  RequestHandler,
+  RouteDirectoryConfig,
+  RouteResponse,
+  RouteRule,
+  RuntimeMode,
+  ServiceWorkerOptions,
+  VitePluginOptions,
+  VitePluginOptionsInput,
 } from './vite/types'

@@ -1,5 +1,5 @@
 import type { RuntimeOptions, RuntimeRequest, RuntimeResult } from '@mokup/runtime'
-import type { MokupServerOptions } from './types'
+import type { ServerOptions } from './types'
 
 const textDecoder = new TextDecoder()
 const textEncoder = new TextEncoder()
@@ -23,7 +23,7 @@ export interface NodeResponseLike {
 }
 
 export function toRuntimeOptions(
-  options: MokupServerOptions,
+  options: ServerOptions,
 ): RuntimeOptions {
   const runtimeOptions: RuntimeOptions = {
     manifest: options.manifest,

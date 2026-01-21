@@ -1,6 +1,6 @@
 import type { DirInput } from './dev/utils'
 
-export interface MokupFetchServerOptions {
+export interface FetchServerOptions {
   dir?: DirInput
   prefix?: string
   include?: RegExp | RegExp[]
@@ -13,6 +13,6 @@ export interface MokupFetchServerOptions {
   root?: string
 }
 
-export type MokupFetchServerOptionsInput
-  = | MokupFetchServerOptions
-    | MokupFetchServerOptions[]
+export type FetchServerOptionsInput
+  = | FetchServerOptions
+    | FetchServerOptions[]

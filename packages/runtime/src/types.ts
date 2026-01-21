@@ -1,4 +1,4 @@
-import type { Context, MiddlewareHandler } from '@mokup/shared/hono'
+import type { Context } from '@mokup/shared/hono'
 import type { RouteToken } from './router'
 
 export type HttpMethod
@@ -66,13 +66,13 @@ export interface RuntimeResult {
   body: string | Uint8Array | null
 }
 
-export type MockContext = Context
-
-export type MockMiddleware = MiddlewareHandler
-
-export type MockResponseHandler = (
+export type RequestHandler = (
   context: Context,
 ) => Response | Promise<Response> | unknown
+
+export type RouteResponse = unknown | RequestHandler
+
+export type { Context, MiddlewareHandler } from '@mokup/shared/hono'
 
 export interface RuntimeOptions {
   manifest: Manifest | (() => Promise<Manifest>)

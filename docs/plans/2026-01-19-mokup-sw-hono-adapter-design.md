@@ -23,7 +23,7 @@ entry) while allowing the base paths to be configured through `sw.basePath`.
 
 ## Configuration
 
-- Add `sw.basePath?: string | string[]` to `MokupSwOptions`.
+- Add `sw.basePath?: string | string[]` to `ServiceWorkerOptions`.
 - If `sw.basePath` is not provided, default to `prefix` for each SW entry.
 - Normalize base paths to leading slash, no trailing slash (except `/`).
 

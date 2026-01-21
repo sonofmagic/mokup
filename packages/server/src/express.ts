@@ -1,8 +1,8 @@
-import type { MokupServerOptions } from './types'
+import type { ServerOptions } from './types'
 import { createConnectMiddleware } from './connect'
 
 export function createExpressMiddleware(
-  options: MokupServerOptions,
+  options: ServerOptions,
 ) {
   return createConnectMiddleware(options)
 }

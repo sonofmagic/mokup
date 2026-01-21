@@ -1,6 +1,6 @@
-import type { MockResponseHandler } from 'mokup'
+import type { RequestHandler } from 'mokup'
 
-const handler: MockResponseHandler = async (c) => {
+const handler: RequestHandler = async (c) => {
   const payload = await c.req.json().catch(() => ({}))
   const body = payload && typeof payload === 'object' ? payload : {}
   const username = (body as { username?: string }).username

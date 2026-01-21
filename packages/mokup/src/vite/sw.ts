@@ -1,9 +1,9 @@
 import type { Manifest, ManifestResponse } from '@mokup/runtime'
 import type {
   Logger,
-  MokupViteOptions,
   ResolvedRoute,
   RouteTable,
+  VitePluginOptions,
 } from './types'
 
 import { Buffer } from 'node:buffer'
@@ -47,7 +47,7 @@ function normalizeBasePath(value: string) {
 }
 
 function resolveSwConfigFromEntries(
-  entries: MokupViteOptions[],
+  entries: VitePluginOptions[],
   logger: Logger,
 ): ResolvedSwConfig {
   let path = defaultSwPath
@@ -130,7 +130,7 @@ function resolveSwConfigFromEntries(
 }
 
 export function resolveSwConfig(
-  options: MokupViteOptions[],
+  options: VitePluginOptions[],
   logger: Logger,
 ): ResolvedSwConfig | null {
   const swEntries = options.filter(entry => entry.mode === 'sw')
@@ -141,7 +141,7 @@ export function resolveSwConfig(
 }
 
 export function resolveSwUnregisterConfig(
-  options: MokupViteOptions[],
+  options: VitePluginOptions[],
   logger: Logger,
 ): ResolvedSwConfig {
   return resolveSwConfigFromEntries(options, logger)

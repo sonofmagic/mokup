@@ -129,7 +129,7 @@ describe('manifest handler helpers', () => {
       expect(indexContent).toContain('mokupModuleMap')
 
       const dts = await fs.readFile(path.join(handlersDir, 'index.d.ts'), 'utf8')
-      expect(dts).toContain('MokupModuleMap')
+      expect(dts).toContain('ModuleMap')
     }
     finally {
       await fs.rm(root, { recursive: true, force: true })

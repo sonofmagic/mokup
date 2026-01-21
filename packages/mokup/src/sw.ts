@@ -1,10 +1,10 @@
-export interface MokupServiceWorkerOptions {
+export interface ServiceWorkerRegisterOptions {
   path?: string
   scope?: string
   enabled?: boolean
 }
 
-export interface MokupServiceWorkerUnregisterOptions {
+export interface ServiceWorkerUnregisterOptions {
   path?: string
   scope?: string
 }
@@ -45,7 +45,7 @@ function matchesScriptPath(scriptUrl: string, origin: string, pathname: string) 
 }
 
 export async function registerMokupServiceWorker(
-  options: MokupServiceWorkerOptions = {},
+  options: ServiceWorkerRegisterOptions = {},
 ): Promise<ServiceWorkerRegistration | null> {
   if (options.enabled === false) {
     return null
@@ -69,7 +69,7 @@ export async function registerMokupServiceWorker(
 }
 
 export async function unregisterMokupServiceWorker(
-  options: MokupServiceWorkerUnregisterOptions = {},
+  options: ServiceWorkerUnregisterOptions = {},
 ): Promise<ServiceWorkerRegistration[]> {
   if (typeof window === 'undefined' || !('serviceWorker' in navigator)) {
     return []

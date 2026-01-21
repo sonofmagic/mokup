@@ -60,8 +60,8 @@ export async function writeHandlerIndex(
 
   await fs.writeFile(join(handlersDir, 'index.mjs'), lines.join('\n'), 'utf8')
   const dts = [
-    'export type MokupModuleMap = Record<string, Record<string, unknown>>',
-    'export declare const mokupModuleMap: MokupModuleMap',
+    'export type ModuleMap = Record<string, Record<string, unknown>>',
+    'export declare const mokupModuleMap: ModuleMap',
     '',
   ]
   await fs.writeFile(join(handlersDir, 'index.d.ts'), dts.join('\n'), 'utf8')

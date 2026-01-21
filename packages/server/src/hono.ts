@@ -1,4 +1,4 @@
-import type { MokupServerOptions } from './types'
+import type { ServerOptions } from './types'
 import { createFetchHandler } from './fetch'
 
 interface HonoContextLike {
@@ -22,7 +22,7 @@ interface HonoRouteLike {
 }
 
 export function createHonoMiddleware(
-  options: MokupServerOptions,
+  options: ServerOptions,
 ) {
   const handler = createFetchHandler(options)
 

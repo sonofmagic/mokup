@@ -1,7 +1,7 @@
-import type { MockRule } from 'mokup'
+import type { RouteRule } from 'mokup'
 import { Buffer } from 'node:buffer'
 
-const rule: MockRule = {
+const rule: RouteRule = {
   headers: {
     'Content-Type': 'application/octet-stream',
     'x-mokup-binary': '1',

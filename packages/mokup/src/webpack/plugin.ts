@@ -1,7 +1,7 @@
 import type { Hono } from '@mokup/shared/hono'
 import type { IncomingMessage, ServerResponse } from 'node:http'
 import type { PreviewServer, ViteDevServer } from 'vite'
-import type { MokupViteOptions, MokupViteOptionsInput, RouteTable } from '../vite/types'
+import type { RouteTable, VitePluginOptions, VitePluginOptionsInput } from '../vite/types'
 
 import { createRequire } from 'node:module'
 import { cwd } from 'node:process'
@@ -85,12 +85,12 @@ interface WebpackCompiler {
 const pluginName = 'mokup:webpack'
 const lifecycleBaseName = 'mokup-sw-lifecycle.js'
 
-function normalizeOptions(options: MokupViteOptionsInput): MokupViteOptions[] {
+function normalizeOptions(options: VitePluginOptionsInput): VitePluginOptions[] {
   const list = Array.isArray(options) ? options : [options]
   return list.length > 0 ? list : [{}]
 }
 
-function resolvePlaygroundInput(list: MokupViteOptions[]) {
+function resolvePlaygroundInput(list: VitePluginOptions[]) {
   for (const entry of list) {
     if (typeof entry.playground !== 'undefined') {
       return entry.playground
@@ -266,7 +266,7 @@ function resolveHtmlWebpackPlugin() {
 }
 
 export function createMokupWebpackPlugin(
-  options: MokupViteOptionsInput = {},
+  options: VitePluginOptionsInput = {},
 ): WebpackPluginInstance {
   const optionList = normalizeOptions(options)
   const logEnabled = optionList.every(entry => entry.log !== false)

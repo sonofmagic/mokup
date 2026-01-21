@@ -1,5 +1,5 @@
 import type { NodeRequestLike, NodeResponseLike } from './internal'
-import type { MokupServerOptions } from './types'
+import type { ServerOptions } from './types'
 
 import { createRuntime } from '@mokup/runtime'
 import {
@@ -11,7 +11,7 @@ import {
 type NextFunction = (error?: unknown) => void
 
 export function createConnectMiddleware(
-  options: MokupServerOptions,
+  options: ServerOptions,
 ) {
   const runtime = createRuntime(toRuntimeOptions(options))
   const onNotFound = options.onNotFound ?? 'next'

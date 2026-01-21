@@ -2,7 +2,7 @@
 
 ## Goals
 
-- Remove route overrides from `MockRule` (no `url`/`method` fields).
+- Remove route overrides from `RouteRule` (no `url`/`method` fields).
 - Add directory-scoped configuration via `index.config.ts`.
 - Support middleware chains applied from root to leaf directories.
 - Surface middleware/config impact in Playground UI.
@@ -41,7 +41,7 @@ async (req, res, ctx, next) => void
 
 ## Route Resolution
 
-- `MockRule` no longer accepts `url` or `method`.
+- `RouteRule` no longer accepts `url` or `method`.
 - Route method and template are derived from file path only.
 - Rules can still set `status`, `headers`, `delay`, `response`.
 

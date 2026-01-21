@@ -1,6 +1,6 @@
-import type { MockRule } from 'mokup'
+import type { RouteRule } from 'mokup'
 
-const rule: MockRule = {
+const rule: RouteRule = {
   handler: async (c) => {
     const body = await c.req.json().catch(() => null)
     return {

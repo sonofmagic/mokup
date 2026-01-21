@@ -1,6 +1,6 @@
-import type { MockResponseHandler, MockRule } from 'mokup'
+import type { RequestHandler, RouteRule } from 'mokup'
 
-const handler: MockResponseHandler = (c) => {
+const handler: RequestHandler = (c) => {
   const slugValue = c.req.param('slug')
   const slug = slugValue ? slugValue.split('/') : []
   return {
@@ -10,7 +10,7 @@ const handler: MockResponseHandler = (c) => {
   }
 }
 
-const rule: MockRule = {
+const rule: RouteRule = {
   handler,
 }
 

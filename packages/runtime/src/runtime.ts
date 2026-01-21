@@ -6,7 +6,7 @@ import type {
   HttpMethod,
   Manifest,
   ManifestRoute,
-  MockMiddleware,
+  MiddlewareHandler,
   ModuleMap,
   RuntimeOptions,
   RuntimeRequest,
@@ -247,7 +247,7 @@ function createRouteHandler(params: {
   }
 }
 
-function createFinalizeMiddleware(route: ManifestRoute): MockMiddleware {
+function createFinalizeMiddleware(route: ManifestRoute): MiddlewareHandler {
   return async (c, next) => {
     const response = await next()
     const resolved = resolveResponse(response, c.res)
@@ -263,7 +263,7 @@ function createFinalizeMiddleware(route: ManifestRoute): MockMiddleware {
 async function buildApp(params: {
   manifest: Manifest
   moduleCache: Map<string, RuntimeRule[]>
-  middlewareCache: Map<string, MockMiddleware[]>
+  middlewareCache: Map<string, MiddlewareHandler[]>
   moduleBase?: string | URL
   moduleMap?: ModuleMap
 }): Promise<Hono> {
@@ -272,7 +272,7 @@ async function buildApp(params: {
   const compiled = compileRoutes(manifest)
 
   for (const entry of compiled) {
-    const middlewares: MockMiddleware[] = []
+    const middlewares: MiddlewareHandler[] = []
     for (const middleware of entry.route.middleware ?? []) {
       const handler = await loadModuleMiddleware(
         middleware,
@@ -309,7 +309,7 @@ export async function createRuntimeApp(options: RuntimeOptions): Promise<Hono> {
     ? await options.manifest()
     : options.manifest
   const moduleCache = new Map<string, RuntimeRule[]>()
-  const middlewareCache = new Map<string, MockMiddleware[]>()
+  const middlewareCache = new Map<string, MiddlewareHandler[]>()
   return await buildApp({
     manifest,
     moduleCache,
@@ -420,7 +420,7 @@ export function createRuntime(options: RuntimeOptions) {
   let appPromise: Promise<Hono> | null = null
   let compiledCache: CompiledRoute[] | null = null
   const moduleCache = new Map<string, RuntimeRule[]>()
-  const middlewareCache = new Map<string, MockMiddleware[]>()
+  const middlewareCache = new Map<string, MiddlewareHandler[]>()
 
   const getManifest = async () => {
     if (!manifestCache) {

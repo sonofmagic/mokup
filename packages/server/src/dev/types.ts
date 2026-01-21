@@ -10,33 +10,29 @@ export type HttpMethod
     | 'OPTIONS'
     | 'HEAD'
 
-export type MockContext = Context
-
-export type MockMiddleware = MiddlewareHandler
-
-export type MockResponseHandler = (
+export type RequestHandler = (
   context: Context,
 ) => Response | Promise<Response> | unknown
 
-export type MockResponse = unknown | MockResponseHandler
+export type RouteResponse = unknown | RequestHandler
 
-export interface MockRule {
-  handler: MockResponse
+export interface RouteRule {
+  handler: RouteResponse
   status?: number
   headers?: Record<string, string>
   delay?: number
 }
 
-export interface DirectoryConfig {
+export interface RouteDirectoryConfig {
   headers?: Record<string, string>
   status?: number
   delay?: number
   enabled?: boolean
-  middleware?: MockMiddleware | MockMiddleware[]
+  middleware?: MiddlewareHandler | MiddlewareHandler[]
 }
 
 export interface ResolvedMiddleware {
-  handle: MockMiddleware
+  handle: MiddlewareHandler
   source: string
   index: number
 }
@@ -47,7 +43,7 @@ export interface ResolvedRoute {
   method: HttpMethod
   tokens: RouteToken[]
   score: number[]
-  handler: MockResponse
+  handler: RouteResponse
   middlewares?: ResolvedMiddleware[]
   status?: number
   headers?: Record<string, string>
@@ -62,3 +58,5 @@ export interface Logger {
   warn: (...args: unknown[]) => void
   error: (...args: unknown[]) => void
 }
+
+export type { Context, MiddlewareHandler } from '@mokup/shared/hono'

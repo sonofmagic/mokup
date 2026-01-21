@@ -1,11 +1,11 @@
-import type { MokupServerOptions } from 'mokup/server'
+import type { ServerOptions } from 'mokup/server'
 import { Hono } from 'hono'
 import { createHonoMiddleware } from 'mokup/server'
 import mokupBundle from './.mokup/mokup.bundle.mjs'
 
 const app = new Hono()
 
-const options: MokupServerOptions = {
+const options: ServerOptions = {
   manifest: mokupBundle.manifest,
   onNotFound: 'response',
 }

@@ -1,6 +1,6 @@
 # Server Adapters
 
-`mokup/server` ships adapters for multiple frameworks, all sharing `MokupServerOptions`.
+`mokup/server` ships adapters for multiple frameworks, all sharing `ServerOptions`.
 
 ## Fetch server (Node/Deno/Bun)
 
@@ -21,7 +21,7 @@ const response = await app.fetch(new Request('http://localhost/api/users'))
 ## Options
 
 ```ts
-export interface MokupServerOptions {
+export interface ServerOptions {
   manifest: Manifest | (() => Promise<Manifest>)
   moduleBase?: string | URL
   moduleMap?: Record<string, Record<string, unknown>>

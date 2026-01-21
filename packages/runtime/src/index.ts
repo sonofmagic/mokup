@@ -8,15 +8,16 @@ export {
 } from './router'
 export { createRuntime, createRuntimeApp } from './runtime'
 export type {
+  Context,
   HttpMethod,
   Manifest,
   ManifestModuleRef,
   ManifestResponse,
   ManifestRoute,
-  MockContext,
-  MockMiddleware,
-  MockResponseHandler,
+  MiddlewareHandler,
   ModuleMap,
+  RequestHandler,
+  RouteResponse,
   RuntimeOptions,
   RuntimeRequest,
   RuntimeResult,

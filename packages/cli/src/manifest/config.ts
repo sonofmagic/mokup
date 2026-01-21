@@ -1,4 +1,4 @@
-import type { DirectoryConfig } from './types'
+import type { RouteDirectoryConfig } from './types'
 
 import { Buffer } from 'node:buffer'
 import { promises as fs } from 'node:fs'
@@ -66,7 +66,7 @@ async function findConfigFile(
   return null
 }
 
-async function loadConfig(file: string): Promise<DirectoryConfig | null> {
+async function loadConfig(file: string): Promise<RouteDirectoryConfig | null> {
   const mod = await loadModule(file)
   if (!mod) {
     return null
@@ -75,11 +75,11 @@ async function loadConfig(file: string): Promise<DirectoryConfig | null> {
   if (!value || typeof value !== 'object') {
     return null
   }
-  return value as DirectoryConfig
+  return value as RouteDirectoryConfig
 }
 
 function normalizeMiddlewares(
-  value: DirectoryConfig['middleware'],
+  value: RouteDirectoryConfig['middleware'],
   source: string,
   log?: (message: string) => void,
 ) {
@@ -102,7 +102,7 @@ export async function resolveDirectoryConfig(params: {
   file: string
   rootDir: string
   log?: (message: string) => void
-  configCache: Map<string, DirectoryConfig | null>
+  configCache: Map<string, RouteDirectoryConfig | null>
   fileCache: Map<string, string | null>
 }): Promise<{
   headers?: Record<string, string>

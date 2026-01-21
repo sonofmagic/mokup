@@ -1,6 +1,6 @@
 # Server 适配器
 
-`mokup/server` 提供多种框架的适配器，统一使用 `MokupServerOptions`。
+`mokup/server` 提供多种框架的适配器，统一使用 `ServerOptions`。
 
 ## Fetch 入口（Node/Deno/Bun）
 
@@ -21,7 +21,7 @@ const response = await app.fetch(new Request('http://localhost/api/users'))
 ## 选项
 
 ```ts
-export interface MokupServerOptions {
+export interface ServerOptions {
   manifest: Manifest | (() => Promise<Manifest>)
   moduleBase?: string | URL
   moduleMap?: Record<string, Record<string, unknown>>

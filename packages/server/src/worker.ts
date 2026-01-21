@@ -1,12 +1,12 @@
-import type { MokupServerOptions, MokupWorkerBundle, MokupWorkerInput } from './types'
+import type { ServerOptions, WorkerBundle, WorkerInput } from './types'
 
 import { createFetchHandler } from './fetch'
 
-export interface MokupWorker {
+export interface FetchWorker {
   fetch: (request: Request) => Promise<Response>
 }
 
-function isManifest(value: MokupWorkerInput): value is MokupWorkerBundle['manifest'] {
+function isManifest(value: WorkerInput): value is WorkerBundle['manifest'] {
   return typeof value === 'object'
     && value !== null
     && !Array.isArray(value)
@@ -14,8 +14,8 @@ function isManifest(value: MokupWorkerInput): value is MokupWorkerBundle['manife
     && 'routes' in value
 }
 
-function normalizeWorkerOptions(bundle: MokupWorkerBundle): MokupServerOptions {
-  const options: MokupServerOptions = {
+function normalizeWorkerOptions(bundle: WorkerBundle): ServerOptions {
+  const options: ServerOptions = {
     manifest: bundle.manifest,
     onNotFound: bundle.onNotFound ?? 'response',
   }
@@ -28,7 +28,7 @@ function normalizeWorkerOptions(bundle: MokupWorkerBundle): MokupServerOptions {
   return options
 }
 
-function createWorker(handlerOptions: MokupServerOptions): MokupWorker {
+function createWorker(handlerOptions: ServerOptions): FetchWorker {
   const handler = createFetchHandler(handlerOptions)
   return {
     fetch: async (request: Request) => {
@@ -38,8 +38,8 @@ function createWorker(handlerOptions: MokupServerOptions): MokupWorker {
 }
 
 export function createMokupWorker(
-  input: Exclude<MokupWorkerInput, string>,
-): MokupWorker {
+  input: Exclude<WorkerInput, string>,
+): FetchWorker {
   if (typeof input === 'string') {
     throw new TypeError('createMokupWorker(dir) is only supported in Node runtimes.')
   }
