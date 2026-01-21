@@ -1,5 +1,4 @@
-import type { ExecaChildProcess } from 'execa'
-
+import { join } from 'node:path'
 import process from 'node:process'
 import { execa } from 'execa'
 import { WEB_BASE_URL, WEB_HOST, WEB_PORT } from '../constants'
@@ -7,7 +6,7 @@ import { isPortOpen, waitForHttp } from './net'
 
 export interface RunningServer {
   name: string
-  process: ExecaChildProcess
+  process: ReturnType<typeof execa>
   url: string
 }
 
@@ -23,11 +22,14 @@ export async function startViteServer(params?: {
     return null
   }
 
+  const repoRoot = params?.cwd ?? process.cwd()
+  const viteBin = join(repoRoot, 'node_modules', '.bin', 'vite')
+  const appRoot = join(repoRoot, 'apps', 'web')
   const child = execa(
-    'pnpm',
-    ['--filter', 'web', 'dev', '--', '--host', host, '--port', String(port)],
+    viteBin,
+    ['--host', host, '--port', String(port)],
     {
-      cwd: params?.cwd,
+      cwd: appRoot,
       env: {
         ...process.env,
         ...params?.env,
@@ -50,14 +52,20 @@ export async function stopServers(servers: RunningServer[]) {
     if (server.process.killed) {
       return
     }
-    server.process.kill('SIGTERM', {
-      forceKillAfterTimeout: 5_000,
-    })
+    server.process.kill('SIGTERM')
+    const killTimer = setTimeout(() => {
+      if (!server.process.killed && server.process.exitCode === null) {
+        server.process.kill('SIGKILL')
+      }
+    }, 5_000)
     try {
       await server.process
     }
     catch {
       // ignore termination errors
+    }
+    finally {
+      clearTimeout(killTimer)
     }
   }))
 }

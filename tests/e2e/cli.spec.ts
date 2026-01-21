@@ -2,17 +2,16 @@ import { stat } from 'node:fs/promises'
 import { join } from 'node:path'
 import { pathToFileURL } from 'node:url'
 import { expect, test } from '@playwright/test'
-import { runCommand } from './utils/command'
+import { runMokup } from './utils/command'
 import { ensureEmptyDir } from './utils/fs'
 import { repoRoot } from './utils/paths'
 
-test('mokup build emits manifest and bundle outputs', async (_context, testInfo) => {
+test('mokup build emits manifest and bundle outputs', async ({ request: _request }, testInfo) => {
   const outDir = testInfo.outputPath('cli-worker')
   await ensureEmptyDir(outDir)
 
-  await runCommand(
-    'pnpm',
-    ['exec', 'mokup', 'build', '--dir', 'apps/web/mock', '--out', outDir],
+  await runMokup(
+    ['build', '--dir', 'apps/web/mock', '--out', outDir],
     { cwd: repoRoot },
   )
 

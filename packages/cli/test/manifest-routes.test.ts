@@ -45,7 +45,6 @@ describe('manifest route helpers', () => {
     expect(resolveRule({
       rule: { handler: { ok: true } },
       derivedTemplate: '/users',
-      derivedMethod: undefined,
       prefix: '',
       file: '/tmp/mock/users.json',
     })).toBeNull()

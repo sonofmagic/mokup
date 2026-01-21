@@ -14,12 +14,12 @@ async function createTempModule(source: string) {
 
 const handlerSource = [
   'export const rules = [',
-  '  { response: { step: "first" } },',
-  '  { response: { step: "second" } },',
+  '  { handler: { step: "first" } },',
+  '  { handler: { step: "second" } },',
   ']',
   '',
   'export const objectRule = {',
-  '  response: { step: "object" },',
+  '  handler: { step: "object" },',
   '}',
   '',
   'export const bufferHandler = () => new Uint8Array([1, 2, 3]).buffer',

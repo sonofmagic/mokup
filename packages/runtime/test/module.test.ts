@@ -26,15 +26,15 @@ describe('module helpers', () => {
   it('normalizes runtime rules from diverse inputs', () => {
     const handler = () => ({ ok: true })
     expect(normalizeRules(undefined)).toEqual([])
-    expect(normalizeRules(handler)).toEqual([{ response: handler }])
-    expect(normalizeRules({ response: 'static' })).toEqual([{ response: 'static' }])
-    expect(normalizeRules('value')).toEqual([{ response: 'value' }])
-    expect(normalizeRules([{ response: 'first' }])).toEqual([{ response: 'first' }])
+    expect(normalizeRules(handler)).toEqual([{ handler }])
+    expect(normalizeRules({ handler: 'static' })).toEqual([{ handler: 'static' }])
+    expect(normalizeRules('value')).toEqual([{ handler: 'value' }])
+    expect(normalizeRules([{ handler: 'first' }])).toEqual([{ handler: 'first' }])
   })
 
   it('executes handler rules when provided', async () => {
     const handler = () => ({ ok: true })
-    const result = await executeRule({ response: handler }, {} as never)
+    const result = await executeRule({ handler }, {} as never)
     expect(result).toEqual({ ok: true })
   })
 
@@ -43,8 +43,8 @@ describe('module helpers', () => {
     const moduleMap = {
       'mock:rules': {
         default: [
-          { response: 'first' },
-          { response: 'second' },
+          { handler: 'first' },
+          { handler: 'second' },
         ],
       },
     }
@@ -56,10 +56,10 @@ describe('module helpers', () => {
     } as const
 
     const rule = await loadModuleRule(response, moduleCache, undefined, moduleMap)
-    expect(rule?.response).toBe('second')
+    expect(rule?.handler).toBe('second')
 
     const cached = await loadModuleRule(response, moduleCache, undefined, moduleMap)
-    expect(cached?.response).toBe('second')
+    expect(cached?.handler).toBe('second')
   })
 
   it('loads module middleware and selects by index', async () => {

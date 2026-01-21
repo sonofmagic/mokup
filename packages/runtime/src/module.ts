@@ -7,7 +7,7 @@ import type {
 } from './types'
 
 export interface RuntimeRule {
-  response: unknown
+  handler?: unknown
   status?: number
   headers?: Record<string, string>
   delay?: number
@@ -43,7 +43,7 @@ export function normalizeRules(value: unknown): RuntimeRule[] {
   if (typeof value === 'function') {
     return [
       {
-        response: value,
+        handler: value,
       },
     ]
   }
@@ -52,7 +52,7 @@ export function normalizeRules(value: unknown): RuntimeRule[] {
   }
   return [
     {
-      response: value,
+      handler: value,
     },
   ]
 }
@@ -64,7 +64,7 @@ export async function executeRule(
   if (!rule) {
     return undefined
   }
-  const value = rule.response
+  const value = rule.handler
   if (typeof value === 'function') {
     const handler = value as MockResponseHandler
     return handler(context)

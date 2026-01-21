@@ -1,18 +1,17 @@
 import { expect, test } from '@playwright/test'
-import { createMokupWorker } from 'mokup/server'
-import { runCommand } from './utils/command'
+import { createMokupWorker } from '../../packages/server/src/index'
+import { runMokup } from './utils/command'
 import { ensureEmptyDir } from './utils/fs'
 import { repoRoot } from './utils/paths'
 
 const mockDir = 'apps/web/mock'
 
-test('worker bundle serves json and handler responses', async (_context, testInfo) => {
+test('worker bundle serves json and handler responses', async ({ request: _request }, testInfo) => {
   const outDir = testInfo.outputPath('worker-build')
   await ensureEmptyDir(outDir)
 
-  await runCommand(
-    'pnpm',
-    ['exec', 'mokup', 'build', '--dir', mockDir, '--out', outDir],
+  await runMokup(
+    ['build', '--dir', mockDir, '--out', outDir],
     { cwd: repoRoot },
   )
 

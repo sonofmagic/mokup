@@ -1,9 +1,10 @@
-import type { MokupServerOptions } from 'mokup/server'
 import type { IncomingMessage, ServerResponse } from 'node:http'
+import type { MokupServerOptions } from '../../packages/server/src/index'
 import { Buffer } from 'node:buffer'
+import { mkdtemp } from 'node:fs/promises'
 import { createServer } from 'node:http'
+import { tmpdir } from 'node:os'
 import { join } from 'node:path'
-import { Hono } from '@mokup/shared/hono'
 import { expect, test } from '@playwright/test'
 import {
   createConnectMiddleware,
@@ -12,10 +13,10 @@ import {
   createFetchServer,
   createHonoMiddleware,
   createKoaMiddleware,
-
-} from 'mokup/server'
-import { runCommand } from './utils/command'
-import { ensureEmptyDir, readJson } from './utils/fs'
+} from '../../packages/server/src/index'
+import { Hono } from '../../packages/shared/src/hono'
+import { runMokup } from './utils/command'
+import { readJson } from './utils/fs'
 import { fetchJson, listen } from './utils/http'
 import { repoRoot } from './utils/paths'
 
@@ -24,12 +25,10 @@ const mockDir = 'apps/web/mock'
 let outDir = ''
 let options: MokupServerOptions
 
-test.beforeAll(async (_context, testInfo) => {
-  outDir = testInfo.outputPath('adapter-build')
-  await ensureEmptyDir(outDir)
-  await runCommand(
-    'pnpm',
-    ['exec', 'mokup', 'build', '--dir', mockDir, '--out', outDir],
+test.beforeAll(async ({ request: _request }) => {
+  outDir = await mkdtemp(join(tmpdir(), 'mokup-adapters-'))
+  await runMokup(
+    ['build', '--dir', mockDir, '--out', outDir],
     { cwd: repoRoot },
   )
   const manifest = await readJson<MokupServerOptions['manifest']>(
