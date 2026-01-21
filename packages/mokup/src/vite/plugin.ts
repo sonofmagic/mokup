@@ -381,7 +381,9 @@ export function createMokupPlugin(options: VitePluginOptionsInput = {}): Plugin 
       if (swRoutes.length === 0) {
         await refreshRoutes(currentServer ?? undefined)
       }
-      const script = buildSwLifecycleScript()
+      const script = buildSwLifecycleScript(
+        command === 'build' ? undefined : resolveSwImportPath(base),
+      )
       if (!script) {
         return html
       }
