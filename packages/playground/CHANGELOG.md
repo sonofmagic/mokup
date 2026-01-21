@@ -1,5 +1,11 @@
 # @mokup/playground
 
+## 0.0.6
+
+### Patch Changes
+
+- 🐛 **Add stable data-testid hooks for E2E coverage.** [`9cb5835`](https://github.com/sonofmagic/mokup/commit/9cb58357947e1dbe3ec977de7bb07d58c0a8c5be) by @sonofmagic
+
 ## 0.0.5
 
 ### Patch Changes

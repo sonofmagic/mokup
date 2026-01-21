@@ -1,7 +1,7 @@
 {
   "name": "mokup",
   "type": "module",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "description": "Mock utilities and Vite plugin for mokup.",
   "license": "MIT",
   "homepage": "https://mokup.icebreaker.top",
