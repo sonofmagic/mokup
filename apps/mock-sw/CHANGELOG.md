@@ -1,4 +1,4 @@
-# mock-worker
+# mock-sw
 
 ## 0.0.7
 
