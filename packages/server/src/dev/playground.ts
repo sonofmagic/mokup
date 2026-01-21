@@ -204,7 +204,18 @@ export function registerPlaygroundRoutes(params: {
     }
   }
 
-  params.app.get(playgroundPath, c => c.redirect(`${playgroundPath}/`))
+  params.app.get(playgroundPath, (c) => {
+    try {
+      const pathname = new URL(c.req.raw.url, 'http://localhost').pathname
+      if (pathname.endsWith('/')) {
+        return serveIndex()
+      }
+    }
+    catch {
+      // fall back to redirect
+    }
+    return c.redirect(`${playgroundPath}/`)
+  })
   params.app.get(`${playgroundPath}/`, () => serveIndex())
   params.app.get(`${playgroundPath}/index.html`, () => serveIndex())
   params.app.get(`${playgroundPath}/routes`, (c) => {
