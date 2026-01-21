@@ -1,5 +1,12 @@
 # mokup
 
+## 1.0.2
+
+### Patch Changes
+
+- 🐛 **Fix Vite dev SW lifecycle script to use a resolved module path for `mokup/sw`.** [`5167c7d`](https://github.com/sonofmagic/mokup/commit/5167c7d4fe9d0ec0148998732681f4e4866af47c) by @sonofmagic
+- 📦 Updated 5 dependencies [`9cb5835`](https://github.com/sonofmagic/mokup/commit/9cb58357947e1dbe3ec977de7bb07d58c0a8c5be)
+
 ## 1.0.1
 
 ### Patch Changes
