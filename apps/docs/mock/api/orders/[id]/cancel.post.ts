@@ -1,6 +1,6 @@
-import type { DocsMockResponseHandler } from '../../../types'
+import type { MockResponseHandler } from 'mokup'
 
-const handler: DocsMockResponseHandler = async (c) => {
+const handler: MockResponseHandler = async (c) => {
   const rawId = c.req.param('id') ?? 'ord_unknown'
   const id = Array.isArray(rawId) ? rawId.join('-') : rawId
   const payload = await c.req.json().catch(() => ({}))

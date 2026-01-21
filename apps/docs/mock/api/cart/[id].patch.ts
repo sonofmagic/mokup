@@ -1,6 +1,6 @@
-import type { DocsMockResponseHandler } from '../../types'
+import type { MockResponseHandler } from 'mokup'
 
-const handler: DocsMockResponseHandler = (c) => {
+const handler: MockResponseHandler = (c) => {
   const rawId = c.req.param('id') ?? 'crt_unknown'
   const id = Array.isArray(rawId) ? rawId.join('-') : rawId
   const displayValue = `Cart ${id}`

@@ -1,40 +1,27 @@
-import type { MokupServerOptions } from 'mokup/server'
-
-import { readFile } from 'node:fs/promises'
-import * as nodeProcess from 'node:process'
+import process from 'node:process'
+import { fileURLToPath } from 'node:url'
 import { serve } from '@hono/node-server'
-import { Hono } from 'hono'
-import { createHonoMiddleware } from 'mokup/server'
+import { createFetchServer } from 'mokup/server'
 
 async function start() {
-  const manifestPath = new URL('../dist/mokup.manifest.json', import.meta.url)
-  const manifest = JSON.parse(
-    await readFile(manifestPath, 'utf8'),
-  ) as MokupServerOptions['manifest']
-
-  const app = new Hono()
-
-  app.use(createHonoMiddleware({
-    manifest,
-    moduleBase: new URL('../dist/', import.meta.url),
-    onNotFound: 'response',
-  }))
-
-  const port = Number(nodeProcess.env.PORT ?? 8787)
+  const root = fileURLToPath(new URL('..', import.meta.url))
+  const server = await createFetchServer({ dir: 'mock', root })
+  const env = process.env as { PORT?: string }
+  const port = Number(env.PORT ?? 8787)
 
   serve({
-    fetch: app.fetch,
+    fetch: server.fetch,
     port,
   })
 
-  nodeProcess.stdout.write(
+  process.stdout.write(
     `mokup mock server running on http://localhost:${port}\n`,
   )
 }
 
 start().catch((error) => {
-  nodeProcess.stderr.write(
+  process.stderr.write(
     `${error instanceof Error ? error.message : error}\n`,
   )
-  nodeProcess.exit(1)
+  process.exit(1)
 })

@@ -1,6 +1,6 @@
-import type { DocsMockResponseHandler } from '../types'
+import type { MockResponseHandler } from 'mokup'
 
-const handler: DocsMockResponseHandler = (c) => {
+const handler: MockResponseHandler = (c) => {
   c.status(201)
   return {
     ok: true,
