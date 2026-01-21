@@ -49,6 +49,7 @@ const {
   responseStatus,
   responseTime,
   runRequest,
+  isSwRegistering,
 } = usePlaygroundRequest(selected)
 
 const { locale, t } = useI18n()
@@ -297,6 +298,7 @@ onBeforeUnmount(() => {
                   :response-text="responseText"
                   :response-status="responseStatus"
                   :response-time="responseTime"
+                  :is-sw-registering="isSwRegistering"
                   @run="runRequest"
                 />
               </div>

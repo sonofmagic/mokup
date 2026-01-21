@@ -1,10 +1,19 @@
 import type { Ref } from 'vue'
 import type { PlaygroundRoute } from '../types'
-import { ref, watch } from 'vue'
+import { computed, ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { applyQuery, parseJsonInput } from '../utils/request'
 
 let swReadyPromise: Promise<void> | null = null
+
+function isMokupScriptUrl(url: string) {
+  try {
+    return new URL(url).pathname.includes('mokup-sw')
+  }
+  catch {
+    return url.includes('mokup-sw')
+  }
+}
 
 function isMokupRegistration(registration: ServiceWorkerRegistration) {
   const scriptUrls = [
@@ -12,62 +21,32 @@ function isMokupRegistration(registration: ServiceWorkerRegistration) {
     registration.waiting?.scriptURL,
     registration.installing?.scriptURL,
   ].filter((entry): entry is string => typeof entry === 'string')
-  return scriptUrls.some((url) => {
-    try {
-      return new URL(url).pathname.includes('mokup-sw')
-    }
-    catch {
-      return url.includes('mokup-sw')
-    }
-  })
+  return scriptUrls.some(url => isMokupScriptUrl(url))
 }
 
-async function waitForServiceWorkerControl(timeoutMs = 2000) {
+function isMokupController(controller: ServiceWorker | null | undefined) {
+  return !!controller && isMokupScriptUrl(controller.scriptURL)
+}
+
+async function resolveMokupRegistration() {
   if (typeof window === 'undefined' || !('serviceWorker' in navigator)) {
-    return
+    return null
   }
-  if (navigator.serviceWorker.controller) {
-    return
+  try {
+    const registration = await navigator.serviceWorker.getRegistration()
+    if (registration && isMokupRegistration(registration)) {
+      return registration
+    }
   }
-  if (swReadyPromise) {
-    await swReadyPromise
-    return
+  catch {
+    // Ignore lookup errors.
   }
-
-  swReadyPromise = (async () => {
-    let registration: ServiceWorkerRegistration | undefined | null = null
-    try {
-      registration = await navigator.serviceWorker.getRegistration()
-    }
-    catch {
-      registration = null
-    }
-    if (!registration || !isMokupRegistration(registration) || navigator.serviceWorker.controller) {
-      return
-    }
-
-    let controllerHandler: (() => void) | null = null
-    const controllerPromise = new Promise<void>((resolve) => {
-      const handler = () => resolve()
-      controllerHandler = handler
-      navigator.serviceWorker.addEventListener('controllerchange', handler)
-    })
-    const readyPromise = navigator.serviceWorker.ready
-      .then(() => undefined)
-      .catch(() => undefined)
-    const timeoutPromise = new Promise<void>((resolve) => {
-      window.setTimeout(resolve, timeoutMs)
-    })
-
-    await Promise.race([controllerPromise, readyPromise, timeoutPromise])
-    if (controllerHandler) {
-      navigator.serviceWorker.removeEventListener('controllerchange', controllerHandler)
-    }
-  })()
-
-  await swReadyPromise
-  if (!navigator.serviceWorker.controller) {
-    swReadyPromise = null
+  try {
+    const registrations = await navigator.serviceWorker.getRegistrations()
+    return registrations.find(isMokupRegistration) ?? null
+  }
+  catch {
+    return null
   }
 }
 
@@ -79,6 +58,46 @@ export function usePlaygroundRequest(selected: Ref<PlaygroundRoute | null>) {
   const responseText = ref(t('response.empty'))
   const responseStatus = ref(t('response.idle'))
   const responseTime = ref('')
+  const isSwMode = ref(false)
+  const isSwReady = ref(false)
+  const isSwRegistering = computed(() => isSwMode.value && !isSwReady.value)
+
+  async function ensureSwReady() {
+    if (isSwReady.value) {
+      return true
+    }
+    if (typeof window === 'undefined' || !('serviceWorker' in navigator)) {
+      return false
+    }
+    const controller = navigator.serviceWorker.controller
+    if (isMokupController(controller)) {
+      isSwMode.value = true
+      isSwReady.value = true
+      return true
+    }
+    if (!isSwMode.value) {
+      const registration = await resolveMokupRegistration()
+      if (!registration) {
+        return false
+      }
+      isSwMode.value = true
+    }
+    if (!swReadyPromise) {
+      swReadyPromise = navigator.serviceWorker.ready
+        .then(() => {
+          isSwReady.value = true
+        })
+        .catch(() => {
+          swReadyPromise = null
+        })
+    }
+    await swReadyPromise
+    return isSwReady.value
+  }
+
+  if (typeof window !== 'undefined' && 'serviceWorker' in navigator) {
+    ensureSwReady().catch(() => undefined)
+  }
 
   function resetResponse() {
     responseText.value = t('response.empty')
@@ -138,7 +157,7 @@ export function usePlaygroundRequest(selected: Ref<PlaygroundRoute | null>) {
     responseTime.value = ''
     responseText.value = t('response.waiting')
 
-    await waitForServiceWorkerControl()
+    await ensureSwReady()
     const startedAt = performance.now()
     try {
       const response = await fetch(url.toString(), init)
@@ -178,5 +197,6 @@ export function usePlaygroundRequest(selected: Ref<PlaygroundRoute | null>) {
     responseTime,
     resetResponse,
     runRequest,
+    isSwRegistering,
   }
 }

@@ -22,7 +22,3 @@ features:
   - title: Built-in Playground
     details: Inspect and debug mock APIs with hot reload support.
 ---
-
-# Mokup Docs
-
-This site covers Mokup end-to-end: Vite dev, CLI build output, runtime APIs, server adapters, and Workers. Start with Quick Start.

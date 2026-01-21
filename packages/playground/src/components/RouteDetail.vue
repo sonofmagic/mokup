@@ -10,6 +10,7 @@ defineProps<{
   responseText: string
   responseStatus: string
   responseTime: string
+  isSwRegistering: boolean
 }>()
 
 const emit = defineEmits<{
@@ -59,10 +60,17 @@ const bodyExample = '{ "name": "Ada" }'
             class="min-w-[220px] flex-1 rounded-lg border px-3 py-2 text-sm outline-none border-pg-border bg-pg-surface-strong text-pg-text"
           >
           <button
-            class="rounded-full px-4 py-2 text-[0.65rem] uppercase tracking-[0.3em] shadow-sm transition hover:-translate-y-0.5 bg-pg-accent text-pg-on-accent"
+            class="flex items-center gap-2 rounded-full px-4 py-2 text-[0.65rem] uppercase tracking-[0.3em] shadow-sm transition hover:-translate-y-0.5 disabled:cursor-not-allowed disabled:opacity-70 disabled:hover:translate-y-0 bg-pg-accent text-pg-on-accent"
             data-testid="playground-run"
+            :disabled="isSwRegistering"
+            :aria-busy="isSwRegistering"
             @click="emit('run')"
           >
+            <span
+              v-if="isSwRegistering"
+              class="i-[carbon--circle-dash] h-3.5 w-3.5 animate-spin"
+              aria-hidden="true"
+            />
             {{ t('detail.run') }}
           </button>
         </div>
