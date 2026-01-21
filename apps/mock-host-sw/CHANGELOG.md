@@ -1,5 +1,12 @@
 # mock-host-sw
 
+## 0.0.3
+
+### Patch Changes
+
+- 📦 **Dependencies**
+  → `mokup@1.0.3`
+
 ## 0.0.2
 
 ### Patch Changes

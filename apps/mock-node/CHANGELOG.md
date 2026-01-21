@@ -1,5 +1,12 @@
 # mock-node
 
+## 0.0.9
+
+### Patch Changes
+
+- 📦 **Dependencies**
+  → `mokup@1.0.3`
+
 ## 0.0.8
 
 ### Patch Changes
