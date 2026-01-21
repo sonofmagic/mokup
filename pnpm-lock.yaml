@@ -156,22 +156,16 @@ importers:
 
   apps/mock-worker:
     dependencies:
-      hono:
-        specifier: ^4.9.0
-        version: 4.11.4
       mokup:
         specifier: workspace:*
         version: link:../../packages/mokup
     devDependencies:
-      '@cloudflare/workers-types':
-        specifier: ^4.20260120.0
-        version: 4.20260120.0
       typescript:
         specifier: ^5.9.3
         version: 5.9.3
-      wrangler:
-        specifier: ^4.0.0
-        version: 4.59.2(@cloudflare/workers-types@4.20260120.0)
+      vite:
+        specifier: ^7.3.1
+        version: 7.3.1(@types/node@25.0.9)(jiti@2.6.1)(lightningcss@1.30.2)(terser@5.46.0)(tsx@4.21.0)(yaml@2.8.2)
 
   apps/web:
     dependencies:
@@ -9221,7 +9215,8 @@ snapshots:
   '@cloudflare/workerd-windows-64@1.20260114.0':
     optional: true
 
-  '@cloudflare/workers-types@4.20260120.0': {}
+  '@cloudflare/workers-types@4.20260120.0':
+    optional: true
 
   '@commitlint/cli@20.3.1(@types/node@25.0.9)(typescript@5.9.3)':
     dependencies:

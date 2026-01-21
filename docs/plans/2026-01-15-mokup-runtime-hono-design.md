@@ -13,7 +13,7 @@
 - `packages/hono`: Hono adapter for Node/Workers.
 - `packages/cli`: build CLI to generate manifest/handlers.
 - `apps/mock-node`: Node deployment template.
-- `apps/mock-worker`: Workers deployment template.
+- `apps/mock-worker`: Service Worker demo template.
 
 ## Manifest Format
 
