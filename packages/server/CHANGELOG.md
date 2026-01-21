@@ -1,5 +1,15 @@
 # @mokup/server
 
+## 1.0.3
+
+### Patch Changes
+
+- 🐛 **Fix playground redirect handling to avoid redirect loops.** [`182912b`](https://github.com/sonofmagic/mokup/commit/182912bf450a6ea93c93a3ca776d145bd788b5fc) by @sonofmagic
+
+- 🐛 **Add a playground WebSocket endpoint for server-side request counts and expose the Node serve helper.** [`1c1edbb`](https://github.com/sonofmagic/mokup/commit/1c1edbb5761d913f3e3f7659da7f1bf4bb361c02) by @sonofmagic
+- 📦 **Dependencies** [`1c1edbb`](https://github.com/sonofmagic/mokup/commit/1c1edbb5761d913f3e3f7659da7f1bf4bb361c02)
+  → `@mokup/playground@0.0.7`
+
 ## 1.0.2
 
 ### Patch Changes

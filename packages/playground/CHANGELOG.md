@@ -1,5 +1,11 @@
 # @mokup/playground
 
+## 0.0.7
+
+### Patch Changes
+
+- 🐛 **Add per-route and total request counts to the playground UI.** [`1c1edbb`](https://github.com/sonofmagic/mokup/commit/1c1edbb5761d913f3e3f7659da7f1bf4bb361c02) by @sonofmagic
+
 ## 0.0.6
 
 ### Patch Changes

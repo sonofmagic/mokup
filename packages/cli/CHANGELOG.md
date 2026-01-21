@@ -1,5 +1,13 @@
 # @mokup/cli
 
+## 1.0.1
+
+### Patch Changes
+
+- 🐛 **Use the Node server helper from @mokup/server/node.** [`1c1edbb`](https://github.com/sonofmagic/mokup/commit/1c1edbb5761d913f3e3f7659da7f1bf4bb361c02) by @sonofmagic
+- 📦 **Dependencies** [`182912b`](https://github.com/sonofmagic/mokup/commit/182912bf450a6ea93c93a3ca776d145bd788b5fc)
+  → `@mokup/server@1.0.3`
+
 ## 1.0.0
 
 ### Major Changes
