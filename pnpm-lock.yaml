@@ -143,9 +143,6 @@ importers:
       '@hono/node-server':
         specifier: ^1.12.0
         version: 1.19.9(hono@4.11.4)
-      hono:
-        specifier: ^4.9.0
-        version: 4.11.4
       mokup:
         specifier: workspace:*
         version: link:../../packages/mokup
