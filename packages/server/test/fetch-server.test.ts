@@ -54,4 +54,39 @@ describe('fetch server', () => {
     const response = await server.fetch(new Request('http://localhost/_mokup'))
     expect(response.status).toBe(404)
   })
+
+  it('supports multiple option entries with prefixes', async () => {
+    const root = await mkdtemp(join(tmpdir(), 'mokup-fetch-'))
+    const dirA = join(root, 'mock-a')
+    const dirB = join(root, 'mock-b')
+    await mkdir(dirA, { recursive: true })
+    await mkdir(dirB, { recursive: true })
+    await writeFile(join(dirA, 'users.get.json'), '{"id":1}', 'utf8')
+    await writeFile(join(dirB, 'teams.get.json'), '{"id":2}', 'utf8')
+
+    const server = await createFetchServer([
+      {
+        dir: dirA,
+        prefix: '/api',
+        log: false,
+        watch: false,
+        playground: false,
+      },
+      {
+        dir: dirB,
+        prefix: '/v2',
+        log: false,
+        watch: false,
+        playground: false,
+      },
+    ])
+
+    const users = await server.fetch(new Request('http://localhost/api/users'))
+    expect(users.status).toBe(200)
+    await expect(users.json()).resolves.toEqual({ id: 1 })
+
+    const teams = await server.fetch(new Request('http://localhost/v2/teams'))
+    expect(teams.status).toBe(200)
+    await expect(teams.json()).resolves.toEqual({ id: 2 })
+  })
 })

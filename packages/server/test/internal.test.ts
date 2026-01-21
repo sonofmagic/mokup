@@ -8,6 +8,8 @@ import {
   parseBody,
   resolveUrl,
   toArrayBuffer,
+  toBinaryBody,
+  toRuntimeOptions,
   toRuntimeRequestFromFetch,
   toRuntimeRequestFromNode,
 } from '../src/internal'
@@ -36,6 +38,7 @@ describe('server internal helpers', () => {
       a: '1',
       b: '2',
     })
+    expect(parseBody('invalid', 'application/json')).toBe('invalid')
     expect(parseBody('raw', 'text/plain')).toBe('raw')
   })
 
@@ -91,6 +94,33 @@ describe('server internal helpers', () => {
     expect(runtime.rawBody).toBe('{"ok":true}')
   })
 
+  it('creates runtime requests from node body overrides', async () => {
+    const textEncoder = new TextEncoder()
+    const req = {
+      method: 'POST',
+      url: '/api',
+      headers: { 'content-type': 'application/json' },
+      body: { skip: true },
+      on: () => undefined,
+    }
+
+    const jsonOverride = await toRuntimeRequestFromNode(
+      req,
+      textEncoder.encode('{"ok":true}'),
+    )
+    expect(jsonOverride.body).toEqual({ ok: true })
+    expect(jsonOverride.rawBody).toBe('{"ok":true}')
+
+    const formOverride = await toRuntimeRequestFromNode(
+      { ...req, headers: { 'content-type': 'application/x-www-form-urlencoded' } },
+      'a=1&b=2',
+    )
+    expect(formOverride.body).toEqual({ a: '1', b: '2' })
+
+    const objectBody = await toRuntimeRequestFromNode(req)
+    expect(objectBody.body).toEqual({ skip: true })
+  })
+
   it('applies runtime results to node responses', () => {
     const headers: Record<string, string> = {}
     let body: unknown
@@ -113,5 +143,50 @@ describe('server internal helpers', () => {
     expect(res.statusCode).toBe(201)
     expect(headers['x-test']).toBe('1')
     expect(body).toBe('ok')
+  })
+
+  it('applies runtime results for null and binary bodies', () => {
+    const headers: Record<string, string> = {}
+    let body: unknown
+    const res = {
+      statusCode: 0,
+      setHeader: (name: string, value: string) => {
+        headers[name] = value
+      },
+      end: (data?: string | Uint8Array | ArrayBuffer | null) => {
+        body = data ?? null
+      },
+    }
+
+    applyRuntimeResultToNode(res, {
+      status: 204,
+      headers: {},
+      body: null,
+    })
+    expect(body).toBeNull()
+
+    const binary = new Uint8Array([1, 2, 3])
+    applyRuntimeResultToNode(res, {
+      status: 200,
+      headers: { 'x-bin': '1' },
+      body: binary,
+    })
+    expect(headers['x-bin']).toBe('1')
+    expect(body).toBe(toBinaryBody(binary))
+  })
+
+  it('builds runtime options from server config', () => {
+    expect(toRuntimeOptions({ manifest: { version: 1, routes: [] } })).toEqual({
+      manifest: { version: 1, routes: [] },
+    })
+    expect(toRuntimeOptions({
+      manifest: { version: 1, routes: [] },
+      moduleBase: 'file:///tmp/',
+      moduleMap: { mock: {} },
+    })).toEqual({
+      manifest: { version: 1, routes: [] },
+      moduleBase: 'file:///tmp/',
+      moduleMap: { mock: {} },
+    })
   })
 })

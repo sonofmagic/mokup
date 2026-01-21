@@ -42,6 +42,20 @@ describe('theme utils', () => {
     expect(readThemeMode()).toBeNull()
   })
 
+  it('ignores storage errors gracefully', () => {
+    const getSpy = vi.spyOn(Storage.prototype, 'getItem').mockImplementation(() => {
+      throw new Error('fail')
+    })
+    expect(readThemeMode()).toBeNull()
+    getSpy.mockRestore()
+
+    const setSpy = vi.spyOn(Storage.prototype, 'setItem').mockImplementation(() => {
+      throw new Error('fail')
+    })
+    expect(() => persistThemeMode('dark')).not.toThrow()
+    setSpy.mockRestore()
+  })
+
   it('cycles theme modes', () => {
     expect(nextThemeMode('system')).toBe('light')
     expect(nextThemeMode('light')).toBe('dark')

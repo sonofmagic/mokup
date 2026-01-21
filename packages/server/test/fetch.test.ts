@@ -1,3 +1,4 @@
+import { Buffer } from 'node:buffer'
 import { describe, expect, it } from 'vitest'
 import { createFetchHandler } from '../src/fetch'
 
@@ -23,6 +24,44 @@ describe('fetch handler', () => {
     expect(response).not.toBeNull()
     expect(response?.status).toBe(200)
     await expect(response?.json()).resolves.toEqual({ ok: true })
+  })
+
+  it('handles binary and empty responses', async () => {
+    const handler = createFetchHandler({
+      manifest: {
+        version: 1,
+        routes: [
+          {
+            method: 'GET',
+            url: '/binary',
+            response: {
+              type: 'binary',
+              body: Buffer.from('ok').toString('base64'),
+              encoding: 'base64',
+            },
+          },
+          {
+            method: 'GET',
+            url: '/empty',
+            response: {
+              type: 'json',
+              body: undefined,
+            },
+          },
+        ],
+      },
+      onNotFound: 'response',
+    })
+
+    const binaryResponse = await handler(new Request('http://localhost/binary'))
+    expect(binaryResponse?.status).toBe(200)
+    const binaryBody = await binaryResponse?.arrayBuffer()
+    expect(Buffer.from(binaryBody ?? new ArrayBuffer(0)).toString('utf8')).toBe('ok')
+
+    const emptyResponse = await handler(new Request('http://localhost/empty'))
+    expect(emptyResponse?.status).toBe(204)
+    const emptyBody = await emptyResponse?.text()
+    expect(emptyBody).toBe('')
   })
 
   it('returns 404 responses when configured', async () => {

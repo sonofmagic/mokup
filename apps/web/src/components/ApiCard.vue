@@ -102,6 +102,7 @@ const statusTone = computed(() => {
   <article
     class="glass panel-glow rise-in flex h-full flex-col gap-5 rounded-3xl p-6"
     :class="{ 'opacity-70': route.disabled }"
+    :data-testid="`api-card-${route.id}`"
   >
     <header class="flex items-start justify-between gap-4">
       <div>
@@ -171,6 +172,7 @@ const statusTone = computed(() => {
       type="button"
       class="rounded-2xl border border-slate-600/70 bg-slate-900/70 px-4 py-3 text-sm uppercase tracking-[0.2em] text-slate-200 transition hover:border-sky-400/70 hover:text-sky-200"
       :disabled="loading"
+      :data-testid="`api-run-${route.id}`"
       @click="runRequest"
     >
       <span v-if="loading">Running...</span>
@@ -182,7 +184,7 @@ const statusTone = computed(() => {
     </p>
 
     <div class="flex flex-wrap items-center gap-4 text-xs text-slate-400">
-      <span v-if="result" :class="statusTone">
+      <span v-if="result" :class="statusTone" :data-testid="`api-status-${route.id}`">
         Status {{ result.status }} {{ result.statusText || '' }}
       </span>
       <span v-if="result">{{ result.duration }}ms</span>
@@ -201,7 +203,10 @@ const statusTone = computed(() => {
         <p class="text-xs uppercase tracking-[0.2em] text-slate-400">
           Response
         </p>
-        <pre class="mt-2 rounded-2xl border border-slate-800/60 bg-slate-950/70 p-4 font-mono text-xs text-slate-200">{{ formatData(result.data) }}</pre>
+        <pre
+          class="mt-2 rounded-2xl border border-slate-800/60 bg-slate-950/70 p-4 font-mono text-xs text-slate-200"
+          :data-testid="`api-response-${route.id}`"
+        >{{ formatData(result.data) }}</pre>
       </div>
     </div>
   </article>

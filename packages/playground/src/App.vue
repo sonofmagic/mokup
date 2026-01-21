@@ -170,7 +170,7 @@ onBeforeUnmount(() => {
 </script>
 
 <template>
-  <div class="h-screen overflow-hidden pg-app-bg">
+  <div class="h-screen overflow-hidden pg-app-bg" data-testid="playground-app">
     <div class="flex h-full w-full flex-col">
       <main class="flex min-h-0 flex-1 flex-col overflow-hidden">
         <div class="flex flex-1 flex-col overflow-hidden bg-pg-surface-shell">

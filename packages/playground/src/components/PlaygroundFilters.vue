@@ -36,6 +36,7 @@ const { t } = useI18n()
         class="rounded-lg border outline-none transition border-pg-border bg-pg-surface-strong text-pg-text focus:border-pg-accent"
         :class="props.compact ? 'px-2.5 py-1.5 text-[0.8rem]' : 'px-3 py-2 text-sm'"
         :placeholder="t('filters.searchPlaceholder')"
+        data-testid="playground-search"
         @input="handleInput"
       >
     </label>

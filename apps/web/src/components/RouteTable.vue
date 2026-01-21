@@ -26,6 +26,7 @@ function badgeClass(method: string) {
         v-for="route in props.routes"
         :key="route.id"
         class="grid grid-cols-[120px_1fr_1fr] items-start gap-4 px-6 py-4 text-sm"
+        :data-testid="`route-row-${route.id}`"
       >
         <span
           class="inline-flex items-center justify-center rounded-full border px-3 py-1 font-display text-xs"

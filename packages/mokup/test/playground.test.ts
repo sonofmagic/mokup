@@ -1,9 +1,10 @@
 import type { IncomingMessage, ServerResponse } from 'node:http'
+import type { ViteDevServer } from 'vite'
 import type { Logger, ResolvedRoute, RouteTable } from '../src/vite/types'
 import { Buffer } from 'node:buffer'
 import path from 'node:path'
 import { parseRouteTemplate } from '@mokup/runtime'
-import { describe, expect, it } from 'vitest'
+import { describe, expect, it, vi } from 'vitest'
 import { createPlaygroundMiddleware, resolvePlaygroundOptions } from '../src/vite/playground'
 
 function toPosixPath(value: string) {
@@ -128,5 +129,83 @@ describe('playground routes endpoint', () => {
       groupKey: expectedGroups[1].key,
       file: 'mock-extra/messages.post.ts',
     })
+  })
+})
+
+describe('playground middleware responses', () => {
+  it('redirects base path to trailing slash', async () => {
+    const logger: Logger = { info: vi.fn(), warn: vi.fn(), error: vi.fn() }
+    const middleware = createPlaygroundMiddleware({
+      getRoutes: () => [],
+      config: resolvePlaygroundOptions(true),
+      logger,
+    })
+
+    const { res, state } = createResponse()
+    let nextCalled = false
+    await middleware(
+      { url: '/_mokup' } as IncomingMessage,
+      res,
+      () => {
+        nextCalled = true
+      },
+    )
+
+    expect(nextCalled).toBe(false)
+    expect(state.statusCode).toBe(302)
+    expect(state.headers.Location).toBe('/_mokup/')
+  })
+
+  it('serves the playground index and injects HMR/SW scripts', async () => {
+    const logger: Logger = { info: vi.fn(), warn: vi.fn(), error: vi.fn() }
+    const middleware = createPlaygroundMiddleware({
+      getRoutes: () => [],
+      config: resolvePlaygroundOptions({ path: '/_mokup' }),
+      logger,
+      getServer: () => ({
+        ws: {},
+        config: { base: '/base/' },
+      }) as ViteDevServer,
+      getSwScript: () => 'console.log("sw")',
+    })
+
+    const { res, state } = createResponse()
+    let nextCalled = false
+    await middleware(
+      { url: '/base/_mokup/' } as IncomingMessage,
+      res,
+      () => {
+        nextCalled = true
+      },
+    )
+
+    expect(nextCalled).toBe(false)
+    expect(state.statusCode).toBe(200)
+    expect(state.body).toContain('mokup-playground-hmr')
+    expect(state.body).toContain('mokup-playground-sw')
+  })
+
+  it('serves static assets from the playground dist', async () => {
+    const logger: Logger = { info: vi.fn(), warn: vi.fn(), error: vi.fn() }
+    const middleware = createPlaygroundMiddleware({
+      getRoutes: () => [],
+      config: resolvePlaygroundOptions(true),
+      logger,
+    })
+
+    const { res, state } = createResponse()
+    let nextCalled = false
+    await middleware(
+      { url: '/_mokup/assets/index.css' } as IncomingMessage,
+      res,
+      () => {
+        nextCalled = true
+      },
+    )
+
+    expect(nextCalled).toBe(false)
+    expect(state.statusCode).toBe(200)
+    expect(state.headers['Content-Type']).toContain('text/css')
+    expect(state.body.length).toBeGreaterThan(0)
   })
 })

@@ -172,6 +172,19 @@ function applyRouteOverrides(response: Response, route: ManifestRoute) {
   return new Response(response.body, { status, headers })
 }
 
+function resolveResponse(value: unknown, fallback: Response) {
+  if (value instanceof Response) {
+    return value
+  }
+  if (value && typeof value === 'object' && 'res' in value) {
+    const resolved = (value as { res?: unknown }).res
+    if (resolved instanceof Response) {
+      return resolved
+    }
+  }
+  return fallback
+}
+
 function normalizeHandlerValue(c: Context, value: unknown): Response {
   if (value instanceof Response) {
     return value
@@ -237,11 +250,13 @@ function createRouteHandler(params: {
 function createFinalizeMiddleware(route: ManifestRoute): MockMiddleware {
   return async (c, next) => {
     const response = await next()
-    const resolved = response ?? c.res
+    const resolved = resolveResponse(response, c.res)
     if (route.delay && route.delay > 0) {
       await delay(route.delay)
     }
-    return applyRouteOverrides(resolved, route)
+    const overridden = applyRouteOverrides(resolved, route)
+    c.res = overridden
+    return overridden
   }
 }
 

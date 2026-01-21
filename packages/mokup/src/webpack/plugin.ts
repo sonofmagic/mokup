@@ -1,4 +1,3 @@
-import type { FSWatcher } from '@mokup/shared/chokidar'
 import type { Hono } from '@mokup/shared/hono'
 import type { IncomingMessage, ServerResponse } from 'node:http'
 import type { PreviewServer, ViteDevServer } from 'vite'
@@ -285,7 +284,8 @@ export function createMokupWebpackPlugin(
   let serverRoutes: RouteTable = []
   let swRoutes: RouteTable = []
   let app: Hono | null = null
-  let watcher: FSWatcher | null = null
+  type Watcher = ReturnType<typeof chokidar.watch>
+  let watcher: Watcher | null = null
   let watchingCompiler: WebpackCompiler | null = null
   let swLifecycleBundle: string | null = null
   let swBundle: string | null = null
@@ -547,7 +547,8 @@ export function createMokupWebpackPlugin(
 
           if (!watcher && watchEnabled) {
             const dirs = resolveAllDirs()
-            watcher = chokidar.watch(dirs, { ignoreInitial: true })
+            const fsWatcher = chokidar.watch(dirs, { ignoreInitial: true })
+            watcher = fsWatcher
             const scheduleRefresh = createDebouncer(80, () => {
               void refreshRoutes()
                 .then(rebuildBundles)
@@ -560,17 +561,17 @@ export function createMokupWebpackPlugin(
                   logger.error('Failed to refresh mokup routes:', error)
                 })
             })
-            watcher.on('add', (file) => {
+            fsWatcher.on('add', (file) => {
               if (isInDirs(file, dirs)) {
                 scheduleRefresh()
               }
             })
-            watcher.on('change', (file) => {
+            fsWatcher.on('change', (file) => {
               if (isInDirs(file, dirs)) {
                 scheduleRefresh()
               }
             })
-            watcher.on('unlink', (file) => {
+            fsWatcher.on('unlink', (file) => {
               if (isInDirs(file, dirs)) {
                 scheduleRefresh()
               }

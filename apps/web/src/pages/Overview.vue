@@ -46,7 +46,10 @@ const sectionSummary = computed(() =>
           <p class="text-xs uppercase tracking-[0.2em] text-slate-500">
             Active routes
           </p>
-          <p class="mt-2 font-display text-3xl text-slate-100">
+          <p
+            class="mt-2 font-display text-3xl text-slate-100"
+            data-testid="overview-active-count"
+          >
             {{ activeCount }}
           </p>
         </div>
@@ -54,7 +57,10 @@ const sectionSummary = computed(() =>
           <p class="text-xs uppercase tracking-[0.2em] text-slate-500">
             Capabilities
           </p>
-          <p class="mt-2 font-display text-3xl text-slate-100">
+          <p
+            class="mt-2 font-display text-3xl text-slate-100"
+            data-testid="overview-capability-count"
+          >
             {{ featureCount }}
           </p>
         </div>
@@ -62,7 +68,10 @@ const sectionSummary = computed(() =>
           <p class="text-xs uppercase tracking-[0.2em] text-slate-500">
             Mock dirs
           </p>
-          <p class="mt-2 font-display text-3xl text-slate-100">
+          <p
+            class="mt-2 font-display text-3xl text-slate-100"
+            data-testid="overview-mock-dir-count"
+          >
             3
           </p>
         </div>
@@ -104,7 +113,7 @@ const sectionSummary = computed(() =>
           Open playground
         </RouterLink>
       </div>
-      <RouteTable :routes="allRoutes" />
+      <RouteTable :routes="allRoutes" data-testid="route-table" />
     </div>
 
     <div class="glass rise-in rounded-3xl p-6" style="animation-delay: 0.3s">

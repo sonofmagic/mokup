@@ -1,4 +1,3 @@
-import type { FSWatcher } from '@mokup/shared/chokidar'
 import type { Hono } from '@mokup/shared/hono'
 import type { IncomingMessage, ServerResponse } from 'node:http'
 import type { Plugin, PreviewServer, ViteDevServer } from 'vite'
@@ -153,7 +152,8 @@ export function createMokupPlugin(options: MokupViteOptionsInput = {}): Plugin {
   let serverRoutes: RouteTable = []
   let swRoutes: RouteTable = []
   let app: Hono | null = null
-  let previewWatcher: FSWatcher | null = null
+  type Watcher = ReturnType<typeof chokidar.watch>
+  let previewWatcher: Watcher | null = null
   let currentServer: ViteDevServer | PreviewServer | null = null
   let lastSignature: string | null = null
 
@@ -514,11 +514,12 @@ export function createMokupPlugin(options: MokupViteOptionsInput = {}): Plugin {
         return
       }
       const dirs = resolveAllDirs()
-      previewWatcher = chokidar.watch(dirs, { ignoreInitial: true })
+      const watcher = chokidar.watch(dirs, { ignoreInitial: true })
+      previewWatcher = watcher
       const scheduleRefresh = createDebouncer(80, () => refreshRoutes(server))
-      previewWatcher.on('add', scheduleRefresh)
-      previewWatcher.on('change', scheduleRefresh)
-      previewWatcher.on('unlink', scheduleRefresh)
+      watcher.on('add', scheduleRefresh)
+      watcher.on('change', scheduleRefresh)
+      watcher.on('unlink', scheduleRefresh)
       server.httpServer?.once('close', () => {
         previewWatcher?.close()
         previewWatcher = null

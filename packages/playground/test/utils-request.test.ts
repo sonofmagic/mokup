@@ -1,4 +1,4 @@
-import { describe, expect, it } from 'vitest'
+import { describe, expect, it, vi } from 'vitest'
 import { applyQuery, parseJsonInput } from '../src/utils/request'
 
 describe('request utils', () => {
@@ -9,6 +9,15 @@ describe('request utils', () => {
     const invalid = parseJsonInput('{')
     expect(invalid.value).toBeUndefined()
     expect(invalid.error).toBeTypeOf('string')
+  })
+
+  it('reports error messages when parse throws', () => {
+    const parseSpy = vi.spyOn(JSON, 'parse').mockImplementation(() => {
+      throw new Error('bad')
+    })
+    const invalid = parseJsonInput('{ bad }')
+    expect(invalid.error).toBe('bad')
+    parseSpy.mockRestore()
   })
 
   it('applies query parameters to URLs', () => {

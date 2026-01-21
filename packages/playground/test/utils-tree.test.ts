@@ -54,4 +54,19 @@ describe('tree utils', () => {
     const root = buildRouteTree(routes.slice(0, 1), 'route')
     expect(root.children[0]?.label).toBe('/')
   })
+
+  it('builds file-based trees and handles collapsed folders', () => {
+    const root = buildRouteTree(routes, 'file')
+    sortRouteTree(root)
+    const rows = buildTreeRows({
+      root,
+      mode: 'file',
+      isExpanded: () => false,
+      selectedKey: 'GET /users',
+      getRouteKey: route => `${route.method} ${route.url}`,
+    })
+
+    expect(rows.some(row => row.kind === 'folder')).toBe(true)
+    expect(rows.every(row => row.depth === 0)).toBe(true)
+  })
 })

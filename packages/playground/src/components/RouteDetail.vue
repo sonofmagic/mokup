@@ -60,6 +60,7 @@ const bodyExample = '{ "name": "Ada" }'
           >
           <button
             class="rounded-full px-4 py-2 text-[0.65rem] uppercase tracking-[0.3em] shadow-sm transition hover:-translate-y-0.5 bg-pg-accent text-pg-on-accent"
+            data-testid="playground-run"
             @click="emit('run')"
           >
             {{ t('detail.run') }}
@@ -125,7 +126,10 @@ const bodyExample = '{ "name": "Ada" }'
             <span>{{ responseTime }}</span>
           </span>
         </div>
-        <pre class="flex-1 min-h-0 overflow-auto rounded-b-2xl p-4 text-xs bg-pg-surface-strong text-pg-text">{{ responseText }}</pre>
+        <pre
+          class="flex-1 min-h-0 overflow-auto rounded-b-2xl p-4 text-xs bg-pg-surface-strong text-pg-text"
+          data-testid="playground-response"
+        >{{ responseText }}</pre>
       </section>
     </div>
   </section>

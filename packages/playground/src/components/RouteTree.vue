@@ -61,12 +61,13 @@ function handleRowClick(row: TreeRow) {
 </script>
 
 <template>
-  <div class="flex flex-col gap-1">
+  <div class="flex flex-col gap-1" data-testid="playground-tree">
     <div
       v-for="row in rows"
       :key="row.id"
       class="group flex items-center gap-2 rounded-lg border border-transparent px-2 py-1 text-left transition text-pg-text hover:bg-pg-hover"
       :class="row.selected ? 'bg-pg-accent text-pg-on-accent border-pg-accent shadow-sm' : ''"
+      data-testid="playground-tree-row"
     >
       <button
         class="flex min-w-0 flex-1 items-center gap-2 text-left"
