@@ -5,6 +5,7 @@ import { toPosixPath } from '../utils/path'
 const props = defineProps<{
   rows: TreeRow[]
   workspaceRoot?: string
+  getRouteCount?: (route: PlaygroundRoute) => number
 }>()
 
 const emit = defineEmits<{
@@ -58,6 +59,10 @@ function handleRowClick(row: TreeRow) {
   }
   emit('select', row)
 }
+
+function resolveRouteCount(route: PlaygroundRoute) {
+  return props.getRouteCount ? props.getRouteCount(route) : 0
+}
 </script>
 
 <template>
@@ -98,6 +103,12 @@ function handleRowClick(row: TreeRow) {
             {{ row.label }}
           </span>
         </div>
+        <span
+          v-if="row.kind === 'route' && row.route && resolveRouteCount(row.route) > 0"
+          class="ml-auto rounded-full px-2 py-0.5 text-[0.55rem] bg-pg-chip text-pg-chip-text"
+        >
+          {{ resolveRouteCount(row.route) }}
+        </span>
       </button>
       <button
         v-if="row.kind === 'route' && row.route && resolveEditorPath(row.route)"

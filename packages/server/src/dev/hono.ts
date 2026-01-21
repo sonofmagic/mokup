@@ -104,7 +104,9 @@ function createRouteHandler(route: ResolvedRoute) {
   }
 }
 
-function createFinalizeMiddleware(route: ResolvedRoute) {
+type RouteResponseHook = (route: ResolvedRoute, response: Response) => void | Promise<void>
+
+function createFinalizeMiddleware(route: ResolvedRoute, onResponse?: RouteResponseHook) {
   return async (c: Context, next: () => Promise<Response | void>) => {
     const response = await next()
     const resolved = resolveResponse(response, c.res)
@@ -113,6 +115,17 @@ function createFinalizeMiddleware(route: ResolvedRoute) {
     }
     const overridden = applyRouteOverrides(resolved, route)
     c.res = overridden
+    if (onResponse) {
+      try {
+        const result = onResponse(route, overridden)
+        if (result instanceof Promise) {
+          result.catch(() => undefined)
+        }
+      }
+      catch {
+        // ignore hook failures
+      }
+    }
     return overridden
   }
 }
@@ -126,7 +139,10 @@ function wrapMiddleware(
   }
 }
 
-export function createHonoApp(routes: RouteTable): Hono {
+export function createHonoApp(
+  routes: RouteTable,
+  options: { onResponse?: RouteResponseHook } = {},
+): Hono {
   const app = new Hono({ router: new PatternRouter(), strict: false })
 
   for (const route of routes) {
@@ -134,7 +150,7 @@ export function createHonoApp(routes: RouteTable): Hono {
     app.on(
       route.method,
       toHonoPath(route),
-      createFinalizeMiddleware(route),
+      createFinalizeMiddleware(route, options.onResponse),
       ...middlewares,
       createRouteHandler(route),
     )

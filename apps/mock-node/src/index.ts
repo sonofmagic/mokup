@@ -9,10 +9,11 @@ async function start() {
   const env = process.env as { PORT?: string }
   const port = Number(env.PORT ?? 8787)
 
-  serve({
+  const nodeServer = serve({
     fetch: server.fetch,
     port,
   })
+  server.injectWebSocket?.(nodeServer)
 
   process.stdout.write(
     `mokup mock server running on http://localhost:${port}\n`,

@@ -54,4 +54,33 @@ describe('dev hono app', () => {
     expect(response.status).toBe(201)
     expect(response.headers.get('x-test')).toBe('1')
   })
+
+  it('invokes onResponse hook after responses', async () => {
+    const parsed = parseRouteTemplate('/hook')
+    let capturedStatus = 0
+    let capturedTemplate = ''
+    const app = createHonoApp(
+      [
+        {
+          file: 'hook.get.ts',
+          template: parsed.template,
+          method: 'GET',
+          tokens: parsed.tokens,
+          score: parsed.score,
+          handler: () => new Response('ok'),
+        },
+      ],
+      {
+        onResponse: (route, response) => {
+          capturedTemplate = route.template
+          capturedStatus = response.status
+        },
+      },
+    )
+
+    await app.fetch(new Request('http://localhost/hook'))
+
+    expect(capturedTemplate).toBe(parsed.template)
+    expect(capturedStatus).toBe(200)
+  })
 })

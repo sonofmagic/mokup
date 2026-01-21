@@ -50,7 +50,9 @@ const {
   responseTime,
   runRequest,
   isSwRegistering,
-} = usePlaygroundRequest(selected)
+  totalCount,
+  getRouteCount,
+} = usePlaygroundRequest(selected, { basePath })
 
 const { locale, t } = useI18n()
 const { themeMode, effectiveTheme, cycleThemeMode } = usePlaygroundTheme()
@@ -238,6 +240,7 @@ onBeforeUnmount(() => {
                   v-else
                   :rows="treeRows"
                   :workspace-root="workspaceRoot"
+                  :get-route-count="getRouteCount"
                   @toggle="toggleExpanded"
                   @select="handleSelectRow"
                 />
@@ -258,10 +261,16 @@ onBeforeUnmount(() => {
 
             <section class="flex min-h-0 flex-1 flex-col overflow-hidden p-4 lg:p-6">
               <div class="flex flex-none flex-wrap items-center justify-between gap-2 rounded-2xl border px-3 py-2 text-[0.55rem] uppercase tracking-[0.25em] shadow-sm border-pg-border bg-pg-surface-card text-pg-text-soft">
-                <span class="flex items-center gap-2 rounded-full border px-2.5 py-1 text-[0.55rem] uppercase tracking-[0.25em] border-pg-border bg-pg-surface-strong text-pg-text-soft">
-                  <span class="i-[carbon--map] h-3.5 w-3.5" aria-hidden="true" />
-                  <span>{{ t('header.routes', { count: routeCount }) }}</span>
-                </span>
+                <div class="flex flex-wrap items-center gap-2">
+                  <span class="flex items-center gap-2 rounded-full border px-2.5 py-1 text-[0.55rem] uppercase tracking-[0.25em] border-pg-border bg-pg-surface-strong text-pg-text-soft">
+                    <span class="i-[carbon--map] h-3.5 w-3.5" aria-hidden="true" />
+                    <span>{{ t('header.routes', { count: routeCount }) }}</span>
+                  </span>
+                  <span class="flex items-center gap-2 rounded-full border px-2.5 py-1 text-[0.55rem] uppercase tracking-[0.25em] border-pg-border bg-pg-surface-strong text-pg-text-soft">
+                    <span class="i-[carbon--activity] h-3.5 w-3.5" aria-hidden="true" />
+                    <span>{{ t('header.calls', { count: totalCount }) }}</span>
+                  </span>
+                </div>
                 <div class="flex flex-wrap items-center gap-2">
                   <button
                     class="flex items-center gap-2 rounded-full border px-2.5 py-1 text-[0.55rem] uppercase tracking-[0.25em] transition hover:-translate-y-0.5 border-pg-border bg-pg-surface-strong text-pg-text-soft"

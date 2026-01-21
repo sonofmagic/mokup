@@ -1,5 +1,5 @@
-import { serve } from '@hono/node-server'
 import { createFetchServer } from '@mokup/server'
+import { serve } from '@mokup/server/node'
 import { Command } from 'commander'
 import { afterEach, describe, expect, it, vi } from 'vitest'
 import { buildManifest } from '../src/manifest'
@@ -9,7 +9,7 @@ vi.mock('@mokup/server', () => ({
   createFetchServer: vi.fn(),
 }))
 
-vi.mock('@hono/node-server', () => ({
+vi.mock('@mokup/server/node', () => ({
   serve: vi.fn(),
 }))
 
@@ -57,9 +57,11 @@ describe('CLI program', () => {
   })
 
   it('runs serve command and parses host/port flags', async () => {
+    const injectWebSocket = vi.fn()
     vi.mocked(createFetchServer).mockResolvedValue({
       fetch: vi.fn(),
       close: vi.fn(),
+      injectWebSocket,
     })
     vi.mocked(serve).mockReturnValue({
       close: (cb?: (error?: Error) => void) => cb?.(),
@@ -90,6 +92,7 @@ describe('CLI program', () => {
       playground: false,
     })
     expect(serve).toHaveBeenCalledTimes(1)
+    expect(injectWebSocket).toHaveBeenCalledTimes(1)
     onSpy.mockRestore()
   })
 

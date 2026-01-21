@@ -16,6 +16,11 @@
       "import": "./dist/index.mjs",
       "require": "./dist/index.cjs"
     },
+    "./node": {
+      "types": "./dist/node.d.ts",
+      "import": "./dist/node.mjs",
+      "require": "./dist/node.cjs"
+    },
     "./worker": {
       "types": "./dist/worker.d.ts",
       "import": "./dist/worker.mjs",
@@ -38,12 +43,13 @@
     "typecheck": "tsc -p tsconfig.json --noEmit"
   },
   "dependencies": {
+    "@hono/node-server": "^1.19.9",
+    "@hono/node-ws": "^1.1.1",
     "@mokup/playground": "workspace:*",
     "@mokup/runtime": "workspace:*",
     "@mokup/shared": "workspace:*"
   },
   "devDependencies": {
-    "@hono/node-server": "^1.19.9",
     "@types/node": "^25.0.9",
     "typescript": "^5.9.3",
     "unbuild": "^3.6.1"

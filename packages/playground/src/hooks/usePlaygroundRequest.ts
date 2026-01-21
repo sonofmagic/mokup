@@ -1,6 +1,6 @@
 import type { Ref } from 'vue'
 import type { PlaygroundRoute } from '../types'
-import { computed, ref, watch } from 'vue'
+import { computed, getCurrentInstance, onBeforeUnmount, ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { applyQuery, parseJsonInput } from '../utils/request'
 
@@ -50,7 +50,22 @@ async function resolveMokupRegistration() {
   }
 }
 
-export function usePlaygroundRequest(selected: Ref<PlaygroundRoute | null>) {
+type RouteCounts = Record<string, number>
+interface PlaygroundWsSnapshot {
+  type: 'snapshot'
+  total: number
+  perRoute: RouteCounts
+}
+interface PlaygroundWsIncrement {
+  type: 'increment'
+  routeKey: string
+  total: number
+}
+
+export function usePlaygroundRequest(
+  selected: Ref<PlaygroundRoute | null>,
+  options: { basePath?: Ref<string> } = {},
+) {
   const { t } = useI18n()
   const queryText = ref('')
   const headersText = ref('')
@@ -61,6 +76,100 @@ export function usePlaygroundRequest(selected: Ref<PlaygroundRoute | null>) {
   const isSwMode = ref(false)
   const isSwReady = ref(false)
   const isSwRegistering = computed(() => isSwMode.value && !isSwReady.value)
+  const routeCounts = ref<RouteCounts>({})
+  const totalCount = computed(() => Object.values(routeCounts.value).reduce((sum, value) => sum + value, 0))
+  const isServerCounts = ref(false)
+  const wsRef = ref<WebSocket | null>(null)
+  const wsUrlRef = ref('')
+
+  function getRouteKey(route: PlaygroundRoute) {
+    return `${route.method} ${route.url}`
+  }
+
+  function getRouteCount(route: PlaygroundRoute) {
+    return routeCounts.value[getRouteKey(route)] ?? 0
+  }
+
+  function resolvePlaygroundWsUrl(basePath: string) {
+    const trimmed = basePath.trim()
+    if (!trimmed) {
+      return ''
+    }
+    const normalized = trimmed.startsWith('/') ? trimmed : `/${trimmed}`
+    const path = normalized.endsWith('/') ? normalized.slice(0, -1) : normalized
+    const url = new URL(`${path}/ws`, window.location.origin)
+    url.protocol = url.protocol === 'https:' ? 'wss:' : 'ws:'
+    return url.toString()
+  }
+
+  function applySnapshot(snapshot: PlaygroundWsSnapshot) {
+    routeCounts.value = { ...snapshot.perRoute }
+  }
+
+  function applyIncrement(update: PlaygroundWsIncrement) {
+    routeCounts.value[update.routeKey] = (routeCounts.value[update.routeKey] ?? 0) + 1
+  }
+
+  function handleWsMessage(event: MessageEvent) {
+    if (typeof event.data !== 'string') {
+      return
+    }
+    try {
+      const parsed = JSON.parse(event.data) as PlaygroundWsSnapshot | PlaygroundWsIncrement
+      if (parsed.type === 'snapshot' && parsed.perRoute) {
+        applySnapshot(parsed)
+        return
+      }
+      if (parsed.type === 'increment' && typeof parsed.routeKey === 'string') {
+        applyIncrement(parsed)
+      }
+    }
+    catch {
+      // ignore invalid payloads
+    }
+  }
+
+  function cleanupWebSocket() {
+    if (wsRef.value) {
+      wsRef.value.close()
+      wsRef.value = null
+    }
+    wsUrlRef.value = ''
+    isServerCounts.value = false
+  }
+
+  function connectWebSocket(basePath: string) {
+    if (typeof window === 'undefined') {
+      return
+    }
+    const url = resolvePlaygroundWsUrl(basePath)
+    if (!url || wsUrlRef.value === url) {
+      return
+    }
+    cleanupWebSocket()
+    wsUrlRef.value = url
+    try {
+      const socket = new WebSocket(url)
+      wsRef.value = socket
+      socket.addEventListener('open', () => {
+        isServerCounts.value = true
+      })
+      socket.addEventListener('message', handleWsMessage)
+      socket.addEventListener('close', () => {
+        if (wsRef.value === socket) {
+          cleanupWebSocket()
+        }
+      })
+      socket.addEventListener('error', () => {
+        if (wsRef.value === socket) {
+          cleanupWebSocket()
+        }
+      })
+    }
+    catch {
+      cleanupWebSocket()
+    }
+  }
 
   async function ensureSwReady() {
     if (isSwReady.value) {
@@ -99,6 +208,24 @@ export function usePlaygroundRequest(selected: Ref<PlaygroundRoute | null>) {
     ensureSwReady().catch(() => undefined)
   }
 
+  if (options.basePath) {
+    watch(
+      options.basePath,
+      (value) => {
+        if (value) {
+          connectWebSocket(value)
+        }
+      },
+      { immediate: true },
+    )
+  }
+
+  if (getCurrentInstance()) {
+    onBeforeUnmount(() => {
+      cleanupWebSocket()
+    })
+  }
+
   function resetResponse() {
     responseText.value = t('response.empty')
     responseStatus.value = t('response.idle')
@@ -109,6 +236,7 @@ export function usePlaygroundRequest(selected: Ref<PlaygroundRoute | null>) {
     if (!selected.value) {
       return
     }
+    const requestKey = getRouteKey(selected.value)
     const parsedQuery = parseJsonInput(queryText.value)
     if (parsedQuery.error) {
       responseText.value = t('errors.queryJson', { message: parsedQuery.error })
@@ -161,6 +289,9 @@ export function usePlaygroundRequest(selected: Ref<PlaygroundRoute | null>) {
     const startedAt = performance.now()
     try {
       const response = await fetch(url.toString(), init)
+      if (!isServerCounts.value) {
+        routeCounts.value[requestKey] = (routeCounts.value[requestKey] ?? 0) + 1
+      }
       const duration = Math.round(performance.now() - startedAt)
       responseTime.value = `${duration}ms`
       responseStatus.value = `${response.status} ${response.statusText}`
@@ -198,5 +329,8 @@ export function usePlaygroundRequest(selected: Ref<PlaygroundRoute | null>) {
     resetResponse,
     runRequest,
     isSwRegistering,
+    routeCounts,
+    totalCount,
+    getRouteCount,
   }
 }

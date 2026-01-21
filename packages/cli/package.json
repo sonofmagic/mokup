@@ -33,7 +33,6 @@
     "typecheck": "tsc -p tsconfig.json --noEmit"
   },
   "dependencies": {
-    "@hono/node-server": "^1.19.9",
     "@mokup/runtime": "workspace:*",
     "@mokup/server": "workspace:*",
     "@mokup/shared": "workspace:*",

@@ -1,8 +1,8 @@
 import type { FetchServerOptions } from '@mokup/server'
 import type { BuildOptions } from './manifest/types'
 import process from 'node:process'
-import { serve } from '@hono/node-server'
 import { createFetchServer } from '@mokup/server'
+import { serve } from '@mokup/server/node'
 import { Command } from 'commander'
 import { buildManifest } from './manifest'
 
@@ -146,6 +146,7 @@ export function createCli() {
           }
         },
       )
+      server.injectWebSocket?.(nodeServer)
       const shutdown = async () => {
         try {
           if (server.close) {

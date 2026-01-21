@@ -1,6 +1,7 @@
-import type { Logger, RouteTable } from './dev/types'
-import type { FetchServerOptions, FetchServerOptionsInput } from './fetch-options'
+import type { Server } from 'node:http'
+import type { Logger, ResolvedRoute, RouteTable } from './dev/types'
 
+import type { FetchServerOptions, FetchServerOptionsInput } from './fetch-options'
 import { cwd as nodeCwd } from 'node:process'
 import { Hono as HonoApp } from '@mokup/shared/hono'
 import { createHonoApp } from './dev/hono'
@@ -14,6 +15,7 @@ export interface FetchServer {
   fetch: (request: Request) => Promise<Response>
   refresh: () => Promise<void>
   getRoutes: () => RouteTable
+  injectWebSocket?: (server: NodeWebSocketServer) => void
   close?: () => Promise<void>
 }
 
@@ -81,12 +83,31 @@ function resolveAllDirs(list: FetchServerOptions[], root: string) {
   return dirs
 }
 
+type RouteCounts = Record<string, number>
+interface PlaygroundWsSnapshot {
+  type: 'snapshot'
+  total: number
+  perRoute: RouteCounts
+}
+interface PlaygroundWsIncrement {
+  type: 'increment'
+  routeKey: string
+  total: number
+}
+interface NodeWebSocketServer {
+  on: (event: string, listener: (...args: unknown[]) => void) => void
+}
+type HonoInstance = InstanceType<typeof HonoApp>
+type PlaygroundWsHandler = Parameters<HonoInstance['get']>[1]
+
 function buildApp(params: {
   routes: RouteTable
   dirs: string[]
   playground: ReturnType<typeof resolvePlaygroundOptions>
   root: string
   logger: Logger
+  onResponse?: (route: ResolvedRoute, response: Response) => void | Promise<void>
+  wsHandler?: PlaygroundWsHandler
 }) {
   const app = new HonoApp({ strict: false })
   registerPlaygroundRoutes({
@@ -97,8 +118,11 @@ function buildApp(params: {
     config: params.playground,
     root: params.root,
   })
+  if (params.wsHandler && params.playground.enabled) {
+    app.get(`${params.playground.path}/ws`, params.wsHandler)
+  }
   if (params.routes.length > 0) {
-    const mockApp = createHonoApp(params.routes)
+    const mockApp = createHonoApp(params.routes, { onResponse: params.onResponse })
     app.route('/', mockApp)
   }
   return app
@@ -207,6 +231,84 @@ export async function createFetchServer(
   const playgroundConfig = resolvePlaygroundOptions(resolvePlaygroundInput(optionList))
   const dirs = resolveAllDirs(optionList, root)
 
+  const routeCounts: RouteCounts = {}
+  const wsClients = new Set<{ send: (data: string) => void }>()
+  let totalCount = 0
+  let wsHandler: PlaygroundWsHandler | undefined
+  let injectWebSocket: ((server: NodeWebSocketServer) => void) | undefined
+
+  function getRouteKey(route: ResolvedRoute) {
+    return `${route.method} ${route.template}`
+  }
+
+  function buildSnapshot(): PlaygroundWsSnapshot {
+    return {
+      type: 'snapshot',
+      total: totalCount,
+      perRoute: { ...routeCounts },
+    }
+  }
+
+  function broadcast(payload: PlaygroundWsSnapshot | PlaygroundWsIncrement) {
+    if (wsClients.size === 0) {
+      return
+    }
+    const message = JSON.stringify(payload)
+    for (const client of wsClients) {
+      try {
+        client.send(message)
+      }
+      catch {
+        wsClients.delete(client)
+      }
+    }
+  }
+
+  function registerWsClient(client: { send: (data: string) => void }) {
+    wsClients.add(client)
+    try {
+      client.send(JSON.stringify(buildSnapshot()))
+    }
+    catch {
+      wsClients.delete(client)
+    }
+  }
+
+  function handleRouteResponse(route: ResolvedRoute) {
+    const routeKey = getRouteKey(route)
+    routeCounts[routeKey] = (routeCounts[routeKey] ?? 0) + 1
+    totalCount += 1
+    broadcast({ type: 'increment', routeKey, total: totalCount })
+  }
+
+  async function setupPlaygroundWebSocket(app: HonoInstance) {
+    if (!playgroundConfig.enabled) {
+      return
+    }
+    try {
+      const mod = await import('@hono/node-ws')
+      const { createNodeWebSocket } = mod
+      const { upgradeWebSocket, injectWebSocket: inject } = createNodeWebSocket({ app })
+      wsHandler = upgradeWebSocket(() => ({
+        onOpen: (_event, ws) => {
+          registerWsClient(ws)
+        },
+        onClose: (_event, ws) => {
+          wsClients.delete(ws)
+        },
+        onMessage: () => {
+          // ignore client messages
+        },
+      }))
+      injectWebSocket = (server) => {
+        inject(server as Server)
+      }
+    }
+    catch {
+      // ignore websocket setup failures
+    }
+  }
+
   let routes: RouteTable = []
   let app = buildApp({
     routes,
@@ -214,6 +316,8 @@ export async function createFetchServer(
     playground: playgroundConfig,
     root,
     logger,
+    onResponse: handleRouteResponse,
+    wsHandler,
   })
 
   const refreshRoutes = async () => {
@@ -242,6 +346,8 @@ export async function createFetchServer(
         playground: playgroundConfig,
         root,
         logger,
+        onResponse: handleRouteResponse,
+        wsHandler,
       })
       logger.info(`Loaded ${routes.length} mock routes.`)
     }
@@ -251,6 +357,10 @@ export async function createFetchServer(
   }
 
   await refreshRoutes()
+  await setupPlaygroundWebSocket(app)
+  if (wsHandler && playgroundConfig.enabled) {
+    app.get(`${playgroundConfig.path}/ws`, wsHandler)
+  }
 
   const scheduleRefresh = createDebouncer(80, () => {
     void refreshRoutes()
@@ -268,6 +378,7 @@ export async function createFetchServer(
     fetch,
     refresh: refreshRoutes,
     getRoutes: () => routes,
+    injectWebSocket,
   }
 
   if (watcher) {
