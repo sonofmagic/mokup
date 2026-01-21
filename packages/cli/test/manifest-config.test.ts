@@ -3,6 +3,7 @@ import { tmpdir } from 'node:os'
 import path from 'node:path'
 import { describe, expect, it } from 'vitest'
 import { resolveDirectoryConfig } from '../src/manifest/config'
+import { toPosix } from '../src/manifest/utils'
 
 async function createTempRoot() {
   const root = await fs.mkdtemp(path.join(tmpdir(), 'mokup-cli-config-'))
@@ -61,8 +62,12 @@ describe('resolveDirectoryConfig', () => {
       expect(config.delay).toBe(10)
       expect(config.enabled).toBe(false)
       expect(config.middlewares).toHaveLength(2)
-      expect(config.middlewares[0]?.file).toBe(path.join(mockDir, 'index.config.js'))
-      expect(config.middlewares[1]?.file).toBe(path.join(usersDir, 'index.config.js'))
+      expect(toPosix(config.middlewares[0]?.file ?? '')).toBe(
+        toPosix(path.join(mockDir, 'index.config.js')),
+      )
+      expect(toPosix(config.middlewares[1]?.file ?? '')).toBe(
+        toPosix(path.join(usersDir, 'index.config.js')),
+      )
     }
     finally {
       await cleanupTempRoot(root)

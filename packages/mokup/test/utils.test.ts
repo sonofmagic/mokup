@@ -23,14 +23,15 @@ describe('vite utils', () => {
   })
 
   it('resolves directories with defaults and de-duplicates', () => {
-    const root = path.join('/tmp', 'mokup')
-    expect(resolveDirs(undefined, root)).toEqual([path.join(root, 'mock')])
+    const posixPath = path.posix
+    const root = posixPath.join('/tmp', 'mokup')
+    expect(resolveDirs(undefined, root)).toEqual([posixPath.join(root, 'mock')])
 
     const resolved = resolveDirs(
-      () => ['mock', path.join(root, 'mock'), 'mock'],
+      () => ['mock', posixPath.join(root, 'mock'), 'mock'],
       root,
     )
-    expect(resolved).toEqual([path.join(root, 'mock')])
+    expect(resolved).toEqual([posixPath.join(root, 'mock')])
   })
 
   it('debounces calls', async () => {
@@ -47,9 +48,10 @@ describe('vite utils', () => {
   })
 
   it('checks directory membership and filters', () => {
-    const dirs = [path.join('/tmp', 'mokup', 'mock')]
-    expect(isInDirs(path.join('/tmp', 'mokup', 'mock', 'users.ts'), dirs)).toBe(true)
-    expect(isInDirs(path.join('/tmp', 'mokup', 'other', 'users.ts'), dirs)).toBe(false)
+    const posixPath = path.posix
+    const dirs = [posixPath.join('/tmp', 'mokup', 'mock')]
+    expect(isInDirs(posixPath.join('/tmp', 'mokup', 'mock', 'users.ts'), dirs)).toBe(true)
+    expect(isInDirs(posixPath.join('/tmp', 'mokup', 'other', 'users.ts'), dirs)).toBe(false)
 
     expect(matchesFilter('/src/index.ts', /src/)).toBe(true)
     expect(matchesFilter('/src/index.ts', /foo/)).toBe(false)

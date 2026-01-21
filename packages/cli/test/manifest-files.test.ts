@@ -38,15 +38,16 @@ describe('manifest file helpers', () => {
 
   it('resolves dirs and matches include/exclude filters', () => {
     const root = '/tmp/mokup-root'
-    const absDir = path.join(root, 'abs')
+    const posixPath = path.posix
+    const absDir = posixPath.join(root, 'abs')
 
-    expect(resolveDirs(undefined, root)).toEqual([path.resolve(root, 'mock')])
+    expect(resolveDirs(undefined, root)).toEqual([posixPath.resolve(root, 'mock')])
     expect(resolveDirs(['mock', absDir, absDir], root)).toEqual([
-      path.resolve(root, 'mock'),
+      posixPath.resolve(root, 'mock'),
       absDir,
     ])
 
-    const file = path.join(root, 'mock', 'users.json')
+    const file = posixPath.join(root, 'mock', 'users.json')
     expect(matchesFilter(file, /users/)).toBe(true)
     expect(matchesFilter(file, /posts/)).toBe(false)
     expect(matchesFilter(file, [/posts/, /users/])).toBe(true)

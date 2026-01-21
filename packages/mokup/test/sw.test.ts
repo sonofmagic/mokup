@@ -56,8 +56,11 @@ describe('mokup SW', () => {
 
     expect(code).toContain('import { createRuntimeApp, handle } from \"mokup/runtime\"')
     expect(manifestRoute?.response.type).toBe('module')
-    expect(manifestRoute?.response.module).toBe('/mock/users.get.ts')
-    expect(manifestRoute?.response.ruleIndex).toBe(3)
+    if (!manifestRoute || manifestRoute.response.type !== 'module') {
+      throw new Error('Expected module response')
+    }
+    expect(manifestRoute.response.module).toBe('/mock/users.get.ts')
+    expect(manifestRoute.response.ruleIndex).toBe(3)
     expect(manifestRoute?.status).toBe(201)
     expect(manifestRoute?.headers).toEqual({ 'x-mokup': '1' })
     expect(manifestRoute?.delay).toBe(120)
@@ -89,7 +92,10 @@ describe('mokup SW', () => {
     const manifestRoute = manifest.routes[0]
 
     expect(manifestRoute?.response.type).toBe('json')
-    expect(manifestRoute?.response.body).toEqual({ ok: true })
+    if (!manifestRoute || manifestRoute.response.type !== 'json') {
+      throw new Error('Expected json response')
+    }
+    expect(manifestRoute.response.body).toEqual({ ok: true })
     expect(code).not.toContain('const moduleMap =')
   })
 
