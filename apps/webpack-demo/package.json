@@ -9,9 +9,9 @@
     "typecheck": "tsc -p tsconfig.json --noEmit"
   },
   "dependencies": {
-    "@faker-js/faker": "^9.6.0",
+    "@faker-js/faker": "catalog:",
     "mokup": "workspace:*",
-    "vue": "^3.5.27"
+    "vue": "catalog:"
   },
   "devDependencies": {
     "@vue/compiler-sfc": "^3.5.27",
@@ -19,8 +19,8 @@
     "html-webpack-plugin": "^5.6.3",
     "style-loader": "^4.0.0",
     "ts-loader": "^9.5.1",
-    "tsx": "^4.21.0",
-    "typescript": "^5.9.3",
+    "tsx": "catalog:",
+    "typescript": "catalog:",
     "vue-loader": "^17.4.2",
     "webpack": "^5.97.0",
     "webpack-cli": "^6.0.1",

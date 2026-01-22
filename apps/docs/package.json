@@ -15,14 +15,14 @@
     "worker:deploy": "pnpm build && wrangler deploy"
   },
   "dependencies": {
-    "@faker-js/faker": "^9.6.0"
+    "@faker-js/faker": "catalog:"
   },
   "devDependencies": {
-    "@tailwindcss/vite": "^4.1.13",
+    "@tailwindcss/vite": "catalog:",
     "mokup": "workspace:*",
-    "tailwindcss": "^4.1.13",
-    "vite": "^7.3.1",
+    "tailwindcss": "catalog:",
+    "vite": "catalog:",
     "vitepress": "^1.6.3",
-    "wrangler": "^4.59.3"
+    "wrangler": "catalog:"
   }
 }

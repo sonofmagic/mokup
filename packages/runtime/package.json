@@ -36,7 +36,7 @@
     "@mokup/shared": "workspace:*"
   },
   "devDependencies": {
-    "typescript": "^5.9.3",
-    "unbuild": "^3.6.1"
+    "typescript": "catalog:",
+    "unbuild": "catalog:"
   }
 }

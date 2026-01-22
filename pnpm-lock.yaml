@@ -4,6 +4,45 @@ settings:
   autoInstallPeers: true
   excludeLinksFromLockfile: false
 
+catalogs:
+  default:
+    '@faker-js/faker':
+      specifier: ^10.2.0
+      version: 10.2.0
+    '@tailwindcss/vite':
+      specifier: ^4.1.13
+      version: 4.1.18
+    '@types/node':
+      specifier: ^25.0.10
+      version: 25.0.10
+    '@vitejs/plugin-vue':
+      specifier: ^6.0.3
+      version: 6.0.3
+    pathe:
+      specifier: ^2.0.3
+      version: 2.0.3
+    tailwindcss:
+      specifier: ^4.1.13
+      version: 4.1.18
+    tsx:
+      specifier: ^4.21.0
+      version: 4.21.0
+    typescript:
+      specifier: ^5.9.3
+      version: 5.9.3
+    unbuild:
+      specifier: ^3.6.1
+      version: 3.6.1
+    vite:
+      specifier: ^7.3.1
+      version: 7.3.1
+    vue:
+      specifier: ^3.5.27
+      version: 3.5.27
+    wrangler:
+      specifier: ^4.59.3
+      version: 4.59.3
+
 importers:
 
   .:
@@ -36,7 +75,7 @@ importers:
         specifier: ^11.0.4
         version: 11.0.4
       '@types/node':
-        specifier: ^25.0.10
+        specifier: 'catalog:'
         version: 25.0.10
       '@types/semver':
         specifier: ^7.7.1
@@ -75,7 +114,7 @@ importers:
         specifier: ^1.2.2
         version: 1.2.2
       pathe:
-        specifier: ^2.0.3
+        specifier: 'catalog:'
         version: 2.0.3
       pkg-types:
         specifier: ^2.3.0
@@ -96,7 +135,7 @@ importers:
         specifier: ^8.5.1
         version: 8.5.1(@microsoft/api-extractor@7.52.12(@types/node@25.0.10))(jiti@2.6.1)(postcss@8.5.6)(tsx@4.21.0)(typescript@5.9.3)(yaml@2.8.2)
       tsx:
-        specifier: ^4.21.0
+        specifier: 'catalog:'
         version: 4.21.0
       turbo:
         specifier: ^2.7.5
@@ -105,10 +144,10 @@ importers:
         specifier: ^5.4.1
         version: 5.4.1
       typescript:
-        specifier: ^5.9.3
+        specifier: 'catalog:'
         version: 5.9.3
       unbuild:
-        specifier: ^3.6.1
+        specifier: 'catalog:'
         version: 3.6.1(typescript@5.9.3)(vue@3.5.27(typescript@5.9.3))
       vitest:
         specifier: ~4.0.17
@@ -120,33 +159,33 @@ importers:
   apps/docs:
     dependencies:
       '@faker-js/faker':
-        specifier: ^9.6.0
-        version: 9.9.0
+        specifier: 'catalog:'
+        version: 10.2.0
     devDependencies:
       '@tailwindcss/vite':
-        specifier: ^4.1.13
+        specifier: 'catalog:'
         version: 4.1.18(vite@7.3.1(@types/node@25.0.10)(jiti@2.6.1)(lightningcss@1.30.2)(terser@5.46.0)(tsx@4.21.0)(yaml@2.8.2))
       mokup:
         specifier: workspace:*
         version: link:../../packages/mokup
       tailwindcss:
-        specifier: ^4.1.13
+        specifier: 'catalog:'
         version: 4.1.18
       vite:
-        specifier: ^7.3.1
+        specifier: 'catalog:'
         version: 7.3.1(@types/node@25.0.10)(jiti@2.6.1)(lightningcss@1.30.2)(terser@5.46.0)(tsx@4.21.0)(yaml@2.8.2)
       vitepress:
         specifier: ^1.6.3
         version: 1.6.4(@algolia/client-search@5.46.3)(@types/node@25.0.10)(axios@1.13.2)(change-case@5.4.4)(lightningcss@1.30.2)(postcss@8.5.6)(search-insights@2.17.3)(terser@5.46.0)(typescript@5.9.3)
       wrangler:
-        specifier: ^4.59.3
+        specifier: 'catalog:'
         version: 4.59.3(@cloudflare/workers-types@4.20260120.0)
 
   apps/middleware-demo:
     dependencies:
       '@faker-js/faker':
-        specifier: ^9.6.0
-        version: 9.9.0
+        specifier: 'catalog:'
+        version: 10.2.0
       express:
         specifier: ^5.2.1
         version: 5.2.1
@@ -158,26 +197,26 @@ importers:
         specifier: ^5.0.6
         version: 5.0.6
       tsx:
-        specifier: ^4.21.0
+        specifier: 'catalog:'
         version: 4.21.0
       typescript:
-        specifier: ^5.9.3
+        specifier: 'catalog:'
         version: 5.9.3
 
   apps/mock-host-sw:
     dependencies:
       '@faker-js/faker':
-        specifier: ^9.6.0
-        version: 9.9.0
+        specifier: 'catalog:'
+        version: 10.2.0
       mokup:
         specifier: workspace:*
         version: link:../../packages/mokup
     devDependencies:
       typescript:
-        specifier: ^5.9.3
+        specifier: 'catalog:'
         version: 5.9.3
       vite:
-        specifier: ^7.3.1
+        specifier: 'catalog:'
         version: 7.3.1(@types/node@25.0.10)(jiti@2.6.1)(lightningcss@1.30.2)(terser@5.46.0)(tsx@4.21.0)(yaml@2.8.2)
       vite-plugin-pwa:
         specifier: ^1.2.0
@@ -186,8 +225,8 @@ importers:
   apps/mock-node:
     dependencies:
       '@faker-js/faker':
-        specifier: ^9.6.0
-        version: 9.9.0
+        specifier: 'catalog:'
+        version: 10.2.0
       '@hono/node-server':
         specifier: ^1.12.0
         version: 1.19.9(hono@4.11.5)
@@ -196,33 +235,33 @@ importers:
         version: link:../../packages/mokup
     devDependencies:
       tsx:
-        specifier: ^4.21.0
+        specifier: 'catalog:'
         version: 4.21.0
       typescript:
-        specifier: ^5.9.3
+        specifier: 'catalog:'
         version: 5.9.3
 
   apps/mock-sw:
     dependencies:
       '@faker-js/faker':
-        specifier: ^9.6.0
-        version: 9.9.0
+        specifier: 'catalog:'
+        version: 10.2.0
       mokup:
         specifier: workspace:*
         version: link:../../packages/mokup
     devDependencies:
       typescript:
-        specifier: ^5.9.3
+        specifier: 'catalog:'
         version: 5.9.3
       vite:
-        specifier: ^7.3.1
+        specifier: 'catalog:'
         version: 7.3.1(@types/node@25.0.10)(jiti@2.6.1)(lightningcss@1.30.2)(terser@5.46.0)(tsx@4.21.0)(yaml@2.8.2)
 
   apps/web:
     dependencies:
       '@faker-js/faker':
-        specifier: ^9.6.0
-        version: 9.9.0
+        specifier: 'catalog:'
+        version: 10.2.0
       axios:
         specifier: ^1.13.2
         version: 1.13.2
@@ -230,41 +269,41 @@ importers:
         specifier: workspace:*
         version: link:../../packages/mokup
       vue:
-        specifier: ^3.5.27
+        specifier: 'catalog:'
         version: 3.5.27(typescript@5.9.3)
       vue-router:
         specifier: ^4.6.0
         version: 4.6.4(vue@3.5.27(typescript@5.9.3))
     devDependencies:
       '@tailwindcss/vite':
-        specifier: ^4.1.13
+        specifier: 'catalog:'
         version: 4.1.18(vite@7.3.1(@types/node@25.0.10)(jiti@2.6.1)(lightningcss@1.30.2)(terser@5.46.0)(tsx@4.21.0)(yaml@2.8.2))
       '@vitejs/plugin-vue':
-        specifier: ^6.0.3
+        specifier: 'catalog:'
         version: 6.0.3(vite@7.3.1(@types/node@25.0.10)(jiti@2.6.1)(lightningcss@1.30.2)(terser@5.46.0)(tsx@4.21.0)(yaml@2.8.2))(vue@3.5.27(typescript@5.9.3))
       tailwindcss:
-        specifier: ^4.1.13
+        specifier: 'catalog:'
         version: 4.1.18
       typescript:
-        specifier: ^5.9.3
+        specifier: 'catalog:'
         version: 5.9.3
       vite:
-        specifier: ^7.3.1
+        specifier: 'catalog:'
         version: 7.3.1(@types/node@25.0.10)(jiti@2.6.1)(lightningcss@1.30.2)(terser@5.46.0)(tsx@4.21.0)(yaml@2.8.2)
       wrangler:
-        specifier: ^4.59.3
+        specifier: 'catalog:'
         version: 4.59.3(@cloudflare/workers-types@4.20260120.0)
 
   apps/webpack-demo:
     dependencies:
       '@faker-js/faker':
-        specifier: ^9.6.0
-        version: 9.9.0
+        specifier: 'catalog:'
+        version: 10.2.0
       mokup:
         specifier: workspace:*
         version: link:../../packages/mokup
       vue:
-        specifier: ^3.5.27
+        specifier: 'catalog:'
         version: 3.5.27(typescript@5.9.3)
     devDependencies:
       '@vue/compiler-sfc':
@@ -283,10 +322,10 @@ importers:
         specifier: ^9.5.1
         version: 9.5.4(typescript@5.9.3)(webpack@5.104.1)
       tsx:
-        specifier: ^4.21.0
+        specifier: 'catalog:'
         version: 4.21.0
       typescript:
-        specifier: ^5.9.3
+        specifier: 'catalog:'
         version: 5.9.3
       vue-loader:
         specifier: ^17.4.2
@@ -317,13 +356,13 @@ importers:
         version: 14.0.2
     devDependencies:
       '@types/node':
-        specifier: ^25.0.10
+        specifier: 'catalog:'
         version: 25.0.10
       typescript:
-        specifier: ^5.9.3
+        specifier: 'catalog:'
         version: 5.9.3
       unbuild:
-        specifier: ^3.6.1
+        specifier: 'catalog:'
         version: 3.6.1(typescript@5.9.3)(vue@3.5.27(typescript@5.9.3))
 
   packages/mokup:
@@ -351,22 +390,22 @@ importers:
         version: 5.104.1(esbuild@0.27.2)
     devDependencies:
       '@types/node':
-        specifier: ^25.0.10
+        specifier: 'catalog:'
         version: 25.0.10
       typescript:
-        specifier: ^5.9.3
+        specifier: 'catalog:'
         version: 5.9.3
       unbuild:
-        specifier: ^3.6.1
+        specifier: 'catalog:'
         version: 3.6.1(typescript@5.9.3)(vue@3.5.27(typescript@5.9.3))
       vite:
-        specifier: ^7.3.1
+        specifier: 'catalog:'
         version: 7.3.1(@types/node@25.0.10)(jiti@2.6.1)(lightningcss@1.30.2)(terser@5.46.0)(tsx@4.21.0)(yaml@2.8.2)
 
   packages/playground:
     dependencies:
       vue:
-        specifier: ^3.5.27
+        specifier: 'catalog:'
         version: 3.5.27(typescript@5.9.3)
       vue-i18n:
         specifier: ^11.1.12
@@ -382,19 +421,19 @@ importers:
         specifier: workspace:*
         version: link:../runtime
       '@tailwindcss/vite':
-        specifier: ^4.1.13
+        specifier: 'catalog:'
         version: 4.1.18(vite@7.3.1(@types/node@25.0.10)(jiti@2.6.1)(lightningcss@1.30.2)(terser@5.46.0)(tsx@4.21.0)(yaml@2.8.2))
       '@vitejs/plugin-vue':
-        specifier: ^6.0.3
+        specifier: 'catalog:'
         version: 6.0.3(vite@7.3.1(@types/node@25.0.10)(jiti@2.6.1)(lightningcss@1.30.2)(terser@5.46.0)(tsx@4.21.0)(yaml@2.8.2))(vue@3.5.27(typescript@5.9.3))
       tailwindcss:
-        specifier: ^4.1.13
+        specifier: 'catalog:'
         version: 4.1.18
       typescript:
-        specifier: ^5.9.3
+        specifier: 'catalog:'
         version: 5.9.3
       vite:
-        specifier: ^7.3.1
+        specifier: 'catalog:'
         version: 7.3.1(@types/node@25.0.10)(jiti@2.6.1)(lightningcss@1.30.2)(terser@5.46.0)(tsx@4.21.0)(yaml@2.8.2)
 
   packages/runtime:
@@ -404,10 +443,10 @@ importers:
         version: link:../shared
     devDependencies:
       typescript:
-        specifier: ^5.9.3
+        specifier: 'catalog:'
         version: 5.9.3
       unbuild:
-        specifier: ^3.6.1
+        specifier: 'catalog:'
         version: 3.6.1(typescript@5.9.3)(vue@3.5.27(typescript@5.9.3))
 
   packages/server:
@@ -429,13 +468,13 @@ importers:
         version: link:../shared
     devDependencies:
       '@types/node':
-        specifier: ^25.0.10
+        specifier: 'catalog:'
         version: 25.0.10
       typescript:
-        specifier: ^5.9.3
+        specifier: 'catalog:'
         version: 5.9.3
       unbuild:
-        specifier: ^3.6.1
+        specifier: 'catalog:'
         version: 3.6.1(typescript@5.9.3)(vue@3.5.27(typescript@5.9.3))
 
   packages/shared:
@@ -453,14 +492,14 @@ importers:
         specifier: ^3.3.1
         version: 3.3.1
       pathe:
-        specifier: ^2.0.3
+        specifier: 'catalog:'
         version: 2.0.3
     devDependencies:
       typescript:
-        specifier: ^5.9.3
+        specifier: 'catalog:'
         version: 5.9.3
       unbuild:
-        specifier: ^3.6.1
+        specifier: 'catalog:'
         version: 3.6.1(typescript@5.9.3)(vue@3.5.27(typescript@5.9.3))
 
 packages:
@@ -2174,9 +2213,9 @@ packages:
       '@noble/hashes':
         optional: true
 
-  '@faker-js/faker@9.9.0':
-    resolution: {integrity: sha512-OEl393iCOoo/z8bMezRlJu+GlRGlsKbUAN7jKB6LhnKoqKve5DXRpalbItIIcwnCjs1k/FOPjFzcA6Qn+H+YbA==}
-    engines: {node: '>=18.0.0', npm: '>=9.0.0'}
+  '@faker-js/faker@10.2.0':
+    resolution: {integrity: sha512-rTXwAsIxpCqzUnZvrxVh3L0QA0NzToqWBLAhV+zDV3MIIwiQhAZHMdPCIaj5n/yADu/tyk12wIPgL6YHGXJP+g==}
+    engines: {node: ^20.19.0 || ^22.13.0 || ^23.5.0 || >=24.0.0, npm: '>=10'}
 
   '@gwhitney/detect-indent@7.0.1':
     resolution: {integrity: sha512-7bQW+gkKa2kKZPeJf6+c6gFK9ARxQfn+FKy9ScTBppyKRWH2KzsmweXUoklqeEiHiNVWaeP5csIdsNq6w7QhzA==}
@@ -12256,7 +12295,7 @@ snapshots:
   '@exodus/bytes@1.9.0':
     optional: true
 
-  '@faker-js/faker@9.9.0': {}
+  '@faker-js/faker@10.2.0': {}
 
   '@gwhitney/detect-indent@7.0.1': {}
 

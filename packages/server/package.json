@@ -50,8 +50,8 @@
     "@mokup/shared": "workspace:*"
   },
   "devDependencies": {
-    "@types/node": "^25.0.10",
-    "typescript": "^5.9.3",
-    "unbuild": "^3.6.1"
+    "@types/node": "catalog:",
+    "typescript": "catalog:",
+    "unbuild": "catalog:"
   }
 }

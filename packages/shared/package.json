@@ -62,10 +62,10 @@
     "esbuild": "^0.27.2",
     "hono": "^4.11.5",
     "jsonc-parser": "^3.3.1",
-    "pathe": "^2.0.3"
+    "pathe": "catalog:"
   },
   "devDependencies": {
-    "typescript": "^5.9.3",
-    "unbuild": "^3.6.1"
+    "typescript": "catalog:",
+    "unbuild": "catalog:"
   }
 }
