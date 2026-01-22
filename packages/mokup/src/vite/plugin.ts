@@ -5,6 +5,7 @@ import type { RouteSkipInfo } from './scanner'
 import type { RouteTable, VitePluginOptions, VitePluginOptionsInput } from './types'
 
 import { existsSync } from 'node:fs'
+import { isAbsolute, resolve } from 'node:path'
 import { cwd } from 'node:process'
 import { fileURLToPath } from 'node:url'
 import chokidar from '@mokup/shared/chokidar'
@@ -152,6 +153,26 @@ function addMiddlewareFirst(
     return
   }
   server.middlewares.use(middleware)
+}
+
+function normalizeWatcherFile(file: string, rootDir: string) {
+  if (!file) {
+    return file
+  }
+  if (isAbsolute(file)) {
+    return file
+  }
+  return resolve(rootDir, file)
+}
+
+function normalizeRawWatcherPath(rawPath: unknown) {
+  if (typeof rawPath === 'string') {
+    return rawPath
+  }
+  if (rawPath && typeof (rawPath as { toString?: () => string }).toString === 'function') {
+    return (rawPath as { toString: () => string }).toString()
+  }
+  return ''
 }
 
 export function createMokupPlugin(options: VitePluginOptionsInput = {}): Plugin {
@@ -481,18 +502,28 @@ export function createMokupPlugin(options: VitePluginOptionsInput = {}): Plugin 
       const dirs = resolveAllDirs()
       server.watcher.add(dirs)
       const scheduleRefresh = createDebouncer(80, () => refreshRoutes(server))
-      server.watcher.on('add', (file) => {
-        if (isInDirs(file, dirs)) {
+      const handleWatchedFile = (file: string) => {
+        const resolvedFile = normalizeWatcherFile(file, server.config.root ?? root)
+        if (isInDirs(resolvedFile, dirs)) {
           scheduleRefresh()
         }
-      })
-      server.watcher.on('change', (file) => {
-        if (isInDirs(file, dirs)) {
-          scheduleRefresh()
+      }
+      server.watcher.on('add', handleWatchedFile)
+      server.watcher.on('change', handleWatchedFile)
+      server.watcher.on('unlink', handleWatchedFile)
+      server.watcher.on('raw', (eventName, rawPath, details) => {
+        if (eventName !== 'rename') {
+          return
         }
-      })
-      server.watcher.on('unlink', (file) => {
-        if (isInDirs(file, dirs)) {
+        const candidate = normalizeRawWatcherPath(rawPath)
+        if (!candidate) {
+          return
+        }
+        const baseDir = typeof details === 'object' && details && 'watchedPath' in details
+          ? (details as { watchedPath?: string }).watchedPath ?? (server.config.root ?? root)
+          : server.config.root ?? root
+        const resolvedFile = normalizeWatcherFile(candidate, baseDir)
+        if (isInDirs(resolvedFile, dirs)) {
           scheduleRefresh()
         }
       })
@@ -538,9 +569,31 @@ export function createMokupPlugin(options: VitePluginOptionsInput = {}): Plugin 
       const watcher = chokidar.watch(dirs, { ignoreInitial: true })
       previewWatcher = watcher
       const scheduleRefresh = createDebouncer(80, () => refreshRoutes(server))
-      watcher.on('add', scheduleRefresh)
-      watcher.on('change', scheduleRefresh)
-      watcher.on('unlink', scheduleRefresh)
+      const handleWatchedFile = (file: string) => {
+        const resolvedFile = normalizeWatcherFile(file, server.config.root ?? root)
+        if (isInDirs(resolvedFile, dirs)) {
+          scheduleRefresh()
+        }
+      }
+      watcher.on('add', handleWatchedFile)
+      watcher.on('change', handleWatchedFile)
+      watcher.on('unlink', handleWatchedFile)
+      watcher.on('raw', (eventName, rawPath, details) => {
+        if (eventName !== 'rename') {
+          return
+        }
+        const candidate = normalizeRawWatcherPath(rawPath)
+        if (!candidate) {
+          return
+        }
+        const baseDir = typeof details === 'object' && details && 'watchedPath' in details
+          ? (details as { watchedPath?: string }).watchedPath ?? (server.config.root ?? root)
+          : server.config.root ?? root
+        const resolvedFile = normalizeWatcherFile(candidate, baseDir)
+        if (isInDirs(resolvedFile, dirs)) {
+          scheduleRefresh()
+        }
+      })
       server.httpServer?.once('close', () => {
         previewWatcher?.close()
         previewWatcher = null

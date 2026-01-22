@@ -17,6 +17,7 @@ import { usePlaygroundRoutes } from './hooks/usePlaygroundRoutes'
 import { usePlaygroundTheme } from './hooks/usePlaygroundTheme'
 import { useRouteTree } from './hooks/useRouteTree'
 import { persistLocale } from './i18n'
+import { toPosixPath } from './utils/path'
 
 declare global {
   interface Window {
@@ -167,6 +168,46 @@ function reasonLabel(reason?: string) {
   return t(`disabled.reason.${key}`)
 }
 
+function hasWorkspaceRoot() {
+  return (workspaceRoot.value ?? '').trim().length > 0
+}
+
+function isAbsolutePath(value: string) {
+  return value.startsWith('/') || /^[a-z]:\//i.test(value)
+}
+
+function resolveEditorPath(file: string) {
+  if (!hasWorkspaceRoot()) {
+    return null
+  }
+  const normalizedFile = toPosixPath(file || '').trim()
+  if (!normalizedFile) {
+    return null
+  }
+  if (isAbsolutePath(normalizedFile)) {
+    return normalizedFile
+  }
+  const normalizedRoot = toPosixPath((workspaceRoot.value ?? '').trim()).replace(/\/$/, '')
+  if (!normalizedRoot) {
+    return null
+  }
+  const relative = normalizedFile.replace(/^\/+/, '')
+  return `${normalizedRoot}/${relative}`
+}
+
+function openInEditor(file: string) {
+  const filePath = resolveEditorPath(file)
+  if (!filePath) {
+    return
+  }
+  const target = `vscode://file/${encodeURI(filePath)}`
+  window.location.href = target
+}
+
+function formatRoutePath(value?: string) {
+  return value ? value.toLowerCase() : ''
+}
+
 function handleOutsideMoreClick(event: PointerEvent) {
   if (!showMore.value) {
     return
@@ -300,7 +341,11 @@ onBeforeUnmount(() => {
                       <div class="flex flex-wrap items-center justify-between gap-2">
                         <div class="flex flex-col gap-1">
                           <span class="text-[0.7rem] uppercase tracking-[0.18em] text-pg-text-muted">
-                            {{ route.method && route.url ? `${route.method} ${route.url}` : route.file }}
+                            {{
+                              route.method && route.url
+                                ? `${route.method} ${formatRoutePath(route.url)}`
+                                : formatRoutePath(route.url) || route.file
+                            }}
                           </span>
                           <span
                             v-if="route.method && route.url"
@@ -309,9 +354,21 @@ onBeforeUnmount(() => {
                             {{ route.file }}
                           </span>
                         </div>
-                        <UiPill tone="strong" size="sm" tracking="tight">
-                          {{ reasonLabel(route.reason) }}
-                        </UiPill>
+                        <div class="flex items-center gap-2">
+                          <UiPill tone="strong" size="sm" tracking="tight">
+                            {{ reasonLabel(route.reason) }}
+                          </UiPill>
+                          <button
+                            v-if="resolveEditorPath(route.file)"
+                            class="flex h-7 w-7 items-center justify-center rounded-md transition text-pg-text-muted hover:bg-pg-hover-strong hover:text-pg-text-soft"
+                            type="button"
+                            :aria-label="`Open ${route.file} in VS Code`"
+                            :title="t('detail.openInVscode')"
+                            @click="openInEditor(route.file)"
+                          >
+                            <span class="i-[carbon--launch] h-3.5 w-3.5" aria-hidden="true" />
+                          </button>
+                        </div>
                       </div>
                     </div>
                   </div>
