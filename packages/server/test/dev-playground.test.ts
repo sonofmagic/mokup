@@ -36,6 +36,14 @@ describe('dev playground', () => {
     registerPlaygroundRoutes({
       app,
       routes,
+      disabledRoutes: [
+        {
+          file: '/tmp/mock/.draft/ignored.get.ts',
+          reason: 'ignore-prefix',
+          method: 'GET',
+          url: '/ignored',
+        },
+      ],
       dirs: ['/tmp/mock'],
       logger,
       config: resolvePlaygroundOptions({ path: '/_mokup', enabled: true }),
@@ -49,6 +57,8 @@ describe('dev playground', () => {
     expect(data.routes[0]?.url).toBe('/users/[id]')
     expect(data.routes[0]?.middlewareCount).toBe(1)
     expect(data.routes[0]?.group).toBe('mock')
+    expect(data.disabled[0]?.url).toBe('/ignored')
+    expect(data.disabled[0]?.reason).toBe('ignore-prefix')
   })
 
   it('skips route registration when playground is disabled', async () => {

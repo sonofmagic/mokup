@@ -88,6 +88,14 @@ describe('playground routes endpoint', () => {
 
     const middleware = createPlaygroundMiddleware({
       getRoutes: () => routes,
+      getDisabledRoutes: () => [
+        {
+          file: path.join(mockDir, '.draft', 'hidden.get.ts'),
+          reason: 'ignore-prefix',
+          method: 'GET',
+          url: '/hidden',
+        },
+      ],
       config: resolvePlaygroundOptions(true),
       logger,
       getDirs: () => [mockDir, extraDir],
@@ -107,6 +115,7 @@ describe('playground routes endpoint', () => {
     const payload = JSON.parse(state.body) as {
       groups: { key: string, label: string }[]
       routes: { group?: string, groupKey?: string, file: string, url: string }[]
+      disabled: { group?: string, groupKey?: string, file: string, url?: string, reason: string }[]
     }
     const expectedGroups = [
       { key: normalizePath(mockDir), label: 'mock' },
@@ -128,6 +137,14 @@ describe('playground routes endpoint', () => {
       group: 'mock-extra',
       groupKey: expectedGroups[1].key,
       file: 'mock-extra/messages.post.ts',
+    })
+
+    const disabledRoute = payload.disabled.find(route => route.url === '/hidden')
+    expect(disabledRoute).toMatchObject({
+      group: 'mock',
+      groupKey: expectedGroups[0].key,
+      file: 'mock/.draft/hidden.get.ts',
+      reason: 'ignore-prefix',
     })
   })
 })

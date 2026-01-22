@@ -11,6 +11,23 @@ export interface PlaygroundRoute {
   middlewares?: string[]
 }
 
+export type PlaygroundDisabledReason
+  = | 'disabled'
+    | 'disabled-dir'
+    | 'exclude'
+    | 'ignore-prefix'
+    | 'include'
+    | 'unknown'
+
+export interface PlaygroundDisabledRoute {
+  file: string
+  reason: PlaygroundDisabledReason
+  method?: string
+  url?: string
+  group?: string
+  groupKey?: string
+}
+
 export interface PlaygroundGroup {
   key: string
   label: string
@@ -22,6 +39,7 @@ export interface PlaygroundResponse {
   count: number
   groups?: PlaygroundGroup[]
   routes: PlaygroundRoute[]
+  disabled?: PlaygroundDisabledRoute[]
 }
 
 export interface TreeRow {

@@ -1,6 +1,7 @@
 import type { Hono } from '@mokup/shared/hono'
 import type { IncomingMessage, ServerResponse } from 'node:http'
 import type { Plugin, PreviewServer, ViteDevServer } from 'vite'
+import type { RouteSkipInfo } from './scanner'
 import type { RouteTable, VitePluginOptions, VitePluginOptionsInput } from './types'
 
 import { existsSync } from 'node:fs'
@@ -15,7 +16,7 @@ import { scanRoutes } from './scanner'
 import { buildSwScript, resolveSwConfig, resolveSwUnregisterConfig } from './sw'
 import { createDebouncer, isInDirs, resolveDirs } from './utils'
 
-function buildRouteSignature(routes: RouteTable) {
+function buildRouteSignature(routes: RouteTable, disabledRoutes: RouteSkipInfo[]) {
   return routes
     .map(route =>
       [
@@ -26,6 +27,16 @@ function buildRouteSignature(routes: RouteTable) {
         route.status ?? '',
         route.delay ?? '',
       ].join('|'),
+    )
+    .concat(
+      disabledRoutes.map(route =>
+        [
+          route.reason,
+          route.file,
+          route.method ?? '',
+          route.url ?? '',
+        ].join('|'),
+      ),
     )
     .join('\n')
 }
@@ -151,6 +162,7 @@ export function createMokupPlugin(options: VitePluginOptionsInput = {}): Plugin 
   let routes: RouteTable = []
   let serverRoutes: RouteTable = []
   let swRoutes: RouteTable = []
+  let disabledRoutes: RouteSkipInfo[] = []
   let app: Hono | null = null
   type Watcher = ReturnType<typeof chokidar.watch>
   let previewWatcher: Watcher | null = null
@@ -256,6 +268,7 @@ export function createMokupPlugin(options: VitePluginOptionsInput = {}): Plugin 
 
   const playgroundMiddleware = createPlaygroundMiddleware({
     getRoutes: () => routes,
+    getDisabledRoutes: () => disabledRoutes,
     config: playgroundConfig,
     logger,
     getServer: () => currentServer,
@@ -267,12 +280,14 @@ export function createMokupPlugin(options: VitePluginOptionsInput = {}): Plugin 
     const collected: RouteTable = []
     const collectedServer: RouteTable = []
     const collectedSw: RouteTable = []
+    const collectedDisabled: RouteSkipInfo[] = []
     for (const entry of optionList) {
       const dirs = resolveDirs(entry.dir, root)
       const scanParams: Parameters<typeof scanRoutes>[0] = {
         dirs,
         prefix: entry.prefix ?? '',
         logger,
+        onSkip: info => collectedDisabled.push(info),
       }
       if (entry.include) {
         scanParams.include = entry.include
@@ -301,8 +316,9 @@ export function createMokupPlugin(options: VitePluginOptionsInput = {}): Plugin 
     routes = sortRoutes(collected)
     serverRoutes = sortRoutes(collectedServer)
     swRoutes = sortRoutes(collectedSw)
+    disabledRoutes = collectedDisabled
     app = serverRoutes.length > 0 ? createHonoApp(serverRoutes) : null
-    const signature = buildRouteSignature(routes)
+    const signature = buildRouteSignature(routes, disabledRoutes)
     if (isViteDevServer(server) && server.ws) {
       if (lastSignature && signature !== lastSignature) {
         server.ws.send({

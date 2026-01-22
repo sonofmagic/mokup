@@ -29,6 +29,18 @@ const messages = {
       base: 'Base',
       searchPlaceholder: 'Filter by method, path, or file',
     },
+    disabled: {
+      active: 'Active ({count})',
+      disabled: 'Disabled ({count})',
+      reason: {
+        'disabled': 'Disabled',
+        'disabled-dir': 'Disabled (dir)',
+        'ignore-prefix': 'Ignore prefix',
+        'include': 'Include filter',
+        'exclude': 'Exclude filter',
+        'unknown': 'Unknown',
+      },
+    },
     tabs: {
       overview: 'Overview',
     },
@@ -39,6 +51,9 @@ const messages = {
     states: {
       loadingRoutes: 'Loading routes...',
       emptyRoutes: 'No routes matched.',
+      emptyDisabledRoutes: 'No disabled routes matched.',
+      disabledTitle: 'Disabled routes',
+      disabledHint: 'Disabled routes are not executable.',
     },
     detail: {
       selectTitle: 'Select a route',
@@ -91,6 +106,18 @@ const messages = {
       base: '基路径',
       searchPlaceholder: '按方法、路径或文件过滤',
     },
+    disabled: {
+      active: '启用 ({count})',
+      disabled: '忽略 ({count})',
+      reason: {
+        'disabled': '已禁用',
+        'disabled-dir': '目录禁用',
+        'ignore-prefix': '前缀忽略',
+        'include': '未命中包含',
+        'exclude': '命中排除',
+        'unknown': '未知',
+      },
+    },
     tabs: {
       overview: '总览',
     },
@@ -101,6 +128,9 @@ const messages = {
     states: {
       loadingRoutes: '正在加载接口...',
       emptyRoutes: '没有匹配的接口。',
+      emptyDisabledRoutes: '没有匹配的忽略接口。',
+      disabledTitle: '忽略/禁用接口',
+      disabledHint: '忽略列表中的接口无法调试。',
     },
     detail: {
       selectTitle: '请选择接口',

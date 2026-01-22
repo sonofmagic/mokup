@@ -23,7 +23,10 @@ declare global {
 }
 
 const {
+  routes,
   filtered,
+  disabledRoutes,
+  disabledFiltered,
   selected,
   groups,
   activeGroup,
@@ -58,6 +61,13 @@ const { locale, t } = useI18n()
 const { themeMode, effectiveTheme, cycleThemeMode } = usePlaygroundTheme()
 
 const selectedKey = computed(() => (selected.value ? routeKey(selected.value) : ''))
+const routeMode = ref<'active' | 'disabled'>('active')
+const isDisabledMode = computed(() => routeMode.value === 'disabled')
+const activeTotal = computed(() => routes.value.length)
+const disabledTotal = computed(() => disabledRoutes.value.length)
+const visibleCount = computed(() =>
+  isDisabledMode.value ? disabledFiltered.value.length : routeCount.value,
+)
 const themeIcon = computed(() =>
   effectiveTheme.value === 'dark' ? 'i-[carbon--moon]' : 'i-[carbon--sun]',
 )
@@ -99,6 +109,13 @@ function handleSelectRow(row: TreeRow) {
   }
 }
 
+function setRouteMode(mode: 'active' | 'disabled') {
+  routeMode.value = mode
+  if (mode === 'disabled') {
+    selectRoute(null)
+  }
+}
+
 function clampSplitWidth(value: number) {
   return Math.min(maxSplitWidth, Math.max(minSplitWidth, value))
 }
@@ -135,6 +152,11 @@ function handleDragStart(event: PointerEvent) {
 
 function toggleMore() {
   showMore.value = !showMore.value
+}
+
+function reasonLabel(reason?: string) {
+  const key = reason ?? 'unknown'
+  return t(`disabled.reason.${key}`)
 }
 
 function handleOutsideMoreClick(event: PointerEvent) {
@@ -205,6 +227,22 @@ onBeforeUnmount(() => {
                     <span>{{ t('controls.more') }}</span>
                   </button>
                 </div>
+                <div class="mt-2 flex flex-wrap items-center gap-2">
+                  <button
+                    class="rounded-full border px-3 py-1.5 text-[0.6rem] uppercase tracking-[0.25em] transition hover:-translate-y-0.5 border-pg-border bg-pg-surface-strong text-pg-text-soft"
+                    :class="!isDisabledMode ? 'bg-pg-accent text-pg-on-accent border-pg-accent shadow-sm ring-1 ring-pg-accent-ring' : ''"
+                    @click="setRouteMode('active')"
+                  >
+                    {{ t('disabled.active', { count: activeTotal }) }}
+                  </button>
+                  <button
+                    class="rounded-full border px-3 py-1.5 text-[0.6rem] uppercase tracking-[0.25em] transition hover:-translate-y-0.5 border-pg-border bg-pg-surface-strong text-pg-text-soft"
+                    :class="isDisabledMode ? 'bg-pg-accent text-pg-on-accent border-pg-accent shadow-sm ring-1 ring-pg-accent-ring' : ''"
+                    @click="setRouteMode('disabled')"
+                  >
+                    {{ t('disabled.disabled', { count: disabledTotal }) }}
+                  </button>
+                </div>
                 <div
                   v-if="showMore"
                   id="playground-more-panel"
@@ -233,17 +271,52 @@ onBeforeUnmount(() => {
                 <div v-else-if="loading" class="rounded-2xl border px-4 py-6 text-sm border-pg-border bg-pg-surface-soft text-pg-text-muted">
                   {{ t('states.loadingRoutes') }}
                 </div>
-                <div v-else-if="!filtered.length" class="rounded-2xl border px-4 py-6 text-sm border-pg-border bg-pg-surface-soft text-pg-text-muted">
-                  {{ t('states.emptyRoutes') }}
-                </div>
-                <RouteTree
-                  v-else
-                  :rows="treeRows"
-                  :workspace-root="workspaceRoot"
-                  :get-route-count="getRouteCount"
-                  @toggle="toggleExpanded"
-                  @select="handleSelectRow"
-                />
+                <template v-else>
+                  <div
+                    v-if="isDisabledMode && !disabledFiltered.length"
+                    class="rounded-2xl border px-4 py-6 text-sm border-pg-border bg-pg-surface-soft text-pg-text-muted"
+                  >
+                    {{ t('states.emptyDisabledRoutes') }}
+                  </div>
+                  <div
+                    v-else-if="!isDisabledMode && !filtered.length"
+                    class="rounded-2xl border px-4 py-6 text-sm border-pg-border bg-pg-surface-soft text-pg-text-muted"
+                  >
+                    {{ t('states.emptyRoutes') }}
+                  </div>
+                  <div v-else-if="isDisabledMode" class="flex flex-col gap-2">
+                    <div
+                      v-for="route in disabledFiltered"
+                      :key="`${route.file}-${route.reason}-${route.method ?? ''}-${route.url ?? ''}`"
+                      class="rounded-2xl border px-4 py-3 text-xs border-pg-border bg-pg-surface-soft text-pg-text-soft"
+                    >
+                      <div class="flex flex-wrap items-center justify-between gap-2">
+                        <div class="flex flex-col gap-1">
+                          <span class="text-[0.7rem] uppercase tracking-[0.18em] text-pg-text-muted">
+                            {{ route.method && route.url ? `${route.method} ${route.url}` : route.file }}
+                          </span>
+                          <span
+                            v-if="route.method && route.url"
+                            class="text-[0.75rem] text-pg-text-subtle"
+                          >
+                            {{ route.file }}
+                          </span>
+                        </div>
+                        <span class="rounded-full border px-3 py-1 text-[0.55rem] uppercase tracking-[0.2em] border-pg-border bg-pg-surface-strong text-pg-text-soft">
+                          {{ reasonLabel(route.reason) }}
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+                  <RouteTree
+                    v-else
+                    :rows="treeRows"
+                    :workspace-root="workspaceRoot"
+                    :get-route-count="getRouteCount"
+                    @toggle="toggleExpanded"
+                    @select="handleSelectRow"
+                  />
+                </template>
               </div>
             </aside>
 
@@ -264,7 +337,7 @@ onBeforeUnmount(() => {
                 <div class="flex flex-wrap items-center gap-2">
                   <span class="flex items-center gap-2 rounded-full border px-2.5 py-1 text-[0.55rem] uppercase tracking-[0.25em] border-pg-border bg-pg-surface-strong text-pg-text-soft">
                     <span class="i-[carbon--map] h-3.5 w-3.5" aria-hidden="true" />
-                    <span>{{ t('header.routes', { count: routeCount }) }}</span>
+                    <span>{{ t('header.routes', { count: visibleCount }) }}</span>
                   </span>
                   <span class="flex items-center gap-2 rounded-full border px-2.5 py-1 text-[0.55rem] uppercase tracking-[0.25em] border-pg-border bg-pg-surface-strong text-pg-text-soft">
                     <span class="i-[carbon--activity] h-3.5 w-3.5" aria-hidden="true" />
@@ -300,6 +373,7 @@ onBeforeUnmount(() => {
 
               <div class="mt-3 flex-1 min-h-0 overflow-auto">
                 <RouteDetail
+                  v-if="!isDisabledMode"
                   v-model:queryText="queryText"
                   v-model:headersText="headersText"
                   v-model:bodyText="bodyText"
@@ -310,6 +384,17 @@ onBeforeUnmount(() => {
                   :is-sw-registering="isSwRegistering"
                   @run="runRequest"
                 />
+                <div
+                  v-else
+                  class="flex h-full flex-col items-center justify-center gap-3 rounded-3xl border p-6 text-center shadow-xl border-pg-border bg-pg-surface-card text-pg-text-muted"
+                >
+                  <p class="text-xl font-display text-pg-text-strong">
+                    {{ t('states.disabledTitle') }}
+                  </p>
+                  <p class="text-sm">
+                    {{ t('states.disabledHint') }}
+                  </p>
+                </div>
               </div>
             </section>
           </div>

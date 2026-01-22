@@ -109,6 +109,46 @@ interface PlaygroundGroup {
   path: string
 }
 
+type PlaygroundDisabledReason
+  = | 'disabled'
+    | 'disabled-dir'
+    | 'exclude'
+    | 'ignore-prefix'
+    | 'include'
+    | 'unknown'
+
+interface PlaygroundDisabledRouteInput {
+  file: string
+  reason?: string
+  method?: string
+  url?: string
+}
+
+interface PlaygroundDisabledRoute {
+  file: string
+  reason: PlaygroundDisabledReason
+  method?: string
+  url?: string
+  group?: string
+  groupKey?: string
+}
+
+const disabledReasonSet = new Set<PlaygroundDisabledReason>([
+  'disabled',
+  'disabled-dir',
+  'exclude',
+  'ignore-prefix',
+  'include',
+  'unknown',
+])
+
+function normalizeDisabledReason(reason?: string): PlaygroundDisabledReason {
+  if (reason && disabledReasonSet.has(reason as PlaygroundDisabledReason)) {
+    return reason as PlaygroundDisabledReason
+  }
+  return 'unknown'
+}
+
 function formatRouteFile(file: string, root?: string) {
   if (!root) {
     return toPosixPath(file)
@@ -177,9 +217,26 @@ function toPlaygroundRoute(
   }
 }
 
+function toPlaygroundDisabledRoute(
+  route: PlaygroundDisabledRouteInput,
+  root: string | undefined,
+  groups: PlaygroundGroup[],
+): PlaygroundDisabledRoute {
+  const matchedGroup = resolveRouteGroup(route.file, groups)
+  return {
+    file: formatRouteFile(route.file, root),
+    reason: normalizeDisabledReason(route.reason),
+    method: route.method,
+    url: route.url,
+    groupKey: matchedGroup?.key,
+    group: matchedGroup?.label,
+  }
+}
+
 export function registerPlaygroundRoutes(params: {
   app: Hono
   routes: RouteTable
+  disabledRoutes?: PlaygroundDisabledRouteInput[]
   dirs: string[]
   logger: Logger
   config: PlaygroundConfig
@@ -227,6 +284,7 @@ export function registerPlaygroundRoutes(params: {
       count: params.routes.length,
       groups: groups.map(group => ({ key: group.key, label: group.label })),
       routes: params.routes.map(route => toPlaygroundRoute(route, baseRoot, groups)),
+      disabled: (params.disabledRoutes ?? []).map(route => toPlaygroundDisabledRoute(route, baseRoot, groups)),
     })
   })
   params.app.get(`${playgroundPath}/*`, async (c) => {

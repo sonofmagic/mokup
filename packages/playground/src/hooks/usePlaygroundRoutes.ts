@@ -1,9 +1,15 @@
-import type { PlaygroundGroup, PlaygroundResponse, PlaygroundRoute } from '../types'
+import type {
+  PlaygroundDisabledRoute,
+  PlaygroundGroup,
+  PlaygroundResponse,
+  PlaygroundRoute,
+} from '../types'
 import { computed, ref, watch } from 'vue'
 import { normalizeBasePath } from '../utils/path'
 
 export function usePlaygroundRoutes() {
   const routes = ref<PlaygroundRoute[]>([])
+  const disabledRoutes = ref<PlaygroundDisabledRoute[]>([])
   const filtered = ref<PlaygroundRoute[]>([])
   const selected = ref<PlaygroundRoute | null>(null)
   const groups = ref<PlaygroundGroup[]>([])
@@ -16,6 +22,7 @@ export function usePlaygroundRoutes() {
 
   const searchTerm = computed(() => search.value.trim().toLowerCase())
   const routeCount = computed(() => filtered.value.length)
+  const disabledCount = computed(() => disabledRoutes.value.length)
   const routesEndpoint = computed(() => {
     const base = basePath.value || ''
     return `${base}/routes`
@@ -39,6 +46,18 @@ export function usePlaygroundRoutes() {
       : [...list]
   }
 
+  const disabledFiltered = computed(() => {
+    const term = searchTerm.value
+    if (!term) {
+      return [...disabledRoutes.value]
+    }
+    return disabledRoutes.value.filter(route =>
+      `${route.method ?? ''} ${route.url ?? ''} ${route.file} ${route.reason}`
+        .toLowerCase()
+        .includes(term),
+    )
+  })
+
   function setActiveGroup(key: string) {
     activeGroup.value = key
     applyFilter()
@@ -51,7 +70,7 @@ export function usePlaygroundRoutes() {
     selected.value = filtered.value[0] ?? null
   }
 
-  function selectRoute(route: PlaygroundRoute) {
+  function selectRoute(route: PlaygroundRoute | null) {
     selected.value = route
   }
 
@@ -71,6 +90,7 @@ export function usePlaygroundRoutes() {
       }
       const data = await response.json() as PlaygroundResponse
       routes.value = data.routes ?? []
+      disabledRoutes.value = data.disabled ?? []
       groups.value = data.groups ?? []
       workspaceRoot.value = data.root ?? ''
       if (previousGroup !== 'all') {
@@ -102,6 +122,8 @@ export function usePlaygroundRoutes() {
 
   return {
     routes,
+    disabledRoutes,
+    disabledFiltered,
     filtered,
     selected,
     groups,
@@ -113,6 +135,7 @@ export function usePlaygroundRoutes() {
     workspaceRoot,
     searchTerm,
     routeCount,
+    disabledCount,
     routeKey,
     loadRoutes,
     setActiveGroup,

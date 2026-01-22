@@ -1,11 +1,58 @@
 import type { PreviewServer, ViteDevServer } from 'vite'
 
-import type { Logger, RouteDirectoryConfig, RouteTable } from './types'
+import type { HttpMethod, Logger, RouteDirectoryConfig, RouteRule, RouteTable } from './types'
 import { resolveDirectoryConfig } from './config'
 import { collectFiles, isSupportedFile } from './files'
 import { loadRules } from './loader'
 import { deriveRouteFromFile, resolveRule, sortRoutes } from './routes'
 import { hasIgnoredPrefix, matchesFilter, normalizeIgnorePrefix } from './utils'
+
+export type RouteSkipReason
+  = | 'disabled'
+    | 'disabled-dir'
+    | 'exclude'
+    | 'ignore-prefix'
+    | 'include'
+
+export interface RouteSkipInfo {
+  file: string
+  reason: RouteSkipReason
+  method?: HttpMethod
+  url?: string
+}
+
+const silentLogger: Logger = {
+  info: () => {},
+  warn: () => {},
+  error: () => {},
+}
+
+function resolveSkipRoute(params: {
+  file: string
+  rootDir: string
+  prefix: string
+  derived?: ReturnType<typeof deriveRouteFromFile> | null
+}) {
+  const derived = params.derived ?? deriveRouteFromFile(params.file, params.rootDir, silentLogger)
+  if (!derived?.method) {
+    return null
+  }
+  const resolved = resolveRule({
+    rule: { handler: null } as RouteRule,
+    derivedTemplate: derived.template,
+    derivedMethod: derived.method,
+    prefix: params.prefix,
+    file: params.file,
+    logger: silentLogger,
+  })
+  if (!resolved) {
+    return null
+  }
+  return {
+    method: resolved.method,
+    url: resolved.template,
+  }
+}
 
 export async function scanRoutes(params: {
   dirs: string[]
@@ -15,6 +62,7 @@ export async function scanRoutes(params: {
   ignorePrefix?: string | string[]
   server?: ViteDevServer | PreviewServer
   logger: Logger
+  onSkip?: (info: RouteSkipInfo) => void
 }): Promise<RouteTable> {
   const routes: RouteTable = []
   const seen = new Set<string>()
@@ -22,6 +70,7 @@ export async function scanRoutes(params: {
   const globalIgnorePrefix = normalizeIgnorePrefix(params.ignorePrefix)
   const configCache = new Map<string, RouteDirectoryConfig | null>()
   const fileCache = new Map<string, string | null>()
+  const shouldCollectSkip = typeof params.onSkip === 'function'
   for (const fileInfo of files) {
     const configParams: Parameters<typeof resolveDirectoryConfig>[0] = {
       file: fileInfo.file,
@@ -35,12 +84,38 @@ export async function scanRoutes(params: {
     }
     const config = await resolveDirectoryConfig(configParams)
     if (config.enabled === false) {
+      if (shouldCollectSkip && isSupportedFile(fileInfo.file)) {
+        const resolved = resolveSkipRoute({
+          file: fileInfo.file,
+          rootDir: fileInfo.rootDir,
+          prefix: params.prefix,
+        })
+        params.onSkip?.({
+          file: fileInfo.file,
+          reason: 'disabled-dir',
+          method: resolved?.method,
+          url: resolved?.url,
+        })
+      }
       continue
     }
     const effectiveIgnorePrefix = typeof config.ignorePrefix !== 'undefined'
       ? normalizeIgnorePrefix(config.ignorePrefix, [])
       : globalIgnorePrefix
     if (hasIgnoredPrefix(fileInfo.file, fileInfo.rootDir, effectiveIgnorePrefix)) {
+      if (shouldCollectSkip && isSupportedFile(fileInfo.file)) {
+        const resolved = resolveSkipRoute({
+          file: fileInfo.file,
+          rootDir: fileInfo.rootDir,
+          prefix: params.prefix,
+        })
+        params.onSkip?.({
+          file: fileInfo.file,
+          reason: 'ignore-prefix',
+          method: resolved?.method,
+          url: resolved?.url,
+        })
+      }
       continue
     }
     if (!isSupportedFile(fileInfo.file)) {
@@ -53,6 +128,22 @@ export async function scanRoutes(params: {
       ? config.exclude
       : params.exclude
     if (!matchesFilter(fileInfo.file, effectiveInclude, effectiveExclude)) {
+      if (shouldCollectSkip) {
+        const resolved = resolveSkipRoute({
+          file: fileInfo.file,
+          rootDir: fileInfo.rootDir,
+          prefix: params.prefix,
+        })
+        const reason = effectiveExclude && matchesFilter(fileInfo.file, undefined, effectiveExclude)
+          ? 'exclude'
+          : 'include'
+        params.onSkip?.({
+          file: fileInfo.file,
+          reason,
+          method: resolved?.method,
+          url: resolved?.url,
+        })
+      }
       continue
     }
     const derived = deriveRouteFromFile(fileInfo.file, fileInfo.rootDir, params.logger)
@@ -65,6 +156,20 @@ export async function scanRoutes(params: {
         continue
       }
       if (rule.enabled === false) {
+        if (shouldCollectSkip) {
+          const resolved = resolveSkipRoute({
+            file: fileInfo.file,
+            rootDir: fileInfo.rootDir,
+            prefix: params.prefix,
+            derived,
+          })
+          params.onSkip?.({
+            file: fileInfo.file,
+            reason: 'disabled',
+            method: resolved?.method,
+            url: resolved?.url,
+          })
+        }
         continue
       }
       const ruleValue = rule as unknown as Record<string, unknown>

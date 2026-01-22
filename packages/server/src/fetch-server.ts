@@ -1,4 +1,5 @@
 import type { Server } from 'node:http'
+import type { RouteSkipInfo } from './dev/scanner'
 import type { Logger, ResolvedRoute, RouteTable } from './dev/types'
 
 import type { FetchServerOptions, FetchServerOptionsInput } from './fetch-options'
@@ -102,6 +103,7 @@ type PlaygroundWsHandler = Parameters<HonoInstance['get']>[1]
 
 function buildApp(params: {
   routes: RouteTable
+  disabledRoutes: RouteSkipInfo[]
   dirs: string[]
   playground: ReturnType<typeof resolvePlaygroundOptions>
   root: string
@@ -113,6 +115,7 @@ function buildApp(params: {
   registerPlaygroundRoutes({
     app,
     routes: params.routes,
+    disabledRoutes: params.disabledRoutes,
     dirs: params.dirs,
     logger: params.logger,
     config: params.playground,
@@ -310,8 +313,10 @@ export async function createFetchServer(
   }
 
   let routes: RouteTable = []
+  let disabledRoutes: RouteSkipInfo[] = []
   let app = buildApp({
     routes,
+    disabledRoutes,
     dirs,
     playground: playgroundConfig,
     root,
@@ -323,11 +328,13 @@ export async function createFetchServer(
   const refreshRoutes = async () => {
     try {
       const collected: RouteTable = []
+      const collectedDisabled: RouteSkipInfo[] = []
       for (const entry of optionList) {
         const scanParams: Parameters<typeof scanRoutes>[0] = {
           dirs: resolveDirs(entry.dir, root),
           prefix: entry.prefix ?? '',
           logger,
+          onSkip: info => collectedDisabled.push(info),
         }
         if (entry.include) {
           scanParams.include = entry.include
@@ -343,8 +350,10 @@ export async function createFetchServer(
       }
       const resolvedRoutes = sortRoutes(collected)
       routes = resolvedRoutes
+      disabledRoutes = collectedDisabled
       app = buildApp({
         routes,
+        disabledRoutes,
         dirs,
         playground: playgroundConfig,
         root,
