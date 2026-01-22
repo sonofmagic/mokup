@@ -1,23 +1,11 @@
 <script setup lang="ts">
-import type { PlaygroundLocale } from './i18n'
-import type { TreeRow } from './types'
 import { computed, onBeforeUnmount, onMounted, ref } from 'vue'
-import { useI18n } from 'vue-i18n'
-import PlaygroundFilters from './components/PlaygroundFilters.vue'
-import PlaygroundTabs from './components/PlaygroundTabs.vue'
-import RouteDetail from './components/RouteDetail.vue'
-import RouteTree from './components/RouteTree.vue'
-import TreeModeToggle from './components/TreeModeToggle.vue'
-import UiChipButton from './components/ui/UiChipButton.vue'
-import UiField from './components/ui/UiField.vue'
-import UiPill from './components/ui/UiPill.vue'
-import UiTextInput from './components/ui/UiTextInput.vue'
+import PlaygroundContent from './components/PlaygroundContent.vue'
+import PlaygroundHeader from './components/PlaygroundHeader.vue'
+import PlaygroundSidebar from './components/PlaygroundSidebar.vue'
 import { usePlaygroundRequest } from './hooks/usePlaygroundRequest'
 import { usePlaygroundRoutes } from './hooks/usePlaygroundRoutes'
-import { usePlaygroundTheme } from './hooks/usePlaygroundTheme'
 import { useRouteTree } from './hooks/useRouteTree'
-import { persistLocale } from './i18n'
-import { toPosixPath } from './utils/path'
 
 declare global {
   interface Window {
@@ -66,9 +54,6 @@ const {
   getRouteCount,
 } = usePlaygroundRequest(selected, { basePath })
 
-const { locale, t } = useI18n()
-const { themeMode, effectiveTheme, cycleThemeMode } = usePlaygroundTheme()
-
 const selectedKey = computed(() => (selected.value ? routeKey(selected.value) : ''))
 const routeMode = ref<'active' | 'disabled'>('active')
 const isDisabledMode = computed(() => routeMode.value === 'disabled')
@@ -77,11 +62,6 @@ const disabledTotal = computed(() => disabledRoutes.value.length)
 const visibleCount = computed(() =>
   isDisabledMode.value ? disabledFiltered.value.length : routeCount.value,
 )
-const themeIcon = computed(() =>
-  effectiveTheme.value === 'dark' ? 'i-[carbon--moon]' : 'i-[carbon--sun]',
-)
-const themeLabel = computed(() => t(`theme.${themeMode.value}`))
-const localeLabel = computed(() => (locale.value === 'zh-CN' ? '中文' : 'EN'))
 
 const splitStorageKey = 'mokup:playground:split-width'
 const minSplitWidth = 240
@@ -101,22 +81,6 @@ const { treeMode, treeRows, toggleExpanded, setTreeMode } = useRouteTree({
   searchTerm,
   getRouteKey: routeKey,
 })
-
-const showMore = ref(false)
-const moreButtonRef = ref<InstanceType<typeof UiChipButton> | null>(null)
-const morePanelRef = ref<HTMLDivElement | null>(null)
-
-function toggleLocale() {
-  const next = locale.value === 'en-US' ? 'zh-CN' : 'en-US'
-  locale.value = next
-  persistLocale(next as PlaygroundLocale)
-}
-
-function handleSelectRow(row: TreeRow) {
-  if (row.route) {
-    selectRoute(row.route)
-  }
-}
 
 function setRouteMode(mode: 'active' | 'disabled') {
   routeMode.value = mode
@@ -159,67 +123,8 @@ function handleDragStart(event: PointerEvent) {
   window.addEventListener('pointerup', stopDrag)
 }
 
-function toggleMore() {
-  showMore.value = !showMore.value
-}
-
-function reasonLabel(reason?: string) {
-  const key = reason ?? 'unknown'
-  return t(`disabled.reason.${key}`)
-}
-
-function hasWorkspaceRoot() {
-  return (workspaceRoot.value ?? '').trim().length > 0
-}
-
-function isAbsolutePath(value: string) {
-  return value.startsWith('/') || /^[a-z]:\//i.test(value)
-}
-
-function resolveEditorPath(file: string) {
-  if (!hasWorkspaceRoot()) {
-    return null
-  }
-  const normalizedFile = toPosixPath(file || '').trim()
-  if (!normalizedFile) {
-    return null
-  }
-  if (isAbsolutePath(normalizedFile)) {
-    return normalizedFile
-  }
-  const normalizedRoot = toPosixPath((workspaceRoot.value ?? '').trim()).replace(/\/$/, '')
-  if (!normalizedRoot) {
-    return null
-  }
-  const relative = normalizedFile.replace(/^\/+/, '')
-  return `${normalizedRoot}/${relative}`
-}
-
-function openInEditor(file: string) {
-  const filePath = resolveEditorPath(file)
-  if (!filePath) {
-    return
-  }
-  const target = `vscode://file/${encodeURI(filePath)}`
-  window.location.href = target
-}
-
-function formatRoutePath(value?: string) {
-  return value ? value.toLowerCase() : ''
-}
-
-function handleOutsideMoreClick(event: PointerEvent) {
-  if (!showMore.value) {
-    return
-  }
-  const target = event.target as Node | null
-  if (!target) {
-    return
-  }
-  if (morePanelRef.value?.contains(target) || moreButtonRef.value?.el?.value?.contains(target)) {
-    return
-  }
-  showMore.value = false
+function handleRefresh() {
+  loadRoutes().catch(() => undefined)
 }
 
 onMounted(() => {
@@ -228,18 +133,14 @@ onMounted(() => {
   if (Number.isFinite(stored) && stored > 0) {
     splitWidth.value = clampSplitWidth(stored)
   }
-  document.addEventListener('pointerdown', handleOutsideMoreClick)
   window.__MOKUP_PLAYGROUND__ = {
-    reloadRoutes: () => {
-      loadRoutes().catch(() => undefined)
-    },
+    reloadRoutes: handleRefresh,
   }
-  loadRoutes().catch(() => undefined)
+  handleRefresh()
 })
 
 onBeforeUnmount(() => {
   stopDrag()
-  document.removeEventListener('pointerdown', handleOutsideMoreClick)
 })
 </script>
 
@@ -253,136 +154,28 @@ onBeforeUnmount(() => {
             :class="isDragging ? 'select-none' : ''"
             :style="splitStyle"
           >
-            <aside class="flex min-h-0 w-full max-w-none flex-col gap-3 overflow-hidden border-b p-3 border-pg-border lg:w-[var(--left-width)] lg:min-w-[240px] lg:max-w-[560px] lg:flex-none lg:border-b-0 lg:border-r">
-              <div class="relative">
-                <div class="flex items-end gap-2">
-                  <PlaygroundFilters
-                    v-model:search="search"
-                    :base-path="basePath || '/'"
-                    :show-base="false"
-                    :compact="true"
-                    class="flex-1"
-                  />
-                  <UiChipButton
-                    ref="moreButtonRef"
-                    size="sm"
-                    class="h-9"
-                    :aria-expanded="showMore"
-                    aria-haspopup="true"
-                    aria-controls="playground-more-panel"
-                    @click="toggleMore"
-                  >
-                    <span class="i-[carbon--settings-adjust] h-3.5 w-3.5" aria-hidden="true" />
-                    <span>{{ t('controls.more') }}</span>
-                  </UiChipButton>
-                </div>
-                <div class="mt-2 flex flex-wrap items-center gap-2">
-                  <UiChipButton
-                    size="md"
-                    :active="!isDisabledMode"
-                    @click="setRouteMode('active')"
-                  >
-                    {{ t('disabled.active', { count: activeTotal }) }}
-                  </UiChipButton>
-                  <UiChipButton
-                    size="md"
-                    :active="isDisabledMode"
-                    @click="setRouteMode('disabled')"
-                  >
-                    {{ t('disabled.disabled', { count: disabledTotal }) }}
-                  </UiChipButton>
-                </div>
-                <div
-                  v-if="showMore"
-                  id="playground-more-panel"
-                  ref="morePanelRef"
-                  class="absolute left-0 right-0 z-30 mt-2 rounded-2xl border p-3 shadow-xl border-pg-border bg-pg-surface-panel"
-                >
-                  <div class="grid gap-3">
-                    <UiField :label="t('filters.base')" dense>
-                      <UiTextInput
-                        :value="basePath || '/'"
-                        readonly
-                        dense
-                      />
-                    </UiField>
-                    <PlaygroundTabs :groups="groups" :active-group="activeGroup" @select="setActiveGroup" />
-                    <TreeModeToggle :tree-mode="treeMode" @update:treeMode="setTreeMode" />
-                  </div>
-                </div>
-              </div>
-
-              <div class="flex-1 min-h-0 overflow-auto">
-                <div v-if="error" class="rounded-2xl border px-4 py-3 text-sm border-pg-danger-border bg-pg-danger-bg text-pg-danger-text">
-                  {{ error }}
-                </div>
-                <div v-else-if="loading" class="rounded-2xl border px-4 py-6 text-sm border-pg-border bg-pg-surface-soft text-pg-text-muted">
-                  {{ t('states.loadingRoutes') }}
-                </div>
-                <template v-else>
-                  <div
-                    v-if="isDisabledMode && !disabledFiltered.length"
-                    class="rounded-2xl border px-4 py-6 text-sm border-pg-border bg-pg-surface-soft text-pg-text-muted"
-                  >
-                    {{ t('states.emptyDisabledRoutes') }}
-                  </div>
-                  <div
-                    v-else-if="!isDisabledMode && !filtered.length"
-                    class="rounded-2xl border px-4 py-6 text-sm border-pg-border bg-pg-surface-soft text-pg-text-muted"
-                  >
-                    {{ t('states.emptyRoutes') }}
-                  </div>
-                  <div v-else-if="isDisabledMode" class="flex flex-col gap-2">
-                    <div
-                      v-for="route in disabledFiltered"
-                      :key="`${route.file}-${route.reason}-${route.method ?? ''}-${route.url ?? ''}`"
-                      class="rounded-2xl border px-4 py-3 text-xs border-pg-border bg-pg-surface-soft text-pg-text-soft"
-                    >
-                      <div class="flex flex-wrap items-center justify-between gap-2">
-                        <div class="flex flex-col gap-1">
-                          <span class="text-[0.7rem] uppercase tracking-[0.18em] text-pg-text-muted">
-                            {{
-                              route.method && route.url
-                                ? `${route.method} ${formatRoutePath(route.url)}`
-                                : formatRoutePath(route.url) || route.file
-                            }}
-                          </span>
-                          <span
-                            v-if="route.method && route.url"
-                            class="text-[0.75rem] text-pg-text-subtle"
-                          >
-                            {{ route.file }}
-                          </span>
-                        </div>
-                        <div class="flex items-center gap-2">
-                          <UiPill tone="strong" size="sm" tracking="tight">
-                            {{ reasonLabel(route.reason) }}
-                          </UiPill>
-                          <button
-                            v-if="resolveEditorPath(route.file)"
-                            class="flex h-7 w-7 items-center justify-center rounded-md transition text-pg-text-muted hover:bg-pg-hover-strong hover:text-pg-text-soft"
-                            type="button"
-                            :aria-label="`Open ${route.file} in VS Code`"
-                            :title="t('detail.openInVscode')"
-                            @click="openInEditor(route.file)"
-                          >
-                            <span class="i-[carbon--launch] h-3.5 w-3.5" aria-hidden="true" />
-                          </button>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                  <RouteTree
-                    v-else
-                    :rows="treeRows"
-                    :workspace-root="workspaceRoot"
-                    :get-route-count="getRouteCount"
-                    @toggle="toggleExpanded"
-                    @select="handleSelectRow"
-                  />
-                </template>
-              </div>
-            </aside>
+            <PlaygroundSidebar
+              v-model:search="search"
+              :base-path="basePath"
+              :groups="groups"
+              :active-group="activeGroup"
+              :tree-mode="treeMode"
+              :is-disabled-mode="isDisabledMode"
+              :active-total="activeTotal"
+              :disabled-total="disabledTotal"
+              :error="error"
+              :loading="loading"
+              :filtered="filtered"
+              :disabled-filtered="disabledFiltered"
+              :tree-rows="treeRows"
+              :workspace-root="workspaceRoot"
+              :get-route-count="getRouteCount"
+              @select-group="setActiveGroup"
+              @set-route-mode="setRouteMode"
+              @toggle="toggleExpanded"
+              @select-route="selectRoute"
+              @update:treeMode="setTreeMode"
+            />
 
             <div class="relative hidden w-4 flex-none items-center justify-center lg:flex">
               <div class="h-full w-px bg-pg-divider" />
@@ -397,47 +190,14 @@ onBeforeUnmount(() => {
             </div>
 
             <section class="flex min-h-0 flex-1 flex-col overflow-hidden p-4 lg:p-6">
-              <div class="flex flex-none flex-wrap items-center justify-between gap-2 rounded-2xl border px-3 py-2 text-[0.55rem] uppercase tracking-[0.25em] shadow-sm border-pg-border bg-pg-surface-card text-pg-text-soft">
-                <div class="flex flex-wrap items-center gap-2">
-                  <UiPill tone="strong" size="xs">
-                    <span class="i-[carbon--map] h-3.5 w-3.5" aria-hidden="true" />
-                    <span>{{ t('header.routes', { count: visibleCount }) }}</span>
-                  </UiPill>
-                  <UiPill tone="strong" size="xs">
-                    <span class="i-[carbon--activity] h-3.5 w-3.5" aria-hidden="true" />
-                    <span>{{ t('header.calls', { count: totalCount }) }}</span>
-                  </UiPill>
-                </div>
-                <div class="flex flex-wrap items-center gap-2">
-                  <UiChipButton
-                    size="xs"
-                    :title="t('header.languageToggle')"
-                    @click="toggleLocale"
-                  >
-                    <span class="i-[carbon--language] h-3.5 w-3.5" aria-hidden="true" />
-                    <span>{{ localeLabel }}</span>
-                  </UiChipButton>
-                  <UiChipButton
-                    size="xs"
-                    :title="t('header.themeToggle')"
-                    @click="cycleThemeMode"
-                  >
-                    <span :class="themeIcon" class="h-3.5 w-3.5" aria-hidden="true" />
-                    <span>{{ themeLabel }}</span>
-                  </UiChipButton>
-                  <UiChipButton
-                    size="xs"
-                    @click="loadRoutes"
-                  >
-                    <span class="i-[carbon--rotate] h-3.5 w-3.5" aria-hidden="true" />
-                    <span>{{ t('header.refresh') }}</span>
-                  </UiChipButton>
-                </div>
-              </div>
+              <PlaygroundHeader
+                :visible-count="visibleCount"
+                :total-count="totalCount"
+                @refresh="handleRefresh"
+              />
 
               <div class="mt-3 flex-1 min-h-0 overflow-auto">
-                <RouteDetail
-                  v-if="!isDisabledMode"
+                <PlaygroundContent
                   v-model:queryText="queryText"
                   v-model:headersText="headersText"
                   v-model:bodyText="bodyText"
@@ -450,20 +210,10 @@ onBeforeUnmount(() => {
                   :is-sw-registering="isSwRegistering"
                   :route-params="routeParams"
                   :param-values="paramValues"
+                  :is-disabled-mode="isDisabledMode"
                   @update:param-value="setParamValue"
                   @run="runRequest"
                 />
-                <div
-                  v-else
-                  class="flex h-full flex-col items-center justify-center gap-3 rounded-3xl border p-6 text-center shadow-xl border-pg-border bg-pg-surface-card text-pg-text-muted"
-                >
-                  <p class="text-xl font-display text-pg-text-strong">
-                    {{ t('states.disabledTitle') }}
-                  </p>
-                  <p class="text-sm">
-                    {{ t('states.disabledHint') }}
-                  </p>
-                </div>
               </div>
             </section>
           </div>

@@ -64,7 +64,7 @@ export default defineConfig(({ command }) => ({
     mokup({
       dir: mockDir,
       prefix: '/api',
-      mode: 'sw',
+      mode: command === 'build' ? 'server' : 'sw',
       sw: {
         register: resolveDocsSwRegister(command),
       },

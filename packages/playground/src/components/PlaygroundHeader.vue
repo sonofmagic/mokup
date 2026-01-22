@@ -1,78 +1,77 @@
 <script setup lang="ts">
-import type { ThemeMode, ThemeValue } from '../utils/theme'
+import type { PlaygroundLocale } from '../i18n'
 import { computed } from 'vue'
 import { useI18n } from 'vue-i18n'
+import { usePlaygroundTheme } from '../hooks/usePlaygroundTheme'
+import { persistLocale } from '../i18n'
 import UiChipButton from './ui/UiChipButton.vue'
 import UiPill from './ui/UiPill.vue'
 
-const props = defineProps<{
-  routeCount: number
-  themeMode: ThemeMode
-  effectiveTheme: ThemeValue
-  locale: string
+defineProps<{
+  visibleCount: number
+  totalCount: number
 }>()
 
 const emit = defineEmits<{
   (event: 'refresh'): void
-  (event: 'toggle-theme'): void
-  (event: 'toggle-locale'): void
 }>()
 
-const { t } = useI18n()
+const { locale, t } = useI18n()
+const { themeMode, effectiveTheme, cycleThemeMode } = usePlaygroundTheme()
 
 const themeIcon = computed(() =>
-  props.effectiveTheme === 'dark' ? 'i-[carbon--moon]' : 'i-[carbon--sun]',
+  effectiveTheme.value === 'dark' ? 'i-[carbon--moon]' : 'i-[carbon--sun]',
 )
-const themeLabel = computed(() => t(`theme.${props.themeMode}`))
-const localeLabel = computed(() => (props.locale === 'zh-CN' ? '中文' : 'EN'))
+const themeLabel = computed(() => t(`theme.${themeMode.value}`))
+const localeLabel = computed(() => (locale.value === 'zh-CN' ? '中文' : 'EN'))
+
+function toggleLocale() {
+  const next = locale.value === 'en-US' ? 'zh-CN' : 'en-US'
+  locale.value = next
+  persistLocale(next as PlaygroundLocale)
+}
+
+function handleRefresh() {
+  emit('refresh')
+}
 </script>
 
 <template>
-  <header class="flex flex-wrap items-center justify-between gap-4 border-b px-6 py-4 shadow-sm border-pg-border bg-pg-surface-shell">
-    <div class="flex min-w-0 items-center gap-4">
-      <div>
-        <p class="text-[0.6rem] uppercase tracking-[0.35em] text-pg-text-subtle">
-          Mokup
-        </p>
-        <h1 class="mt-1 font-display text-lg text-pg-text-strong">
-          {{ t('header.title') }}
-        </h1>
-      </div>
-      <p class="hidden max-w-lg text-xs text-pg-text-subtle lg:block">
-        {{ t('header.subtitle') }}
-      </p>
+  <div class="flex flex-none flex-wrap items-center justify-between gap-2 rounded-2xl border px-3 py-2 text-[0.55rem] uppercase tracking-[0.25em] shadow-sm border-pg-border bg-pg-surface-card text-pg-text-soft">
+    <div class="flex flex-wrap items-center gap-2">
+      <UiPill tone="strong" size="xs">
+        <span class="i-[carbon--map] h-3.5 w-3.5" aria-hidden="true" />
+        <span>{{ t('header.routes', { count: visibleCount }) }}</span>
+      </UiPill>
+      <UiPill tone="strong" size="xs">
+        <span class="i-[carbon--activity] h-3.5 w-3.5" aria-hidden="true" />
+        <span>{{ t('header.calls', { count: totalCount }) }}</span>
+      </UiPill>
     </div>
     <div class="flex flex-wrap items-center gap-2">
       <UiChipButton
-        tone="card"
-        size="lg"
+        size="xs"
         :title="t('header.languageToggle')"
-        @click="emit('toggle-locale')"
+        @click="toggleLocale"
       >
-        <span class="i-[carbon--language] h-4 w-4" aria-hidden="true" />
+        <span class="i-[carbon--language] h-3.5 w-3.5" aria-hidden="true" />
         <span>{{ localeLabel }}</span>
       </UiChipButton>
       <UiChipButton
-        tone="card"
-        size="lg"
+        size="xs"
         :title="t('header.themeToggle')"
-        @click="emit('toggle-theme')"
+        @click="cycleThemeMode"
       >
-        <span :class="themeIcon" class="h-4 w-4" aria-hidden="true" />
+        <span :class="themeIcon" class="h-3.5 w-3.5" aria-hidden="true" />
         <span>{{ themeLabel }}</span>
       </UiChipButton>
       <UiChipButton
-        tone="card"
-        size="lg"
-        @click="emit('refresh')"
+        size="xs"
+        @click="handleRefresh"
       >
-        <span class="i-[carbon--rotate] h-4 w-4" aria-hidden="true" />
+        <span class="i-[carbon--rotate] h-3.5 w-3.5" aria-hidden="true" />
         <span>{{ t('header.refresh') }}</span>
       </UiChipButton>
-      <UiPill tone="card" size="lg">
-        <span class="i-[carbon--map] h-4 w-4" aria-hidden="true" />
-        <span>{{ t('header.routes', { count: routeCount }) }}</span>
-      </UiPill>
     </div>
-  </header>
+  </div>
 </template>
