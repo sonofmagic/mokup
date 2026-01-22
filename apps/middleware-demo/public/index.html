@@ -1,0 +1,167 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Mokup Middleware Demo</title>
+    <style>
+      body {
+        margin: 0;
+        font-family: 'Space Grotesk', 'Segoe UI', sans-serif;
+        background: linear-gradient(135deg, #fff4ef, #f7fbff 50%, #f4f0ff);
+        color: #1f1b2e;
+      }
+      .page {
+        max-width: 980px;
+        margin: 0 auto;
+        padding: 48px 24px 64px;
+      }
+      header {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-end;
+        gap: 16px;
+        flex-wrap: wrap;
+      }
+      .eyebrow {
+        text-transform: uppercase;
+        letter-spacing: 0.18em;
+        font-size: 12px;
+        font-weight: 600;
+        color: #6a4fff;
+        margin: 0 0 8px;
+      }
+      h1 {
+        margin: 0 0 8px;
+        font-size: clamp(28px, 4vw, 44px);
+      }
+      .subtext {
+        margin: 0;
+        color: #5a4f7a;
+        max-width: 520px;
+        line-height: 1.6;
+      }
+      .grid {
+        margin-top: 28px;
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+        gap: 20px;
+      }
+      .card {
+        background: rgba(255, 255, 255, 0.85);
+        border: 1px solid rgba(30, 26, 46, 0.08);
+        border-radius: 16px;
+        padding: 18px;
+        box-shadow: 0 10px 24px rgba(32, 26, 60, 0.08);
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+      }
+      button {
+        align-self: flex-start;
+        border: 1px solid #1f1b2e;
+        background: transparent;
+        padding: 8px 14px;
+        border-radius: 999px;
+        cursor: pointer;
+        font-size: 12px;
+      }
+      pre {
+        margin: 0;
+        background: rgba(31, 27, 46, 0.06);
+        border-radius: 12px;
+        padding: 10px;
+        font-size: 12px;
+        line-height: 1.5;
+        white-space: pre-wrap;
+        word-break: break-word;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="page">
+      <header>
+        <div>
+          <p class="eyebrow">Express + Mokup</p>
+          <h1>Middleware Demo</h1>
+          <p class="subtext">
+            This page is served by Express. Mock API routes are handled by Mokup middleware mounted under
+            <code>/api</code>.
+          </p>
+        </div>
+        <button id="run-all" type="button">Run all requests</button>
+      </header>
+
+      <section class="grid">
+        <article class="card">
+          <h2>Express health</h2>
+          <p class="subtext">GET /health</p>
+          <button data-request="health" type="button">Request</button>
+          <pre id="health-output">Click request to load /health.</pre>
+        </article>
+
+        <article class="card">
+          <h2>Mokup users</h2>
+          <p class="subtext">GET /api/users</p>
+          <button data-request="users" type="button">Request</button>
+          <pre id="users-output">Click request to load /api/users.</pre>
+        </article>
+
+        <article class="card">
+          <h2>Mokup time</h2>
+          <p class="subtext">GET /api/time</p>
+          <button data-request="time" type="button">Request</button>
+          <pre id="time-output">Click request to load /api/time.</pre>
+        </article>
+      </section>
+    </div>
+
+    <script>
+      const output = {
+        health: document.getElementById('health-output'),
+        users: document.getElementById('users-output'),
+        time: document.getElementById('time-output'),
+      }
+
+      async function request(url) {
+        const response = await fetch(url)
+        const text = await response.text()
+        try {
+          return JSON.stringify(JSON.parse(text), null, 2)
+        } catch {
+          return text
+        }
+      }
+
+      async function run(key, url) {
+        output[key].textContent = 'Loading...'
+        try {
+          output[key].textContent = await request(url)
+        } catch (error) {
+          output[key].textContent = error instanceof Error ? error.message : String(error)
+        }
+      }
+
+      document.querySelectorAll('[data-request]').forEach((button) => {
+        button.addEventListener('click', () => {
+          const key = button.getAttribute('data-request')
+          if (key === 'health') {
+            run('health', '/health')
+          }
+          if (key === 'users') {
+            run('users', '/api/users')
+          }
+          if (key === 'time') {
+            run('time', '/api/time')
+          }
+        })
+      })
+
+      document.getElementById('run-all').addEventListener('click', () => {
+        run('health', '/health')
+        run('users', '/api/users')
+        run('time', '/api/time')
+      })
+    </script>
+  </body>
+</html>

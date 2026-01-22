@@ -1,0 +1,20 @@
+{
+  "name": "middleware-demo",
+  "type": "module",
+  "version": "0.0.1",
+  "private": true,
+  "scripts": {
+    "build:mock": "pnpm exec mokup build --dir mock --out .mokup",
+    "dev": "pnpm build:mock && tsx src/index.ts",
+    "typecheck": "tsc -p tsconfig.json --noEmit"
+  },
+  "dependencies": {
+    "express": "^4.19.2",
+    "mokup": "workspace:*"
+  },
+  "devDependencies": {
+    "@types/express": "^4.17.21",
+    "tsx": "^4.21.0",
+    "typescript": "^5.9.3"
+  }
+}
