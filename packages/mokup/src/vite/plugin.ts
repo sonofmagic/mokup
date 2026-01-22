@@ -2,7 +2,7 @@ import type { Hono } from '@mokup/shared/hono'
 import type { IncomingMessage, ServerResponse } from 'node:http'
 import type { Plugin, PreviewServer, ViteDevServer } from 'vite'
 import type { RouteSkipInfo } from './scanner'
-import type { RouteTable, VitePluginOptions, VitePluginOptionsInput } from './types'
+import type { MokupPluginOptions, RouteTable, VitePluginOptions } from './types'
 
 import { existsSync } from 'node:fs'
 import { isAbsolute, resolve } from 'node:path'
@@ -48,18 +48,48 @@ function isViteDevServer(
   return !!server && 'ws' in server
 }
 
-function normalizeOptions(options: VitePluginOptionsInput): VitePluginOptions[] {
-  const list = Array.isArray(options) ? options : [options]
-  return list.length > 0 ? list : [{}]
+const legacyEntryKeys = [
+  'dir',
+  'prefix',
+  'include',
+  'exclude',
+  'ignorePrefix',
+  'watch',
+  'log',
+  'mode',
+  'sw',
+]
+
+function isLegacyEntryOptions(value: Record<string, unknown>) {
+  return legacyEntryKeys.some(key => key in value)
 }
 
-function resolvePlaygroundInput(list: VitePluginOptions[]) {
-  for (const entry of list) {
-    if (typeof entry.playground !== 'undefined') {
-      return entry.playground
-    }
+function normalizeMokupOptions(options: MokupPluginOptions | null | undefined): MokupPluginOptions {
+  if (!options) {
+    return {}
   }
-  return undefined
+  if (Array.isArray(options)) {
+    throw new TypeError('[mokup] Invalid config: use mokup({ entries: [...] }) instead of mokup([...]).')
+  }
+  if (typeof options !== 'object') {
+    return {}
+  }
+  if (isLegacyEntryOptions(options as Record<string, unknown>)) {
+    throw new Error(
+      '[mokup] Invalid config: use mokup({ entries: { ... } }) instead of mokup({ dir, prefix, ... }).',
+    )
+  }
+  return options
+}
+
+function normalizeOptions(options: MokupPluginOptions): VitePluginOptions[] {
+  const entries = options.entries
+  const list = Array.isArray(entries)
+    ? entries
+    : entries
+      ? [entries]
+      : [{}]
+  return list.length > 0 ? list : [{}]
 }
 
 function normalizeBase(base: string) {
@@ -175,7 +205,7 @@ function normalizeRawWatcherPath(rawPath: unknown) {
   return ''
 }
 
-export function createMokupPlugin(options: VitePluginOptionsInput = {}): Plugin {
+export function createMokupPlugin(options: MokupPluginOptions = {}): Plugin {
   let root = cwd()
   let base = '/'
   let command: 'serve' | 'build' = 'serve'
@@ -190,10 +220,11 @@ export function createMokupPlugin(options: VitePluginOptionsInput = {}): Plugin 
   let currentServer: ViteDevServer | PreviewServer | null = null
   let lastSignature: string | null = null
 
-  const optionList = normalizeOptions(options)
+  const normalizedOptions = normalizeMokupOptions(options)
+  const optionList = normalizeOptions(normalizedOptions)
   const logEnabled = optionList.every(entry => entry.log !== false)
   const watchEnabled = optionList.every(entry => entry.watch !== false)
-  const playgroundConfig = resolvePlaygroundOptions(resolvePlaygroundInput(optionList))
+  const playgroundConfig = resolvePlaygroundOptions(normalizedOptions.playground)
   const logger = createLogger(logEnabled)
   const hasSwEntries = optionList.some(entry => entry.mode === 'sw')
   const swConfig = resolveSwConfig(optionList, logger)

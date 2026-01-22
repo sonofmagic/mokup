@@ -60,8 +60,10 @@ function config(_env: unknown, argv: { mode?: string }): Configuration {
         template: path.resolve(__dirname, 'public/index.html'),
       }),
       createMokupWebpackPlugin({
-        dir: 'mock',
-        prefix: '/api',
+        entries: {
+          dir: 'mock',
+          prefix: '/api',
+        },
       }) as unknown as WebpackPluginInstance,
     ],
     devServer: {

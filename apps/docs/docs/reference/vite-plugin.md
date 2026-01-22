@@ -16,14 +16,25 @@ import mokup from 'mokup/vite'
 export default {
   plugins: [
     mokup({
-      dir: 'mock',
-      prefix: '/api',
+      entries: {
+        dir: 'mock',
+        prefix: '/api',
+      },
     }),
   ],
 }
 ```
 
 ## Options
+
+### Plugin options
+
+| Option       | Type                                             | Description        |
+| ------------ | ------------------------------------------------ | ------------------ |
+| `entries`    | `VitePluginOptions / VitePluginOptions[]`        | Mock entry configs |
+| `playground` | `boolean / { path?: string; enabled?: boolean }` | Playground config  |
+
+### Entry options
 
 | Option         | Type                                                                                                                            | Description                                |
 | -------------- | ------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------ |
@@ -36,7 +47,6 @@ export default {
 | `log`          | `boolean`                                                                                                                       | Enable logging                             |
 | `mode`         | `'server' / 'sw'`                                                                                                               | Mock runtime mode                          |
 | `sw`           | `{ path?: string; scope?: string; register?: boolean; unregister?: boolean; fallback?: boolean; basePath?: string / string[] }` | Service worker options (SW mode only)      |
-| `playground`   | `boolean / { path?: string; enabled?: boolean }`                                                                                | Playground config                          |
 
 ## Routing notes
 
@@ -55,9 +65,11 @@ Set `mode: 'sw'` to generate a service worker that runs mock handlers in the bro
 export default {
   plugins: [
     mokup({
-      dir: 'mock',
-      prefix: '/api',
-      mode: 'sw',
+      entries: {
+        dir: 'mock',
+        prefix: '/api',
+        mode: 'sw',
+      },
     }),
   ],
 }
@@ -69,13 +81,15 @@ export default {
 export default {
   plugins: [
     mokup({
-      dir: 'mock',
-      prefix: '/api',
-      mode: 'sw',
-      sw: {
-        path: '/mokup-sw.js',
-        scope: '/',
-        register: false,
+      entries: {
+        dir: 'mock',
+        prefix: '/api',
+        mode: 'sw',
+        sw: {
+          path: '/mokup-sw.js',
+          scope: '/',
+          register: false,
+        },
       },
     }),
   ],
@@ -96,10 +110,12 @@ registerMokupServiceWorker({
 ```ts
 export default {
   plugins: [
-    mokup([
-      { dir: 'mock', prefix: '/api', mode: 'sw', sw: { fallback: false } },
-      { dir: 'mock-server', prefix: '/internal', mode: 'server' },
-    ]),
+    mokup({
+      entries: [
+        { dir: 'mock', prefix: '/api', mode: 'sw', sw: { fallback: false } },
+        { dir: 'mock-server', prefix: '/internal', mode: 'server' },
+      ],
+    }),
   ],
 }
 ```
@@ -116,11 +132,13 @@ Notes:
 export default {
   plugins: [
     mokup({
-      dir: 'mock',
-      prefix: '/api',
-      mode: 'sw',
-      sw: {
-        basePath: '/api',
+      entries: {
+        dir: 'mock',
+        prefix: '/api',
+        mode: 'sw',
+        sw: {
+          basePath: '/api',
+        },
       },
     }),
   ],
@@ -133,11 +151,13 @@ export default {
 export default {
   plugins: [
     mokup({
-      dir: 'mock',
-      prefix: '/api',
-      mode: 'sw',
-      sw: {
-        unregister: true,
+      entries: {
+        dir: 'mock',
+        prefix: '/api',
+        mode: 'sw',
+        sw: {
+          unregister: true,
+        },
       },
     }),
   ],
@@ -163,10 +183,12 @@ Notes:
 ```ts
 export default {
   plugins: [
-    mokup([
-      { dir: 'mock', prefix: '/api' },
-      { dir: 'mock-extra', prefix: '/api-extra' },
-    ]),
+    mokup({
+      entries: [
+        { dir: 'mock', prefix: '/api' },
+        { dir: 'mock-extra', prefix: '/api-extra' },
+      ],
+    }),
   ],
 }
 ```

@@ -62,11 +62,13 @@ export default defineConfig(({ command }) => ({
     tailwindcss(),
     routesAliasPlugin(),
     mokup({
-      dir: mockDir,
-      prefix: '/api',
-      mode: command === 'build' ? 'server' : 'sw',
-      sw: {
-        register: resolveDocsSwRegister(command),
+      entries: {
+        dir: mockDir,
+        prefix: '/api',
+        mode: command === 'build' ? 'server' : 'sw',
+        sw: {
+          register: resolveDocsSwRegister(command),
+        },
       },
     }),
   ],

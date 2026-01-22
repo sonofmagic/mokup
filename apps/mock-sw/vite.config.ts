@@ -4,9 +4,11 @@ import { defineConfig } from 'vite'
 export default defineConfig({
   plugins: [
     mokup({
-      dir: 'mock',
-      prefix: '/api',
-      mode: 'sw',
+      entries: {
+        dir: 'mock',
+        prefix: '/api',
+        mode: 'sw',
+      },
     }),
   ],
 })

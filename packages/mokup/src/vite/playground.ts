@@ -1,6 +1,6 @@
 import type { IncomingMessage, ServerResponse } from 'node:http'
 import type { PreviewServer, ViteDevServer } from 'vite'
-import type { Logger, RouteTable, VitePluginOptions } from './types'
+import type { Logger, PlaygroundOptionsInput, RouteTable } from './types'
 import { promises as fs } from 'node:fs'
 import { createRequire } from 'node:module'
 import { cwd } from 'node:process'
@@ -110,7 +110,7 @@ function isViteDevServer(
 }
 
 export function resolvePlaygroundOptions(
-  playground: VitePluginOptions['playground'],
+  playground: PlaygroundOptionsInput,
 ): PlaygroundConfig {
   if (playground === false) {
     return { enabled: false, path: '/_mokup' }

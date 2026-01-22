@@ -17,11 +17,13 @@ const themeConfig: DefaultTheme.Config = {
 const vitePlugins = [
   tailwindcss(),
   mokup({
-    dir: '../mock',
-    prefix: '/api',
-    mode: 'sw',
-    sw: {
-      fallback: false,
+    entries: {
+      dir: '../mock',
+      prefix: '/api',
+      mode: 'sw',
+      sw: {
+        fallback: false,
+      },
     },
     playground: {
       path: '/_mokup',

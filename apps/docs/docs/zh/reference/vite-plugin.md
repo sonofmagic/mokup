@@ -16,14 +16,25 @@ import mokup from 'mokup/vite'
 export default {
   plugins: [
     mokup({
-      dir: 'mock',
-      prefix: '/api',
+      entries: {
+        dir: 'mock',
+        prefix: '/api',
+      },
     }),
   ],
 }
 ```
 
 ## 选项
+
+### 插件选项
+
+| 选项         | 类型                                             | 说明            |
+| ------------ | ------------------------------------------------ | --------------- |
+| `entries`    | `VitePluginOptions / VitePluginOptions[]`        | mock 目录配置   |
+| `playground` | `boolean / { path?: string; enabled?: boolean }` | Playground 配置 |
+
+### Entry 选项
 
 | 选项           | 类型                                                                                                                            | 说明                              |
 | -------------- | ------------------------------------------------------------------------------------------------------------------------------- | --------------------------------- |
@@ -36,7 +47,6 @@ export default {
 | `log`          | `boolean`                                                                                                                       | 是否输出日志                      |
 | `mode`         | `'server' / 'sw'`                                                                                                               | mock 运行模式                     |
 | `sw`           | `{ path?: string; scope?: string; register?: boolean; unregister?: boolean; fallback?: boolean; basePath?: string / string[] }` | Service Worker 配置（仅 SW 模式） |
-| `playground`   | `boolean / { path?: string; enabled?: boolean }`                                                                                | Playground 配置                   |
 
 ## 路由备注
 
@@ -55,9 +65,11 @@ export default {
 export default {
   plugins: [
     mokup({
-      dir: 'mock',
-      prefix: '/api',
-      mode: 'sw',
+      entries: {
+        dir: 'mock',
+        prefix: '/api',
+        mode: 'sw',
+      },
     }),
   ],
 }
@@ -69,13 +81,15 @@ export default {
 export default {
   plugins: [
     mokup({
-      dir: 'mock',
-      prefix: '/api',
-      mode: 'sw',
-      sw: {
-        path: '/mokup-sw.js',
-        scope: '/',
-        register: false,
+      entries: {
+        dir: 'mock',
+        prefix: '/api',
+        mode: 'sw',
+        sw: {
+          path: '/mokup-sw.js',
+          scope: '/',
+          register: false,
+        },
       },
     }),
   ],
@@ -96,10 +110,12 @@ registerMokupServiceWorker({
 ```ts
 export default {
   plugins: [
-    mokup([
-      { dir: 'mock', prefix: '/api', mode: 'sw', sw: { fallback: false } },
-      { dir: 'mock-server', prefix: '/internal', mode: 'server' },
-    ]),
+    mokup({
+      entries: [
+        { dir: 'mock', prefix: '/api', mode: 'sw', sw: { fallback: false } },
+        { dir: 'mock-server', prefix: '/internal', mode: 'server' },
+      ],
+    }),
   ],
 }
 ```
@@ -116,11 +132,13 @@ export default {
 export default {
   plugins: [
     mokup({
-      dir: 'mock',
-      prefix: '/api',
-      mode: 'sw',
-      sw: {
-        basePath: '/api',
+      entries: {
+        dir: 'mock',
+        prefix: '/api',
+        mode: 'sw',
+        sw: {
+          basePath: '/api',
+        },
       },
     }),
   ],
@@ -133,11 +151,13 @@ export default {
 export default {
   plugins: [
     mokup({
-      dir: 'mock',
-      prefix: '/api',
-      mode: 'sw',
-      sw: {
-        unregister: true,
+      entries: {
+        dir: 'mock',
+        prefix: '/api',
+        mode: 'sw',
+        sw: {
+          unregister: true,
+        },
       },
     }),
   ],
@@ -163,10 +183,12 @@ await unregisterMokupServiceWorker({
 ```ts
 export default {
   plugins: [
-    mokup([
-      { dir: 'mock', prefix: '/api' },
-      { dir: 'mock-extra', prefix: '/api-extra' },
-    ]),
+    mokup({
+      entries: [
+        { dir: 'mock', prefix: '/api' },
+        { dir: 'mock-extra', prefix: '/api-extra' },
+      ],
+    }),
   ],
 }
 ```

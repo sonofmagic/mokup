@@ -35,6 +35,11 @@ export interface ServiceWorkerOptions {
   basePath?: string | string[]
 }
 
+export type PlaygroundOptionsInput = boolean | {
+  path?: string
+  enabled?: boolean
+} | undefined
+
 export interface RouteDirectoryConfig {
   headers?: Record<string, string>
   status?: number
@@ -62,13 +67,14 @@ export interface VitePluginOptions {
   log?: boolean
   mode?: RuntimeMode
   sw?: ServiceWorkerOptions
-  playground?: boolean | {
-    path?: string
-    enabled?: boolean
-  }
 }
 
-export type VitePluginOptionsInput = VitePluginOptions | VitePluginOptions[]
+export interface MokupPluginOptions {
+  entries?: VitePluginOptions | VitePluginOptions[]
+  playground?: PlaygroundOptionsInput
+}
+
+export type VitePluginOptionsInput = MokupPluginOptions
 
 export interface ResolvedRoute {
   file: string

@@ -2,7 +2,7 @@ import type { Hono } from '@mokup/shared/hono'
 import type { IncomingMessage, ServerResponse } from 'node:http'
 import type { PreviewServer, ViteDevServer } from 'vite'
 import type { RouteSkipInfo } from '../vite/scanner'
-import type { RouteTable, VitePluginOptions, VitePluginOptionsInput } from '../vite/types'
+import type { MokupPluginOptions, RouteTable, VitePluginOptions } from '../vite/types'
 
 import { createRequire } from 'node:module'
 import { cwd } from 'node:process'
@@ -86,18 +86,48 @@ interface WebpackCompiler {
 const pluginName = 'mokup:webpack'
 const lifecycleBaseName = 'mokup-sw-lifecycle.js'
 
-function normalizeOptions(options: VitePluginOptionsInput): VitePluginOptions[] {
-  const list = Array.isArray(options) ? options : [options]
-  return list.length > 0 ? list : [{}]
+const legacyEntryKeys = [
+  'dir',
+  'prefix',
+  'include',
+  'exclude',
+  'ignorePrefix',
+  'watch',
+  'log',
+  'mode',
+  'sw',
+]
+
+function isLegacyEntryOptions(value: Record<string, unknown>) {
+  return legacyEntryKeys.some(key => key in value)
 }
 
-function resolvePlaygroundInput(list: VitePluginOptions[]) {
-  for (const entry of list) {
-    if (typeof entry.playground !== 'undefined') {
-      return entry.playground
-    }
+function normalizeMokupOptions(options: MokupPluginOptions | null | undefined): MokupPluginOptions {
+  if (!options) {
+    return {}
   }
-  return undefined
+  if (Array.isArray(options)) {
+    throw new TypeError('[mokup] Invalid config: use mokup({ entries: [...] }) instead of mokup([...]).')
+  }
+  if (typeof options !== 'object') {
+    return {}
+  }
+  if (isLegacyEntryOptions(options as Record<string, unknown>)) {
+    throw new Error(
+      '[mokup] Invalid config: use mokup({ entries: { ... } }) instead of mokup({ dir, prefix, ... }).',
+    )
+  }
+  return options
+}
+
+function normalizeOptions(options: MokupPluginOptions): VitePluginOptions[] {
+  const entries = options.entries
+  const list = Array.isArray(entries)
+    ? entries
+    : entries
+      ? [entries]
+      : [{}]
+  return list.length > 0 ? list : [{}]
 }
 
 function normalizeBase(base: string) {
@@ -267,12 +297,13 @@ function resolveHtmlWebpackPlugin() {
 }
 
 export function createMokupWebpackPlugin(
-  options: VitePluginOptionsInput = {},
+  options: MokupPluginOptions = {},
 ): WebpackPluginInstance {
-  const optionList = normalizeOptions(options)
+  const normalizedOptions = normalizeMokupOptions(options)
+  const optionList = normalizeOptions(normalizedOptions)
   const logEnabled = optionList.every(entry => entry.log !== false)
   const watchEnabled = optionList.every(entry => entry.watch !== false)
-  const playgroundConfig = resolvePlaygroundOptions(resolvePlaygroundInput(optionList))
+  const playgroundConfig = resolvePlaygroundOptions(normalizedOptions.playground)
   const logger = createLogger(logEnabled)
   const hasSwEntries = optionList.some(entry => entry.mode === 'sw')
   const swConfig = resolveSwConfig(optionList, logger)

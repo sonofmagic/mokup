@@ -19,12 +19,14 @@ import { defineConfig } from 'vite'
 export default defineConfig({
   plugins: [
     mokup({
-      dir: ['mock', 'mock-extra'],
-      prefix: '/api',
-      exclude: [/mock\/_ignored/],
-      ignorePrefix: '.',
-      watch: true,
-      log: true,
+      entries: {
+        dir: ['mock', 'mock-extra'],
+        prefix: '/api',
+        exclude: [/mock\/_ignored/],
+        ignorePrefix: '.',
+        watch: true,
+        log: true,
+      },
     }),
   ],
 })
@@ -346,7 +348,9 @@ type RequestHandler = (context: Context) => Response | Promise<Response> | unkno
 
 ```ts
 mokup({
-  dir: ['mock', 'mock-extra'],
+  entries: {
+    dir: ['mock', 'mock-extra'],
+  },
 })
 ```
 
@@ -354,25 +358,31 @@ mokup({
 
 ```ts
 mokup({
-  prefix: '/api',
+  entries: {
+    prefix: '/api',
+  },
 })
 ```
 
 ### 多目录不同前缀
 
 ```ts
-mokup([
-  { dir: 'mock', prefix: '/api' },
-  { dir: 'mock-extra', prefix: '/api-extra' },
-])
+mokup({
+  entries: [
+    { dir: 'mock', prefix: '/api' },
+    { dir: 'mock-extra', prefix: '/api-extra' },
+  ],
+})
 ```
 
 ### include/exclude
 
 ```ts
 mokup({
-  include: [/mock/],
-  exclude: [/mock\/_ignored/],
+  entries: {
+    include: [/mock/],
+    exclude: [/mock\/_ignored/],
+  },
 })
 ```
 
@@ -380,8 +390,10 @@ mokup({
 
 ```ts
 mokup({
-  watch: false,
-  log: false,
+  entries: {
+    watch: false,
+    log: false,
+  },
 })
 ```
 
@@ -391,6 +403,9 @@ mokup({
 
 ```ts
 mokup({
+  entries: {
+    dir: 'mock',
+  },
   playground: true,
 })
 ```
@@ -399,6 +414,9 @@ mokup({
 
 ```ts
 mokup({
+  entries: {
+    dir: 'mock',
+  },
   playground: {
     path: '/_mokup',
     enabled: true,
@@ -406,6 +424,9 @@ mokup({
 })
 
 mokup({
+  entries: {
+    dir: 'mock',
+  },
   playground: false,
 })
 ```

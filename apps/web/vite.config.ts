@@ -7,20 +7,22 @@ export default defineConfig({
   plugins: [
     vue(),
     tailwindcss(),
-    mokup([
-      {
-        dir: 'mock',
-        prefix: '/api',
-        exclude: [/\/mock\/_ignored\//],
-      },
-      {
-        dir: 'mock-extra',
-        prefix: '/api-extra',
-      },
-      {
-        dir: 'mock-ignored',
-        prefix: '/api-ignored',
-      },
-    ]),
+    mokup({
+      entries: [
+        {
+          dir: 'mock',
+          prefix: '/api',
+          exclude: [/\/mock\/_ignored\//],
+        },
+        {
+          dir: 'mock-extra',
+          prefix: '/api-extra',
+        },
+        {
+          dir: 'mock-ignored',
+          prefix: '/api-ignored',
+        },
+      ],
+    }),
   ],
 })

@@ -31,12 +31,14 @@ import mokup from 'mokup/vite'
 export default {
   plugins: [
     mokup({
-      dir: 'mock',
-      prefix: '/api',
-      mode: 'sw',
-      sw: {
-        path: '/mokup-sw.js',
-        scope: '/',
+      entries: {
+        dir: 'mock',
+        prefix: '/api',
+        mode: 'sw',
+        sw: {
+          path: '/mokup-sw.js',
+          scope: '/',
+        },
       },
     }),
   ],

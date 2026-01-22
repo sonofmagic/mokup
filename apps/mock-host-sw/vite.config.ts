@@ -5,11 +5,13 @@ import { VitePWA } from 'vite-plugin-pwa'
 export default defineConfig({
   plugins: [
     mokup({
-      dir: 'mock',
-      prefix: '/api',
-      mode: 'sw',
-      sw: {
-        register: false,
+      entries: {
+        dir: 'mock',
+        prefix: '/api',
+        mode: 'sw',
+        sw: {
+          register: false,
+        },
       },
     }),
     VitePWA({

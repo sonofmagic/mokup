@@ -16,6 +16,10 @@ import mokup from 'mokup/vite'
 export default {
   plugins: [
     mokup({
+      entries: {
+        dir: 'mock',
+        prefix: '/api',
+      },
       playground: {
         path: '/_mokup',
         enabled: true,

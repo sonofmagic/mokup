@@ -10,8 +10,10 @@ import mokup from 'mokup/vite'
 export default {
   plugins: [
     mokup({
-      dir: 'mock',
-      watch: true,
+      entries: {
+        dir: 'mock',
+        watch: true,
+      },
     }),
   ],
 }

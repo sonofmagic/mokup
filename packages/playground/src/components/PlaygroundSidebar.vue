@@ -53,6 +53,22 @@ const searchModel = computed({
   set: value => emit('update:search', value),
 })
 const resolvedBasePath = computed(() => props.basePath || '/')
+const routeTreeProps = computed(() => {
+  const base: {
+    rows: TreeRow[]
+    workspaceRoot?: string
+    getRouteCount?: (route: PlaygroundRoute) => number
+  } = {
+    rows: props.treeRows,
+  }
+  if (props.workspaceRoot && props.workspaceRoot.trim()) {
+    base.workspaceRoot = props.workspaceRoot
+  }
+  if (props.getRouteCount) {
+    base.getRouteCount = props.getRouteCount
+  }
+  return base
+})
 
 const showMore = ref(false)
 const moreButtonRef = ref<ComponentPublicInstance | null>(null)
@@ -259,9 +275,7 @@ onBeforeUnmount(() => {
         </div>
         <RouteTree
           v-else
-          :rows="props.treeRows"
-          :workspace-root="props.workspaceRoot"
-          :get-route-count="props.getRouteCount"
+          v-bind="routeTreeProps"
           @toggle="emit('toggle', $event)"
           @select="handleSelectRow"
         />

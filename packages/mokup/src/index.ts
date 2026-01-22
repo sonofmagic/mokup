@@ -2,6 +2,8 @@ export type {
   Context,
   HttpMethod,
   MiddlewareHandler,
+  MokupPluginOptions,
+  PlaygroundOptionsInput,
   RequestHandler,
   RouteDirectoryConfig,
   RouteResponse,

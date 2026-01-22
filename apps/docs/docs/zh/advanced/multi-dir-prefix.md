@@ -8,11 +8,13 @@ import { defineConfig } from 'vite'
 
 export default defineConfig({
   plugins: [
-    mokup([
-      { dir: 'mock', prefix: '/api' },
-      { dir: 'mock-extra', prefix: '/api-extra' },
-      { dir: 'mock-ignored', prefix: '/api-ignored', watch: false },
-    ]),
+    mokup({
+      entries: [
+        { dir: 'mock', prefix: '/api' },
+        { dir: 'mock-extra', prefix: '/api-extra' },
+        { dir: 'mock-ignored', prefix: '/api-ignored', watch: false },
+      ],
+    }),
   ],
 })
 ```
