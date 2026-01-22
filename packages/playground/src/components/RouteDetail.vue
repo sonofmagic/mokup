@@ -1,6 +1,6 @@
 <script setup lang="ts">
-import type { PlaygroundRoute, RouteParamField } from '../types'
-import { ref, watch } from 'vue'
+import type { BodyType, PlaygroundRoute, RouteParamField } from '../types'
+import { ref, toRefs, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 import UiChipButton from './ui/UiChipButton.vue'
 import UiField from './ui/UiField.vue'
@@ -19,6 +19,7 @@ const props = defineProps<{
   queryText: string
   headersText: string
   bodyText: string
+  bodyType: BodyType
   responseText: string
   responseStatus: string
   responseTime: string
@@ -29,11 +30,13 @@ const emit = defineEmits<{
   (event: 'update:queryText', value: string): void
   (event: 'update:headersText', value: string): void
   (event: 'update:bodyText', value: string): void
+  (event: 'update:bodyType', value: BodyType): void
   (event: 'update:param-value', name: string, value: string): void
   (event: 'run'): void
 }>()
 
 const { t } = useI18n()
+const { bodyType } = toRefs(props)
 
 const methodBadge = (method: string) => `method-${method.toLowerCase()}`
 function paramPlaceholder(param: RouteParamField) {
@@ -104,6 +107,24 @@ watch(
 const queryExample = '{ "q": "alpha", "page": 1 }'
 const headersExample = '{ "x-mokup": "playground" }'
 const bodyExample = '{ "name": "Ada" }'
+const formExample = 'title=alpha\ncount=3'
+const multipartExample = 'title=alpha\nstatus=active'
+const base64Example = 'SGVsbG8gd29ybGQ='
+
+function resolveBodyPlaceholder() {
+  switch (props.bodyType) {
+    case 'text':
+      return t('detail.bodyPlaceholderText')
+    case 'form':
+      return t('detail.bodyPlaceholderForm', { sample: formExample })
+    case 'multipart':
+      return t('detail.bodyPlaceholderMultipart', { sample: multipartExample })
+    case 'base64':
+      return t('detail.bodyPlaceholderBase64', { sample: base64Example })
+    default:
+      return t('detail.bodyPlaceholderJson', { json: bodyExample })
+  }
+}
 </script>
 
 <template>
@@ -257,11 +278,42 @@ const bodyExample = '{ "name": "Ada" }'
               </UiField>
             </div>
             <div v-show="activeTab === 'body'">
+              <UiField :label="t('detail.bodyType')">
+                <div class="relative">
+                  <select
+                    class="w-full appearance-none rounded-lg border px-3 py-2 text-[0.7rem] uppercase tracking-[0.2em] outline-none transition border-pg-border bg-pg-surface-strong text-pg-text focus:border-pg-accent"
+                    :value="bodyType"
+                    @change="emit('update:bodyType', ($event.target as HTMLSelectElement | null)?.value as BodyType)"
+                  >
+                    <option value="json">
+                      {{ t('detail.bodyTypeJson') }}
+                    </option>
+                    <option value="text">
+                      {{ t('detail.bodyTypeText') }}
+                    </option>
+                    <option value="form">
+                      {{ t('detail.bodyTypeForm') }}
+                    </option>
+                    <option value="multipart">
+                      {{ t('detail.bodyTypeMultipart') }}
+                    </option>
+                    <option value="base64">
+                      {{ t('detail.bodyTypeBase64') }}
+                    </option>
+                  </select>
+                  <span
+                    class="pointer-events-none absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 text-pg-text-muted"
+                    aria-hidden="true"
+                  >
+                    <span class="i-[carbon--chevron-down] block h-4 w-4" />
+                  </span>
+                </div>
+              </UiField>
               <UiField :label="t('detail.body')">
                 <UiTextarea
                   :value="bodyText"
                   rows="6"
-                  :placeholder="t('detail.bodyPlaceholder', { json: bodyExample })"
+                  :placeholder="resolveBodyPlaceholder()"
                   @input="emit('update:bodyText', ($event.target as HTMLTextAreaElement | null)?.value ?? '')"
                 />
               </UiField>

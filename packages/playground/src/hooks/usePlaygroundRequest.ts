@@ -1,6 +1,6 @@
 import type { RouteToken } from '@mokup/runtime'
 import type { Ref } from 'vue'
-import type { PlaygroundRoute, RouteParamField, RouteParamKind } from '../types'
+import type { BodyType, PlaygroundRoute, RouteParamField, RouteParamKind } from '../types'
 import { parseRouteTemplate } from '@mokup/runtime'
 import { computed, getCurrentInstance, onBeforeUnmount, ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
@@ -181,6 +181,51 @@ function buildDisplayPath(tokens: RouteToken[], values: Record<string, string>) 
   return segments.length > 0 ? `/${segments.join('/')}` : '/'
 }
 
+function parseKeyValueInput(input: string) {
+  const trimmed = input.trim()
+  if (!trimmed) {
+    return []
+  }
+  const parts = trimmed.split(/[&\n]/)
+  const entries: Array<[string, string]> = []
+  for (const part of parts) {
+    const segment = part.trim()
+    if (!segment) {
+      continue
+    }
+    const [key, ...rest] = segment.split('=')
+    const normalizedKey = (key ?? '').trim()
+    if (!normalizedKey) {
+      continue
+    }
+    const value = rest.join('=').trim()
+    entries.push([normalizedKey, value])
+  }
+  return entries
+}
+
+function decodeBase64(input: string) {
+  const trimmed = input.trim()
+  if (!trimmed) {
+    return { value: undefined as Uint8Array | undefined }
+  }
+  const normalized = trimmed.startsWith('data:')
+    ? trimmed.split('base64,').pop() ?? ''
+    : trimmed
+  const cleaned = normalized.replace(/\s+/g, '')
+  try {
+    const binary = atob(cleaned)
+    const bytes = new Uint8Array(binary.length)
+    for (let i = 0; i < binary.length; i += 1) {
+      bytes[i] = binary.charCodeAt(i)
+    }
+    return { value: bytes }
+  }
+  catch (err) {
+    return { error: err instanceof Error ? err.message : 'Invalid base64' }
+  }
+}
+
 export function usePlaygroundRequest(
   selected: Ref<PlaygroundRoute | null>,
   options: { basePath?: Ref<string> } = {},
@@ -189,6 +234,7 @@ export function usePlaygroundRequest(
   const queryText = ref('')
   const headersText = ref('')
   const bodyText = ref('')
+  const bodyType = ref<BodyType>('json')
   const responseText = ref(t('response.empty'))
   const responseStatus = ref(t('response.idle'))
   const responseTime = ref('')
@@ -416,12 +462,6 @@ export function usePlaygroundRequest(
       responseText.value = t('errors.headersJson', { message: parsedHeaders.error })
       return
     }
-    const parsedBody = parseJsonInput(bodyText.value)
-    if (parsedBody.error) {
-      responseText.value = t('errors.bodyJson', { message: parsedBody.error })
-      return
-    }
-
     const url = new URL(resolved.path, window.location.origin)
     if (parsedQuery.value) {
       applyQuery(url, parsedQuery.value)
@@ -443,10 +483,65 @@ export function usePlaygroundRequest(
     }
 
     const upperMethod = selected.value.method.toUpperCase()
-    if (parsedBody.value && upperMethod !== 'GET' && upperMethod !== 'HEAD') {
-      init.body = JSON.stringify(parsedBody.value)
-      if (!headers['Content-Type']) {
-        headers['Content-Type'] = 'application/json'
+    if (upperMethod !== 'GET' && upperMethod !== 'HEAD') {
+      const rawBody = bodyText.value
+      if (bodyType.value === 'json') {
+        const parsedBody = parseJsonInput(rawBody)
+        if (parsedBody.error) {
+          responseText.value = t('errors.bodyJson', { message: parsedBody.error })
+          return
+        }
+        if (parsedBody.value) {
+          init.body = JSON.stringify(parsedBody.value)
+          if (!headers['Content-Type']) {
+            headers['Content-Type'] = 'application/json'
+          }
+        }
+      }
+      else if (bodyType.value === 'text') {
+        const trimmed = rawBody.trim()
+        if (trimmed) {
+          init.body = rawBody
+          if (!headers['Content-Type']) {
+            headers['Content-Type'] = 'text/plain; charset=utf-8'
+          }
+        }
+      }
+      else if (bodyType.value === 'form') {
+        const entries = parseKeyValueInput(rawBody)
+        if (entries.length > 0) {
+          const params = new URLSearchParams()
+          for (const [key, value] of entries) {
+            params.append(key, value)
+          }
+          init.body = params.toString()
+          if (!headers['Content-Type']) {
+            headers['Content-Type'] = 'application/x-www-form-urlencoded; charset=utf-8'
+          }
+        }
+      }
+      else if (bodyType.value === 'multipart') {
+        const entries = parseKeyValueInput(rawBody)
+        if (entries.length > 0) {
+          const formData = new FormData()
+          for (const [key, value] of entries) {
+            formData.append(key, value)
+          }
+          init.body = formData
+        }
+      }
+      else if (bodyType.value === 'base64') {
+        const parsed = decodeBase64(rawBody)
+        if (parsed.error) {
+          responseText.value = t('errors.bodyBase64', { message: parsed.error })
+          return
+        }
+        if (parsed.value) {
+          init.body = parsed.value
+          if (!headers['Content-Type']) {
+            headers['Content-Type'] = 'application/octet-stream'
+          }
+        }
       }
     }
 
@@ -493,6 +588,7 @@ export function usePlaygroundRequest(
     queryText,
     headersText,
     bodyText,
+    bodyType,
     responseText,
     responseStatus,
     responseTime,

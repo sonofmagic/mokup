@@ -41,6 +41,7 @@ const {
   queryText,
   headersText,
   bodyText,
+  bodyType,
   responseText,
   responseStatus,
   responseTime,
@@ -201,6 +202,7 @@ onBeforeUnmount(() => {
                   v-model:queryText="queryText"
                   v-model:headersText="headersText"
                   v-model:bodyText="bodyText"
+                  v-model:bodyType="bodyType"
                   :selected="selected"
                   :request-url="requestUrl"
                   :workspace-root="workspaceRoot"

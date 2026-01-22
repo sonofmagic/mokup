@@ -42,6 +42,8 @@ export interface PlaygroundResponse {
   disabled?: PlaygroundDisabledRoute[]
 }
 
+export type BodyType = 'json' | 'text' | 'form' | 'multipart' | 'base64'
+
 export type RouteParamKind = 'param' | 'catchall' | 'optional-catchall'
 
 export interface RouteParamField {
