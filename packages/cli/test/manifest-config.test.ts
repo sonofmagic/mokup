@@ -31,6 +31,8 @@ describe('resolveDirectoryConfig', () => {
           '  headers: { "x-root": "1" },',
           '  status: 201,',
           '  delay: 50,',
+          '  include: /root/,',
+          '  ignorePrefix: ".",',
           '  middleware: [async (_req, _res, _ctx, next) => { await next() }],',
           '}',
         ].join('\n'),
@@ -44,6 +46,9 @@ describe('resolveDirectoryConfig', () => {
           '  status: 404,',
           '  delay: 10,',
           '  enabled: false,',
+          '  include: /users/,',
+          '  exclude: /skip/,',
+          '  ignorePrefix: "_",',
           '  middleware: async (_req, _res, _ctx, next) => { await next() },',
           '}',
         ].join('\n'),
@@ -61,6 +66,9 @@ describe('resolveDirectoryConfig', () => {
       expect(config.status).toBe(404)
       expect(config.delay).toBe(10)
       expect(config.enabled).toBe(false)
+      expect(config.include?.source).toBe('users')
+      expect(config.exclude?.source).toBe('skip')
+      expect(config.ignorePrefix).toBe('_')
       expect(config.middlewares).toHaveLength(2)
       expect(toPosix(config.middlewares[0]?.file ?? '')).toBe(
         toPosix(path.join(mockDir, 'index.config.js')),

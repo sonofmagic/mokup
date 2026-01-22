@@ -1,6 +1,6 @@
 import type { HttpMethod, VitePluginOptions } from './types'
 
-import { isAbsolute, resolve } from '@mokup/shared/pathe'
+import { isAbsolute, relative, resolve } from '@mokup/shared/pathe'
 import { methodSet } from './constants'
 
 export function normalizeMethod(method?: string | null): HttpMethod | undefined {
@@ -77,6 +77,33 @@ export function matchesFilter(
     return testPatterns(include, normalized)
   }
   return true
+}
+
+export function normalizeIgnorePrefix(
+  value: string | string[] | undefined,
+  fallback: string[] = ['.'],
+) {
+  const list = typeof value === 'undefined'
+    ? fallback
+    : Array.isArray(value)
+      ? value
+      : [value]
+  return list.filter((entry): entry is string => typeof entry === 'string' && entry.length > 0)
+}
+
+export function hasIgnoredPrefix(
+  file: string,
+  rootDir: string,
+  prefixes: string[],
+) {
+  if (prefixes.length === 0) {
+    return false
+  }
+  const relativePath = toPosix(relative(rootDir, file))
+  const segments = relativePath.split('/')
+  return segments.some(segment =>
+    prefixes.some(prefix => segment.startsWith(prefix)),
+  )
 }
 
 export function delay(ms: number) {

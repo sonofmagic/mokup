@@ -92,6 +92,43 @@ describe('buildManifest', () => {
     }
   })
 
+  it('skips disabled rules and ignores prefixed paths', async () => {
+    const { root, mockDir } = await createTempRoot()
+    try {
+      await writeFile(path.join(mockDir, '.draft', 'users.get.json'), '{"ok":true}')
+      await writeFile(
+        path.join(mockDir, 'disabled.get.ts'),
+        [
+          'export default {',
+          '  enabled: false,',
+          '  handler: { ok: true },',
+          '}',
+        ].join('\n'),
+      )
+      await writeFile(
+        path.join(mockDir, 'active.get.ts'),
+        [
+          'export default {',
+          '  handler: { ok: true },',
+          '}',
+        ].join('\n'),
+      )
+
+      const result = await buildManifest({
+        root,
+        dir: 'mock',
+        outDir: 'dist',
+        handlers: false,
+      })
+
+      const urls = result.manifest.routes.map(route => route.url)
+      expect(urls).toEqual(['/active'])
+    }
+    finally {
+      await cleanupTempRoot(root)
+    }
+  })
+
   it('applies prefix to derived routes', async () => {
     const { root, mockDir } = await createTempRoot()
     try {

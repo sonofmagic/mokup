@@ -8,7 +8,14 @@ import { join, relative, resolve } from '@mokup/shared/pathe'
 
 import { writeBundle, writeManifestModule } from './bundle'
 import { resolveDirectoryConfig } from './config'
-import { collectFiles, isSupportedFile, matchesFilter, resolveDirs } from './files'
+import {
+  collectFiles,
+  hasIgnoredPrefix,
+  isSupportedFile,
+  matchesFilter,
+  normalizeIgnorePrefix,
+  resolveDirs,
+} from './files'
 import { buildResponse, bundleHandlers, getHandlerModulePath, writeHandlerIndex } from './handlers'
 import { deriveRouteFromFile, resolveRule, sortRoutes } from './routes'
 import { loadRules } from './rules'
@@ -27,14 +34,9 @@ export async function buildManifest(options: BuildOptions = {}) {
   const handlerModuleMap = new Map<string, string>()
   const configCache = new Map<string, RouteDirectoryConfig | null>()
   const configFileCache = new Map<string, string | null>()
+  const globalIgnorePrefix = normalizeIgnorePrefix(options.ignorePrefix)
 
   for (const fileInfo of files) {
-    if (!isSupportedFile(fileInfo.file)) {
-      continue
-    }
-    if (!matchesFilter(fileInfo.file, options.include, options.exclude)) {
-      continue
-    }
     const configParams: Parameters<typeof resolveDirectoryConfig>[0] = {
       file: fileInfo.file,
       rootDir: fileInfo.rootDir,
@@ -48,6 +50,24 @@ export async function buildManifest(options: BuildOptions = {}) {
     if (config.enabled === false) {
       continue
     }
+    const effectiveIgnorePrefix = typeof config.ignorePrefix !== 'undefined'
+      ? normalizeIgnorePrefix(config.ignorePrefix, [])
+      : globalIgnorePrefix
+    if (hasIgnoredPrefix(fileInfo.file, fileInfo.rootDir, effectiveIgnorePrefix)) {
+      continue
+    }
+    if (!isSupportedFile(fileInfo.file)) {
+      continue
+    }
+    const effectiveInclude = typeof config.include !== 'undefined'
+      ? config.include
+      : options.include
+    const effectiveExclude = typeof config.exclude !== 'undefined'
+      ? config.exclude
+      : options.exclude
+    if (!matchesFilter(fileInfo.file, effectiveInclude, effectiveExclude)) {
+      continue
+    }
     const derived = deriveRouteFromFile(fileInfo.file, fileInfo.rootDir, options.log)
     if (!derived) {
       continue
@@ -55,6 +75,9 @@ export async function buildManifest(options: BuildOptions = {}) {
     const rules = await loadRules(fileInfo.file)
     for (const [index, rule] of rules.entries()) {
       if (!rule || typeof rule !== 'object') {
+        continue
+      }
+      if (rule.enabled === false) {
         continue
       }
       const ruleValue = rule as unknown as Record<string, unknown>

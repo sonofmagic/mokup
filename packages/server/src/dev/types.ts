@@ -18,6 +18,7 @@ export type RouteResponse = unknown | RequestHandler
 
 export interface RouteRule {
   handler: RouteResponse
+  enabled?: boolean
   status?: number
   headers?: Record<string, string>
   delay?: number
@@ -28,6 +29,9 @@ export interface RouteDirectoryConfig {
   status?: number
   delay?: number
   enabled?: boolean
+  ignorePrefix?: string | string[]
+  include?: RegExp | RegExp[]
+  exclude?: RegExp | RegExp[]
   middleware?: MiddlewareHandler | MiddlewareHandler[]
 }
 

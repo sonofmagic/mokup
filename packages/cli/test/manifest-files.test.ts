@@ -4,8 +4,10 @@ import path from 'node:path'
 import { describe, expect, it } from 'vitest'
 import {
   collectFiles,
+  hasIgnoredPrefix,
   isSupportedFile,
   matchesFilter,
+  normalizeIgnorePrefix,
   resolveDirs,
 } from '../src/manifest/files'
 
@@ -59,5 +61,14 @@ describe('manifest file helpers', () => {
     expect(isSupportedFile('/tmp/index.config.ts')).toBe(false)
     expect(isSupportedFile('/tmp/route.JSON')).toBe(true)
     expect(isSupportedFile('/tmp/route.ts')).toBe(true)
+  })
+
+  it('normalizes ignore prefixes and checks path segments', () => {
+    const root = path.posix.join('/tmp', 'mokup-root', 'mock')
+    const file = path.posix.join(root, '.draft', 'users.get.json')
+    expect(normalizeIgnorePrefix(undefined)).toEqual(['.'])
+    expect(normalizeIgnorePrefix([''])).toEqual([])
+    expect(hasIgnoredPrefix(file, root, normalizeIgnorePrefix(undefined))).toBe(true)
+    expect(hasIgnoredPrefix(file, root, normalizeIgnorePrefix('_'))).toBe(false)
   })
 })

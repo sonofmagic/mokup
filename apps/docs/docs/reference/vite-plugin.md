@@ -25,17 +25,25 @@ export default {
 
 ## Options
 
-| Option       | Type                                                                                                                            | Description                           |
-| ------------ | ------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------- |
-| `dir`        | `string / string[] / (root) => string / string[]`                                                                               | Mock directory                        |
-| `prefix`     | `string`                                                                                                                        | URL prefix                            |
-| `include`    | `RegExp / RegExp[]`                                                                                                             | Include files                         |
-| `exclude`    | `RegExp / RegExp[]`                                                                                                             | Exclude files                         |
-| `watch`      | `boolean`                                                                                                                       | Watch file changes                    |
-| `log`        | `boolean`                                                                                                                       | Enable logging                        |
-| `mode`       | `'server' / 'sw'`                                                                                                               | Mock runtime mode                     |
-| `sw`         | `{ path?: string; scope?: string; register?: boolean; unregister?: boolean; fallback?: boolean; basePath?: string / string[] }` | Service worker options (SW mode only) |
-| `playground` | `boolean / { path?: string; enabled?: boolean }`                                                                                | Playground config                     |
+| Option         | Type                                                                                                                            | Description                                |
+| -------------- | ------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------ |
+| `dir`          | `string / string[] / (root) => string / string[]`                                                                               | Mock directory                             |
+| `prefix`       | `string`                                                                                                                        | URL prefix                                 |
+| `include`      | `RegExp / RegExp[]`                                                                                                             | Include files                              |
+| `exclude`      | `RegExp / RegExp[]`                                                                                                             | Exclude files                              |
+| `ignorePrefix` | `string / string[]`                                                                                                             | Ignore path segment prefixes (default `.`) |
+| `watch`        | `boolean`                                                                                                                       | Watch file changes                         |
+| `log`          | `boolean`                                                                                                                       | Enable logging                             |
+| `mode`         | `'server' / 'sw'`                                                                                                               | Mock runtime mode                          |
+| `sw`           | `{ path?: string; scope?: string; register?: boolean; unregister?: boolean; fallback?: boolean; basePath?: string / string[] }` | Service worker options (SW mode only)      |
+| `playground`   | `boolean / { path?: string; enabled?: boolean }`                                                                                | Playground config                          |
+
+## Routing notes
+
+- `index` files collapse to the directory root; use `mock/api/index/index.get.ts` for `/api/index`.
+- Any directory or file segment starting with `ignorePrefix` is ignored (default `.`).
+- `index.config.ts` can override `ignorePrefix/include/exclude` per directory.
+- TS/JS mocks can disable a single route with `enabled: false`.
 
 ## Service Worker mode
 

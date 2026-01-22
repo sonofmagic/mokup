@@ -6,6 +6,7 @@ export interface BuildOptions {
   prefix?: string
   include?: RegExp | RegExp[]
   exclude?: RegExp | RegExp[]
+  ignorePrefix?: string | string[]
   handlers?: boolean
   root?: string
   log?: (message: string) => void
@@ -13,6 +14,7 @@ export interface BuildOptions {
 
 export interface RouteRule {
   handler: unknown
+  enabled?: boolean
   status?: number
   headers?: Record<string, string>
   delay?: number
@@ -23,6 +25,9 @@ export interface RouteDirectoryConfig {
   status?: number
   delay?: number
   enabled?: boolean
+  ignorePrefix?: string | string[]
+  include?: RegExp | RegExp[]
+  exclude?: RegExp | RegExp[]
   middleware?: MiddlewareHandler | MiddlewareHandler[]
 }
 

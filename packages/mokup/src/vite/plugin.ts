@@ -280,6 +280,9 @@ export function createMokupPlugin(options: VitePluginOptionsInput = {}): Plugin 
       if (entry.exclude) {
         scanParams.exclude = entry.exclude
       }
+      if (typeof entry.ignorePrefix !== 'undefined') {
+        scanParams.ignorePrefix = entry.ignorePrefix
+      }
       if (server) {
         scanParams.server = server
       }

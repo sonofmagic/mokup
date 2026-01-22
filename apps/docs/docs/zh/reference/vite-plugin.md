@@ -25,17 +25,25 @@ export default {
 
 ## 选项
 
-| 选项         | 类型                                                                                                                            | 说明                              |
-| ------------ | ------------------------------------------------------------------------------------------------------------------------------- | --------------------------------- |
-| `dir`        | `string / string[] / (root) => string / string[]`                                                                               | mock 目录                         |
-| `prefix`     | `string`                                                                                                                        | 路由前缀                          |
-| `include`    | `RegExp / RegExp[]`                                                                                                             | 仅包含匹配文件                    |
-| `exclude`    | `RegExp / RegExp[]`                                                                                                             | 排除匹配文件                      |
-| `watch`      | `boolean`                                                                                                                       | 是否监听文件变化                  |
-| `log`        | `boolean`                                                                                                                       | 是否输出日志                      |
-| `mode`       | `'server' / 'sw'`                                                                                                               | mock 运行模式                     |
-| `sw`         | `{ path?: string; scope?: string; register?: boolean; unregister?: boolean; fallback?: boolean; basePath?: string / string[] }` | Service Worker 配置（仅 SW 模式） |
-| `playground` | `boolean / { path?: string; enabled?: boolean }`                                                                                | Playground 配置                   |
+| 选项           | 类型                                                                                                                            | 说明                              |
+| -------------- | ------------------------------------------------------------------------------------------------------------------------------- | --------------------------------- |
+| `dir`          | `string / string[] / (root) => string / string[]`                                                                               | mock 目录                         |
+| `prefix`       | `string`                                                                                                                        | 路由前缀                          |
+| `include`      | `RegExp / RegExp[]`                                                                                                             | 仅包含匹配文件                    |
+| `exclude`      | `RegExp / RegExp[]`                                                                                                             | 排除匹配文件                      |
+| `ignorePrefix` | `string / string[]`                                                                                                             | 忽略路径段前缀（默认 `.`）        |
+| `watch`        | `boolean`                                                                                                                       | 是否监听文件变化                  |
+| `log`          | `boolean`                                                                                                                       | 是否输出日志                      |
+| `mode`         | `'server' / 'sw'`                                                                                                               | mock 运行模式                     |
+| `sw`           | `{ path?: string; scope?: string; register?: boolean; unregister?: boolean; fallback?: boolean; basePath?: string / string[] }` | Service Worker 配置（仅 SW 模式） |
+| `playground`   | `boolean / { path?: string; enabled?: boolean }`                                                                                | Playground 配置                   |
+
+## 路由备注
+
+- `index` 文件会合并为目录根路径；若需要 `/api/index`，请使用 `mock/api/index/index.get.ts`。
+- 以 `ignorePrefix` 指定前缀开头的目录或文件会被忽略，默认忽略 `.`。
+- `index.config.ts` 可在目录级覆盖 `ignorePrefix/include/exclude`。
+- TS/JS mock 可通过 `enabled: false` 暂停单个接口。
 
 ## Service Worker 模式
 

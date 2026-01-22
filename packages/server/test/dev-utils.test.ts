@@ -2,8 +2,10 @@ import { describe, expect, it, vi } from 'vitest'
 import {
   createDebouncer,
   delay,
+  hasIgnoredPrefix,
   isInDirs,
   matchesFilter,
+  normalizeIgnorePrefix,
   normalizeMethod,
   normalizePrefix,
   resolveDirs,
@@ -30,6 +32,13 @@ describe('server dev utils', () => {
     expect(matchesFilter('/tmp/mock/users.json', /users/)).toBe(true)
     expect(matchesFilter('/tmp/mock/users.json', /posts/)).toBe(false)
     expect(matchesFilter('/tmp/mock/users.json', /users/, /users/)).toBe(false)
+
+    const root = '/tmp/mock'
+    const file = '/tmp/mock/.draft/users.get.json'
+    expect(normalizeIgnorePrefix(undefined)).toEqual(['.'])
+    expect(normalizeIgnorePrefix('_')).toEqual(['_'])
+    expect(hasIgnoredPrefix(file, root, normalizeIgnorePrefix(undefined))).toBe(true)
+    expect(hasIgnoredPrefix(file, root, normalizeIgnorePrefix('_'))).toBe(false)
   })
 
   it('debounces and delays using timers', async () => {

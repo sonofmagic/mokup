@@ -22,6 +22,7 @@ function toBuildOptions(options: {
   prefix?: string
   include?: RegExp[]
   exclude?: RegExp[]
+  ignorePrefix?: string[]
   handlers?: boolean
 }) {
   const buildOptions: BuildOptions = {
@@ -45,6 +46,9 @@ function toBuildOptions(options: {
   if (options.exclude && options.exclude.length > 0) {
     buildOptions.exclude = options.exclude
   }
+  if (options.ignorePrefix && options.ignorePrefix.length > 0) {
+    buildOptions.ignorePrefix = options.ignorePrefix
+  }
   return buildOptions
 }
 
@@ -53,6 +57,7 @@ function toServeOptions(options: {
   prefix?: string
   include?: RegExp[]
   exclude?: RegExp[]
+  ignorePrefix?: string[]
   host?: string
   port?: string
   watch?: boolean
@@ -74,6 +79,9 @@ function toServeOptions(options: {
   }
   if (options.exclude && options.exclude.length > 0) {
     serveOptions.exclude = options.exclude
+  }
+  if (options.ignorePrefix && options.ignorePrefix.length > 0) {
+    serveOptions.ignorePrefix = options.ignorePrefix
   }
   if (options.host) {
     serveOptions.host = options.host
@@ -106,6 +114,7 @@ export function createCli() {
     .option('--prefix <prefix>', 'URL prefix')
     .option('--include <pattern>', 'Include regex (repeatable)', collectRegex)
     .option('--exclude <pattern>', 'Exclude regex (repeatable)', collectRegex)
+    .option('--ignore-prefix <prefix>', 'Ignore path segment prefix (repeatable)', collectValues)
     .option('--no-handlers', 'Skip function handler output')
     .action(async (options) => {
       const buildOptions = toBuildOptions(options)
@@ -119,6 +128,7 @@ export function createCli() {
     .option('--prefix <prefix>', 'URL prefix')
     .option('--include <pattern>', 'Include regex (repeatable)', collectRegex)
     .option('--exclude <pattern>', 'Exclude regex (repeatable)', collectRegex)
+    .option('--ignore-prefix <prefix>', 'Ignore path segment prefix (repeatable)', collectValues)
     .option('--host <host>', 'Hostname (default: localhost)')
     .option('--port <port>', 'Port (default: 8080)')
     .option('--no-watch', 'Disable file watching')

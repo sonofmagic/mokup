@@ -5,6 +5,7 @@ export interface FetchServerOptions {
   prefix?: string
   include?: RegExp | RegExp[]
   exclude?: RegExp | RegExp[]
+  ignorePrefix?: string | string[]
   watch?: boolean
   log?: boolean
   playground?: boolean | { path?: string, enabled?: boolean }

@@ -3,27 +3,23 @@ import { resolveDirectoryConfig } from './config'
 import { collectFiles, isSupportedFile } from './files'
 import { loadRules } from './loader'
 import { deriveRouteFromFile, resolveRule, sortRoutes } from './routes'
-import { matchesFilter } from './utils'
+import { hasIgnoredPrefix, matchesFilter, normalizeIgnorePrefix } from './utils'
 
 export async function scanRoutes(params: {
   dirs: string[]
   prefix: string
   include?: RegExp | RegExp[]
   exclude?: RegExp | RegExp[]
+  ignorePrefix?: string | string[]
   logger: Logger
 }): Promise<RouteTable> {
   const routes: RouteTable = []
   const seen = new Set<string>()
   const files = await collectFiles(params.dirs)
+  const globalIgnorePrefix = normalizeIgnorePrefix(params.ignorePrefix)
   const configCache = new Map<string, RouteDirectoryConfig | null>()
   const fileCache = new Map<string, string | null>()
   for (const fileInfo of files) {
-    if (!isSupportedFile(fileInfo.file)) {
-      continue
-    }
-    if (!matchesFilter(fileInfo.file, params.include, params.exclude)) {
-      continue
-    }
     const config = await resolveDirectoryConfig({
       file: fileInfo.file,
       rootDir: fileInfo.rootDir,
@@ -34,6 +30,24 @@ export async function scanRoutes(params: {
     if (config.enabled === false) {
       continue
     }
+    const effectiveIgnorePrefix = typeof config.ignorePrefix !== 'undefined'
+      ? normalizeIgnorePrefix(config.ignorePrefix, [])
+      : globalIgnorePrefix
+    if (hasIgnoredPrefix(fileInfo.file, fileInfo.rootDir, effectiveIgnorePrefix)) {
+      continue
+    }
+    if (!isSupportedFile(fileInfo.file)) {
+      continue
+    }
+    const effectiveInclude = typeof config.include !== 'undefined'
+      ? config.include
+      : params.include
+    const effectiveExclude = typeof config.exclude !== 'undefined'
+      ? config.exclude
+      : params.exclude
+    if (!matchesFilter(fileInfo.file, effectiveInclude, effectiveExclude)) {
+      continue
+    }
     const derived = deriveRouteFromFile(fileInfo.file, fileInfo.rootDir, params.logger)
     if (!derived) {
       continue
@@ -41,6 +55,9 @@ export async function scanRoutes(params: {
     const rules = await loadRules(fileInfo.file, params.logger)
     for (const [index, rule] of rules.entries()) {
       if (!rule || typeof rule !== 'object') {
+        continue
+      }
+      if (rule.enabled === false) {
         continue
       }
       const ruleValue = rule as unknown as Record<string, unknown>

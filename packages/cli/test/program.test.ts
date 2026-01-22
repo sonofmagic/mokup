@@ -42,6 +42,8 @@ describe('CLI program', () => {
       'users',
       '--exclude',
       'ignore',
+      '--ignore-prefix',
+      '.',
       '--no-handlers',
     ])
 
@@ -53,6 +55,7 @@ describe('CLI program', () => {
     expect(options?.handlers).toBe(false)
     expect(options?.include?.[0]?.source).toBe('users')
     expect(options?.exclude?.[0]?.source).toBe('ignore')
+    expect(options?.ignorePrefix).toEqual(['.'])
     expect(typeof options?.log).toBe('function')
   })
 
@@ -82,11 +85,14 @@ describe('CLI program', () => {
       '--no-watch',
       '--no-playground',
       '--no-log',
+      '--ignore-prefix',
+      '_',
     ])
 
     expect(createFetchServer).toHaveBeenCalledWith({
       watch: false,
       log: false,
+      ignorePrefix: ['_'],
       host: '0.0.0.0',
       port: 9001,
       playground: false,

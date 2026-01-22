@@ -16,7 +16,18 @@ describe('dev route scanner', () => {
     const { root, mockDir } = await createTempRoot()
     const logger = { warn: vi.fn(), info: vi.fn(), error: vi.fn() }
     try {
+      await fs.mkdir(path.join(mockDir, '.draft'), { recursive: true })
       await fs.writeFile(path.join(mockDir, 'users.get.json'), '{ "ok": true }', 'utf8')
+      await fs.writeFile(
+        path.join(mockDir, '.draft', 'hidden.get.json'),
+        '{ "ok": true }',
+        'utf8',
+      )
+      await fs.writeFile(
+        path.join(mockDir, 'disabled.get.ts'),
+        'export default { enabled: false, handler: { ok: true } }',
+        'utf8',
+      )
       await fs.writeFile(
         path.join(mockDir, 'skip.get.js'),
         'export default { response: { ok: true }, handler: { ok: true } }',

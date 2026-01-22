@@ -2,7 +2,7 @@ import type { BuildOptions, FileInfo } from './types'
 
 import { promises as fs } from 'node:fs'
 
-import { basename, extname, isAbsolute, join, resolve } from '@mokup/shared/pathe'
+import { basename, extname, isAbsolute, join, relative, resolve } from '@mokup/shared/pathe'
 
 import { toPosix } from './utils'
 
@@ -84,6 +84,33 @@ export function matchesFilter(
     return testPatterns(include, normalized)
   }
   return true
+}
+
+export function normalizeIgnorePrefix(
+  value: string | string[] | undefined,
+  fallback: string[] = ['.'],
+) {
+  const list = typeof value === 'undefined'
+    ? fallback
+    : Array.isArray(value)
+      ? value
+      : [value]
+  return list.filter((entry): entry is string => typeof entry === 'string' && entry.length > 0)
+}
+
+export function hasIgnoredPrefix(
+  file: string,
+  rootDir: string,
+  prefixes: string[],
+) {
+  if (prefixes.length === 0) {
+    return false
+  }
+  const relativePath = toPosix(relative(rootDir, file))
+  const segments = relativePath.split('/')
+  return segments.some(segment =>
+    prefixes.some(prefix => segment.startsWith(prefix)),
+  )
 }
 
 export function isSupportedFile(file: string) {

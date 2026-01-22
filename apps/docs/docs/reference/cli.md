@@ -12,14 +12,15 @@ pnpm exec mokup build --dir mock --out .mokup
 
 ### Build options
 
-| Option          | Description                          |
-| --------------- | ------------------------------------ |
-| `--dir, -d`     | Mock directory (repeatable)          |
-| `--out, -o`     | Output directory (default: `.mokup`) |
-| `--prefix`      | URL prefix                           |
-| `--include`     | Include regex                        |
-| `--exclude`     | Exclude regex                        |
-| `--no-handlers` | Skip handler output                  |
+| Option            | Description                               |
+| ----------------- | ----------------------------------------- |
+| `--dir, -d`       | Mock directory (repeatable)               |
+| `--out, -o`       | Output directory (default: `.mokup`)      |
+| `--prefix`        | URL prefix                                |
+| `--include`       | Include regex                             |
+| `--exclude`       | Exclude regex                             |
+| `--ignore-prefix` | Ignore path segment prefixes (repeatable) |
+| `--no-handlers`   | Skip handler output                       |
 
 ## Serve
 
@@ -31,17 +32,18 @@ pnpm exec mokup serve --dir mock --prefix /api --port 3000
 
 ### Serve options
 
-| Option            | Description                     |
-| ----------------- | ------------------------------- |
-| `--dir, -d`       | Mock directory (repeatable)     |
-| `--prefix`        | URL prefix                      |
-| `--include`       | Include regex                   |
-| `--exclude`       | Exclude regex                   |
-| `--host`          | Hostname (default: `localhost`) |
-| `--port`          | Port (default: `8080`)          |
-| `--no-watch`      | Disable file watching           |
-| `--no-playground` | Disable Playground              |
-| `--no-log`        | Disable logging                 |
+| Option            | Description                               |
+| ----------------- | ----------------------------------------- |
+| `--dir, -d`       | Mock directory (repeatable)               |
+| `--prefix`        | URL prefix                                |
+| `--include`       | Include regex                             |
+| `--exclude`       | Exclude regex                             |
+| `--ignore-prefix` | Ignore path segment prefixes (repeatable) |
+| `--host`          | Hostname (default: `localhost`)           |
+| `--port`          | Port (default: `8080`)                    |
+| `--no-watch`      | Disable file watching                     |
+| `--no-playground` | Disable Playground                        |
+| `--no-log`        | Disable logging                           |
 
 ## API
 

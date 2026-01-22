@@ -335,6 +335,9 @@ export async function createFetchServer(
         if (entry.exclude) {
           scanParams.exclude = entry.exclude
         }
+        if (typeof entry.ignorePrefix !== 'undefined') {
+          scanParams.ignorePrefix = entry.ignorePrefix
+        }
         const scanned = await scanRoutes(scanParams)
         collected.push(...scanned)
       }

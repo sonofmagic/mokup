@@ -3,8 +3,10 @@ import { describe, expect, it, vi } from 'vitest'
 import {
   createDebouncer,
   delay,
+  hasIgnoredPrefix,
   isInDirs,
   matchesFilter,
+  normalizeIgnorePrefix,
   normalizeMethod,
   normalizePrefix,
   resolveDirs,
@@ -56,6 +58,15 @@ describe('vite utils', () => {
     expect(matchesFilter('/src/index.ts', /src/)).toBe(true)
     expect(matchesFilter('/src/index.ts', /foo/)).toBe(false)
     expect(matchesFilter('/src/index.ts', /src/, /index/)).toBe(false)
+  })
+
+  it('normalizes ignore prefixes and checks segments', () => {
+    const root = path.posix.join('/tmp', 'mokup', 'mock')
+    const file = path.posix.join(root, '.draft', 'users.get.json')
+    expect(normalizeIgnorePrefix(undefined)).toEqual(['.'])
+    expect(normalizeIgnorePrefix('_')).toEqual(['_'])
+    expect(hasIgnoredPrefix(file, root, normalizeIgnorePrefix(undefined))).toBe(true)
+    expect(hasIgnoredPrefix(file, root, normalizeIgnorePrefix('_'))).toBe(false)
   })
 
   it('normalizes to posix paths', () => {

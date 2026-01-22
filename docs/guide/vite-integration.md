@@ -22,6 +22,7 @@ export default defineConfig({
       dir: ['mock', 'mock-extra'],
       prefix: '/api',
       exclude: [/mock\/_ignored/],
+      ignorePrefix: '.',
       watch: true,
       log: true,
     }),
@@ -70,6 +71,7 @@ mock-extra/
 ### index 归并
 
 `mock/users/index.get.json` -> `GET /users`
+`mock/api/index/index.get.ts` -> `GET /api/index`
 
 ### 动态参数
 
@@ -88,6 +90,16 @@ mock-extra/
 ### 路由分组
 
 不支持 `(group)`，出现会被跳过并告警。
+
+### 忽略文件/目录
+
+默认忽略以 `.` 开头的目录或文件名（可用 `ignorePrefix` 改成 `_` 或其他前缀）。
+示例：
+
+- `mock/api/.draft.get.json` -> 忽略
+- `mock/api/.temp/users.get.ts` -> 忽略整棵目录
+
+目录级也可在 `index.config.ts` 中覆盖 `ignorePrefix`，并通过 `include/exclude` 精准控制。
 
 ## Mock 文件类型
 

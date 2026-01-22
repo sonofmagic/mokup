@@ -126,6 +126,9 @@ export async function resolveDirectoryConfig(params: {
   status?: number
   delay?: number
   enabled?: boolean
+  ignorePrefix?: string | string[]
+  include?: RegExp | RegExp[]
+  exclude?: RegExp | RegExp[]
   middlewares: ResolvedMiddleware[]
 }> {
   const { file, rootDir, server, logger, configCache, fileCache } = params
@@ -151,6 +154,9 @@ export async function resolveDirectoryConfig(params: {
     status?: number
     delay?: number
     enabled?: boolean
+    ignorePrefix?: string | string[]
+    include?: RegExp | RegExp[]
+    exclude?: RegExp | RegExp[]
     middlewares: ResolvedMiddleware[]
   } = { middlewares: [] }
 
@@ -179,6 +185,15 @@ export async function resolveDirectoryConfig(params: {
     }
     if (typeof config.enabled === 'boolean') {
       merged.enabled = config.enabled
+    }
+    if (typeof config.ignorePrefix !== 'undefined') {
+      merged.ignorePrefix = config.ignorePrefix
+    }
+    if (typeof config.include !== 'undefined') {
+      merged.include = config.include
+    }
+    if (typeof config.exclude !== 'undefined') {
+      merged.exclude = config.exclude
     }
     const normalized = normalizeMiddlewares(config.middleware, configPath, logger)
     if (normalized.length > 0) {
