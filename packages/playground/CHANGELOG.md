@@ -1,5 +1,15 @@
 # @mokup/playground
 
+## 0.0.9
+
+### Patch Changes
+
+- 🐛 **Improve playground request UI with param-aware inputs, tabbed request sections, real-time URL preview, and shared UI components.** [`08b7d60`](https://github.com/sonofmagic/mokup/commit/08b7d60b1f4ca32b687e0302db950c0ddbb38a17) by @sonofmagic
+
+- 🐛 **Add selectable request body types (JSON, text, form, multipart, base64) to the playground.** [`63a04dc`](https://github.com/sonofmagic/mokup/commit/63a04dc8245d4df3ce792edb6f227d1de4f02450) by @sonofmagic
+
+- 🐛 **Allow opening disabled routes in VSCode and render disabled route paths in lowercase.** [`06c943f`](https://github.com/sonofmagic/mokup/commit/06c943fa705ad95a43ff112ec6c00517fcf31228) by @sonofmagic
+
 ## 0.0.8
 
 ### Patch Changes

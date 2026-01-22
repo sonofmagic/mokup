@@ -1,5 +1,12 @@
 # @mokup/cli
 
+## 1.0.3
+
+### Patch Changes
+
+- 📦 **Dependencies** [`dd601f9`](https://github.com/sonofmagic/mokup/commit/dd601f990a6546bde5a909cf67990dbbc99fdfa4)
+  → `@mokup/server@1.1.0`
+
 ## 1.0.2
 
 ### Patch Changes

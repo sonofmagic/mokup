@@ -1,5 +1,16 @@
 # @mokup/server
 
+## 1.1.0
+
+### Minor Changes
+
+- ✨ **feat: register tsx loader to allow TS mock source debugging by default** [`dd601f9`](https://github.com/sonofmagic/mokup/commit/dd601f990a6546bde5a909cf67990dbbc99fdfa4) by @sonofmagic
+
+### Patch Changes
+
+- 📦 **Dependencies** [`08b7d60`](https://github.com/sonofmagic/mokup/commit/08b7d60b1f4ca32b687e0302db950c0ddbb38a17)
+  → `@mokup/playground@0.0.9`
+
 ## 1.0.4
 
 ### Patch Changes

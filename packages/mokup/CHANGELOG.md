@@ -1,5 +1,17 @@
 # mokup
 
+## 2.0.0
+
+### Major Changes
+
+- 🚀 **refactor: move Vite/webpack plugin config to `{ entries, playground }` and drop legacy entry-shaped input** [`006d219`](https://github.com/sonofmagic/mokup/commit/006d219943db21334fb60818e4e29c2ada896996) by @sonofmagic
+
+### Patch Changes
+
+- 🐛 **Handle Vite watcher relative paths and rename events so mock route changes refresh the playground.** [`06c943f`](https://github.com/sonofmagic/mokup/commit/06c943fa705ad95a43ff112ec6c00517fcf31228) by @sonofmagic
+- 📦 **Dependencies** [`dd601f9`](https://github.com/sonofmagic/mokup/commit/dd601f990a6546bde5a909cf67990dbbc99fdfa4)
+  → `@mokup/server@1.1.0`, `@mokup/playground@0.0.9`, `@mokup/cli@1.0.3`
+
 ## 1.0.4
 
 ### Patch Changes

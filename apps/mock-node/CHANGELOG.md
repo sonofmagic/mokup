@@ -1,5 +1,12 @@
 # mock-node
 
+## 0.0.11
+
+### Patch Changes
+
+- 📦 **Dependencies** [`006d219`](https://github.com/sonofmagic/mokup/commit/006d219943db21334fb60818e4e29c2ada896996)
+  → `mokup@2.0.0`
+
 ## 0.0.10
 
 ### Patch Changes
