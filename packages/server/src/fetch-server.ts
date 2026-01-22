@@ -1,6 +1,6 @@
 import type { Server } from 'node:http'
 import type { RouteSkipInfo } from './dev/scanner'
-import type { Logger, ResolvedRoute, RouteTable } from './dev/types'
+import type { Logger, MiddlewareHandler, ResolvedRoute, RouteTable } from './dev/types'
 
 import type { FetchServerOptions, FetchServerOptionsInput } from './fetch-options'
 import { cwd as nodeCwd } from 'node:process'
@@ -99,7 +99,7 @@ interface NodeWebSocketServer {
   on: (event: string, listener: (...args: unknown[]) => void) => void
 }
 type HonoInstance = InstanceType<typeof HonoApp>
-type PlaygroundWsHandler = Parameters<HonoInstance['get']>[1]
+type PlaygroundWsHandler = MiddlewareHandler<any, string, { outputFormat: 'ws' }>
 
 function buildApp(params: {
   routes: RouteTable
@@ -125,7 +125,8 @@ function buildApp(params: {
     app.get(`${params.playground.path}/ws`, params.wsHandler)
   }
   if (params.routes.length > 0) {
-    const mockApp = createHonoApp(params.routes, { onResponse: params.onResponse })
+    const mockAppOptions = params.onResponse ? { onResponse: params.onResponse } : {}
+    const mockApp = createHonoApp(params.routes, mockAppOptions)
     app.route('/', mockApp)
   }
   return app
@@ -322,7 +323,7 @@ export async function createFetchServer(
     root,
     logger,
     onResponse: handleRouteResponse,
-    wsHandler,
+    ...(wsHandler ? { wsHandler } : {}),
   })
 
   const refreshRoutes = async () => {
@@ -359,7 +360,7 @@ export async function createFetchServer(
         root,
         logger,
         onResponse: handleRouteResponse,
-        wsHandler,
+        ...(wsHandler ? { wsHandler } : {}),
       })
       logger.info(`Loaded ${routes.length} mock routes.`)
     }
@@ -390,7 +391,7 @@ export async function createFetchServer(
     fetch,
     refresh: refreshRoutes,
     getRoutes: () => routes,
-    injectWebSocket,
+    ...(injectWebSocket ? { injectWebSocket } : {}),
   }
 
   if (watcher) {

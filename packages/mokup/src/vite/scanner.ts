@@ -54,6 +54,21 @@ function resolveSkipRoute(params: {
   }
 }
 
+type ResolvedSkipRoute = ReturnType<typeof resolveSkipRoute>
+
+function buildSkipInfo(
+  file: string,
+  reason: RouteSkipReason,
+  resolved?: ResolvedSkipRoute,
+): RouteSkipInfo {
+  const info: RouteSkipInfo = { file, reason }
+  if (resolved) {
+    info.method = resolved.method
+    info.url = resolved.url
+  }
+  return info
+}
+
 export async function scanRoutes(params: {
   dirs: string[]
   prefix: string
@@ -90,12 +105,7 @@ export async function scanRoutes(params: {
           rootDir: fileInfo.rootDir,
           prefix: params.prefix,
         })
-        params.onSkip?.({
-          file: fileInfo.file,
-          reason: 'disabled-dir',
-          method: resolved?.method,
-          url: resolved?.url,
-        })
+        params.onSkip?.(buildSkipInfo(fileInfo.file, 'disabled-dir', resolved))
       }
       continue
     }
@@ -109,12 +119,7 @@ export async function scanRoutes(params: {
           rootDir: fileInfo.rootDir,
           prefix: params.prefix,
         })
-        params.onSkip?.({
-          file: fileInfo.file,
-          reason: 'ignore-prefix',
-          method: resolved?.method,
-          url: resolved?.url,
-        })
+        params.onSkip?.(buildSkipInfo(fileInfo.file, 'ignore-prefix', resolved))
       }
       continue
     }
@@ -137,12 +142,7 @@ export async function scanRoutes(params: {
         const reason = effectiveExclude && matchesFilter(fileInfo.file, undefined, effectiveExclude)
           ? 'exclude'
           : 'include'
-        params.onSkip?.({
-          file: fileInfo.file,
-          reason,
-          method: resolved?.method,
-          url: resolved?.url,
-        })
+        params.onSkip?.(buildSkipInfo(fileInfo.file, reason, resolved))
       }
       continue
     }
@@ -163,12 +163,7 @@ export async function scanRoutes(params: {
             prefix: params.prefix,
             derived,
           })
-          params.onSkip?.({
-            file: fileInfo.file,
-            reason: 'disabled',
-            method: resolved?.method,
-            url: resolved?.url,
-          })
+          params.onSkip?.(buildSkipInfo(fileInfo.file, 'disabled', resolved))
         }
         continue
       }

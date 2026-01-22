@@ -223,14 +223,21 @@ function toPlaygroundDisabledRoute(
   groups: PlaygroundGroup[],
 ): PlaygroundDisabledRoute {
   const matchedGroup = resolveRouteGroup(route.file, groups)
-  return {
+  const disabled: PlaygroundDisabledRoute = {
     file: formatRouteFile(route.file, root),
     reason: normalizeDisabledReason(route.reason),
-    method: route.method,
-    url: route.url,
-    groupKey: matchedGroup?.key,
-    group: matchedGroup?.label,
   }
+  if (typeof route.method !== 'undefined') {
+    disabled.method = route.method
+  }
+  if (typeof route.url !== 'undefined') {
+    disabled.url = route.url
+  }
+  if (matchedGroup) {
+    disabled.groupKey = matchedGroup.key
+    disabled.group = matchedGroup.label
+  }
+  return disabled
 }
 
 export function registerPlaygroundRoutes(params: {
