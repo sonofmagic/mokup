@@ -1,5 +1,7 @@
+import type { RouteToken } from '@mokup/runtime'
 import type { Ref } from 'vue'
-import type { PlaygroundRoute } from '../types'
+import type { PlaygroundRoute, RouteParamField, RouteParamKind } from '../types'
+import { parseRouteTemplate } from '@mokup/runtime'
 import { computed, getCurrentInstance, onBeforeUnmount, ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { applyQuery, parseJsonInput } from '../utils/request'
@@ -62,6 +64,123 @@ interface PlaygroundWsIncrement {
   total: number
 }
 
+function formatParamToken(kind: RouteParamKind, name: string) {
+  if (kind === 'catchall') {
+    return `[...${name}]`
+  }
+  if (kind === 'optional-catchall') {
+    return `[[...${name}]]`
+  }
+  return `[${name}]`
+}
+
+function buildRouteParams(tokens: RouteToken[]) {
+  const params: RouteParamField[] = []
+  const seen = new Set<string>()
+  for (const token of tokens) {
+    if (token.type === 'static') {
+      continue
+    }
+    if (seen.has(token.name)) {
+      continue
+    }
+    seen.add(token.name)
+    const kind = token.type
+    params.push({
+      id: `${kind}:${token.name}`,
+      name: token.name,
+      kind,
+      token: formatParamToken(kind, token.name),
+      required: kind !== 'optional-catchall',
+    })
+  }
+  return params
+}
+
+function splitCatchallInput(value: string) {
+  const trimmed = value.trim().replace(/^\/+|\/+$/g, '')
+  return trimmed ? trimmed.split('/').filter(Boolean) : []
+}
+
+function buildQueryString(query: Record<string, unknown>) {
+  const params = new URLSearchParams()
+  for (const [key, value] of Object.entries(query)) {
+    if (typeof value === 'undefined') {
+      continue
+    }
+    if (Array.isArray(value)) {
+      value.forEach(item => params.append(key, String(item)))
+    }
+    else {
+      params.set(key, String(value))
+    }
+  }
+  const search = params.toString()
+  return search ? `?${search}` : ''
+}
+
+function buildResolvedPath(tokens: RouteToken[], values: Record<string, string>) {
+  const segments: string[] = []
+  const missing = new Set<string>()
+  for (const token of tokens) {
+    if (token.type === 'static') {
+      segments.push(token.value)
+      continue
+    }
+    const rawValue = values[token.name]?.trim() ?? ''
+    if (!rawValue) {
+      if (token.type !== 'optional-catchall') {
+        missing.add(token.name)
+      }
+      continue
+    }
+    if (token.type === 'param') {
+      segments.push(encodeURIComponent(rawValue))
+      continue
+    }
+    const catchallSegments = splitCatchallInput(rawValue).map(encodeURIComponent)
+    if (catchallSegments.length === 0) {
+      if (token.type !== 'optional-catchall') {
+        missing.add(token.name)
+      }
+      continue
+    }
+    segments.push(...catchallSegments)
+  }
+  const path = segments.length > 0 ? `/${segments.join('/')}` : '/'
+  return { path, missing: [...missing] }
+}
+
+function buildDisplayPath(tokens: RouteToken[], values: Record<string, string>) {
+  const segments: string[] = []
+  for (const token of tokens) {
+    if (token.type === 'static') {
+      segments.push(token.value)
+      continue
+    }
+    const rawValue = values[token.name]?.trim() ?? ''
+    if (!rawValue) {
+      if (token.type !== 'optional-catchall') {
+        segments.push(formatParamToken(token.type, token.name))
+      }
+      continue
+    }
+    if (token.type === 'param') {
+      segments.push(encodeURIComponent(rawValue))
+      continue
+    }
+    const catchallSegments = splitCatchallInput(rawValue).map(encodeURIComponent)
+    if (catchallSegments.length === 0) {
+      if (token.type !== 'optional-catchall') {
+        segments.push(formatParamToken(token.type, token.name))
+      }
+      continue
+    }
+    segments.push(...catchallSegments)
+  }
+  return segments.length > 0 ? `/${segments.join('/')}` : '/'
+}
+
 export function usePlaygroundRequest(
   selected: Ref<PlaygroundRoute | null>,
   options: { basePath?: Ref<string> } = {},
@@ -81,6 +200,23 @@ export function usePlaygroundRequest(
   const isServerCounts = ref(false)
   const wsRef = ref<WebSocket | null>(null)
   const wsUrlRef = ref('')
+  const routeTokens = ref<RouteToken[]>([])
+  const routeParams = ref<RouteParamField[]>([])
+  const paramValues = ref<Record<string, string>>({})
+  const requestUrl = computed(() => {
+    if (!selected.value) {
+      return ''
+    }
+    const tokens = routeTokens.value.length > 0
+      ? routeTokens.value
+      : parseRouteTemplate(selected.value.url).tokens
+    const path = buildDisplayPath(tokens, paramValues.value)
+    const parsedQuery = parseJsonInput(queryText.value)
+    if (parsedQuery.error || !parsedQuery.value) {
+      return path
+    }
+    return `${path}${buildQueryString(parsedQuery.value)}`
+  })
 
   function getRouteKey(route: PlaygroundRoute) {
     return `${route.method} ${route.url}`
@@ -171,6 +307,31 @@ export function usePlaygroundRequest(
     }
   }
 
+  function setParamValue(name: string, value: string) {
+    paramValues.value = {
+      ...paramValues.value,
+      [name]: value,
+    }
+  }
+
+  function syncRouteParams(route: PlaygroundRoute | null) {
+    if (!route) {
+      routeTokens.value = []
+      routeParams.value = []
+      paramValues.value = {}
+      return
+    }
+    const parsed = parseRouteTemplate(route.url)
+    routeTokens.value = parsed.tokens
+    const nextParams = buildRouteParams(parsed.tokens)
+    const nextValues: Record<string, string> = {}
+    for (const param of nextParams) {
+      nextValues[param.name] = paramValues.value[param.name] ?? ''
+    }
+    routeParams.value = nextParams
+    paramValues.value = nextValues
+  }
+
   async function ensureSwReady() {
     if (isSwReady.value) {
       return true
@@ -236,6 +397,14 @@ export function usePlaygroundRequest(
     if (!selected.value) {
       return
     }
+    const tokens = routeTokens.value.length > 0
+      ? routeTokens.value
+      : parseRouteTemplate(selected.value.url).tokens
+    const resolved = buildResolvedPath(tokens, paramValues.value)
+    if (resolved.missing.length > 0) {
+      responseText.value = t('errors.routeParams', { params: resolved.missing.join(', ') })
+      return
+    }
     const requestKey = getRouteKey(selected.value)
     const parsedQuery = parseJsonInput(queryText.value)
     if (parsedQuery.error) {
@@ -253,7 +422,7 @@ export function usePlaygroundRequest(
       return
     }
 
-    const url = new URL(selected.value.url, window.location.origin)
+    const url = new URL(resolved.path, window.location.origin)
     if (parsedQuery.value) {
       applyQuery(url, parsedQuery.value)
     }
@@ -317,6 +486,7 @@ export function usePlaygroundRequest(
 
   watch(selected, () => {
     resetResponse()
+    syncRouteParams(selected.value)
   })
 
   return {
@@ -329,6 +499,10 @@ export function usePlaygroundRequest(
     resetResponse,
     runRequest,
     isSwRegistering,
+    routeParams,
+    paramValues,
+    setParamValue,
+    requestUrl,
     routeCounts,
     totalCount,
     getRouteCount,

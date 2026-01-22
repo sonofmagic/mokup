@@ -1,5 +1,7 @@
 <script setup lang="ts">
 import { useI18n } from 'vue-i18n'
+import UiField from './ui/UiField.vue'
+import UiTextInput from './ui/UiTextInput.vue'
 
 const props = withDefaults(defineProps<{
   search: string
@@ -25,33 +27,29 @@ const { t } = useI18n()
 
 <template>
   <section class="grid" :class="props.compact ? 'gap-2' : 'gap-3'">
-    <label
-      class="flex flex-col uppercase text-pg-text-muted"
-      :class="props.compact ? 'gap-1 text-[0.55rem] tracking-[0.25em]' : 'gap-1.5 text-[0.65rem] tracking-[0.2em]'"
+    <UiField
+      :label="t('filters.search')"
+      :dense="props.compact"
     >
-      {{ t('filters.search') }}
-      <input
+      <UiTextInput
         :value="search"
         type="search"
-        class="rounded-lg border outline-none transition border-pg-border bg-pg-surface-strong text-pg-text focus:border-pg-accent"
-        :class="props.compact ? 'px-2.5 py-1.5 text-[0.8rem]' : 'px-3 py-2 text-sm'"
+        :dense="props.compact"
         :placeholder="t('filters.searchPlaceholder')"
         data-testid="playground-search"
         @input="handleInput"
-      >
-    </label>
-    <label
+      />
+    </UiField>
+    <UiField
       v-if="props.showBase"
-      class="flex flex-col uppercase text-pg-text-muted"
-      :class="props.compact ? 'gap-1 text-[0.55rem] tracking-[0.25em]' : 'gap-1.5 text-[0.65rem] tracking-[0.2em]'"
+      :label="t('filters.base')"
+      :dense="props.compact"
     >
-      {{ t('filters.base') }}
-      <input
+      <UiTextInput
         :value="basePath"
         readonly
-        class="rounded-lg border border-pg-border bg-pg-surface-strong text-pg-text"
-        :class="props.compact ? 'px-2.5 py-1.5 text-[0.8rem]' : 'px-3 py-2 text-sm'"
-      >
-    </label>
+        :dense="props.compact"
+      />
+    </UiField>
   </section>
 </template>

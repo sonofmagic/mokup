@@ -2,6 +2,8 @@
 import type { ThemeMode, ThemeValue } from '../utils/theme'
 import { computed } from 'vue'
 import { useI18n } from 'vue-i18n'
+import UiChipButton from './ui/UiChipButton.vue'
+import UiPill from './ui/UiPill.vue'
 
 const props = defineProps<{
   routeCount: number
@@ -41,33 +43,36 @@ const localeLabel = computed(() => (props.locale === 'zh-CN' ? '中文' : 'EN'))
       </p>
     </div>
     <div class="flex flex-wrap items-center gap-2">
-      <button
-        class="flex items-center gap-2 rounded-full border px-3 py-1.5 text-[0.65rem] uppercase tracking-[0.25em] transition hover:-translate-y-0.5 border-pg-border bg-pg-surface-card text-pg-text-soft"
+      <UiChipButton
+        tone="card"
+        size="lg"
         :title="t('header.languageToggle')"
         @click="emit('toggle-locale')"
       >
         <span class="i-[carbon--language] h-4 w-4" aria-hidden="true" />
         <span>{{ localeLabel }}</span>
-      </button>
-      <button
-        class="flex items-center gap-2 rounded-full border px-3 py-1.5 text-[0.65rem] uppercase tracking-[0.25em] transition hover:-translate-y-0.5 border-pg-border bg-pg-surface-card text-pg-text-soft"
+      </UiChipButton>
+      <UiChipButton
+        tone="card"
+        size="lg"
         :title="t('header.themeToggle')"
         @click="emit('toggle-theme')"
       >
         <span :class="themeIcon" class="h-4 w-4" aria-hidden="true" />
         <span>{{ themeLabel }}</span>
-      </button>
-      <button
-        class="flex items-center gap-2 rounded-full border px-3 py-1.5 text-[0.65rem] uppercase tracking-[0.25em] transition hover:-translate-y-0.5 border-pg-border bg-pg-surface-card text-pg-text-soft"
+      </UiChipButton>
+      <UiChipButton
+        tone="card"
+        size="lg"
         @click="emit('refresh')"
       >
         <span class="i-[carbon--rotate] h-4 w-4" aria-hidden="true" />
         <span>{{ t('header.refresh') }}</span>
-      </button>
-      <span class="flex items-center gap-2 rounded-full border px-3 py-1.5 text-[0.65rem] uppercase tracking-[0.25em] border-pg-border bg-pg-surface-card text-pg-text-soft">
+      </UiChipButton>
+      <UiPill tone="card" size="lg">
         <span class="i-[carbon--map] h-4 w-4" aria-hidden="true" />
         <span>{{ t('header.routes', { count: routeCount }) }}</span>
-      </span>
+      </UiPill>
     </div>
   </header>
 </template>

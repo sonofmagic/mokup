@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import type { PlaygroundRoute, TreeRow } from '../types'
 import { toPosixPath } from '../utils/path'
+import UiPill from './ui/UiPill.vue'
 
 const props = defineProps<{
   rows: TreeRow[]
@@ -103,12 +104,15 @@ function resolveRouteCount(route: PlaygroundRoute) {
             {{ row.label }}
           </span>
         </div>
-        <span
+        <UiPill
           v-if="row.kind === 'route' && row.route && resolveRouteCount(row.route) > 0"
-          class="ml-auto rounded-full px-2 py-0.5 text-[0.55rem] bg-pg-chip text-pg-chip-text"
+          tone="chip"
+          size="xxs"
+          :caps="false"
+          class="ml-auto"
         >
           {{ resolveRouteCount(row.route) }}
-        </span>
+        </UiPill>
       </button>
       <button
         v-if="row.kind === 'route' && row.route && resolveEditorPath(row.route)"

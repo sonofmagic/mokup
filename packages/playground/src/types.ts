@@ -42,6 +42,16 @@ export interface PlaygroundResponse {
   disabled?: PlaygroundDisabledRoute[]
 }
 
+export type RouteParamKind = 'param' | 'catchall' | 'optional-catchall'
+
+export interface RouteParamField {
+  id: string
+  name: string
+  kind: RouteParamKind
+  token: string
+  required: boolean
+}
+
 export interface TreeRow {
   id: string
   label: string

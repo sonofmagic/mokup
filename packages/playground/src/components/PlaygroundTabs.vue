@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import type { PlaygroundGroup } from '../types'
 import { useI18n } from 'vue-i18n'
+import UiChipButton from './ui/UiChipButton.vue'
 
 defineProps<{
   groups: PlaygroundGroup[]
@@ -16,21 +17,21 @@ const { t } = useI18n()
 
 <template>
   <section class="flex flex-wrap items-center gap-2">
-    <button
-      class="rounded-full border px-3 py-1.5 text-[0.6rem] uppercase tracking-[0.25em] transition hover:-translate-y-0.5 border-pg-border bg-pg-surface-strong text-pg-text-soft"
-      :class="activeGroup === 'all' ? 'bg-pg-accent text-pg-on-accent border-pg-accent shadow-sm ring-1 ring-pg-accent-ring' : ''"
+    <UiChipButton
+      size="md"
+      :active="activeGroup === 'all'"
       @click="emit('select', 'all')"
     >
       {{ t('tabs.overview') }}
-    </button>
-    <button
+    </UiChipButton>
+    <UiChipButton
       v-for="group in groups"
       :key="group.key"
-      class="rounded-full border px-3 py-1.5 text-[0.6rem] uppercase tracking-[0.25em] transition hover:-translate-y-0.5 border-pg-border bg-pg-surface-strong text-pg-text-soft"
-      :class="activeGroup === group.key ? 'bg-pg-accent text-pg-on-accent border-pg-accent shadow-sm ring-1 ring-pg-accent-ring' : ''"
+      size="md"
+      :active="activeGroup === group.key"
       @click="emit('select', group.key)"
     >
       {{ group.label }}
-    </button>
+    </UiChipButton>
   </section>
 </template>

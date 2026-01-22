@@ -8,6 +8,10 @@ import PlaygroundTabs from './components/PlaygroundTabs.vue'
 import RouteDetail from './components/RouteDetail.vue'
 import RouteTree from './components/RouteTree.vue'
 import TreeModeToggle from './components/TreeModeToggle.vue'
+import UiChipButton from './components/ui/UiChipButton.vue'
+import UiField from './components/ui/UiField.vue'
+import UiPill from './components/ui/UiPill.vue'
+import UiTextInput from './components/ui/UiTextInput.vue'
 import { usePlaygroundRequest } from './hooks/usePlaygroundRequest'
 import { usePlaygroundRoutes } from './hooks/usePlaygroundRoutes'
 import { usePlaygroundTheme } from './hooks/usePlaygroundTheme'
@@ -53,6 +57,10 @@ const {
   responseTime,
   runRequest,
   isSwRegistering,
+  routeParams,
+  paramValues,
+  setParamValue,
+  requestUrl,
   totalCount,
   getRouteCount,
 } = usePlaygroundRequest(selected, { basePath })
@@ -94,7 +102,7 @@ const { treeMode, treeRows, toggleExpanded, setTreeMode } = useRouteTree({
 })
 
 const showMore = ref(false)
-const moreButtonRef = ref<HTMLButtonElement | null>(null)
+const moreButtonRef = ref<InstanceType<typeof UiChipButton> | null>(null)
 const morePanelRef = ref<HTMLDivElement | null>(null)
 
 function toggleLocale() {
@@ -167,7 +175,7 @@ function handleOutsideMoreClick(event: PointerEvent) {
   if (!target) {
     return
   }
-  if (morePanelRef.value?.contains(target) || moreButtonRef.value?.contains(target)) {
+  if (morePanelRef.value?.contains(target) || moreButtonRef.value?.el?.value?.contains(target)) {
     return
   }
   showMore.value = false
@@ -214,10 +222,10 @@ onBeforeUnmount(() => {
                     :compact="true"
                     class="flex-1"
                   />
-                  <button
+                  <UiChipButton
                     ref="moreButtonRef"
-                    class="flex h-9 items-center gap-2 rounded-full border px-3 text-[0.55rem] uppercase tracking-[0.25em] transition hover:-translate-y-0.5 border-pg-border bg-pg-surface-strong text-pg-text-soft"
-                    type="button"
+                    size="sm"
+                    class="h-9"
                     :aria-expanded="showMore"
                     aria-haspopup="true"
                     aria-controls="playground-more-panel"
@@ -225,23 +233,23 @@ onBeforeUnmount(() => {
                   >
                     <span class="i-[carbon--settings-adjust] h-3.5 w-3.5" aria-hidden="true" />
                     <span>{{ t('controls.more') }}</span>
-                  </button>
+                  </UiChipButton>
                 </div>
                 <div class="mt-2 flex flex-wrap items-center gap-2">
-                  <button
-                    class="rounded-full border px-3 py-1.5 text-[0.6rem] uppercase tracking-[0.25em] transition hover:-translate-y-0.5 border-pg-border bg-pg-surface-strong text-pg-text-soft"
-                    :class="!isDisabledMode ? 'bg-pg-accent text-pg-on-accent border-pg-accent shadow-sm ring-1 ring-pg-accent-ring' : ''"
+                  <UiChipButton
+                    size="md"
+                    :active="!isDisabledMode"
                     @click="setRouteMode('active')"
                   >
                     {{ t('disabled.active', { count: activeTotal }) }}
-                  </button>
-                  <button
-                    class="rounded-full border px-3 py-1.5 text-[0.6rem] uppercase tracking-[0.25em] transition hover:-translate-y-0.5 border-pg-border bg-pg-surface-strong text-pg-text-soft"
-                    :class="isDisabledMode ? 'bg-pg-accent text-pg-on-accent border-pg-accent shadow-sm ring-1 ring-pg-accent-ring' : ''"
+                  </UiChipButton>
+                  <UiChipButton
+                    size="md"
+                    :active="isDisabledMode"
                     @click="setRouteMode('disabled')"
                   >
                     {{ t('disabled.disabled', { count: disabledTotal }) }}
-                  </button>
+                  </UiChipButton>
                 </div>
                 <div
                   v-if="showMore"
@@ -250,14 +258,13 @@ onBeforeUnmount(() => {
                   class="absolute left-0 right-0 z-30 mt-2 rounded-2xl border p-3 shadow-xl border-pg-border bg-pg-surface-panel"
                 >
                   <div class="grid gap-3">
-                    <label class="flex flex-col gap-1 text-[0.55rem] uppercase tracking-[0.25em] text-pg-text-muted">
-                      {{ t('filters.base') }}
-                      <input
+                    <UiField :label="t('filters.base')" dense>
+                      <UiTextInput
                         :value="basePath || '/'"
                         readonly
-                        class="rounded-lg border px-2.5 py-1.5 text-[0.8rem] border-pg-border bg-pg-surface-strong text-pg-text"
-                      >
-                    </label>
+                        dense
+                      />
+                    </UiField>
                     <PlaygroundTabs :groups="groups" :active-group="activeGroup" @select="setActiveGroup" />
                     <TreeModeToggle :tree-mode="treeMode" @update:treeMode="setTreeMode" />
                   </div>
@@ -302,9 +309,9 @@ onBeforeUnmount(() => {
                             {{ route.file }}
                           </span>
                         </div>
-                        <span class="rounded-full border px-3 py-1 text-[0.55rem] uppercase tracking-[0.2em] border-pg-border bg-pg-surface-strong text-pg-text-soft">
+                        <UiPill tone="strong" size="sm" tracking="tight">
                           {{ reasonLabel(route.reason) }}
-                        </span>
+                        </UiPill>
                       </div>
                     </div>
                   </div>
@@ -335,39 +342,39 @@ onBeforeUnmount(() => {
             <section class="flex min-h-0 flex-1 flex-col overflow-hidden p-4 lg:p-6">
               <div class="flex flex-none flex-wrap items-center justify-between gap-2 rounded-2xl border px-3 py-2 text-[0.55rem] uppercase tracking-[0.25em] shadow-sm border-pg-border bg-pg-surface-card text-pg-text-soft">
                 <div class="flex flex-wrap items-center gap-2">
-                  <span class="flex items-center gap-2 rounded-full border px-2.5 py-1 text-[0.55rem] uppercase tracking-[0.25em] border-pg-border bg-pg-surface-strong text-pg-text-soft">
+                  <UiPill tone="strong" size="xs">
                     <span class="i-[carbon--map] h-3.5 w-3.5" aria-hidden="true" />
                     <span>{{ t('header.routes', { count: visibleCount }) }}</span>
-                  </span>
-                  <span class="flex items-center gap-2 rounded-full border px-2.5 py-1 text-[0.55rem] uppercase tracking-[0.25em] border-pg-border bg-pg-surface-strong text-pg-text-soft">
+                  </UiPill>
+                  <UiPill tone="strong" size="xs">
                     <span class="i-[carbon--activity] h-3.5 w-3.5" aria-hidden="true" />
                     <span>{{ t('header.calls', { count: totalCount }) }}</span>
-                  </span>
+                  </UiPill>
                 </div>
                 <div class="flex flex-wrap items-center gap-2">
-                  <button
-                    class="flex items-center gap-2 rounded-full border px-2.5 py-1 text-[0.55rem] uppercase tracking-[0.25em] transition hover:-translate-y-0.5 border-pg-border bg-pg-surface-strong text-pg-text-soft"
+                  <UiChipButton
+                    size="xs"
                     :title="t('header.languageToggle')"
                     @click="toggleLocale"
                   >
                     <span class="i-[carbon--language] h-3.5 w-3.5" aria-hidden="true" />
                     <span>{{ localeLabel }}</span>
-                  </button>
-                  <button
-                    class="flex items-center gap-2 rounded-full border px-2.5 py-1 text-[0.55rem] uppercase tracking-[0.25em] transition hover:-translate-y-0.5 border-pg-border bg-pg-surface-strong text-pg-text-soft"
+                  </UiChipButton>
+                  <UiChipButton
+                    size="xs"
                     :title="t('header.themeToggle')"
                     @click="cycleThemeMode"
                   >
                     <span :class="themeIcon" class="h-3.5 w-3.5" aria-hidden="true" />
                     <span>{{ themeLabel }}</span>
-                  </button>
-                  <button
-                    class="flex items-center gap-2 rounded-full border px-2.5 py-1 text-[0.55rem] uppercase tracking-[0.25em] transition hover:-translate-y-0.5 border-pg-border bg-pg-surface-strong text-pg-text-soft"
+                  </UiChipButton>
+                  <UiChipButton
+                    size="xs"
                     @click="loadRoutes"
                   >
                     <span class="i-[carbon--rotate] h-3.5 w-3.5" aria-hidden="true" />
                     <span>{{ t('header.refresh') }}</span>
-                  </button>
+                  </UiChipButton>
                 </div>
               </div>
 
@@ -378,10 +385,15 @@ onBeforeUnmount(() => {
                   v-model:headersText="headersText"
                   v-model:bodyText="bodyText"
                   :selected="selected"
+                  :request-url="requestUrl"
+                  :workspace-root="workspaceRoot"
                   :response-text="responseText"
                   :response-status="responseStatus"
                   :response-time="responseTime"
                   :is-sw-registering="isSwRegistering"
+                  :route-params="routeParams"
+                  :param-values="paramValues"
+                  @update:param-value="setParamValue"
                   @run="runRequest"
                 />
                 <div
