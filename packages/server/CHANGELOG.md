@@ -1,5 +1,13 @@
 # @mokup/server
 
+## 1.0.4
+
+### Patch Changes
+
+- 🐛 **Add ignore-prefix support, per-route enable toggles, and a playground view for disabled routes.** [`86ea1db`](https://github.com/sonofmagic/mokup/commit/86ea1dbfc8842bc233b20016133d980df3d072f5) by @sonofmagic
+- 📦 **Dependencies** [`86ea1db`](https://github.com/sonofmagic/mokup/commit/86ea1dbfc8842bc233b20016133d980df3d072f5)
+  → `@mokup/playground@0.0.8`
+
 ## 1.0.3
 
 ### Patch Changes
