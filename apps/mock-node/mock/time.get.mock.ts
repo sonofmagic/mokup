@@ -1,6 +1,9 @@
+import { faker } from '@faker-js/faker'
+
 const rule = {
   handler: () => ({
-    now: new Date().toISOString(),
+    now: faker.date.recent({ days: 14 }).toISOString(),
+    timezone: faker.location.timeZone(),
   }),
 }
 

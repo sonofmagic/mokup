@@ -1,10 +1,11 @@
 import type { RouteRule } from 'mokup'
+import { faker } from '@faker-js/faker'
 
 const rule: RouteRule = {
-  handler: {
+  handler: () => ({
     ok: true,
-    message: 'Rule-based handler response.',
-  },
+    message: faker.lorem.sentence(),
+  }),
 }
 
 export default rule

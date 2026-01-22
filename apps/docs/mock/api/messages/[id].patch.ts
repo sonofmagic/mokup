@@ -1,4 +1,5 @@
 import type { RequestHandler } from 'mokup'
+import { faker } from '@faker-js/faker'
 
 const handler: RequestHandler = (c) => {
   const rawId = c.req.param('id') ?? 'msg_unknown'
@@ -15,8 +16,8 @@ const handler: RequestHandler = (c) => {
       id,
       subject: displayValue,
       status: 'unread',
-      createdAt: '2026-01-01T12:00:00.000Z',
-      updatedAt: '2026-01-19T12:00:00.000Z',
+      createdAt: faker.date.recent({ days: 90 }).toISOString(),
+      updatedAt: faker.date.recent({ days: 30 }).toISOString(),
       ...defaults,
     },
   }

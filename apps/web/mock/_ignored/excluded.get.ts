@@ -1,10 +1,11 @@
 import type { RouteRule } from 'mokup'
+import { faker } from '@faker-js/faker'
 
 const rule: RouteRule = {
-  handler: {
+  handler: () => ({
     ok: false,
-    note: 'This file should be excluded by the plugin.',
-  },
+    note: faker.lorem.sentence(),
+  }),
 }
 
 export default rule

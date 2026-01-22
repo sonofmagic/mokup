@@ -1,4 +1,5 @@
 import type { RequestHandler } from 'mokup'
+import { faker } from '@faker-js/faker'
 
 const handler: RequestHandler = (c) => {
   const rawId = c.req.param('id') ?? 'org_unknown'
@@ -6,6 +7,7 @@ const handler: RequestHandler = (c) => {
   return {
     ok: true,
     id,
+    deletedAt: faker.date.recent({ days: 14 }).toISOString(),
   }
 }
 

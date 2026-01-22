@@ -32,3 +32,29 @@ export default {
 ```
 
 Array exports are supported, but each entry still uses file-based routing.
+
+## Faker integration
+
+Use `@faker-js/faker` in TS/JS handlers to generate realistic mock data:
+
+```ts
+import type { RequestHandler } from 'mokup'
+import { faker } from '@faker-js/faker'
+
+const handler: RequestHandler = () => ({
+  id: faker.string.uuid(),
+  name: faker.person.fullName(),
+  email: faker.internet.email(),
+  createdAt: faker.date.recent({ days: 30 }).toISOString(),
+})
+
+export default handler
+```
+
+Optional: seed the generator for reproducible output (place this once in a shared module):
+
+```ts
+import { faker } from '@faker-js/faker'
+
+faker.seed(123)
+```

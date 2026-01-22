@@ -9,6 +9,7 @@
     "typecheck": "tsc -p tsconfig.json --noEmit"
   },
   "dependencies": {
+    "@faker-js/faker": "^9.6.0",
     "mokup": "workspace:*",
     "vue": "^3.5.27"
   },

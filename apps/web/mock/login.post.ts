@@ -1,4 +1,5 @@
 import type { RequestHandler, RouteRule } from 'mokup'
+import { faker } from '@faker-js/faker'
 
 const handler: RequestHandler = async (c) => {
   await new Promise(resolve => setTimeout(resolve, 150))
@@ -9,15 +10,15 @@ const handler: RequestHandler = async (c) => {
   if (username === 'mokup' && password === '123456') {
     return {
       ok: true,
-      message: 'Access granted. Welcome to the mock channel.',
-      token: 'mock-token-7d91',
+      message: faker.lorem.sentence(),
+      token: faker.string.alphanumeric({ length: 18, casing: 'lower' }),
     }
   }
   c.status(401)
   return {
     ok: false,
-    message: 'Invalid credentials.',
-    hint: 'Try mokup / 123456',
+    message: faker.lorem.sentence(),
+    hint: `Try ${faker.helpers.arrayElement(['mokup', 'demo'])} / 123456`,
   }
 }
 

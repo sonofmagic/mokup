@@ -1,4 +1,5 @@
 import type { RequestHandler } from 'mokup'
+import { faker } from '@faker-js/faker'
 
 const handler: RequestHandler = async (c) => {
   const payload = await c.req.json().catch(() => ({}))
@@ -10,15 +11,17 @@ const handler: RequestHandler = async (c) => {
     return {
       ok: false,
       error: 'invalid_credentials',
+      requestId: faker.string.uuid(),
     }
   }
   return {
-    token: 'mokup-demo-token',
-    expiresIn: 3600,
+    token: faker.string.alphanumeric({ length: 24, casing: 'lower' }),
+    expiresIn: faker.number.int({ min: 900, max: 7200 }),
+    requestId: faker.string.uuid(),
     user: {
-      id: 'usr_1001',
-      name: 'Demo User',
-      email: 'demo@example.com',
+      id: `usr_${faker.string.alphanumeric({ length: 6, casing: 'lower' })}`,
+      name: faker.person.fullName(),
+      email: faker.internet.email(),
     },
   }
 }

@@ -9,6 +9,7 @@
     "typecheck": "tsc -p tsconfig.json --noEmit"
   },
   "dependencies": {
+    "@faker-js/faker": "^9.6.0",
     "express": "^5.2.1",
     "mokup": "workspace:*"
   },

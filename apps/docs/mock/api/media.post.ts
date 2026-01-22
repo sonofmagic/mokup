@@ -1,15 +1,16 @@
 import type { RequestHandler } from 'mokup'
+import { faker } from '@faker-js/faker'
 
 const handler: RequestHandler = (c) => {
   c.status(201)
   return {
     ok: true,
     data: {
-      id: 'med_2001',
+      id: `med_${faker.string.alphanumeric({ length: 6, casing: 'lower' })}`,
       name: 'Media 2001',
       status: 'ready',
-      createdAt: '2026-01-19T12:00:00.000Z',
-      updatedAt: '2026-01-19T12:00:00.000Z',
+      createdAt: faker.date.recent({ days: 90 }).toISOString(),
+      updatedAt: faker.date.recent({ days: 30 }).toISOString(),
       type: 'image',
       url: 'https://cdn.example.com/media.png',
       size: 2048,

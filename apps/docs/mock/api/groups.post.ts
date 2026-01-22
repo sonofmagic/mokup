@@ -1,15 +1,16 @@
 import type { RequestHandler } from 'mokup'
+import { faker } from '@faker-js/faker'
 
 const handler: RequestHandler = (c) => {
   c.status(201)
   return {
     ok: true,
     data: {
-      id: 'grp_2001',
+      id: `grp_${faker.string.alphanumeric({ length: 6, casing: 'lower' })}`,
       name: 'Group 2001',
       status: 'active',
-      createdAt: '2026-01-19T12:00:00.000Z',
-      updatedAt: '2026-01-19T12:00:00.000Z',
+      createdAt: faker.date.recent({ days: 90 }).toISOString(),
+      updatedAt: faker.date.recent({ days: 30 }).toISOString(),
       membersCount: 12,
       privacy: 'private',
     },

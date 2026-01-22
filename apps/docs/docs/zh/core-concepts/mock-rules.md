@@ -32,3 +32,29 @@ export default {
 ```
 
 数组导出仍使用文件路由生成路径，重复路由会提示告警。
+
+## Faker 集成
+
+在 TS/JS 处理器中使用 `@faker-js/faker` 生成更真实的随机数据：
+
+```ts
+import type { RequestHandler } from 'mokup'
+import { faker } from '@faker-js/faker'
+
+const handler: RequestHandler = () => ({
+  id: faker.string.uuid(),
+  name: faker.person.fullName(),
+  email: faker.internet.email(),
+  createdAt: faker.date.recent({ days: 30 }).toISOString(),
+})
+
+export default handler
+```
+
+可选：通过 seed 保证可复现的数据（建议放在共享模块中统一设置一次）：
+
+```ts
+import { faker } from '@faker-js/faker'
+
+faker.seed(123)
+```

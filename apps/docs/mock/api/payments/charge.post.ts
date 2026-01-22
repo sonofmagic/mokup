@@ -1,4 +1,5 @@
 import type { RequestHandler } from 'mokup'
+import { faker } from '@faker-js/faker'
 
 const handler: RequestHandler = async (c) => {
   const payload = await c.req.json().catch(() => ({}))
@@ -10,13 +11,18 @@ const handler: RequestHandler = async (c) => {
     return {
       ok: false,
       error: 'payment_required',
+      requestId: faker.string.uuid(),
     }
   }
   return {
     ok: true,
-    paymentId: 'pay_2001',
-    status: 'authorized',
-    amount: { amount: 120, currency: 'USD' },
+    paymentId: `pay_${faker.string.alphanumeric({ length: 6, casing: 'lower' })}`,
+    status: faker.helpers.arrayElement(['authorized', 'captured', 'pending']),
+    amount: {
+      amount: faker.number.int({ min: 20, max: 2000 }),
+      currency: faker.finance.currencyCode(),
+    },
+    requestId: faker.string.uuid(),
   }
 }
 
