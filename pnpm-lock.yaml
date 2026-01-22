@@ -471,6 +471,9 @@ importers:
       '@mokup/shared':
         specifier: workspace:*
         version: link:../shared
+      tsx:
+        specifier: 'catalog:'
+        version: 4.21.0
     devDependencies:
       '@types/node':
         specifier: 'catalog:'

@@ -8,8 +8,52 @@ import { build as esbuild } from '@mokup/shared/esbuild'
 import { parse as parseJsonc } from '@mokup/shared/jsonc-parser'
 
 import { extname } from '@mokup/shared/pathe'
+import { ensureTsxRegister } from './tsx-loader'
 
-async function loadModule(file: string) {
+function isUnknownFileExtensionError(error: unknown) {
+  if (!error || typeof error !== 'object') {
+    return false
+  }
+  const code = (error as { code?: string }).code
+  if (code === 'ERR_UNKNOWN_FILE_EXTENSION') {
+    return true
+  }
+  const message = (error as { message?: string }).message
+  return typeof message === 'string' && message.includes('Unknown file extension')
+}
+
+async function loadTsModule(file: string, logger: Logger) {
+  const cacheBust = Date.now()
+  const fileUrl = `${pathToFileURL(file).href}?t=${cacheBust}`
+  const registered = await ensureTsxRegister(logger)
+  if (registered) {
+    try {
+      return await import(fileUrl)
+    }
+    catch (error) {
+      if (!isUnknownFileExtensionError(error)) {
+        throw error
+      }
+    }
+  }
+  const result = await esbuild({
+    entryPoints: [file],
+    bundle: true,
+    format: 'esm',
+    platform: 'node',
+    sourcemap: 'inline',
+    target: 'es2020',
+    write: false,
+  })
+  const output = result.outputFiles[0]
+  const code = output?.text ?? ''
+  const dataUrl = `data:text/javascript;base64,${Buffer.from(code).toString(
+    'base64',
+  )}`
+  return import(`${dataUrl}#${cacheBust}`)
+}
+
+async function loadModule(file: string, logger: Logger) {
   const ext = extname(file).toLowerCase()
   if (ext === '.cjs') {
     const require = createRequire(import.meta.url)
@@ -20,21 +64,7 @@ async function loadModule(file: string) {
     return import(`${pathToFileURL(file).href}?t=${Date.now()}`)
   }
   if (ext === '.ts') {
-    const result = await esbuild({
-      entryPoints: [file],
-      bundle: true,
-      format: 'esm',
-      platform: 'node',
-      sourcemap: 'inline',
-      target: 'es2020',
-      write: false,
-    })
-    const output = result.outputFiles[0]
-    const code = output?.text ?? ''
-    const dataUrl = `data:text/javascript;base64,${Buffer.from(code).toString(
-      'base64',
-    )}`
-    return import(`${dataUrl}#${Date.now()}`)
+    return loadTsModule(file, logger)
   }
   return null
 }
@@ -76,7 +106,7 @@ export async function loadRules(
     ]
   }
 
-  const mod = await loadModule(file)
+  const mod = await loadModule(file, logger)
   const value = (mod as { default?: unknown } | undefined)?.default ?? mod
   if (!value) {
     return []
