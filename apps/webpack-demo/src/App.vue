@@ -309,7 +309,7 @@ pre {
   margin: 0;
   font-size: 12px;
   line-height: 1.5;
-  word-break: break-word;
+  overflow-wrap: break-word;
   white-space: pre-wrap;
   background: rgb(29 26 43 / 6%);
   border-radius: 12px;

@@ -60,7 +60,7 @@
   "dependencies": {
     "chokidar": "^5.0.0",
     "esbuild": "^0.27.2",
-    "hono": "^4.11.4",
+    "hono": "^4.11.5",
     "jsonc-parser": "^3.3.1",
     "pathe": "^2.0.3"
   },
