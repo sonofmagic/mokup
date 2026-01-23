@@ -8,6 +8,8 @@ export default defineBuildConfig({
     'src/chokidar',
     'src/esbuild',
     'src/hono',
+    'src/logger',
+    'src/logger.browser',
     'src/pathe',
     'src/jsonc-parser',
   ],

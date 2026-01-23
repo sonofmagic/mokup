@@ -97,10 +97,5 @@ export interface ResolvedRoute {
 
 export type RouteTable = ResolvedRoute[]
 
-export interface Logger {
-  info: (...args: unknown[]) => void
-  warn: (...args: unknown[]) => void
-  error: (...args: unknown[]) => void
-}
-
 export type { Context, MiddlewareHandler } from '@mokup/shared/hono'
+export type { Logger } from '@mokup/shared/logger'

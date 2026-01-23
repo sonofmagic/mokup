@@ -58,6 +58,7 @@
     "@icebreakers/eslint-config": "^1.6.15",
     "@icebreakers/monorepo": "latest",
     "@icebreakers/stylelint-config": "^2.0.1",
+    "@mokup/shared": "workspace:*",
     "@playwright/test": "^1.55.0",
     "@types/fs-extra": "^11.0.4",
     "@types/node": "catalog:",

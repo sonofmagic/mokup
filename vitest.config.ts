@@ -1,6 +1,7 @@
 import fs from 'node:fs'
 import path from 'node:path'
 import { fileURLToPath } from 'node:url'
+import { createLogger } from '@mokup/shared/logger'
 import { defineConfig } from 'vitest/config'
 import YAML from 'yaml'
 
@@ -14,6 +15,7 @@ const CONFIG_FILENAMES = [
   'vitest.config.cjs',
   'vitest.config.mjs',
 ] as const
+const logger = createLogger({ tag: 'vitest' })
 
 function extractBaseDirFromGlob(pattern: string): string | null {
   if (!pattern) {
@@ -50,7 +52,7 @@ function loadProjectRootsFromWorkspace(): string[] {
     return roots.length ? Array.from(new Set(roots)) : []
   }
   catch (error) {
-    console.warn('[vitest] Failed to parse pnpm-workspace.yaml, no project roots will be used.', error)
+    logger.warn('Failed to parse pnpm-workspace.yaml, no project roots will be used.', error)
     return []
   }
 }
@@ -58,7 +60,7 @@ function loadProjectRootsFromWorkspace(): string[] {
 const PROJECT_ROOTS = loadProjectRootsFromWorkspace()
 
 if (!PROJECT_ROOTS.length) {
-  console.warn('[vitest] No project roots detected. Check pnpm-workspace.yaml to define workspace packages.')
+  logger.warn('No project roots detected. Check pnpm-workspace.yaml to define workspace packages.')
 }
 
 function findConfig(basePath: string): string | null {

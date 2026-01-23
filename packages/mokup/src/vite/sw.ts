@@ -162,6 +162,7 @@ export function buildSwScript(params: {
   })
 
   const imports: string[] = [
+    'import { createLogger } from \'@mokup/shared/logger\'',
     `import { createRuntimeApp, handle } from ${JSON.stringify(runtimeImportPath)}`,
   ]
   const moduleEntries: Array<{ id: string, name: string, kind: 'rule' | 'middleware' }> = []
@@ -176,6 +177,8 @@ export function buildSwScript(params: {
   const lines: string[] = []
   lines.push(...imports, '')
   lines.push(
+    'const logger = createLogger()',
+    '',
     'const resolveModuleExport = (mod) => mod?.default ?? mod',
     '',
     'const toRuntimeRule = (value) => {',
@@ -279,7 +282,7 @@ export function buildSwScript(params: {
     '}',
     '',
     'registerHandler().catch((error) => {',
-    '  console.error(\'[mokup] Failed to build service worker app:\', error)',
+    '  logger.error(\'Failed to build service worker app:\', error)',
     '})',
     '',
   )

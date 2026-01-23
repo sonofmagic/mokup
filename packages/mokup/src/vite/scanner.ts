@@ -39,6 +39,7 @@ const silentLogger: Logger = {
   info: () => {},
   warn: () => {},
   error: () => {},
+  log: () => {},
 }
 
 function resolveSkipRoute(params: {

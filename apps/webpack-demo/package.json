@@ -4,7 +4,9 @@
   "version": "0.0.5",
   "private": true,
   "scripts": {
+    "predev": "pnpm --filter mokup build",
     "dev": "tsx node_modules/webpack-cli/bin/cli.js serve --config webpack.config.ts --mode development",
+    "prebuild": "pnpm --filter mokup build",
     "build": "tsx node_modules/webpack-cli/bin/cli.js --config webpack.config.ts --mode production",
     "typecheck": "tsc -p tsconfig.json --noEmit"
   },

@@ -2,8 +2,11 @@ import type { FetchServerOptions, FetchServerOptionsConfig } from '@mokup/server
 import type { BuildOptions } from './manifest/types'
 import process from 'node:process'
 import { createFetchServer, serve } from '@mokup/server/node'
+import { createLogger } from '@mokup/shared/logger'
 import { Command } from 'commander'
 import { buildManifest } from './manifest'
+
+const logger = createLogger()
 
 function collectValues(value: string, previous: string[] | undefined) {
   return [...(previous ?? []), value]
@@ -27,7 +30,7 @@ function toBuildOptions(options: {
   const buildOptions: BuildOptions = {
     handlers: options.handlers !== false,
     log: (message: string) => {
-      console.log(message)
+      logger.log(message)
     },
   }
   if (options.dir && options.dir.length > 0) {
@@ -153,9 +156,9 @@ export function createCli() {
         (info) => {
           const resolvedHost = typeof info === 'string' ? host : info?.address ?? host
           const resolvedPort = typeof info === 'string' ? port : info?.port ?? port
-          console.log(`Mock server ready at http://${resolvedHost}:${resolvedPort}`)
+          logger.info(`Mock server ready at http://${resolvedHost}:${resolvedPort}`)
           if (playgroundEnabled) {
-            console.log(`Playground at http://${resolvedHost}:${resolvedPort}${playgroundPath}`)
+            logger.info(`Playground at http://${resolvedHost}:${resolvedPort}${playgroundPath}`)
           }
         },
       )
