@@ -1,7 +1,6 @@
 import type { Manifest, ManifestResponse } from '@mokup/runtime'
 import type { ResolvedRoute, RouteTable } from './types'
 
-import { Buffer } from 'node:buffer'
 import { isAbsolute, relative, resolve } from '@mokup/shared/pathe'
 import { toPosix } from './utils'
 
@@ -78,15 +77,67 @@ function shouldModuleize(handler: ResolvedRoute['handler']) {
   return false
 }
 
+const BASE64_ALPHABET
+  = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/'
+
+function getNodeBuffer() {
+  if (typeof globalThis === 'undefined') {
+    return null
+  }
+  // eslint-disable-next-line node/prefer-global/buffer
+  const buffer = (globalThis as {
+    Buffer?: {
+      from: (data: Uint8Array) => { toString: (encoding: 'base64') => string }
+    }
+  }).Buffer
+  return buffer ?? null
+}
+
+function getBtoa() {
+  if (typeof globalThis === 'undefined') {
+    return null
+  }
+  const btoaFn = (globalThis as { btoa?: (data: string) => string }).btoa
+  return typeof btoaFn === 'function' ? btoaFn : null
+}
+
+function encodeBase64(bytes: Uint8Array) {
+  const buffer = getNodeBuffer()
+  if (buffer) {
+    return buffer.from(bytes).toString('base64')
+  }
+  const btoaFn = getBtoa()
+  if (btoaFn) {
+    let binary = ''
+    const chunkSize = 0x8000
+    for (let i = 0; i < bytes.length; i += chunkSize) {
+      const chunk = bytes.subarray(i, i + chunkSize)
+      binary += String.fromCharCode(...chunk)
+    }
+    return btoaFn(binary)
+  }
+  let output = ''
+  for (let i = 0; i < bytes.length; i += 3) {
+    const a = bytes[i]
+    const b = i + 1 < bytes.length ? bytes[i + 1] : 0
+    const c = i + 2 < bytes.length ? bytes[i + 2] : 0
+    const triple = (a << 16) | (b << 8) | c
+    output += BASE64_ALPHABET[(triple >> 18) & 63]
+    output += BASE64_ALPHABET[(triple >> 12) & 63]
+    output += i + 1 < bytes.length
+      ? BASE64_ALPHABET[(triple >> 6) & 63]
+      : '='
+    output += i + 2 < bytes.length ? BASE64_ALPHABET[triple & 63] : '='
+  }
+  return output
+}
+
 function toBinaryBody(handler: ResolvedRoute['handler']) {
   if (handler instanceof ArrayBuffer) {
-    return Buffer.from(new Uint8Array(handler)).toString('base64')
+    return encodeBase64(new Uint8Array(handler))
   }
   if (handler instanceof Uint8Array) {
-    return Buffer.from(handler).toString('base64')
-  }
-  if (Buffer.isBuffer(handler)) {
-    return handler.toString('base64')
+    return encodeBase64(handler)
   }
   return null
 }

@@ -1,20 +1,18 @@
-import type { Server } from 'node:http'
 import type { RouteConfigInfo, RouteIgnoreInfo, RouteSkipInfo } from './dev/scanner'
-import type { Logger, MiddlewareHandler, ResolvedRoute, RouteTable } from './dev/types'
+import type { RouteTable } from './dev/types'
 
 import type {
-  FetchServerOptions,
-  FetchServerOptionsConfig,
   FetchServerOptionsInput,
 } from './fetch-options'
-import { cwd as nodeCwd } from 'node:process'
-import { Hono as HonoApp } from '@mokup/shared/hono'
-import { createHonoApp } from './dev/hono'
 import { createLogger } from './dev/logger'
-import { registerPlaygroundRoutes, resolvePlaygroundOptions } from './dev/playground'
+import { resolvePlaygroundOptions } from './dev/playground'
 import { sortRoutes } from './dev/routes'
 import { scanRoutes } from './dev/scanner'
-import { createDebouncer, isInDirs, resolveDirs } from './dev/utils'
+import { createDebouncer, resolveDirs } from './dev/utils'
+import { buildFetchServerApp } from './fetch-server/app'
+import { normalizeOptions, resolveAllDirs, resolveRoot } from './fetch-server/options'
+import { createPlaygroundWs } from './fetch-server/playground-ws'
+import { createWatcher } from './fetch-server/watcher'
 
 export type {
   FetchServerOptions,
@@ -47,218 +45,8 @@ export interface FetchServer {
   close?: () => Promise<void>
 }
 
-interface RuntimeDeno {
-  cwd?: () => string
-  watchFs?: (paths: string | string[], options?: { recursive?: boolean }) => {
-    close: () => void
-    [Symbol.asyncIterator]: () => AsyncIterator<{ kind: string, paths: string[] }>
-  }
-}
-
-function normalizeEntries(
-  entries: FetchServerOptions | FetchServerOptions[] | undefined,
-): FetchServerOptions[] {
-  const list = Array.isArray(entries)
-    ? entries
-    : entries
-      ? [entries]
-      : [{}]
-  return list.length > 0 ? list : [{}]
-}
-
-function normalizeOptions(
-  options: FetchServerOptionsInput,
-): { entries: FetchServerOptions[], playground?: FetchServerOptionsConfig['playground'] } {
-  return {
-    entries: normalizeEntries(options.entries),
-    playground: options.playground,
-  }
-}
-
-function resolveFirst<T>(
-  list: FetchServerOptions[],
-  getter: (entry: FetchServerOptions) => T | undefined,
-): T | undefined {
-  for (const entry of list) {
-    const value = getter(entry)
-    if (typeof value !== 'undefined') {
-      return value
-    }
-  }
-  return undefined
-}
-
-function resolveRoot(list: FetchServerOptions[]) {
-  const explicit = resolveFirst(list, entry => entry.root)
-  if (explicit) {
-    return explicit
-  }
-  const deno = (globalThis as { Deno?: RuntimeDeno }).Deno
-  if (deno?.cwd) {
-    return deno.cwd()
-  }
-  return nodeCwd()
-}
-
-function resolveAllDirs(list: FetchServerOptions[], root: string) {
-  const dirs: string[] = []
-  const seen = new Set<string>()
-  for (const entry of list) {
-    for (const dir of resolveDirs(entry.dir, root)) {
-      if (seen.has(dir)) {
-        continue
-      }
-      seen.add(dir)
-      dirs.push(dir)
-    }
-  }
-  return dirs
-}
-
-type RouteCounts = Record<string, number>
-interface PlaygroundWsSnapshot {
-  type: 'snapshot'
-  total: number
-  perRoute: RouteCounts
-}
-interface PlaygroundWsIncrement {
-  type: 'increment'
-  routeKey: string
-  total: number
-}
 interface NodeWebSocketServer {
   on: (event: string, listener: (...args: unknown[]) => void) => void
-}
-type HonoInstance = InstanceType<typeof HonoApp>
-type PlaygroundWsHandler = MiddlewareHandler<any, string, { outputFormat: 'ws' }>
-
-function buildApp(params: {
-  routes: RouteTable
-  disabledRoutes: RouteSkipInfo[]
-  ignoredRoutes: RouteIgnoreInfo[]
-  configFiles: RouteConfigInfo[]
-  disabledConfigFiles: RouteConfigInfo[]
-  dirs: string[]
-  playground: ReturnType<typeof resolvePlaygroundOptions>
-  root: string
-  logger: Logger
-  onResponse?: (route: ResolvedRoute, response: Response) => void | Promise<void>
-  wsHandler?: PlaygroundWsHandler
-}) {
-  const app = new HonoApp({ strict: false })
-  registerPlaygroundRoutes({
-    app,
-    routes: params.routes,
-    disabledRoutes: params.disabledRoutes,
-    ignoredRoutes: params.ignoredRoutes,
-    configFiles: params.configFiles,
-    disabledConfigFiles: params.disabledConfigFiles,
-    dirs: params.dirs,
-    logger: params.logger,
-    config: params.playground,
-    root: params.root,
-  })
-  if (params.wsHandler && params.playground.enabled) {
-    app.get(`${params.playground.path}/ws`, params.wsHandler)
-  }
-  if (params.routes.length > 0) {
-    const mockAppOptions = params.onResponse ? { onResponse: params.onResponse } : {}
-    const mockApp = createHonoApp(params.routes, mockAppOptions)
-    app.route('/', mockApp)
-  }
-  return app
-}
-
-async function createDenoWatcher(params: {
-  dirs: string[]
-  onChange: () => void
-  logger: Logger
-}): Promise<null | { close: () => Promise<void> }> {
-  const deno = (globalThis as { Deno?: RuntimeDeno }).Deno
-  if (!deno?.watchFs) {
-    return null
-  }
-  const watcher = deno.watchFs(params.dirs, { recursive: true })
-  let closed = false
-  ;(async () => {
-    try {
-      for await (const event of watcher) {
-        if (closed) {
-          break
-        }
-        if (event.kind === 'access') {
-          continue
-        }
-        params.onChange()
-      }
-    }
-    catch (error) {
-      if (!closed) {
-        params.logger.warn('Watcher failed:', error)
-      }
-    }
-  })()
-
-  return {
-    close: async () => {
-      closed = true
-      watcher.close()
-    },
-  }
-}
-
-async function createChokidarWatcher(params: {
-  dirs: string[]
-  onChange: () => void
-}): Promise<null | { close: () => Promise<void> }> {
-  try {
-    const { default: chokidar } = await import('@mokup/shared/chokidar')
-    const watcher = chokidar.watch(params.dirs, { ignoreInitial: true })
-    watcher.on('add', (file) => {
-      if (isInDirs(file, params.dirs)) {
-        params.onChange()
-      }
-    })
-    watcher.on('change', (file) => {
-      if (isInDirs(file, params.dirs)) {
-        params.onChange()
-      }
-    })
-    watcher.on('unlink', (file) => {
-      if (isInDirs(file, params.dirs)) {
-        params.onChange()
-      }
-    })
-    return {
-      close: async () => {
-        await watcher.close()
-      },
-    }
-  }
-  catch {
-    return null
-  }
-}
-
-async function createWatcher(params: {
-  enabled: boolean
-  dirs: string[]
-  onChange: () => void
-  logger: Logger
-}) {
-  if (!params.enabled || params.dirs.length === 0) {
-    return null
-  }
-  const denoWatcher = await createDenoWatcher(params)
-  if (denoWatcher) {
-    return denoWatcher
-  }
-  const chokidarWatcher = await createChokidarWatcher(params)
-  if (chokidarWatcher) {
-    return chokidarWatcher
-  }
-  params.logger.warn('Watcher is not available in this runtime; file watching disabled.')
-  return null
 }
 
 /**
@@ -284,90 +72,14 @@ export async function createFetchServer(
   const playgroundConfig = resolvePlaygroundOptions(normalized.playground)
   const dirs = resolveAllDirs(optionList, root)
 
-  const routeCounts: RouteCounts = {}
-  const wsClients = new Set<{ send: (data: string) => void }>()
-  let totalCount = 0
-  let wsHandler: PlaygroundWsHandler | undefined
-  let injectWebSocket: ((server: NodeWebSocketServer) => void) | undefined
-
-  function getRouteKey(route: ResolvedRoute) {
-    return `${route.method} ${route.template}`
-  }
-
-  function buildSnapshot(): PlaygroundWsSnapshot {
-    return {
-      type: 'snapshot',
-      total: totalCount,
-      perRoute: { ...routeCounts },
-    }
-  }
-
-  function broadcast(payload: PlaygroundWsSnapshot | PlaygroundWsIncrement) {
-    if (wsClients.size === 0) {
-      return
-    }
-    const message = JSON.stringify(payload)
-    for (const client of wsClients) {
-      try {
-        client.send(message)
-      }
-      catch {
-        wsClients.delete(client)
-      }
-    }
-  }
-
-  function registerWsClient(client: { send: (data: string) => void }) {
-    wsClients.add(client)
-    try {
-      client.send(JSON.stringify(buildSnapshot()))
-    }
-    catch {
-      wsClients.delete(client)
-    }
-  }
-
-  function handleRouteResponse(route: ResolvedRoute) {
-    const routeKey = getRouteKey(route)
-    routeCounts[routeKey] = (routeCounts[routeKey] ?? 0) + 1
-    totalCount += 1
-    broadcast({ type: 'increment', routeKey, total: totalCount })
-  }
-
-  async function setupPlaygroundWebSocket(app: HonoInstance) {
-    if (!playgroundConfig.enabled) {
-      return
-    }
-    try {
-      const mod = await import('@hono/node-ws')
-      const { createNodeWebSocket } = mod
-      const { upgradeWebSocket, injectWebSocket: inject } = createNodeWebSocket({ app })
-      wsHandler = upgradeWebSocket(() => ({
-        onOpen: (_event, ws) => {
-          registerWsClient(ws)
-        },
-        onClose: (_event, ws) => {
-          wsClients.delete(ws)
-        },
-        onMessage: () => {
-          // ignore client messages
-        },
-      }))
-      injectWebSocket = (server) => {
-        inject(server as Server)
-      }
-    }
-    catch {
-      // ignore websocket setup failures
-    }
-  }
+  const playgroundWs = createPlaygroundWs(playgroundConfig)
 
   let routes: RouteTable = []
   let disabledRoutes: RouteSkipInfo[] = []
   let ignoredRoutes: RouteIgnoreInfo[] = []
   let configFiles: RouteConfigInfo[] = []
   let disabledConfigFiles: RouteConfigInfo[] = []
-  let app = buildApp({
+  let app = buildFetchServerApp({
     routes,
     disabledRoutes,
     ignoredRoutes,
@@ -377,8 +89,8 @@ export async function createFetchServer(
     playground: playgroundConfig,
     root,
     logger,
-    onResponse: handleRouteResponse,
-    ...(wsHandler ? { wsHandler } : {}),
+    onResponse: playgroundWs.handleRouteResponse,
+    ...(playgroundWs.getWsHandler() ? { wsHandler: playgroundWs.getWsHandler() } : {}),
   })
 
   const refreshRoutes = async () => {
@@ -416,7 +128,7 @@ export async function createFetchServer(
       const resolvedConfigs = Array.from(configMap.values())
       configFiles = resolvedConfigs.filter(entry => entry.enabled)
       disabledConfigFiles = resolvedConfigs.filter(entry => !entry.enabled)
-      app = buildApp({
+      app = buildFetchServerApp({
         routes,
         disabledRoutes,
         ignoredRoutes,
@@ -426,8 +138,8 @@ export async function createFetchServer(
         playground: playgroundConfig,
         root,
         logger,
-        onResponse: handleRouteResponse,
-        ...(wsHandler ? { wsHandler } : {}),
+        onResponse: playgroundWs.handleRouteResponse,
+        ...(playgroundWs.getWsHandler() ? { wsHandler: playgroundWs.getWsHandler() } : {}),
       })
       logger.info(`Loaded ${routes.length} mock routes.`)
     }
@@ -437,7 +149,8 @@ export async function createFetchServer(
   }
 
   await refreshRoutes()
-  await setupPlaygroundWebSocket(app)
+  await playgroundWs.setupPlaygroundWebSocket(app)
+  const wsHandler = playgroundWs.getWsHandler()
   if (wsHandler && playgroundConfig.enabled) {
     app.get(`${playgroundConfig.path}/ws`, wsHandler)
   }
@@ -458,7 +171,9 @@ export async function createFetchServer(
     fetch,
     refresh: refreshRoutes,
     getRoutes: () => routes,
-    ...(injectWebSocket ? { injectWebSocket } : {}),
+    ...(playgroundWs.getInjectWebSocket()
+      ? { injectWebSocket: playgroundWs.getInjectWebSocket() }
+      : {}),
   }
 
   if (watcher) {

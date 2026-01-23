@@ -1,235 +1,25 @@
 import type { RouteToken } from '@mokup/runtime'
 import type { Ref } from 'vue'
-import type { BodyType, PlaygroundRoute, RouteParamField, RouteParamKind } from '../types'
+import type { BodyType, PlaygroundRoute, RouteParamField } from '../types'
+import type { RouteCounts } from './playground-request/websocket'
 import { parseRouteTemplate } from '@mokup/runtime'
 import { computed, getCurrentInstance, onBeforeUnmount, ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
-import { applyQuery, parseJsonInput } from '../utils/request'
+import { parseJsonInput } from '../utils/request'
+import { buildDisplayPath, buildRouteParams } from './playground-request/params'
+import { buildQueryString } from './playground-request/query'
+import { createRequestRunner } from './playground-request/request-runner'
+import { isMokupController, resolveMokupRegistration } from './playground-request/service-worker'
+import { parseWsMessage, resolvePlaygroundWsUrl } from './playground-request/websocket'
 
 let swReadyPromise: Promise<void> | null = null
-
-function isMokupScriptUrl(url: string) {
-  try {
-    return new URL(url).pathname.includes('mokup-sw')
-  }
-  catch {
-    return url.includes('mokup-sw')
-  }
-}
-
-function isMokupRegistration(registration: ServiceWorkerRegistration) {
-  const scriptUrls = [
-    registration.active?.scriptURL,
-    registration.waiting?.scriptURL,
-    registration.installing?.scriptURL,
-  ].filter((entry): entry is string => typeof entry === 'string')
-  return scriptUrls.some(url => isMokupScriptUrl(url))
-}
-
-function isMokupController(controller: ServiceWorker | null | undefined) {
-  return !!controller && isMokupScriptUrl(controller.scriptURL)
-}
-
-async function resolveMokupRegistration() {
-  if (typeof window === 'undefined' || !('serviceWorker' in navigator)) {
-    return null
-  }
-  try {
-    const registration = await navigator.serviceWorker.getRegistration()
-    if (registration && isMokupRegistration(registration)) {
-      return registration
-    }
-  }
-  catch {
-    // Ignore lookup errors.
-  }
-  try {
-    const registrations = await navigator.serviceWorker.getRegistrations()
-    return registrations.find(isMokupRegistration) ?? null
-  }
-  catch {
-    return null
-  }
-}
-
-type RouteCounts = Record<string, number>
-interface PlaygroundWsSnapshot {
-  type: 'snapshot'
-  total: number
-  perRoute: RouteCounts
-}
-interface PlaygroundWsIncrement {
-  type: 'increment'
-  routeKey: string
-  total: number
-}
-
-function formatParamToken(kind: RouteParamKind, name: string) {
-  if (kind === 'catchall') {
-    return `[...${name}]`
-  }
-  if (kind === 'optional-catchall') {
-    return `[[...${name}]]`
-  }
-  return `[${name}]`
-}
-
-function buildRouteParams(tokens: RouteToken[]) {
-  const params: RouteParamField[] = []
-  const seen = new Set<string>()
-  for (const token of tokens) {
-    if (token.type === 'static') {
-      continue
-    }
-    if (seen.has(token.name)) {
-      continue
-    }
-    seen.add(token.name)
-    const kind = token.type
-    params.push({
-      id: `${kind}:${token.name}`,
-      name: token.name,
-      kind,
-      token: formatParamToken(kind, token.name),
-      required: kind !== 'optional-catchall',
-    })
-  }
-  return params
-}
-
-function splitCatchallInput(value: string) {
-  const trimmed = value.trim().replace(/^\/+|\/+$/g, '')
-  return trimmed ? trimmed.split('/').filter(Boolean) : []
-}
-
-function buildQueryString(query: Record<string, unknown>) {
-  const params = new URLSearchParams()
-  for (const [key, value] of Object.entries(query)) {
-    if (typeof value === 'undefined') {
-      continue
-    }
-    if (Array.isArray(value)) {
-      value.forEach(item => params.append(key, String(item)))
-    }
-    else {
-      params.set(key, String(value))
-    }
-  }
-  const search = params.toString()
-  return search ? `?${search}` : ''
-}
-
-function buildResolvedPath(tokens: RouteToken[], values: Record<string, string>) {
-  const segments: string[] = []
-  const missing = new Set<string>()
-  for (const token of tokens) {
-    if (token.type === 'static') {
-      segments.push(token.value)
-      continue
-    }
-    const rawValue = values[token.name]?.trim() ?? ''
-    if (!rawValue) {
-      if (token.type !== 'optional-catchall') {
-        missing.add(token.name)
-      }
-      continue
-    }
-    if (token.type === 'param') {
-      segments.push(encodeURIComponent(rawValue))
-      continue
-    }
-    const catchallSegments = splitCatchallInput(rawValue).map(encodeURIComponent)
-    if (catchallSegments.length === 0) {
-      if (token.type !== 'optional-catchall') {
-        missing.add(token.name)
-      }
-      continue
-    }
-    segments.push(...catchallSegments)
-  }
-  const path = segments.length > 0 ? `/${segments.join('/')}` : '/'
-  return { path, missing: [...missing] }
-}
-
-function buildDisplayPath(tokens: RouteToken[], values: Record<string, string>) {
-  const segments: string[] = []
-  for (const token of tokens) {
-    if (token.type === 'static') {
-      segments.push(token.value)
-      continue
-    }
-    const rawValue = values[token.name]?.trim() ?? ''
-    if (!rawValue) {
-      if (token.type !== 'optional-catchall') {
-        segments.push(formatParamToken(token.type, token.name))
-      }
-      continue
-    }
-    if (token.type === 'param') {
-      segments.push(encodeURIComponent(rawValue))
-      continue
-    }
-    const catchallSegments = splitCatchallInput(rawValue).map(encodeURIComponent)
-    if (catchallSegments.length === 0) {
-      if (token.type !== 'optional-catchall') {
-        segments.push(formatParamToken(token.type, token.name))
-      }
-      continue
-    }
-    segments.push(...catchallSegments)
-  }
-  return segments.length > 0 ? `/${segments.join('/')}` : '/'
-}
-
-function parseKeyValueInput(input: string) {
-  const trimmed = input.trim()
-  if (!trimmed) {
-    return []
-  }
-  const parts = trimmed.split(/[&\n]/)
-  const entries: Array<[string, string]> = []
-  for (const part of parts) {
-    const segment = part.trim()
-    if (!segment) {
-      continue
-    }
-    const [key, ...rest] = segment.split('=')
-    const normalizedKey = (key ?? '').trim()
-    if (!normalizedKey) {
-      continue
-    }
-    const value = rest.join('=').trim()
-    entries.push([normalizedKey, value])
-  }
-  return entries
-}
-
-function decodeBase64(input: string) {
-  const trimmed = input.trim()
-  if (!trimmed) {
-    return { value: undefined as Uint8Array | undefined }
-  }
-  const normalized = trimmed.startsWith('data:')
-    ? trimmed.split('base64,').pop() ?? ''
-    : trimmed
-  const cleaned = normalized.replace(/\s+/g, '')
-  try {
-    const binary = atob(cleaned)
-    const bytes = new Uint8Array(binary.length)
-    for (let i = 0; i < binary.length; i += 1) {
-      bytes[i] = binary.charCodeAt(i)
-    }
-    return { value: bytes }
-  }
-  catch (err) {
-    return { error: err instanceof Error ? err.message : 'Invalid base64' }
-  }
-}
 
 /**
  * Vue composable for running playground requests and tracking state.
  *
- * @param params - Request configuration.
+ * @param selected - Currently selected route.
+ * @param options - Optional configuration.
+ * @param options.basePath - Optional base path ref for websocket.
  * @returns Reactive request helpers and state.
  *
  * @example
@@ -283,43 +73,19 @@ export function usePlaygroundRequest(
     return routeCounts.value[getRouteKey(route)] ?? 0
   }
 
-  function resolvePlaygroundWsUrl(basePath: string) {
-    const trimmed = basePath.trim()
-    if (!trimmed) {
-      return ''
-    }
-    const normalized = trimmed.startsWith('/') ? trimmed : `/${trimmed}`
-    const path = normalized.endsWith('/') ? normalized.slice(0, -1) : normalized
-    const url = new URL(`${path}/ws`, window.location.origin)
-    url.protocol = url.protocol === 'https:' ? 'wss:' : 'ws:'
-    return url.toString()
-  }
-
-  function applySnapshot(snapshot: PlaygroundWsSnapshot) {
-    routeCounts.value = { ...snapshot.perRoute }
-  }
-
-  function applyIncrement(update: PlaygroundWsIncrement) {
-    routeCounts.value[update.routeKey] = (routeCounts.value[update.routeKey] ?? 0) + 1
-  }
-
   function handleWsMessage(event: MessageEvent) {
     if (typeof event.data !== 'string') {
       return
     }
-    try {
-      const parsed = JSON.parse(event.data) as PlaygroundWsSnapshot | PlaygroundWsIncrement
-      if (parsed.type === 'snapshot' && parsed.perRoute) {
-        applySnapshot(parsed)
-        return
-      }
-      if (parsed.type === 'increment' && typeof parsed.routeKey === 'string') {
-        applyIncrement(parsed)
-      }
+    const parsed = parseWsMessage(event.data)
+    if (!parsed) {
+      return
     }
-    catch {
-      // ignore invalid payloads
+    if (parsed.type === 'snapshot') {
+      routeCounts.value = { ...parsed.perRoute }
+      return
     }
+    routeCounts.value[parsed.routeKey] = (routeCounts.value[parsed.routeKey] ?? 0) + 1
   }
 
   function cleanupWebSocket() {
@@ -444,151 +210,23 @@ export function usePlaygroundRequest(
     })
   }
 
-  function resetResponse() {
-    responseText.value = t('response.empty')
-    responseStatus.value = t('response.idle')
-    responseTime.value = ''
-  }
-
-  async function runRequest() {
-    if (!selected.value) {
-      return
-    }
-    const tokens = routeTokens.value.length > 0
-      ? routeTokens.value
-      : parseRouteTemplate(selected.value.url).tokens
-    const resolved = buildResolvedPath(tokens, paramValues.value)
-    if (resolved.missing.length > 0) {
-      responseText.value = t('errors.routeParams', { params: resolved.missing.join(', ') })
-      return
-    }
-    const requestKey = getRouteKey(selected.value)
-    const parsedQuery = parseJsonInput(queryText.value)
-    if (parsedQuery.error) {
-      responseText.value = t('errors.queryJson', { message: parsedQuery.error })
-      return
-    }
-    const parsedHeaders = parseJsonInput(headersText.value)
-    if (parsedHeaders.error) {
-      responseText.value = t('errors.headersJson', { message: parsedHeaders.error })
-      return
-    }
-    const url = new URL(resolved.path, window.location.origin)
-    if (parsedQuery.value) {
-      applyQuery(url, parsedQuery.value)
-    }
-
-    const headers: Record<string, string> = {}
-    if (parsedHeaders.value) {
-      for (const [key, value] of Object.entries(parsedHeaders.value)) {
-        if (typeof value === 'undefined') {
-          continue
-        }
-        headers[key] = Array.isArray(value) ? value.join(',') : String(value)
-      }
-    }
-
-    const init: RequestInit = {
-      method: selected.value.method,
-      headers,
-    }
-
-    const upperMethod = selected.value.method.toUpperCase()
-    if (upperMethod !== 'GET' && upperMethod !== 'HEAD') {
-      const rawBody = bodyText.value
-      if (bodyType.value === 'json') {
-        const parsedBody = parseJsonInput(rawBody)
-        if (parsedBody.error) {
-          responseText.value = t('errors.bodyJson', { message: parsedBody.error })
-          return
-        }
-        if (parsedBody.value) {
-          init.body = JSON.stringify(parsedBody.value)
-          if (!headers['Content-Type']) {
-            headers['Content-Type'] = 'application/json'
-          }
-        }
-      }
-      else if (bodyType.value === 'text') {
-        const trimmed = rawBody.trim()
-        if (trimmed) {
-          init.body = rawBody
-          if (!headers['Content-Type']) {
-            headers['Content-Type'] = 'text/plain; charset=utf-8'
-          }
-        }
-      }
-      else if (bodyType.value === 'form') {
-        const entries = parseKeyValueInput(rawBody)
-        if (entries.length > 0) {
-          const params = new URLSearchParams()
-          for (const [key, value] of entries) {
-            params.append(key, value)
-          }
-          init.body = params.toString()
-          if (!headers['Content-Type']) {
-            headers['Content-Type'] = 'application/x-www-form-urlencoded; charset=utf-8'
-          }
-        }
-      }
-      else if (bodyType.value === 'multipart') {
-        const entries = parseKeyValueInput(rawBody)
-        if (entries.length > 0) {
-          const formData = new FormData()
-          for (const [key, value] of entries) {
-            formData.append(key, value)
-          }
-          init.body = formData
-        }
-      }
-      else if (bodyType.value === 'base64') {
-        const parsed = decodeBase64(rawBody)
-        if (parsed.error) {
-          responseText.value = t('errors.bodyBase64', { message: parsed.error })
-          return
-        }
-        if (parsed.value) {
-          init.body = parsed.value
-          if (!headers['Content-Type']) {
-            headers['Content-Type'] = 'application/octet-stream'
-          }
-        }
-      }
-    }
-
-    responseStatus.value = t('response.loading')
-    responseTime.value = ''
-    responseText.value = t('response.waiting')
-
-    await ensureSwReady()
-    const startedAt = performance.now()
-    try {
-      const response = await fetch(url.toString(), init)
-      if (!isServerCounts.value) {
-        routeCounts.value[requestKey] = (routeCounts.value[requestKey] ?? 0) + 1
-      }
-      const duration = Math.round(performance.now() - startedAt)
-      responseTime.value = `${duration}ms`
-      responseStatus.value = `${response.status} ${response.statusText}`
-      const contentType = response.headers.get('content-type') ?? ''
-      const raw = await response.text()
-      if (contentType.includes('application/json')) {
-        try {
-          responseText.value = JSON.stringify(JSON.parse(raw), null, 2)
-        }
-        catch {
-          responseText.value = raw
-        }
-      }
-      else {
-        responseText.value = raw || t('response.emptyPayload')
-      }
-    }
-    catch (err) {
-      responseStatus.value = t('response.error')
-      responseText.value = err instanceof Error ? err.message : String(err)
-    }
-  }
+  const { resetResponse, runRequest } = createRequestRunner({
+    t,
+    selected,
+    routeTokens,
+    paramValues,
+    queryText,
+    headersText,
+    bodyText,
+    bodyType,
+    responseText,
+    responseStatus,
+    responseTime,
+    routeCounts,
+    isServerCounts,
+    ensureSwReady,
+    getRouteKey,
+  })
 
   watch(selected, () => {
     resetResponse()

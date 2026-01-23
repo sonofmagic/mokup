@@ -1,300 +1,35 @@
-import type { Hono } from '@mokup/shared/hono'
 import type { IncomingMessage, ServerResponse } from 'node:http'
 import type { PreviewServer, ViteDevServer } from 'vite'
-import type { RouteConfigInfo, RouteIgnoreInfo, RouteSkipInfo } from '../vite/scanner'
-import type { MokupPluginOptions, RouteTable, VitePluginOptions } from '../vite/types'
+import type { MokupPluginOptions } from '../vite/types'
 
-import { createRequire } from 'node:module'
+import type { BundleState } from './plugin/bundles'
+import type { PluginState } from './plugin/state'
+import type {
+  WebpackCompiler,
+  WebpackPluginInstance,
+} from './plugin/types'
 import { cwd } from 'node:process'
-import chokidar from '@mokup/shared/chokidar'
-import { build as esbuild } from '@mokup/shared/esbuild'
-import { isAbsolute, resolve } from '@mokup/shared/pathe'
 import { createLogger } from '../vite/logger'
-import { createHonoApp, createMiddleware } from '../vite/middleware'
+import { createMiddleware } from '../vite/middleware'
 import { createPlaygroundMiddleware, resolvePlaygroundOptions } from '../vite/playground'
-import { sortRoutes } from '../vite/routes'
-import { scanRoutes } from '../vite/scanner'
-import { buildSwScript, resolveSwConfig, resolveSwUnregisterConfig } from '../vite/sw'
-import { createDebouncer, isInDirs, resolveDirs, toPosix } from '../vite/utils'
-
-interface WebpackPluginInstance {
-  apply: (compiler: WebpackCompiler) => void
-}
-
-interface WebpackDevMiddleware {
-  name?: string
-  middleware: (
-    req: IncomingMessage,
-    res: ServerResponse,
-    next: (err?: unknown) => void,
-  ) => void | Promise<void>
-}
-
-interface WebpackDevServer {
-  app?: { use: (middleware: WebpackDevMiddleware['middleware']) => void }
-}
-
-interface WebpackCompilation {
-  hooks: {
-    processAssets: {
-      tapPromise: (
-        options: { name: string, stage: number },
-        handler: () => Promise<void>,
-      ) => void
-    }
-  }
-  emitAsset: (name: string, source: { source: () => string }) => void
-  updateAsset: (name: string, source: { source: () => string }) => void
-  getAsset: (name: string) => unknown
-  getAssetPath: (name: string, data?: { hash?: string }) => string
-  outputOptions: {
-    publicPath?: unknown
-  }
-  hash?: string
-}
-
-interface WebpackCompiler {
-  context?: string
-  options: {
-    output?: {
-      publicPath?: unknown
-      assetModuleFilename?: unknown
-    }
-    devServer?: {
-      setupMiddlewares?: (
-        middlewares: WebpackDevMiddleware[],
-        devServer: WebpackDevServer,
-      ) => WebpackDevMiddleware[]
-      devMiddleware?: {
-        publicPath?: unknown
-      }
-    }
-  }
-  hooks: {
-    beforeCompile: { tapPromise: (name: string, handler: () => Promise<void>) => void }
-    thisCompilation: { tap: (name: string, handler: (compilation: WebpackCompilation) => void) => void }
-    watchRun: { tap: (name: string, handler: (compiler: WebpackCompiler) => void) => void }
-    watchClose: { tap: (name: string, handler: () => void) => void }
-  }
-  watching?: { invalidate: () => void }
-  webpack: {
-    Compilation: { PROCESS_ASSETS_STAGE_ADDITIONS: number }
-    sources: { RawSource: new (source: string) => { source: () => string } }
-  }
-}
+import { resolveSwConfig, resolveSwUnregisterConfig } from '../vite/sw'
+import { resolveDirs } from '../vite/utils'
+import { createBundleBuilder } from './plugin/bundles'
+import { resolveHtmlWebpackPlugin } from './plugin/html'
+import { normalizeMokupOptions, normalizeOptions } from './plugin/options'
+import {
+  joinPublicPath,
+  resolveAssetsDir,
+  resolveBaseFromPublicPath,
+  resolveModuleFilePath,
+  resolveRegisterPath,
+  resolveRegisterScope,
+} from './plugin/paths'
+import { createRouteRefresher } from './plugin/refresh'
+import { createWebpackWatcher } from './plugin/watcher'
 
 const pluginName = 'mokup:webpack'
 const lifecycleBaseName = 'mokup-sw-lifecycle.js'
-
-const legacyEntryKeys = [
-  'dir',
-  'prefix',
-  'include',
-  'exclude',
-  'ignorePrefix',
-  'watch',
-  'log',
-  'mode',
-  'sw',
-]
-
-function isLegacyEntryOptions(value: Record<string, unknown>) {
-  return legacyEntryKeys.some(key => key in value)
-}
-
-function normalizeMokupOptions(options: MokupPluginOptions | null | undefined): MokupPluginOptions {
-  if (!options) {
-    return {}
-  }
-  if (Array.isArray(options)) {
-    throw new TypeError('[mokup] Invalid config: use mokup({ entries: [...] }) instead of mokup([...]).')
-  }
-  if (typeof options !== 'object') {
-    return {}
-  }
-  if (isLegacyEntryOptions(options as Record<string, unknown>)) {
-    throw new Error(
-      '[mokup] Invalid config: use mokup({ entries: { ... } }) instead of mokup({ dir, prefix, ... }).',
-    )
-  }
-  return options
-}
-
-function normalizeOptions(options: MokupPluginOptions): VitePluginOptions[] {
-  const entries = options.entries
-  const list = Array.isArray(entries)
-    ? entries
-    : entries
-      ? [entries]
-      : [{}]
-  return list.length > 0 ? list : [{}]
-}
-
-function normalizeBase(base: string) {
-  if (!base) {
-    return '/'
-  }
-  if (base.startsWith('.')) {
-    return '/'
-  }
-  let normalized = base.startsWith('/') ? base : `/${base}`
-  if (!normalized.endsWith('/')) {
-    normalized = `${normalized}/`
-  }
-  return normalized
-}
-
-function resolveRegisterPath(base: string, path: string) {
-  const normalizedBase = normalizeBase(base)
-  const normalizedPath = path.startsWith('/') ? path : `/${path}`
-  if (normalizedPath.startsWith(normalizedBase)) {
-    return normalizedPath
-  }
-  return `${normalizedBase}${normalizedPath.slice(1)}`
-}
-
-function resolveRegisterScope(base: string, scope: string) {
-  const normalizedBase = normalizeBase(base)
-  const normalizedScope = scope.startsWith('/') ? scope : `/${scope}`
-  if (normalizedScope.startsWith(normalizedBase)) {
-    return normalizedScope
-  }
-  return `${normalizedBase}${normalizedScope.slice(1)}`
-}
-
-function isAbsoluteUrl(value: string) {
-  return /^https?:\/\//.test(value)
-}
-
-function resolveBaseFromPublicPath(publicPath: unknown) {
-  if (typeof publicPath !== 'string') {
-    return '/'
-  }
-  if (!publicPath || publicPath === 'auto') {
-    return '/'
-  }
-  if (isAbsoluteUrl(publicPath)) {
-    return '/'
-  }
-  return normalizeBase(publicPath)
-}
-
-function resolveAssetsDir(assetModuleFilename?: unknown) {
-  if (typeof assetModuleFilename !== 'string') {
-    return 'assets'
-  }
-  const normalized = assetModuleFilename.replace(/\\/g, '/')
-  const prefix = normalized.split('/')[0] ?? ''
-  if (!prefix || prefix.includes('[')) {
-    return 'assets'
-  }
-  return prefix
-}
-
-function joinPublicPath(publicPath: string, fileName: string) {
-  if (!publicPath) {
-    return fileName
-  }
-  const normalized = publicPath.endsWith('/') ? publicPath : `${publicPath}/`
-  return `${normalized}${fileName}`
-}
-
-function buildSwLifecycleScript(params: {
-  base: string
-  importPath: string
-  swConfig: ReturnType<typeof resolveSwConfig>
-  unregisterConfig: ReturnType<typeof resolveSwUnregisterConfig>
-  hasSwEntries: boolean
-  hasSwRoutes: boolean
-}) {
-  const { base, importPath, swConfig, unregisterConfig, hasSwEntries, hasSwRoutes } = params
-  const shouldUnregister = unregisterConfig.unregister === true || !hasSwEntries
-  if (shouldUnregister) {
-    const path = resolveRegisterPath(base, unregisterConfig.path)
-    const scope = resolveRegisterScope(base, unregisterConfig.scope)
-    return [
-      `import { unregisterMokupServiceWorker } from ${JSON.stringify(importPath)}`,
-      '(async () => {',
-      `  await unregisterMokupServiceWorker({ path: ${JSON.stringify(path)}, scope: ${JSON.stringify(scope)} })`,
-      '})()',
-    ].join('\n')
-  }
-  if (!swConfig || swConfig.register === false) {
-    return null
-  }
-  if (!hasSwRoutes) {
-    return null
-  }
-  const path = resolveRegisterPath(base, swConfig.path)
-  const scope = resolveRegisterScope(base, swConfig.scope)
-  return [
-    `import { registerMokupServiceWorker } from ${JSON.stringify(importPath)}`,
-    '(async () => {',
-    `  const registration = await registerMokupServiceWorker({ path: ${JSON.stringify(path)}, scope: ${JSON.stringify(scope)} })`,
-    '  if (import.meta.hot && registration) {',
-    '    import.meta.hot.on(\'mokup:routes-changed\', () => {',
-    '      registration.update()',
-    '    })',
-    '  }',
-    '})()',
-  ].join('\n')
-}
-
-function resolveModuleFilePath(file: string, root: string) {
-  const absolute = isAbsolute(file) ? file : resolve(root, file)
-  const normalized = toPosix(absolute)
-  if (/^[a-z]:\//i.test(normalized)) {
-    return `file:///${normalized}`
-  }
-  return normalized
-}
-
-async function bundleScript(params: {
-  code: string
-  root: string
-  sourceName: string
-}) {
-  const result = await esbuild({
-    stdin: {
-      contents: params.code,
-      resolveDir: params.root,
-      sourcefile: params.sourceName,
-      loader: 'js',
-    },
-    absWorkingDir: params.root,
-    bundle: true,
-    platform: 'browser',
-    format: 'esm',
-    target: 'es2020',
-    write: false,
-  })
-  return result.outputFiles[0]?.text ?? ''
-}
-
-const require = createRequire(import.meta.url)
-
-function resolveHtmlWebpackPlugin() {
-  try {
-    const mod = require('html-webpack-plugin') as {
-      default?: unknown
-      getHooks?: unknown
-    }
-    const plugin = (mod.default ?? mod) as {
-      getHooks: (compilation: WebpackCompilation) => {
-        alterAssetTagGroups?: {
-          tap: (name: string, handler: (data: { headTags: unknown[], bodyTags: unknown[], publicPath?: string }) => void) => void
-        }
-        alterAssetTags?: {
-          tap: (name: string, handler: (data: { assetTags: { scripts: unknown[] }, publicPath?: string }) => void) => void
-        }
-      }
-    }
-    return plugin
-  }
-  catch {
-    return null
-  }
-}
 
 /**
  * Create the mokup webpack plugin for webpack-dev-server.
@@ -321,27 +56,28 @@ export function createMokupWebpackPlugin(
   const hasSwEntries = optionList.some(entry => entry.mode === 'sw')
   const swConfig = resolveSwConfig(optionList, logger)
   const unregisterConfig = resolveSwUnregisterConfig(optionList, logger)
-
   let root = cwd()
   let base = '/'
   let assetsDir = 'assets'
-  let routes: RouteTable = []
-  let serverRoutes: RouteTable = []
-  let swRoutes: RouteTable = []
-  let disabledRoutes: RouteSkipInfo[] = []
-  let ignoredRoutes: RouteIgnoreInfo[] = []
-  let configFiles: RouteConfigInfo[] = []
-  let disabledConfigFiles: RouteConfigInfo[] = []
-  let app: Hono | null = null
-  type Watcher = ReturnType<typeof chokidar.watch>
+  const state: PluginState = {
+    routes: [],
+    serverRoutes: [],
+    swRoutes: [],
+    disabledRoutes: [],
+    ignoredRoutes: [],
+    configFiles: [],
+    disabledConfigFiles: [],
+    app: null,
+  }
+  type Watcher = ReturnType<typeof createWebpackWatcher>
   let watcher: Watcher | null = null
   let watchingCompiler: WebpackCompiler | null = null
-  let swLifecycleBundle: string | null = null
-  let swBundle: string | null = null
+  const bundleState: BundleState = {
+    swLifecycleBundle: null,
+    swBundle: null,
+  }
   let swLifecycleFileName = `${assetsDir}/${lifecycleBaseName}`
   let warnedHtml = false
-  let buildPromise: Promise<void> | null = null
-
   const resolveAllDirs = () => {
     const dirs: string[] = []
     const seen = new Set<string>()
@@ -356,116 +92,34 @@ export function createMokupWebpackPlugin(
     }
     return dirs
   }
-
-  const hasSwRoutes = () => !!swConfig && swRoutes.length > 0
-
-  const refreshRoutes = async () => {
-    const collected: RouteTable = []
-    const collectedServer: RouteTable = []
-    const collectedSw: RouteTable = []
-    const collectedDisabled: RouteSkipInfo[] = []
-    const collectedIgnored: RouteIgnoreInfo[] = []
-    const collectedConfigs: RouteConfigInfo[] = []
-    for (const entry of optionList) {
-      const dirs = resolveDirs(entry.dir, root)
-      const scanParams: Parameters<typeof scanRoutes>[0] = {
-        dirs,
-        prefix: entry.prefix ?? '',
-        logger,
-        onSkip: info => collectedDisabled.push(info),
-        onIgnore: info => collectedIgnored.push(info),
-        onConfig: info => collectedConfigs.push(info),
-      }
-      if (entry.include) {
-        scanParams.include = entry.include
-      }
-      if (entry.exclude) {
-        scanParams.exclude = entry.exclude
-      }
-      if (typeof entry.ignorePrefix !== 'undefined') {
-        scanParams.ignorePrefix = entry.ignorePrefix
-      }
-      const scanned = await scanRoutes(scanParams)
-      collected.push(...scanned)
-      if (entry.mode === 'sw') {
-        collectedSw.push(...scanned)
-        if (entry.sw?.fallback !== false) {
-          collectedServer.push(...scanned)
-        }
-      }
-      else {
-        collectedServer.push(...scanned)
-      }
-    }
-    routes = sortRoutes(collected)
-    serverRoutes = sortRoutes(collectedServer)
-    swRoutes = sortRoutes(collectedSw)
-    disabledRoutes = collectedDisabled
-    ignoredRoutes = collectedIgnored
-    const configMap = new Map(collectedConfigs.map(entry => [entry.file, entry]))
-    const resolvedConfigs = Array.from(configMap.values())
-    configFiles = resolvedConfigs.filter(entry => entry.enabled)
-    disabledConfigFiles = resolvedConfigs.filter(entry => !entry.enabled)
-    app = serverRoutes.length > 0 ? createHonoApp(serverRoutes) : null
-  }
-
-  const rebuildBundles = async () => {
-    const lifecycle = buildSwLifecycleScript({
-      base,
-      importPath: 'mokup/sw',
-      swConfig,
-      unregisterConfig,
-      hasSwEntries,
-      hasSwRoutes: hasSwRoutes(),
-    })
-    swLifecycleBundle = lifecycle
-      ? await bundleScript({
-          code: lifecycle,
-          root,
-          sourceName: lifecycleBaseName,
-        })
-      : null
-    if (swConfig && hasSwRoutes()) {
-      const swScript = buildSwScript({
-        routes: swRoutes,
-        root,
-        runtimeImportPath: 'mokup/runtime',
-        basePaths: swConfig.basePaths ?? [],
-        resolveModulePath: resolveModuleFilePath,
-      })
-      swBundle = await bundleScript({
-        code: swScript,
-        root,
-        sourceName: 'mokup-sw.js',
-      })
-    }
-    else {
-      swBundle = null
-    }
-  }
-
-  const ensureBuilt = async () => {
-    if (!buildPromise) {
-      buildPromise = (async () => {
-        await refreshRoutes()
-        await rebuildBundles()
-      })()
-        .catch((error) => {
-          logger.error('Failed to build mokup bundles:', error)
-        })
-        .finally(() => {
-          buildPromise = null
-        })
-    }
-    await buildPromise
-  }
+  const hasSwRoutes = () => !!swConfig && state.swRoutes.length > 0
+  const refreshRoutes = createRouteRefresher({
+    state,
+    optionList,
+    root: () => root,
+    logger,
+  })
+  const { rebuildBundles, ensureBuilt } = createBundleBuilder({
+    bundleState,
+    state,
+    root: () => root,
+    swConfig,
+    unregisterConfig,
+    hasSwEntries,
+    hasSwRoutes,
+    resolveRequestPath: path => resolveRegisterPath(base, path),
+    resolveRegisterScope: scope => resolveRegisterScope(base, scope),
+    resolveModulePath: resolveModuleFilePath,
+    refreshRoutes,
+    logger,
+  })
 
   const playgroundMiddleware = createPlaygroundMiddleware({
-    getRoutes: () => routes,
-    getDisabledRoutes: () => disabledRoutes,
-    getIgnoredRoutes: () => ignoredRoutes,
-    getConfigFiles: () => configFiles,
-    getDisabledConfigFiles: () => disabledConfigFiles,
+    getRoutes: () => state.routes,
+    getDisabledRoutes: () => state.disabledRoutes,
+    getIgnoredRoutes: () => state.ignoredRoutes,
+    getConfigFiles: () => state.configFiles,
+    getDisabledConfigFiles: () => state.disabledConfigFiles,
     config: playgroundConfig,
     logger,
     getDirs: () => resolveAllDirs(),
@@ -487,7 +141,7 @@ export function createMokupWebpackPlugin(
       return next()
     }
     await ensureBuilt()
-    if (!swBundle) {
+    if (!bundleState.swBundle) {
       res.statusCode = 500
       res.setHeader('Content-Type', 'text/plain; charset=utf-8')
       res.end('Failed to generate mokup service worker.')
@@ -496,10 +150,10 @@ export function createMokupWebpackPlugin(
     res.statusCode = 200
     res.setHeader('Content-Type', 'application/javascript; charset=utf-8')
     res.setHeader('Cache-Control', 'no-cache')
-    res.end(swBundle)
+    res.end(bundleState.swBundle)
   }
 
-  const mockMiddleware = createMiddleware(() => app, logger)
+  const mockMiddleware = createMiddleware(() => state.app, logger)
 
   return {
     apply(compiler) {
@@ -523,7 +177,7 @@ export function createMokupWebpackPlugin(
         if (HtmlWebpackPlugin) {
           const hooks = HtmlWebpackPlugin.getHooks(compilation)
           const injectTag = () => {
-            if (!swLifecycleBundle) {
+            if (!bundleState.swLifecycleBundle) {
               return
             }
             const tagBase = {
@@ -571,9 +225,9 @@ export function createMokupWebpackPlugin(
           { name: pluginName, stage: compiler.webpack.Compilation.PROCESS_ASSETS_STAGE_ADDITIONS },
           async () => {
             await ensureBuilt()
-            if (swLifecycleBundle) {
+            if (bundleState.swLifecycleBundle) {
               const RawSource = compiler.webpack.sources.RawSource
-              const source = new RawSource(swLifecycleBundle)
+              const source = new RawSource(bundleState.swLifecycleBundle)
               if (compilation.getAsset(swLifecycleFileName)) {
                 compilation.updateAsset(swLifecycleFileName, source)
               }
@@ -581,12 +235,12 @@ export function createMokupWebpackPlugin(
                 compilation.emitAsset(swLifecycleFileName, source)
               }
             }
-            if (swBundle && swConfig) {
+            if (bundleState.swBundle && swConfig) {
               const fileName = swConfig.path.startsWith('/')
                 ? swConfig.path.slice(1)
                 : swConfig.path
               const RawSource = compiler.webpack.sources.RawSource
-              const source = new RawSource(swBundle)
+              const source = new RawSource(bundleState.swBundle)
               if (compilation.getAsset(fileName)) {
                 compilation.updateAsset(fileName, source)
               }
@@ -615,34 +269,21 @@ export function createMokupWebpackPlugin(
 
           if (!watcher && watchEnabled) {
             const dirs = resolveAllDirs()
-            const fsWatcher = chokidar.watch(dirs, { ignoreInitial: true })
-            watcher = fsWatcher
-            const scheduleRefresh = createDebouncer(80, () => {
-              void refreshRoutes()
-                .then(rebuildBundles)
-                .then(() => {
+            watcher = createWebpackWatcher({
+              enabled: watchEnabled,
+              dirs,
+              onRefresh: async () => {
+                try {
+                  await refreshRoutes()
+                  await rebuildBundles()
                   if (watchingCompiler?.watching) {
                     watchingCompiler.watching.invalidate()
                   }
-                })
-                .catch((error) => {
+                }
+                catch (error) {
                   logger.error('Failed to refresh mokup routes:', error)
-                })
-            })
-            fsWatcher.on('add', (file) => {
-              if (isInDirs(file, dirs)) {
-                scheduleRefresh()
-              }
-            })
-            fsWatcher.on('change', (file) => {
-              if (isInDirs(file, dirs)) {
-                scheduleRefresh()
-              }
-            })
-            fsWatcher.on('unlink', (file) => {
-              if (isInDirs(file, dirs)) {
-                scheduleRefresh()
-              }
+                }
+              },
             })
           }
 

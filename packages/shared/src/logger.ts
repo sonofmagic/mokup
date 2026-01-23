@@ -33,10 +33,34 @@ export function createLogger(options: LoggerOptions | boolean = true): Logger {
   const tag = resolvedOptions?.tag ?? 'mokup'
   const logger = consola.withTag(tag)
   return {
-    info: (...args: unknown[]) => logger.info(...args),
-    warn: (...args: unknown[]) => logger.warn(...args),
-    error: (...args: unknown[]) => logger.error(...args),
-    log: (...args: unknown[]) => logger.log(...args),
+    info: (...args: unknown[]) => {
+      if (args.length === 0) {
+        return
+      }
+      const [first, ...rest] = args
+      logger.info(first as any, ...(rest as any[]))
+    },
+    warn: (...args: unknown[]) => {
+      if (args.length === 0) {
+        return
+      }
+      const [first, ...rest] = args
+      logger.warn(first as any, ...(rest as any[]))
+    },
+    error: (...args: unknown[]) => {
+      if (args.length === 0) {
+        return
+      }
+      const [first, ...rest] = args
+      logger.error(first as any, ...(rest as any[]))
+    },
+    log: (...args: unknown[]) => {
+      if (args.length === 0) {
+        return
+      }
+      const [first, ...rest] = args
+      logger.log(first as any, ...(rest as any[]))
+    },
   }
 }
 

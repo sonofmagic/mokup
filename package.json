@@ -26,6 +26,7 @@
     "test": "vitest run",
     "test:dev": "vitest",
     "lint": "turbo run lint",
+    "lint:lines": "node scripts/lint-lines.mjs",
     "audit": "pnpm audit --audit-level=moderate",
     "audit:fix": "pnpm audit --fix",
     "typecheck": "turbo run typecheck",
