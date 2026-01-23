@@ -10,6 +10,17 @@ import {
 
 type NextFunction = (error?: unknown) => void
 
+/**
+ * Create a Connect-style middleware from server options.
+ *
+ * @param options - Server options.
+ * @returns Connect middleware handler.
+ *
+ * @example
+ * import { createConnectMiddleware } from '@mokup/server'
+ *
+ * const middleware = createConnectMiddleware({ manifest: { version: 1, routes: [] } })
+ */
 export function createConnectMiddleware(
   options: ServerOptions,
 ) {

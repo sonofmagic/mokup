@@ -139,6 +139,18 @@ function wrapMiddleware(
   }
 }
 
+/**
+ * Build a Hono app for the resolved route table.
+ *
+ * @param routes - Resolved route table.
+ * @param options - Optional response hook.
+ * @returns Hono app instance.
+ *
+ * @example
+ * import { createHonoApp } from '@mokup/server'
+ *
+ * const app = createHonoApp([])
+ */
 export function createHonoApp(
   routes: RouteTable,
   options: { onResponse?: RouteResponseHook } = {},

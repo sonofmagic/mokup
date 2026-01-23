@@ -304,6 +304,19 @@ async function buildApp(params: {
   return app
 }
 
+/**
+ * Build a Hono app from a manifest, loading module handlers as needed.
+ *
+ * @param options - Runtime options including the manifest.
+ * @returns A Hono app with routes registered.
+ *
+ * @example
+ * import { createRuntimeApp } from '@mokup/runtime'
+ *
+ * const app = await createRuntimeApp({
+ *   manifest: { version: 1, routes: [] },
+ * })
+ */
 export async function createRuntimeApp(options: RuntimeOptions): Promise<Hono> {
   const manifest = typeof options.manifest === 'function'
     ? await options.manifest()
@@ -415,6 +428,19 @@ function routeNeedsModuleBase(route: ManifestRoute, moduleMap: ModuleMap | undef
   return false
 }
 
+/**
+ * Create a cached runtime handler for fetching and request simulation.
+ *
+ * @param options - Runtime options including the manifest.
+ * @returns Runtime helper with fetch and match helpers.
+ *
+ * @example
+ * import { createRuntime } from '@mokup/runtime'
+ *
+ * const runtime = createRuntime({
+ *   manifest: { version: 1, routes: [] },
+ * })
+ */
 export function createRuntime(options: RuntimeOptions) {
   let manifestCache: Manifest | null = null
   let appPromise: Promise<Hono> | null = null

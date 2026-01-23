@@ -296,6 +296,19 @@ function resolveHtmlWebpackPlugin() {
   }
 }
 
+/**
+ * Create the mokup webpack plugin for webpack-dev-server.
+ *
+ * @param options - Plugin options.
+ * @returns Webpack plugin instance.
+ *
+ * @example
+ * import { createMokupWebpackPlugin } from 'mokup/webpack'
+ *
+ * export default {
+ *   plugins: [createMokupWebpackPlugin({ entries: { dir: 'mock' } })],
+ * }
+ */
 export function createMokupWebpackPlugin(
   options: MokupPluginOptions = {},
 ): WebpackPluginInstance {

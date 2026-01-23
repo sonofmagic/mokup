@@ -34,6 +34,17 @@ function normalizePlaygroundPath(value?: string) {
     : normalized
 }
 
+/**
+ * Normalize playground configuration to enabled/path values.
+ *
+ * @param playground - Playground options input.
+ * @returns Normalized playground config.
+ *
+ * @example
+ * import { resolvePlaygroundOptions } from '@mokup/server'
+ *
+ * const config = resolvePlaygroundOptions(true)
+ */
 export function resolvePlaygroundOptions(
   playground: { path?: string, enabled?: boolean } | boolean | undefined,
 ): PlaygroundConfig {
@@ -310,6 +321,22 @@ function toPlaygroundConfigFile(
   return configFile
 }
 
+/**
+ * Register playground routes on a Hono app.
+ *
+ * @param params - Playground registration parameters.
+ *
+ * @example
+ * import { registerPlaygroundRoutes } from '@mokup/server'
+ *
+ * registerPlaygroundRoutes({
+ *   app: new (class { get() {} })() as any,
+ *   routes: [],
+ *   dirs: [],
+ *   logger: console,
+ *   config: { enabled: true, path: '/__mokup' },
+ * })
+ */
 export function registerPlaygroundRoutes(params: {
   app: Hono
   routes: RouteTable

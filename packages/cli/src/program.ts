@@ -101,6 +101,16 @@ function toServeOptions(options: {
   }
 }
 
+/**
+ * Create the mokup CLI program instance.
+ *
+ * @returns A configured CLI program.
+ *
+ * @example
+ * import { createCli } from '@mokup/cli'
+ *
+ * const cli = createCli()
+ */
 export function createCli() {
   const program = new Command()
   program
@@ -196,6 +206,17 @@ export function createCli() {
   return program
 }
 
+/**
+ * Run the mokup CLI with the provided argv.
+ *
+ * @param argv - CLI arguments.
+ * @returns Exit code or void.
+ *
+ * @example
+ * import { runCli } from '@mokup/cli'
+ *
+ * await runCli(['node', 'mokup', 'build', '--dir', 'mock'])
+ */
 export async function runCli(argv = process.argv) {
   const program = createCli()
   if (argv.length <= 2) {

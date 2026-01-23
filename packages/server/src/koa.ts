@@ -17,6 +17,17 @@ interface KoaContextLike {
 
 type KoaNext = () => Promise<unknown>
 
+/**
+ * Create a Koa middleware from server options.
+ *
+ * @param options - Server options.
+ * @returns Koa middleware handler.
+ *
+ * @example
+ * import { createKoaMiddleware } from '@mokup/server'
+ *
+ * const middleware = createKoaMiddleware({ manifest: { version: 1, routes: [] } })
+ */
 export function createKoaMiddleware(
   options: ServerOptions,
 ) {

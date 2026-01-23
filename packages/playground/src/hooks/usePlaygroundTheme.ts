@@ -9,6 +9,14 @@ import {
 
 } from '../utils/theme'
 
+/**
+ * Vue composable for managing playground theme state.
+ *
+ * @example
+ * import { usePlaygroundTheme } from '@mokup/playground'
+ *
+ * const theme = usePlaygroundTheme()
+ */
 export function usePlaygroundTheme() {
   const themeMode = ref<ThemeMode>('system')
   const prefersDark = ref(false)

@@ -4,10 +4,27 @@ import type { ServerOptions, WorkerBundle, WorkerInput } from './types'
 
 import { createFetchHandler } from './fetch'
 
+/**
+ * Minimal Worker-style fetch interface for Node helpers.
+ *
+ * @example
+ * import type { FetchWorker } from '@mokup/server/node'
+ *
+ * const worker: FetchWorker = { fetch: async () => new Response('ok') }
+ */
 export interface FetchWorker {
+  /** Fetch handler for the Worker runtime. */
   fetch: (request: Request) => Promise<Response>
 }
 
+/**
+ * Input accepted by the Node worker helper.
+ *
+ * @example
+ * import type { NodeWorkerInput } from '@mokup/server/node'
+ *
+ * const input: NodeWorkerInput = '.mokup'
+ */
 export type NodeWorkerInput = string | WorkerInput
 
 function isManifest(value: WorkerInput): value is WorkerBundle['manifest'] {
@@ -77,6 +94,17 @@ function createWorker(handlerOptions: ServerOptions): FetchWorker {
   }
 }
 
+/**
+ * Create a Worker-compatible fetch handler for Node.
+ *
+ * @param input - Directory path, manifest, or bundle.
+ * @returns Worker handler or a promise when input is a directory.
+ *
+ * @example
+ * import { createMokupWorker } from '@mokup/server/node'
+ *
+ * const worker = await createMokupWorker('.mokup')
+ */
 export function createMokupWorker(input: string): Promise<FetchWorker>
 export function createMokupWorker(input: WorkerInput): FetchWorker
 export function createMokupWorker(

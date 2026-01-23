@@ -113,6 +113,23 @@ function normalizeMiddlewares(
   return middlewares
 }
 
+/**
+ * Resolve and merge directory-level configuration files for a route file.
+ *
+ * @param params - Resolution parameters.
+ * @returns Resolved config and normalized middleware list.
+ *
+ * @example
+ * import { resolveDirectoryConfig } from 'mokup/vite'
+ *
+ * const config = await resolveDirectoryConfig({
+ *   file: '/project/mock/users.get.ts',
+ *   rootDir: '/project/mock',
+ *   logger: console,
+ *   configCache: new Map(),
+ *   fileCache: new Map(),
+ * })
+ */
 export async function resolveDirectoryConfig(params: {
   file: string
   rootDir: string

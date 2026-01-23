@@ -5,6 +5,14 @@ import { loadRules } from './loader'
 import { deriveRouteFromFile, resolveRule, sortRoutes } from './routes'
 import { hasIgnoredPrefix, matchesFilter, normalizeIgnorePrefix } from './utils'
 
+/**
+ * Reasons a route file was skipped during scanning.
+ *
+ * @example
+ * import type { RouteSkipReason } from '@mokup/server'
+ *
+ * const reason: RouteSkipReason = 'disabled'
+ */
 export type RouteSkipReason
   = | 'disabled'
     | 'disabled-dir'
@@ -12,24 +20,71 @@ export type RouteSkipReason
     | 'ignore-prefix'
     | 'include'
 
+/**
+ * Reasons a file was ignored during scanning.
+ *
+ * @example
+ * import type { RouteIgnoreReason } from '@mokup/server'
+ *
+ * const reason: RouteIgnoreReason = 'unsupported'
+ */
 export type RouteIgnoreReason
   = | 'unsupported'
     | 'invalid-route'
 
+/**
+ * Directory config discovery metadata.
+ *
+ * @example
+ * import type { RouteConfigInfo } from '@mokup/server'
+ *
+ * const info: RouteConfigInfo = { file: 'mock/index.config.ts', enabled: true }
+ */
 export interface RouteConfigInfo {
+  /** Config file path. */
   file: string
+  /**
+   * Whether this config enables routes.
+   *
+   * @default true
+   */
   enabled: boolean
 }
 
+/**
+ * Metadata for a skipped route.
+ *
+ * @example
+ * import type { RouteSkipInfo } from '@mokup/server'
+ *
+ * const info: RouteSkipInfo = {
+ *   file: 'mock/disabled.get.ts',
+ *   reason: 'disabled',
+ * }
+ */
 export interface RouteSkipInfo {
+  /** Route file path. */
   file: string
+  /** Skip reason. */
   reason: RouteSkipReason
+  /** Derived method (when available). */
   method?: HttpMethod
+  /** Derived URL template (when available). */
   url?: string
 }
 
+/**
+ * Metadata for an ignored file.
+ *
+ * @example
+ * import type { RouteIgnoreInfo } from '@mokup/server'
+ *
+ * const info: RouteIgnoreInfo = { file: 'mock/notes.txt', reason: 'unsupported' }
+ */
 export interface RouteIgnoreInfo {
+  /** Ignored file path. */
   file: string
+  /** Ignore reason. */
   reason: RouteIgnoreReason
 }
 
@@ -82,6 +137,21 @@ function buildSkipInfo(
   return info
 }
 
+/**
+ * Scan directories for mock routes and build the route table.
+ *
+ * @param params - Scanner configuration.
+ * @returns The resolved route table.
+ *
+ * @example
+ * import { scanRoutes } from '@mokup/server'
+ *
+ * const routes = await scanRoutes({
+ *   dirs: ['/project/mock'],
+ *   prefix: '/api',
+ *   logger: console,
+ * })
+ */
 export async function scanRoutes(params: {
   dirs: string[]
   prefix: string

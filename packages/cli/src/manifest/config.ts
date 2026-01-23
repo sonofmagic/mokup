@@ -98,6 +98,22 @@ function normalizeMiddlewares(
   return middlewares
 }
 
+/**
+ * Resolve and merge directory-level config files for the manifest build.
+ *
+ * @param params - Resolution parameters.
+ * @returns Resolved config and middleware list.
+ *
+ * @example
+ * import { resolveDirectoryConfig } from '@mokup/cli'
+ *
+ * const config = await resolveDirectoryConfig({
+ *   file: 'mock/users.get.ts',
+ *   rootDir: 'mock',
+ *   configCache: new Map(),
+ *   fileCache: new Map(),
+ * })
+ */
 export async function resolveDirectoryConfig(params: {
   file: string
   rootDir: string

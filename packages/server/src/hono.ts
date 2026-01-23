@@ -21,6 +21,17 @@ interface HonoRouteLike {
   handler: HonoMiddleware
 }
 
+/**
+ * Create a Hono middleware from server options.
+ *
+ * @param options - Server options.
+ * @returns Hono middleware handler.
+ *
+ * @example
+ * import { createHonoMiddleware } from '@mokup/server'
+ *
+ * const middleware = createHonoMiddleware({ manifest: { version: 1, routes: [] } })
+ */
 export function createHonoMiddleware(
   options: ServerOptions,
 ) {

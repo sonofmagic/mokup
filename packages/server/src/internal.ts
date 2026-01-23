@@ -4,10 +4,28 @@ import type { ServerOptions } from './types'
 const textDecoder = new TextDecoder()
 const textEncoder = new TextEncoder()
 
+/**
+ * Minimal readable stream shape used by adapters.
+ *
+ * @example
+ * import type { ReadableStreamLike } from '@mokup/server'
+ *
+ * const stream: ReadableStreamLike = {
+ *   on: () => {},
+ * }
+ */
 export interface ReadableStreamLike {
   on: (event: string, listener: (...args: unknown[]) => void) => void
 }
 
+/**
+ * Minimal Node request shape used by adapters.
+ *
+ * @example
+ * import type { NodeRequestLike } from '@mokup/server'
+ *
+ * const req: NodeRequestLike = { method: 'GET', url: '/api/ping' }
+ */
 export interface NodeRequestLike extends ReadableStreamLike {
   method?: string
   url?: string
@@ -16,12 +34,34 @@ export interface NodeRequestLike extends ReadableStreamLike {
   body?: unknown
 }
 
+/**
+ * Minimal Node response shape used by adapters.
+ *
+ * @example
+ * import type { NodeResponseLike } from '@mokup/server'
+ *
+ * const res: NodeResponseLike = {
+ *   setHeader: () => {},
+ *   end: () => {},
+ * }
+ */
 export interface NodeResponseLike {
   statusCode?: number
   setHeader: (name: string, value: string) => void
   end: (data?: string | Uint8Array | ArrayBuffer | null) => void
 }
 
+/**
+ * Convert server adapter options to runtime options.
+ *
+ * @param options - Server options.
+ * @returns Runtime options.
+ *
+ * @example
+ * import { toRuntimeOptions } from '@mokup/server'
+ *
+ * const runtime = toRuntimeOptions({ manifest: { version: 1, routes: [] } })
+ */
 export function toRuntimeOptions(
   options: ServerOptions,
 ): RuntimeOptions {
@@ -37,6 +77,17 @@ export function toRuntimeOptions(
   return runtimeOptions
 }
 
+/**
+ * Normalize URLSearchParams into a record.
+ *
+ * @param params - URLSearchParams instance.
+ * @returns Query record.
+ *
+ * @example
+ * import { normalizeQuery } from '@mokup/server'
+ *
+ * const query = normalizeQuery(new URLSearchParams('a=1&a=2'))
+ */
 export function normalizeQuery(
   params: URLSearchParams,
 ): Record<string, string | string[]> {
@@ -56,6 +107,17 @@ export function normalizeQuery(
   return query
 }
 
+/**
+ * Normalize fetch Headers into a lowercase record.
+ *
+ * @param headers - Headers instance.
+ * @returns Header record.
+ *
+ * @example
+ * import { normalizeHeaders } from '@mokup/server'
+ *
+ * const record = normalizeHeaders(new Headers({ 'X-Test': '1' }))
+ */
 export function normalizeHeaders(
   headers: Headers,
 ): Record<string, string> {
@@ -66,6 +128,17 @@ export function normalizeHeaders(
   return record
 }
 
+/**
+ * Normalize Node headers into a lowercase record.
+ *
+ * @param headers - Node header record.
+ * @returns Header record.
+ *
+ * @example
+ * import { normalizeNodeHeaders } from '@mokup/server'
+ *
+ * const record = normalizeNodeHeaders({ 'X-Test': '1' })
+ */
 export function normalizeNodeHeaders(
   headers?: Record<string, string | string[] | undefined>,
 ): Record<string, string> {
@@ -82,6 +155,18 @@ export function normalizeNodeHeaders(
   return record
 }
 
+/**
+ * Parse raw body text based on content type.
+ *
+ * @param rawText - Raw body text.
+ * @param contentType - Content type string.
+ * @returns Parsed body value.
+ *
+ * @example
+ * import { parseBody } from '@mokup/server'
+ *
+ * const body = parseBody('{\"ok\":true}', 'application/json')
+ */
 export function parseBody(rawText: string, contentType: string) {
   if (!rawText) {
     return undefined
@@ -105,10 +190,32 @@ function decodeText(data: Uint8Array): string {
   return textDecoder.decode(data)
 }
 
+/**
+ * Normalize a binary body for runtime output.
+ *
+ * @param body - Binary data.
+ * @returns Binary data.
+ *
+ * @example
+ * import { toBinaryBody } from '@mokup/server'
+ *
+ * const data = toBinaryBody(new Uint8Array([1, 2]))
+ */
 export function toBinaryBody(body: Uint8Array): Uint8Array {
   return body
 }
 
+/**
+ * Convert a Uint8Array to an ArrayBuffer.
+ *
+ * @param body - Binary data.
+ * @returns ArrayBuffer view of the data.
+ *
+ * @example
+ * import { toArrayBuffer } from '@mokup/server'
+ *
+ * const buffer = toArrayBuffer(new Uint8Array([1, 2]))
+ */
 export function toArrayBuffer(body: Uint8Array): ArrayBuffer {
   const { buffer, byteOffset, byteLength } = body
   if (
@@ -123,6 +230,18 @@ export function toArrayBuffer(body: Uint8Array): ArrayBuffer {
   return copy.buffer
 }
 
+/**
+ * Resolve an input URL using request headers as a base.
+ *
+ * @param input - Request URL or path.
+ * @param headers - Headers with optional host.
+ * @returns Resolved URL.
+ *
+ * @example
+ * import { resolveUrl } from '@mokup/server'
+ *
+ * const url = resolveUrl('/api/ping', { host: 'localhost:3000' })
+ */
 export function resolveUrl(
   input: string,
   headers: Record<string, string> & { host?: string },
@@ -253,6 +372,17 @@ function buildRuntimeRequest(
   return request
 }
 
+/**
+ * Convert a Fetch Request into a RuntimeRequest.
+ *
+ * @param request - Fetch request.
+ * @returns RuntimeRequest for the runtime engine.
+ *
+ * @example
+ * import { toRuntimeRequestFromFetch } from '@mokup/server'
+ *
+ * const runtimeRequest = await toRuntimeRequestFromFetch(new Request('http://localhost/api'))
+ */
 export async function toRuntimeRequestFromFetch(
   request: Request,
 ): Promise<RuntimeRequest> {
@@ -270,6 +400,18 @@ export async function toRuntimeRequestFromFetch(
   )
 }
 
+/**
+ * Convert a Node-style request into a RuntimeRequest.
+ *
+ * @param req - Node request-like object.
+ * @param bodyOverride - Optional body override.
+ * @returns RuntimeRequest for the runtime engine.
+ *
+ * @example
+ * import { toRuntimeRequestFromNode } from '@mokup/server'
+ *
+ * const runtimeRequest = await toRuntimeRequestFromNode({ url: '/api', on: () => {} })
+ */
 export async function toRuntimeRequestFromNode(
   req: NodeRequestLike,
   bodyOverride?: unknown,
@@ -291,6 +433,21 @@ export async function toRuntimeRequestFromNode(
   )
 }
 
+/**
+ * Apply a RuntimeResult to a Node response-like object.
+ *
+ * @param res - Node response-like object.
+ * @param result - Runtime result to apply.
+ *
+ * @example
+ * import { applyRuntimeResultToNode } from '@mokup/server'
+ *
+ * applyRuntimeResultToNode({ setHeader: () => {}, end: () => {} }, {
+ *   status: 200,
+ *   headers: {},
+ *   body: 'ok',
+ * })
+ */
 export function applyRuntimeResultToNode(
   res: NodeResponseLike,
   result: RuntimeResult,

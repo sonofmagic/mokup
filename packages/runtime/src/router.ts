@@ -1,9 +1,31 @@
+/**
+ * Tokenized route segment for matching.
+ *
+ * @example
+ * import type { RouteToken } from '@mokup/runtime'
+ *
+ * const token: RouteToken = { type: 'param', name: 'id' }
+ */
 export type RouteToken
   = | { type: 'static', value: string }
     | { type: 'param', name: string }
     | { type: 'catchall', name: string }
     | { type: 'optional-catchall', name: string }
 
+/**
+ * Parsed route template with tokens and score.
+ *
+ * @example
+ * import type { ParsedRouteTemplate } from '@mokup/runtime'
+ *
+ * const parsed: ParsedRouteTemplate = {
+ *   template: '/users/[id]',
+ *   tokens: [{ type: 'param', name: 'id' }],
+ *   score: [3],
+ *   errors: [],
+ *   warnings: [],
+ * }
+ */
 export interface ParsedRouteTemplate {
   template: string
   tokens: RouteToken[]
@@ -42,10 +64,33 @@ function scoreToken(token: RouteToken) {
   }
 }
 
+/**
+ * Compute a score array for route tokens.
+ *
+ * @param tokens - Parsed route tokens.
+ * @returns A numeric score array used for sorting.
+ *
+ * @example
+ * import { scoreRouteTokens } from '@mokup/runtime'
+ *
+ * const score = scoreRouteTokens([{ type: 'static', value: 'users' }])
+ */
 export function scoreRouteTokens(tokens: RouteToken[]) {
   return tokens.map(scoreToken)
 }
 
+/**
+ * Compare two route scores (higher wins).
+ *
+ * @param a - Score array for route A.
+ * @param b - Score array for route B.
+ * @returns Negative when A is higher priority.
+ *
+ * @example
+ * import { compareRouteScore } from '@mokup/runtime'
+ *
+ * const order = compareRouteScore([4], [3])
+ */
 export function compareRouteScore(a: number[], b: number[]) {
   const min = Math.min(a.length, b.length)
   for (let i = 0; i < min; i += 1) {
@@ -61,6 +106,17 @@ export function compareRouteScore(a: number[], b: number[]) {
   return 0
 }
 
+/**
+ * Normalize a URL path by stripping query/hash and trailing slash.
+ *
+ * @param value - Raw path or URL.
+ * @returns Normalized pathname.
+ *
+ * @example
+ * import { normalizePathname } from '@mokup/runtime'
+ *
+ * const pathname = normalizePathname('/users/?q=1')
+ */
 export function normalizePathname(value: string) {
   const withoutQuery = value.split('?')[0] ?? ''
   const withoutHash = withoutQuery.split('#')[0] ?? ''
@@ -75,6 +131,17 @@ function splitPath(value: string) {
   return normalizePathname(value).split('/').filter(Boolean)
 }
 
+/**
+ * Parse a route template into tokens, score, and diagnostics.
+ *
+ * @param template - Route template string.
+ * @returns Parsed template details.
+ *
+ * @example
+ * import { parseRouteTemplate } from '@mokup/runtime'
+ *
+ * const parsed = parseRouteTemplate('/users/[id]')
+ */
 export function parseRouteTemplate(template: string): ParsedRouteTemplate {
   const errors: string[] = []
   const warnings: string[] = []
@@ -175,6 +242,21 @@ export function parseRouteTemplate(template: string): ParsedRouteTemplate {
   }
 }
 
+/**
+ * Match route tokens against a pathname and extract params.
+ *
+ * @param tokens - Tokens for the template.
+ * @param pathname - Request pathname.
+ * @returns Params object or null if no match.
+ *
+ * @example
+ * import { matchRouteTokens } from '@mokup/runtime'
+ *
+ * const match = matchRouteTokens(
+ *   [{ type: 'param', name: 'id' }],
+ *   '/123',
+ * )
+ */
 export function matchRouteTokens(tokens: RouteToken[], pathname: string) {
   const segments = splitPath(pathname)
   const params: Record<string, string | string[]> = {}

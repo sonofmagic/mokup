@@ -2,6 +2,17 @@ import type { RouteTable } from './types'
 
 import { buildManifestData } from './manifest'
 
+/**
+ * Build the source for a virtual mokup bundle module.
+ *
+ * @param params - Bundle build parameters.
+ * @returns JavaScript source string.
+ *
+ * @example
+ * import { buildBundleModule } from 'mokup/vite'
+ *
+ * const source = buildBundleModule({ routes: [], root: process.cwd() })
+ */
 export function buildBundleModule(params: {
   routes: RouteTable
   root: string

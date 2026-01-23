@@ -24,6 +24,17 @@ interface FastifyInstanceLike {
   ) => void
 }
 
+/**
+ * Create a Fastify plugin from server options.
+ *
+ * @param options - Server options.
+ * @returns Fastify plugin handler.
+ *
+ * @example
+ * import { createFastifyPlugin } from '@mokup/server'
+ *
+ * const plugin = createFastifyPlugin({ manifest: { version: 1, routes: [] } })
+ */
 export function createFastifyPlugin(
   options: ServerOptions,
 ) {

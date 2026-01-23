@@ -226,6 +226,17 @@ function decodeBase64(input: string) {
   }
 }
 
+/**
+ * Vue composable for running playground requests and tracking state.
+ *
+ * @param params - Request configuration.
+ * @returns Reactive request helpers and state.
+ *
+ * @example
+ * import { usePlaygroundRequest } from '@mokup/playground'
+ *
+ * const request = usePlaygroundRequest({ route: null })
+ */
 export function usePlaygroundRequest(
   selected: Ref<PlaygroundRoute | null>,
   options: { basePath?: Ref<string> } = {},

@@ -9,6 +9,15 @@ import type {
 import { computed, ref, watch } from 'vue'
 import { normalizeBasePath } from '../utils/path'
 
+/**
+ * Vue composable for loading and filtering playground route data.
+ *
+ * @example
+ * import { usePlaygroundRoutes } from '@mokup/playground'
+ *
+ * const state = usePlaygroundRoutes()
+ * await state.loadRoutes()
+ */
 export function usePlaygroundRoutes() {
   const routes = ref<PlaygroundRoute[]>([])
   const disabledRoutes = ref<PlaygroundDisabledRoute[]>([])

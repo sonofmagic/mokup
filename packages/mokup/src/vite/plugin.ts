@@ -239,6 +239,24 @@ function normalizeRawWatcherPath(rawPath: unknown) {
   return ''
 }
 
+/**
+ * Create the mokup Vite plugin.
+ *
+ * @param options - Plugin options.
+ * @returns Vite plugin instance.
+ *
+ * @example
+ * import mokup from 'mokup/vite'
+ *
+ * export default {
+ *   plugins: [
+ *     mokup({
+ *       entries: { dir: 'mock', prefix: '/api' },
+ *       playground: true,
+ *     }),
+ *   ],
+ * }
+ */
 export function createMokupPlugin(options: MokupPluginOptions = {}): Plugin {
   let root = cwd()
   let base = '/'

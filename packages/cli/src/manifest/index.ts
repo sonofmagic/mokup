@@ -21,6 +21,17 @@ import { deriveRouteFromFile, resolveRule, sortRoutes } from './routes'
 import { loadRules } from './rules'
 import { toPosix } from './utils'
 
+/**
+ * Build and write a mokup manifest to disk.
+ *
+ * @param options - Build options.
+ * @returns Build output metadata.
+ *
+ * @example
+ * import { buildManifest } from '@mokup/cli'
+ *
+ * const result = await buildManifest({ dir: 'mock', outDir: '.mokup' })
+ */
 export async function buildManifest(options: BuildOptions = {}) {
   const root = options.root ?? cwd()
   const outDir = resolve(root, options.outDir ?? '.mokup')

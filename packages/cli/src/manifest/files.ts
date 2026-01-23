@@ -46,6 +46,17 @@ async function walkDir(
   }
 }
 
+/**
+ * Collect all files under the provided directories.
+ *
+ * @param dirs - Directories to scan.
+ * @returns List of discovered files.
+ *
+ * @example
+ * import { collectFiles } from '@mokup/cli'
+ *
+ * const files = await collectFiles(['mock'])
+ */
 export async function collectFiles(dirs: string[]) {
   const files: FileInfo[] = []
   for (const dir of dirs) {
@@ -57,6 +68,18 @@ export async function collectFiles(dirs: string[]) {
   return files
 }
 
+/**
+ * Resolve directory inputs into absolute paths.
+ *
+ * @param dir - Directory input.
+ * @param root - Project root.
+ * @returns Absolute directory list.
+ *
+ * @example
+ * import { resolveDirs } from '@mokup/cli'
+ *
+ * const dirs = resolveDirs('mock', process.cwd())
+ */
 export function resolveDirs(dir: BuildOptions['dir'], root: string): string[] {
   const raw = dir
   const resolved = Array.isArray(raw) ? raw : raw ? [raw] : ['mock']
@@ -71,6 +94,19 @@ function testPatterns(patterns: RegExp | RegExp[], value: string) {
   return list.some(pattern => pattern.test(value))
 }
 
+/**
+ * Apply include/exclude filters to a file path.
+ *
+ * @param file - File path.
+ * @param include - Include patterns.
+ * @param exclude - Exclude patterns.
+ * @returns True if the file passes the filter.
+ *
+ * @example
+ * import { matchesFilter } from '@mokup/cli'
+ *
+ * const ok = matchesFilter('mock/ping.get.ts', /\.get\.ts$/)
+ */
 export function matchesFilter(
   file: string,
   include?: RegExp | RegExp[],
@@ -86,6 +122,18 @@ export function matchesFilter(
   return true
 }
 
+/**
+ * Normalize ignore prefixes into a list.
+ *
+ * @param value - Prefix input.
+ * @param fallback - Default prefixes.
+ * @returns Normalized prefixes.
+ *
+ * @example
+ * import { normalizeIgnorePrefix } from '@mokup/cli'
+ *
+ * const prefixes = normalizeIgnorePrefix(undefined, ['.'])
+ */
 export function normalizeIgnorePrefix(
   value: string | string[] | undefined,
   fallback: string[] = ['.'],
@@ -98,6 +146,19 @@ export function normalizeIgnorePrefix(
   return list.filter((entry): entry is string => typeof entry === 'string' && entry.length > 0)
 }
 
+/**
+ * Check whether a file path includes ignored prefixes.
+ *
+ * @param file - Absolute file path.
+ * @param rootDir - Root directory.
+ * @param prefixes - Ignored prefixes.
+ * @returns True if the path contains ignored segments.
+ *
+ * @example
+ * import { hasIgnoredPrefix } from '@mokup/cli'
+ *
+ * const ignored = hasIgnoredPrefix('/root/mock/.tmp/a.ts', '/root/mock', ['.'])
+ */
 export function hasIgnoredPrefix(
   file: string,
   rootDir: string,
@@ -113,6 +174,17 @@ export function hasIgnoredPrefix(
   )
 }
 
+/**
+ * Check whether a file is supported for manifest build.
+ *
+ * @param file - File path to check.
+ * @returns True when file is a supported mock source.
+ *
+ * @example
+ * import { isSupportedFile } from '@mokup/cli'
+ *
+ * const ok = isSupportedFile('mock/ping.get.ts')
+ */
 export function isSupportedFile(file: string) {
   if (file.endsWith('.d.ts')) {
     return false

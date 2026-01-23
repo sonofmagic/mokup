@@ -1,13 +1,54 @@
 import { createLogger } from '@mokup/shared/logger'
 
+/**
+ * Options for registering the mokup service worker.
+ *
+ * @example
+ * import type { ServiceWorkerRegisterOptions } from 'mokup/sw'
+ *
+ * const options: ServiceWorkerRegisterOptions = { path: '/mokup-sw.js' }
+ */
 export interface ServiceWorkerRegisterOptions {
+  /**
+   * Service worker script path.
+   *
+   * @default "/mokup-sw.js"
+   */
   path?: string
+  /**
+   * Service worker scope.
+   *
+   * @default "/"
+   */
   scope?: string
+  /**
+   * Toggle registration.
+   *
+   * @default true
+   */
   enabled?: boolean
 }
 
+/**
+ * Options for unregistering the mokup service worker.
+ *
+ * @example
+ * import type { ServiceWorkerUnregisterOptions } from 'mokup/sw'
+ *
+ * const options: ServiceWorkerUnregisterOptions = { path: '/mokup-sw.js' }
+ */
 export interface ServiceWorkerUnregisterOptions {
+  /**
+   * Service worker script path.
+   *
+   * @default "/mokup-sw.js"
+   */
   path?: string
+  /**
+   * Service worker scope.
+   *
+   * @default "/"
+   */
   scope?: string
 }
 
@@ -47,6 +88,17 @@ function matchesScriptPath(scriptUrl: string, origin: string, pathname: string) 
   }
 }
 
+/**
+ * Register the mokup service worker in the browser.
+ *
+ * @param options - Registration options.
+ * @returns The registration or null if unsupported.
+ *
+ * @example
+ * import { registerMokupServiceWorker } from 'mokup/sw'
+ *
+ * await registerMokupServiceWorker({ path: '/mokup-sw.js' })
+ */
 export async function registerMokupServiceWorker(
   options: ServiceWorkerRegisterOptions = {},
 ): Promise<ServiceWorkerRegistration | null> {
@@ -70,6 +122,17 @@ export async function registerMokupServiceWorker(
   }
 }
 
+/**
+ * Unregister matching mokup service worker registrations.
+ *
+ * @param options - Unregister options.
+ * @returns List of removed registrations.
+ *
+ * @example
+ * import { unregisterMokupServiceWorker } from 'mokup/sw'
+ *
+ * await unregisterMokupServiceWorker({ path: '/mokup-sw.js' })
+ */
 export async function unregisterMokupServiceWorker(
   options: ServiceWorkerUnregisterOptions = {},
 ): Promise<ServiceWorkerRegistration[]> {

@@ -10,6 +10,17 @@ const methodSet = new Set<HttpMethod>([
   'HEAD',
 ])
 
+/**
+ * Normalize an HTTP method to the supported union.
+ *
+ * @param method - Raw method string.
+ * @returns A normalized HttpMethod or undefined if unsupported.
+ *
+ * @example
+ * import { normalizeMethod } from '@mokup/runtime'
+ *
+ * const method = normalizeMethod('post')
+ */
 export function normalizeMethod(method?: string | null): HttpMethod | undefined {
   if (!method) {
     return undefined
@@ -21,6 +32,18 @@ export function normalizeMethod(method?: string | null): HttpMethod | undefined 
   return undefined
 }
 
+/**
+ * Merge header records, letting overrides win.
+ *
+ * @param base - Base headers.
+ * @param override - Optional overrides.
+ * @returns A merged header record.
+ *
+ * @example
+ * import { mergeHeaders } from '@mokup/runtime'
+ *
+ * const headers = mergeHeaders({ a: '1' }, { a: '2', b: '3' })
+ */
 export function mergeHeaders(
   base: Record<string, string>,
   override?: Record<string, string>,
@@ -34,6 +57,17 @@ export function mergeHeaders(
   }
 }
 
+/**
+ * Delay for the given number of milliseconds.
+ *
+ * @param ms - Delay duration in milliseconds.
+ * @returns A promise that resolves after the delay.
+ *
+ * @example
+ * import { delay } from '@mokup/runtime'
+ *
+ * await delay(50)
+ */
 export function delay(ms: number) {
   return new Promise<void>(resolve => setTimeout(resolve, ms))
 }

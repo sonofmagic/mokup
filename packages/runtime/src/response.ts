@@ -1,3 +1,14 @@
+/**
+ * Decode a base64-encoded string into bytes.
+ *
+ * @param value - Base64 string.
+ * @returns Decoded bytes.
+ *
+ * @example
+ * import { decodeBase64 } from '@mokup/runtime'
+ *
+ * const bytes = decodeBase64('aGVsbG8=')
+ */
 export function decodeBase64(value: string): Uint8Array {
   if (typeof atob === 'function') {
     const binary = atob(value)

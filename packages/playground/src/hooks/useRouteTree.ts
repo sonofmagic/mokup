@@ -3,6 +3,17 @@ import type { PlaygroundRoute, TreeMode } from '../types'
 import { computed, onMounted, ref } from 'vue'
 import { buildRouteTree, buildTreeRows, getAllFolderIds, sortRouteTree } from '../utils/tree'
 
+/**
+ * Vue composable that builds and manages the route tree view.
+ *
+ * @param params - Tree inputs.
+ * @returns Reactive tree state and helpers.
+ *
+ * @example
+ * import { useRouteTree } from '@mokup/playground'
+ *
+ * const tree = useRouteTree({ routes: [], mode: 'file' })
+ */
 export function useRouteTree(params: {
   routes: Ref<PlaygroundRoute[]>
   selectedKey: ComputedRef<string>

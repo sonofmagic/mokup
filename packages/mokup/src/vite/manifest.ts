@@ -5,18 +5,60 @@ import { Buffer } from 'node:buffer'
 import { isAbsolute, relative, resolve } from '@mokup/shared/pathe'
 import { toPosix } from './utils'
 
+/**
+ * Module kind emitted by the manifest builder.
+ *
+ * @example
+ * import type { ManifestModuleKind } from 'mokup/vite'
+ *
+ * const kind: ManifestModuleKind = 'rule'
+ */
 export type ManifestModuleKind = 'rule' | 'middleware'
 
+/**
+ * Module entry emitted during manifest build.
+ *
+ * @example
+ * import type { ManifestModuleEntry } from 'mokup/vite'
+ *
+ * const entry: ManifestModuleEntry = {
+ *   id: '/@fs/project/mock/ping.get.ts',
+ *   kind: 'rule',
+ * }
+ */
 export interface ManifestModuleEntry {
   id: string
   kind: ManifestModuleKind
 }
 
+/**
+ * Result of building a manifest from routes.
+ *
+ * @example
+ * import type { ManifestBuildResult } from 'mokup/vite'
+ *
+ * const result: ManifestBuildResult = {
+ *   manifest: { version: 1, routes: [] },
+ *   modules: [],
+ * }
+ */
 export interface ManifestBuildResult {
   manifest: Manifest
   modules: ManifestModuleEntry[]
 }
 
+/**
+ * Convert a file path to a Vite import path.
+ *
+ * @param file - File path to convert.
+ * @param root - Project root.
+ * @returns Vite-compatible import path.
+ *
+ * @example
+ * import { toViteImportPath } from 'mokup/vite'
+ *
+ * const id = toViteImportPath('mock/ping.get.ts', process.cwd())
+ */
 export function toViteImportPath(file: string, root: string) {
   const absolute = isAbsolute(file) ? file : resolve(root, file)
   const rel = relative(root, absolute)
@@ -88,6 +130,17 @@ function buildManifestResponse(
   }
 }
 
+/**
+ * Build manifest data and module entries from resolved routes.
+ *
+ * @param params - Build inputs.
+ * @returns Manifest and module entries.
+ *
+ * @example
+ * import { buildManifestData } from 'mokup/vite'
+ *
+ * const { manifest } = buildManifestData({ routes: [], root: process.cwd() })
+ */
 export function buildManifestData(params: {
   routes: RouteTable
   root: string

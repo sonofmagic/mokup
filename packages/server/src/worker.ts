@@ -2,7 +2,18 @@ import type { ServerOptions, WorkerBundle, WorkerInput } from './types'
 
 import { createFetchHandler } from './fetch'
 
+/**
+ * Minimal Worker-style fetch interface.
+ *
+ * @example
+ * import type { FetchWorker } from '@mokup/server/worker'
+ *
+ * const worker: FetchWorker = {
+ *   fetch: async () => new Response('ok'),
+ * }
+ */
 export interface FetchWorker {
+  /** Fetch handler for the Worker runtime. */
   fetch: (request: Request) => Promise<Response>
 }
 
@@ -41,6 +52,17 @@ function createWorker(handlerOptions: ServerOptions): FetchWorker {
   }
 }
 
+/**
+ * Create a Worker-compatible fetch handler from a manifest or bundle.
+ *
+ * @param input - Manifest or bundle input.
+ * @returns Worker fetch handler.
+ *
+ * @example
+ * import { createMokupWorker } from '@mokup/server/worker'
+ *
+ * const worker = createMokupWorker({ version: 1, routes: [] })
+ */
 export function createMokupWorker(
   input: WorkerInput,
 ): FetchWorker {

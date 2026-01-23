@@ -1,5 +1,13 @@
 import { createI18n } from 'vue-i18n'
 
+/**
+ * Supported playground locales.
+ *
+ * @example
+ * import type { PlaygroundLocale } from '@mokup/playground'
+ *
+ * const locale: PlaygroundLocale = 'en-US'
+ */
 export type PlaygroundLocale = 'en-US' | 'zh-CN'
 
 const LOCALE_KEY = 'mokup.playground.locale'
@@ -236,6 +244,16 @@ const messages = {
   },
 }
 
+/**
+ * Read the persisted locale from localStorage.
+ *
+ * @returns Locale or null when unset.
+ *
+ * @example
+ * import { readLocale } from '@mokup/playground'
+ *
+ * const locale = readLocale()
+ */
 export function readLocale(): PlaygroundLocale | null {
   try {
     const stored = localStorage.getItem(LOCALE_KEY)
@@ -249,6 +267,16 @@ export function readLocale(): PlaygroundLocale | null {
   return null
 }
 
+/**
+ * Persist the selected locale to localStorage.
+ *
+ * @param locale - Locale to persist.
+ *
+ * @example
+ * import { persistLocale } from '@mokup/playground'
+ *
+ * persistLocale('zh-CN')
+ */
 export function persistLocale(locale: PlaygroundLocale) {
   try {
     localStorage.setItem(LOCALE_KEY, locale)
@@ -258,6 +286,14 @@ export function persistLocale(locale: PlaygroundLocale) {
   }
 }
 
+/**
+ * Vue I18n instance for the playground UI.
+ *
+ * @example
+ * import { i18n } from '@mokup/playground'
+ *
+ * const locale = i18n.global.locale
+ */
 export const i18n = createI18n({
   legacy: false,
   locale: readLocale() ?? 'en-US',

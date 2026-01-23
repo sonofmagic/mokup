@@ -1,6 +1,14 @@
 import type { RouteToken } from '@mokup/runtime'
 import type { Context, MiddlewareHandler } from '@mokup/shared/hono'
 
+/**
+ * Supported HTTP methods for server dev routes.
+ *
+ * @example
+ * import type { HttpMethod } from '@mokup/server'
+ *
+ * const method: HttpMethod = 'GET'
+ */
 export type HttpMethod
   = | 'GET'
     | 'POST'
@@ -10,6 +18,14 @@ export type HttpMethod
     | 'OPTIONS'
     | 'HEAD'
 
+/**
+ * Static response payloads supported by route rules.
+ *
+ * @example
+ * import type { RouteStaticResponse } from '@mokup/server'
+ *
+ * const value: RouteStaticResponse = { ok: true }
+ */
 export type RouteStaticResponse
   = | string
     | number
@@ -20,39 +36,165 @@ export type RouteStaticResponse
     | undefined
     | object
 
+/**
+ * Allowed return value from a route handler.
+ *
+ * @example
+ * import type { RouteHandlerResult } from '@mokup/server'
+ *
+ * const result: RouteHandlerResult = 'ok'
+ */
 export type RouteHandlerResult = RouteStaticResponse | Response
 
+/**
+ * Request handler signature for server dev routes.
+ *
+ * @example
+ * import type { RequestHandler } from '@mokup/server'
+ *
+ * const handler: RequestHandler = (c) => c.json({ ok: true })
+ */
 export type RequestHandler = (
   context: Context,
 ) => RouteHandlerResult | Promise<RouteHandlerResult>
 
+/**
+ * Route response as a static value or handler.
+ *
+ * @example
+ * import type { RouteResponse } from '@mokup/server'
+ *
+ * const response: RouteResponse = { ok: true }
+ */
 export type RouteResponse = RouteStaticResponse | RequestHandler
 
+/**
+ * Rule metadata for a route handler.
+ *
+ * @example
+ * import type { RouteRule } from '@mokup/server'
+ *
+ * const rule: RouteRule = {
+ *   handler: () => ({ ok: true }),
+ * }
+ */
 export interface RouteRule {
+  /** Handler for the route. */
   handler: RouteResponse
+  /**
+   * Enable or disable this rule.
+   *
+   * @default true
+   */
   enabled?: boolean
+  /**
+   * Override response status code.
+   *
+   * @default 200
+   */
   status?: number
+  /**
+   * Additional response headers.
+   *
+   * @default {}
+   */
   headers?: Record<string, string>
+  /**
+   * Delay in milliseconds before responding.
+   *
+   * @default 0
+   */
   delay?: number
 }
 
+/**
+ * Directory-level config for server dev scanning.
+ *
+ * @example
+ * import type { RouteDirectoryConfig } from '@mokup/server'
+ *
+ * const config: RouteDirectoryConfig = { headers: { 'x-mokup': 'dir' } }
+ */
 export interface RouteDirectoryConfig {
+  /**
+   * Headers applied to routes in this directory.
+   *
+   * @default {}
+   */
   headers?: Record<string, string>
+  /**
+   * Default status code override.
+   *
+   * @default 200
+   */
   status?: number
+  /**
+   * Default delay in milliseconds.
+   *
+   * @default 0
+   */
   delay?: number
+  /**
+   * Enable or disable this directory.
+   *
+   * @default true
+   */
   enabled?: boolean
+  /**
+   * Ignore prefixes for files.
+   *
+   * @default ["."]
+   */
   ignorePrefix?: string | string[]
+  /**
+   * Include filter.
+   *
+   * @default undefined
+   */
   include?: RegExp | RegExp[]
+  /**
+   * Exclude filter.
+   *
+   * @default undefined
+   */
   exclude?: RegExp | RegExp[]
+  /**
+   * Middleware for this directory.
+   *
+   * @default undefined
+   */
   middleware?: MiddlewareHandler | MiddlewareHandler[]
 }
 
+/**
+ * Normalized middleware metadata.
+ *
+ * @example
+ * import type { ResolvedMiddleware } from '@mokup/server'
+ *
+ * const item: ResolvedMiddleware = { handle: () => {}, source: 'index.config.ts', index: 0 }
+ */
 export interface ResolvedMiddleware {
   handle: MiddlewareHandler
   source: string
   index: number
 }
 
+/**
+ * Fully resolved route metadata.
+ *
+ * @example
+ * import type { ResolvedRoute } from '@mokup/server'
+ *
+ * const route: ResolvedRoute = {
+ *   file: '/mock/ping.get.ts',
+ *   template: '/ping',
+ *   method: 'GET',
+ *   tokens: [{ type: 'static', value: 'ping' }],
+ *   score: [4],
+ *   handler: () => ({ ok: true }),
+ * }
+ */
 export interface ResolvedRoute {
   file: string
   template: string
@@ -69,5 +211,17 @@ export interface ResolvedRoute {
 
 export type RouteTable = ResolvedRoute[]
 
+/**
+ * Re-exported Hono types used by handlers.
+ *
+ * @example
+ * import type { Context } from '@mokup/server'
+ */
 export type { Context, MiddlewareHandler } from '@mokup/shared/hono'
+/**
+ * Re-exported logger type.
+ *
+ * @example
+ * import type { Logger } from '@mokup/server'
+ */
 export type { Logger } from '@mokup/shared/logger'

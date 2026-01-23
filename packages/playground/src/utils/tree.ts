@@ -20,6 +20,18 @@ function buildSegments(route: PlaygroundRoute, mode: TreeMode) {
   return trimmed ? trimmed.split('/').filter(Boolean) : []
 }
 
+/**
+ * Build a tree structure for the route list.
+ *
+ * @param routes - Playground routes.
+ * @param mode - Tree mode.
+ * @returns Root tree node.
+ *
+ * @example
+ * import { buildRouteTree } from '@mokup/playground'
+ *
+ * const tree = buildRouteTree([], 'file')
+ */
 export function buildRouteTree(routes: PlaygroundRoute[], mode: TreeMode) {
   const root: TreeNode = {
     id: `${mode}:root`,
@@ -81,6 +93,17 @@ export function buildRouteTree(routes: PlaygroundRoute[], mode: TreeMode) {
   return root
 }
 
+/**
+ * Sort a route tree node in-place.
+ *
+ * @param node - Root node to sort.
+ * @returns The sorted node.
+ *
+ * @example
+ * import { sortRouteTree } from '@mokup/playground'
+ *
+ * const sorted = sortRouteTree({ id: 'root', label: '', kind: 'folder', children: [] })
+ */
 export function sortRouteTree(node: TreeNode) {
   node.children.sort((a, b) => {
     if (a.kind !== b.kind) {
@@ -111,6 +134,18 @@ function collectFolderIds(node: TreeNode, ids: string[]) {
   }
 }
 
+/**
+ * Collect all folder ids for a route list and tree mode.
+ *
+ * @param routes - Routes list.
+ * @param mode - Tree mode.
+ * @returns List of folder ids.
+ *
+ * @example
+ * import { getAllFolderIds } from '@mokup/playground'
+ *
+ * const ids = getAllFolderIds([], 'file')
+ */
 export function getAllFolderIds(routes: PlaygroundRoute[], mode: TreeMode) {
   const root = buildRouteTree(routes, mode)
   sortRouteTree(root)
@@ -151,6 +186,17 @@ function toRows(
   }
 }
 
+/**
+ * Build flattened rows for the tree view.
+ *
+ * @param params - Tree builder inputs.
+ * @returns List of tree rows.
+ *
+ * @example
+ * import { buildTreeRows } from '@mokup/playground'
+ *
+ * const rows = buildTreeRows({ routes: [], mode: 'file' })
+ */
 export function buildTreeRows(params: {
   root: TreeNode
   mode: TreeMode

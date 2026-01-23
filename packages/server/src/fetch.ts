@@ -3,6 +3,17 @@ import type { FetchHandler, ServerOptions } from './types'
 import { createRuntime } from '@mokup/runtime'
 import { toArrayBuffer, toRuntimeOptions, toRuntimeRequestFromFetch } from './internal'
 
+/**
+ * Create a fetch handler that executes mokup routes.
+ *
+ * @param options - Server options.
+ * @returns Fetch handler for use in adapters.
+ *
+ * @example
+ * import { createFetchHandler } from '@mokup/server/fetch'
+ *
+ * const handler = createFetchHandler({ manifest: { version: 1, routes: [] } })
+ */
 export function createFetchHandler(
   options: ServerOptions,
 ): FetchHandler {

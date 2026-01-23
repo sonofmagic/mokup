@@ -8,16 +8,56 @@ import { dirname, extname, join, relative, resolve } from '@mokup/shared/pathe'
 
 import { toPosix } from './utils'
 
+/**
+ * Options for building a manifest response from a handler.
+ *
+ * @example
+ * import type { BuildResponseOptions } from '@mokup/cli'
+ *
+ * const options: BuildResponseOptions = {
+ *   file: 'mock/ping.get.ts',
+ *   handlers: true,
+ *   handlerSources: new Set(),
+ *   handlerModuleMap: new Map(),
+ *   handlersDir: '.mokup/mokup-handlers',
+ *   root: process.cwd(),
+ *   ruleIndex: 0,
+ * }
+ */
 export interface BuildResponseOptions {
+  /** Handler file path. */
   file: string
+  /**
+   * Whether to emit handler bundles.
+   *
+   * @default true
+   */
   handlers: boolean
+  /** Mutable set of handler source files. */
   handlerSources: Set<string>
+  /** Map of source file to handler module path. */
   handlerModuleMap: Map<string, string>
+  /** Output directory for handler bundles. */
   handlersDir: string
+  /** Root directory used for relative paths. */
   root: string
+  /** Rule index within the file. */
   ruleIndex: number
 }
 
+/**
+ * Resolve the handler module path relative to the handlers directory.
+ *
+ * @param file - Source handler file.
+ * @param handlersDir - Handler output directory.
+ * @param root - Project root.
+ * @returns Relative module path for import.
+ *
+ * @example
+ * import { getHandlerModulePath } from '@mokup/cli'
+ *
+ * const path = getHandlerModulePath('mock/ping.get.ts', '.mokup/mokup-handlers', process.cwd())
+ */
 export function getHandlerModulePath(file: string, handlersDir: string, root: string) {
   const relFromRoot = relative(root, file)
   const ext = extname(relFromRoot)
@@ -28,6 +68,18 @@ export function getHandlerModulePath(file: string, handlersDir: string, root: st
   return normalized.startsWith('.') ? normalized : `./${normalized}`
 }
 
+/**
+ * Write the handler module map index files.
+ *
+ * @param handlerModuleMap - Map of source file to module path.
+ * @param handlersDir - Handler output directory.
+ * @param outDir - Build output directory.
+ *
+ * @example
+ * import { writeHandlerIndex } from '@mokup/cli'
+ *
+ * await writeHandlerIndex(new Map(), '.mokup/mokup-handlers', '.mokup')
+ */
 export async function writeHandlerIndex(
   handlerModuleMap: Map<string, string>,
   handlersDir: string,
@@ -68,6 +120,26 @@ export async function writeHandlerIndex(
   await fs.writeFile(join(handlersDir, 'index.d.mts'), dts.join('\n'), 'utf8')
 }
 
+/**
+ * Build a manifest response entry from a handler value.
+ *
+ * @param handler - Handler value or function.
+ * @param options - Build options.
+ * @returns Manifest response or null when handlers are disabled.
+ *
+ * @example
+ * import { buildResponse } from '@mokup/cli'
+ *
+ * const response = buildResponse({ ok: true }, {
+ *   file: 'mock/ping.get.ts',
+ *   handlers: true,
+ *   handlerSources: new Set(),
+ *   handlerModuleMap: new Map(),
+ *   handlersDir: '.mokup/mokup-handlers',
+ *   root: process.cwd(),
+ *   ruleIndex: 0,
+ * })
+ */
 export function buildResponse(
   handler: unknown,
   options: BuildResponseOptions,
@@ -115,6 +187,18 @@ export function buildResponse(
   }
 }
 
+/**
+ * Bundle handler modules into the handlers directory.
+ *
+ * @param files - Source files to bundle.
+ * @param root - Project root.
+ * @param handlersDir - Output directory.
+ *
+ * @example
+ * import { bundleHandlers } from '@mokup/cli'
+ *
+ * await bundleHandlers(['mock/ping.get.ts'], process.cwd(), '.mokup/mokup-handlers')
+ */
 export async function bundleHandlers(files: string[], root: string, handlersDir: string) {
   await esbuild({
     entryPoints: files,

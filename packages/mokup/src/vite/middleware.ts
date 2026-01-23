@@ -128,6 +128,17 @@ function wrapMiddleware(
   }
 }
 
+/**
+ * Build a Hono app for the resolved route table.
+ *
+ * @param routes - Resolved route table.
+ * @returns Hono app instance.
+ *
+ * @example
+ * import { createHonoApp } from 'mokup/vite'
+ *
+ * const app = createHonoApp([])
+ */
 export function createHonoApp(routes: RouteTable): Hono {
   const app = new Hono({ router: new PatternRouter(), strict: false })
 
@@ -217,6 +228,18 @@ function hasMatch(app: Hono, method: string, pathname: string) {
   return !!match && match[0].length > 0
 }
 
+/**
+ * Create a Connect-style middleware for Vite/preview servers.
+ *
+ * @param getApp - Lazy getter for the Hono app.
+ * @param logger - Logger for request output.
+ * @returns Node middleware handler.
+ *
+ * @example
+ * import { createMiddleware } from 'mokup/vite'
+ *
+ * const middleware = createMiddleware(() => null, console)
+ */
 export function createMiddleware(
   getApp: () => Hono | null,
   logger: Logger,

@@ -6,13 +6,52 @@ import type {
   RequestHandler,
 } from './types'
 
+/**
+ * Normalized rule for module-based handlers.
+ *
+ * @example
+ * import type { RuntimeRule } from '@mokup/runtime'
+ *
+ * const rule: RuntimeRule = {
+ *   handler: () => ({ ok: true }),
+ *   status: 200,
+ * }
+ */
 export interface RuntimeRule {
+  /** Handler value or function exported from a module. */
   handler?: unknown
+  /**
+   * Override status code for this rule.
+   *
+   * @default 200
+   */
   status?: number
+  /**
+   * Additional response headers.
+   *
+   * @default {}
+   */
   headers?: Record<string, string>
+  /**
+   * Delay in milliseconds before responding.
+   *
+   * @default 0
+   */
   delay?: number
 }
 
+/**
+ * Resolve a module path relative to a base directory or URL.
+ *
+ * @param modulePath - Module path from the manifest.
+ * @param moduleBase - Base path or URL for relative modules.
+ * @returns A fully qualified module URL or path.
+ *
+ * @example
+ * import { resolveModuleUrl } from '@mokup/runtime'
+ *
+ * const url = resolveModuleUrl('./handlers/ping.mjs', new URL('file:///app/'))
+ */
 export function resolveModuleUrl(modulePath: string, moduleBase?: string | URL) {
   if (/^(?:data|http|https|file):/.test(modulePath)) {
     return modulePath
@@ -33,6 +72,17 @@ export function resolveModuleUrl(modulePath: string, moduleBase?: string | URL) 
   return `${normalizedBase}${normalizedModule}`
 }
 
+/**
+ * Normalize a module export into an array of runtime rules.
+ *
+ * @param value - Exported module value.
+ * @returns A list of runtime rules.
+ *
+ * @example
+ * import { normalizeRules } from '@mokup/runtime'
+ *
+ * const rules = normalizeRules(() => ({ ok: true }))
+ */
 export function normalizeRules(value: unknown): RuntimeRule[] {
   if (!value) {
     return []
@@ -57,6 +107,18 @@ export function normalizeRules(value: unknown): RuntimeRule[] {
   ]
 }
 
+/**
+ * Execute a runtime rule and return its value.
+ *
+ * @param rule - Normalized runtime rule.
+ * @param context - Request context.
+ * @returns The handler result or static value.
+ *
+ * @example
+ * import { executeRule } from '@mokup/runtime'
+ *
+ * const result = await executeRule({ handler: () => 'ok' }, {} as any)
+ */
 export async function executeRule(
   rule: RuntimeRule | undefined,
   context: Parameters<RequestHandler>[0],
@@ -125,6 +187,23 @@ function resolveModuleCacheKey(
   return `${resolvedUrl}::${exportName}`
 }
 
+/**
+ * Load and normalize a module-backed response rule.
+ *
+ * @param response - Manifest response of type "module".
+ * @param moduleCache - Cache of normalized rules.
+ * @param moduleBase - Base path or URL for relative modules.
+ * @param moduleMap - Optional in-memory module map.
+ * @returns The resolved runtime rule.
+ *
+ * @example
+ * import { loadModuleRule } from '@mokup/runtime'
+ *
+ * const rule = await loadModuleRule(
+ *   { type: 'module', module: './handlers/ping.mjs' },
+ *   new Map(),
+ * )
+ */
 export async function loadModuleRule(
   response: Extract<ManifestResponse, { type: 'module' }>,
   moduleCache: Map<string, RuntimeRule[]>,
@@ -155,6 +234,23 @@ export async function loadModuleRule(
   return rules[0]
 }
 
+/**
+ * Load and normalize middleware modules.
+ *
+ * @param middleware - Module reference for middleware.
+ * @param middlewareCache - Cache of middleware handlers.
+ * @param moduleBase - Base path or URL for relative modules.
+ * @param moduleMap - Optional in-memory module map.
+ * @returns The resolved middleware handlers.
+ *
+ * @example
+ * import { loadModuleMiddleware } from '@mokup/runtime'
+ *
+ * const handlers = await loadModuleMiddleware(
+ *   { module: './middleware/auth.mjs' },
+ *   new Map(),
+ * )
+ */
 export async function loadModuleMiddleware(
   middleware: ManifestModuleRef,
   middlewareCache: Map<string, MiddlewareHandler[]>,

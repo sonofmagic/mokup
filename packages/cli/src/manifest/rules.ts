@@ -57,6 +57,17 @@ async function loadModule(file: string) {
   return null
 }
 
+/**
+ * Load rules from a mock file (JSON/TS/JS).
+ *
+ * @param file - Mock file path.
+ * @returns Normalized route rules.
+ *
+ * @example
+ * import { loadRules } from '@mokup/cli'
+ *
+ * const rules = await loadRules('mock/ping.get.ts')
+ */
 export async function loadRules(file: string): Promise<RouteRule[]> {
   const ext = extname(file).toLowerCase()
   if (ext === '.json' || ext === '.jsonc') {

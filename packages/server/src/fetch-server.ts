@@ -22,11 +22,28 @@ export type {
   FetchServerOptionsInput,
 } from './fetch-options'
 
+/**
+ * Fetch server instance returned by createFetchServer.
+ *
+ * @example
+ * import type { FetchServer } from '@mokup/server'
+ *
+ * const server: FetchServer = {
+ *   fetch: async () => new Response('ok'),
+ *   refresh: async () => {},
+ *   getRoutes: () => [],
+ * }
+ */
 export interface FetchServer {
+  /** Fetch handler for runtime requests. */
   fetch: (request: Request) => Promise<Response>
+  /** Refresh the route table. */
   refresh: () => Promise<void>
+  /** Read the current route table. */
   getRoutes: () => RouteTable
+  /** Inject a WebSocket server for playground metrics. */
   injectWebSocket?: (server: NodeWebSocketServer) => void
+  /** Close any active watchers. */
   close?: () => Promise<void>
 }
 
@@ -244,6 +261,17 @@ async function createWatcher(params: {
   return null
 }
 
+/**
+ * Create a fetch server that scans routes and serves playground metadata.
+ *
+ * @param options - Server options input.
+ * @returns Fetch server instance.
+ *
+ * @example
+ * import { createFetchServer } from '@mokup/server'
+ *
+ * const server = await createFetchServer({ entries: { dir: 'mock' } })
+ */
 export async function createFetchServer(
   options: FetchServerOptionsInput = {},
 ): Promise<FetchServer> {

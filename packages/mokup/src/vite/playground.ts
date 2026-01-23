@@ -109,6 +109,17 @@ function isViteDevServer(
   return !!server && 'ws' in server
 }
 
+/**
+ * Normalize playground configuration to enabled/path values.
+ *
+ * @param playground - Playground options input.
+ * @returns Normalized playground config.
+ *
+ * @example
+ * import { resolvePlaygroundOptions } from 'mokup/vite'
+ *
+ * const config = resolvePlaygroundOptions(true)
+ */
 export function resolvePlaygroundOptions(
   playground: PlaygroundOptionsInput,
 ): PlaygroundConfig {
@@ -404,6 +415,21 @@ function toPlaygroundConfigFile(
   return configFile
 }
 
+/**
+ * Create middleware that serves the playground UI and routes data.
+ *
+ * @param params - Playground middleware parameters.
+ * @returns Connect-style middleware handler.
+ *
+ * @example
+ * import { createPlaygroundMiddleware } from 'mokup/vite'
+ *
+ * const middleware = createPlaygroundMiddleware({
+ *   config: { enabled: true, path: '/__mokup' },
+ *   logger: console,
+ *   getRoutes: () => [],
+ * })
+ */
 export function createPlaygroundMiddleware(params: {
   getRoutes: () => RouteTable
   getDisabledRoutes?: () => PlaygroundDisabledRouteInput[]

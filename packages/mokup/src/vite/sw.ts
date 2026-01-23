@@ -7,9 +7,39 @@ import type {
 import { buildManifestData, toViteImportPath } from './manifest'
 import { normalizePrefix } from './utils'
 
+/**
+ * Default service worker script path.
+ *
+ * @example
+ * import { defaultSwPath } from 'mokup/vite'
+ *
+ * const path = defaultSwPath
+ */
 export const defaultSwPath = '/mokup-sw.js'
+/**
+ * Default service worker scope.
+ *
+ * @example
+ * import { defaultSwScope } from 'mokup/vite'
+ *
+ * const scope = defaultSwScope
+ */
 export const defaultSwScope = '/'
 
+/**
+ * Resolved service worker configuration.
+ *
+ * @example
+ * import type { ResolvedSwConfig } from 'mokup/vite'
+ *
+ * const config: ResolvedSwConfig = {
+ *   path: '/mokup-sw.js',
+ *   scope: '/',
+ *   register: true,
+ *   unregister: false,
+ *   basePaths: [],
+ * }
+ */
 export interface ResolvedSwConfig {
   path: string
   scope: string
@@ -126,6 +156,18 @@ function resolveSwConfigFromEntries(
   }
 }
 
+/**
+ * Resolve the service worker config from entries with mode "sw".
+ *
+ * @param options - Vite plugin options.
+ * @param logger - Logger for warnings.
+ * @returns Resolved config or null when no SW entries exist.
+ *
+ * @example
+ * import { resolveSwConfig } from 'mokup/vite'
+ *
+ * const config = resolveSwConfig([], console)
+ */
 export function resolveSwConfig(
   options: VitePluginOptions[],
   logger: Logger,
@@ -137,6 +179,18 @@ export function resolveSwConfig(
   return resolveSwConfigFromEntries(swEntries, logger)
 }
 
+/**
+ * Resolve SW config for unregister flow (all entries).
+ *
+ * @param options - Vite plugin options.
+ * @param logger - Logger for warnings.
+ * @returns Resolved config for unregister script.
+ *
+ * @example
+ * import { resolveSwUnregisterConfig } from 'mokup/vite'
+ *
+ * const config = resolveSwUnregisterConfig([], console)
+ */
 export function resolveSwUnregisterConfig(
   options: VitePluginOptions[],
   logger: Logger,
@@ -144,6 +198,17 @@ export function resolveSwUnregisterConfig(
   return resolveSwConfigFromEntries(options, logger)
 }
 
+/**
+ * Build the service worker script for mock routing.
+ *
+ * @param params - Script build inputs.
+ * @returns JavaScript source string.
+ *
+ * @example
+ * import { buildSwScript } from 'mokup/vite'
+ *
+ * const script = buildSwScript({ routes: [], root: process.cwd() })
+ */
 export function buildSwScript(params: {
   routes: RouteTable
   root: string

@@ -89,6 +89,18 @@ async function readJsonFile(file: string, logger: Logger) {
   }
 }
 
+/**
+ * Load route rules from a mock file.
+ *
+ * @param file - Mock file path.
+ * @param logger - Logger for parse warnings.
+ * @returns Normalized route rules.
+ *
+ * @example
+ * import { loadRules } from '@mokup/server'
+ *
+ * const rules = await loadRules('/project/mock/ping.get.ts', console)
+ */
 export async function loadRules(
   file: string,
   logger: Logger,

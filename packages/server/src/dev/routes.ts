@@ -44,6 +44,19 @@ function stripMethodSuffix(base: string) {
   }
 }
 
+/**
+ * Derive route metadata from a file path.
+ *
+ * @param file - Route file path.
+ * @param rootDir - Root directory for routing.
+ * @param logger - Logger for warnings.
+ * @returns Parsed route info or null when invalid.
+ *
+ * @example
+ * import { deriveRouteFromFile } from '@mokup/server'
+ *
+ * const route = deriveRouteFromFile('/project/mock/ping.get.ts', '/project/mock', console)
+ */
 export function deriveRouteFromFile(
   file: string,
   rootDir: string,
@@ -88,6 +101,24 @@ export function deriveRouteFromFile(
   }
 }
 
+/**
+ * Resolve a route rule into a normalized route entry.
+ *
+ * @param params - Rule and derived route inputs.
+ * @returns A resolved route or null when invalid.
+ *
+ * @example
+ * import { resolveRule } from '@mokup/server'
+ *
+ * const resolved = resolveRule({
+ *   rule: { handler: () => ({ ok: true }) },
+ *   derivedTemplate: '/ping',
+ *   derivedMethod: 'GET',
+ *   prefix: '/api',
+ *   file: '/project/mock/ping.get.ts',
+ *   logger: console,
+ * })
+ */
 export function resolveRule(params: {
   rule: RouteRule
   derivedTemplate: string
@@ -132,6 +163,17 @@ export function resolveRule(params: {
   return route
 }
 
+/**
+ * Sort routes by method, score, and template.
+ *
+ * @param routes - Routes to sort (in place).
+ * @returns The sorted routes.
+ *
+ * @example
+ * import { sortRoutes } from '@mokup/server'
+ *
+ * const routes = sortRoutes([])
+ */
 export function sortRoutes(routes: ResolvedRoute[]) {
   return routes.sort((a, b) => {
     if (a.method !== b.method) {
