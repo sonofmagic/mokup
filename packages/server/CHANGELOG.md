@@ -1,5 +1,14 @@
 # @mokup/server
 
+## 1.1.2
+
+### Patch Changes
+
+- 🐛 **Make @mokup/server default entry runtime-safe, add node/adapter subpath exports,** [`fd1e240`](https://github.com/sonofmagic/mokup/commit/fd1e240c9d818c20e87954ca3c4a0d40715f07d2) by @sonofmagic
+  - and update mokup/server to re-export the Node adapters with a new `mokup/server/fetch` entry for runtime-agnostic handlers. Unify createFetchServer to accept { entries, playground } only. Shared mock option types are now centralized for Vite/webpack and server configs.
+- 📦 **Dependencies** [`fd1e240`](https://github.com/sonofmagic/mokup/commit/fd1e240c9d818c20e87954ca3c4a0d40715f07d2)
+  → `@mokup/shared@1.0.1`, `@mokup/runtime@1.0.2`, `@mokup/playground@0.0.10`
+
 ## 1.1.1
 
 ### Patch Changes
