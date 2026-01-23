@@ -1,9 +1,8 @@
+import type { DirInput } from '@mokup/shared'
 import type { HttpMethod } from './types'
 
 import { isAbsolute, relative, resolve } from '@mokup/shared/pathe'
 import { methodSet } from './constants'
-
-export type DirInput = string | string[] | ((root: string) => string | string[]) | undefined
 
 export function normalizeMethod(method?: string | null): HttpMethod | undefined {
   if (!method) {

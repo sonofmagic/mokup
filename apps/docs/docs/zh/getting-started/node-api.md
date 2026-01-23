@@ -6,25 +6,28 @@
 
 ```ts
 import { serve } from '@hono/node-server'
-import { createFetchServer } from 'mokup/server'
+import { createFetchServer } from 'mokup/server/node'
 
-const app = await createFetchServer({ dir: 'mock' })
+const app = await createFetchServer({ entries: { dir: 'mock' } })
 serve({ fetch: app.fetch, port: 3000 })
 ```
 
 也可以传入多个目录：
 
 ```ts
-const app = await createFetchServer([{ dir: 'mock' }, { dir: 'fixtures' }])
+const app = await createFetchServer({ entries: [{ dir: 'mock' }, { dir: 'fixtures' }] })
 serve({ fetch: app.fetch, port: 3000 })
 ```
 
 ## Deno / Bun（fetch 入口）
 
 ```ts
-import { createFetchServer } from 'mokup/server'
+import { createFetchServer } from 'mokup/server/node'
 
-const app = await createFetchServer({ dir: 'mock', playground: false })
+const app = await createFetchServer({
+  entries: { dir: 'mock' },
+  playground: false,
+})
 const response = await app.fetch(new Request('http://localhost/api/users'))
 ```
 

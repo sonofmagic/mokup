@@ -1,11 +1,11 @@
 import process from 'node:process'
 import { fileURLToPath } from 'node:url'
 import { serve } from '@hono/node-server'
-import { createFetchServer } from 'mokup/server'
+import { createFetchServer } from 'mokup/server/node'
 
 async function start() {
   const root = fileURLToPath(new URL('..', import.meta.url))
-  const server = await createFetchServer({ dir: 'mock', root })
+  const server = await createFetchServer({ entries: { dir: 'mock', root } })
   const env = process.env as { PORT?: string }
   const port = Number(env.PORT ?? 8787)
 

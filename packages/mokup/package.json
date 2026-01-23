@@ -26,6 +26,11 @@
       "import": "./dist/server.mjs",
       "require": "./dist/server.cjs"
     },
+    "./server/node": {
+      "types": "./dist/server/node.d.ts",
+      "import": "./dist/server/node.mjs",
+      "require": "./dist/server/node.cjs"
+    },
     "./server/worker": {
       "types": "./dist/server/worker.d.ts",
       "import": "./dist/server/worker.mjs",

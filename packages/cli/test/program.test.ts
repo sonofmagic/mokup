@@ -1,15 +1,11 @@
-import { createFetchServer } from '@mokup/server'
-import { serve } from '@mokup/server/node'
+import { createFetchServer, serve } from '@mokup/server/node'
 import { Command } from 'commander'
 import { afterEach, describe, expect, it, vi } from 'vitest'
 import { buildManifest } from '../src/manifest'
 import { createCli, runCli } from '../src/program'
 
-vi.mock('@mokup/server', () => ({
-  createFetchServer: vi.fn(),
-}))
-
 vi.mock('@mokup/server/node', () => ({
+  createFetchServer: vi.fn(),
   serve: vi.fn(),
 }))
 
@@ -90,11 +86,13 @@ describe('CLI program', () => {
     ])
 
     expect(createFetchServer).toHaveBeenCalledWith({
-      watch: false,
-      log: false,
-      ignorePrefix: ['_'],
-      host: '0.0.0.0',
-      port: 9001,
+      entries: {
+        watch: false,
+        log: false,
+        ignorePrefix: ['_'],
+        host: '0.0.0.0',
+        port: 9001,
+      },
       playground: false,
     })
     expect(serve).toHaveBeenCalledTimes(1)

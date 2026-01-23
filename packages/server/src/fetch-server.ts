@@ -2,7 +2,11 @@ import type { Server } from 'node:http'
 import type { RouteConfigInfo, RouteIgnoreInfo, RouteSkipInfo } from './dev/scanner'
 import type { Logger, MiddlewareHandler, ResolvedRoute, RouteTable } from './dev/types'
 
-import type { FetchServerOptions, FetchServerOptionsInput } from './fetch-options'
+import type {
+  FetchServerOptions,
+  FetchServerOptionsConfig,
+  FetchServerOptionsInput,
+} from './fetch-options'
 import { cwd as nodeCwd } from 'node:process'
 import { Hono as HonoApp } from '@mokup/shared/hono'
 import { createHonoApp } from './dev/hono'
@@ -11,6 +15,12 @@ import { registerPlaygroundRoutes, resolvePlaygroundOptions } from './dev/playgr
 import { sortRoutes } from './dev/routes'
 import { scanRoutes } from './dev/scanner'
 import { createDebouncer, isInDirs, resolveDirs } from './dev/utils'
+
+export type {
+  FetchServerOptions,
+  FetchServerOptionsConfig,
+  FetchServerOptionsInput,
+} from './fetch-options'
 
 export interface FetchServer {
   fetch: (request: Request) => Promise<Response>
@@ -28,20 +38,24 @@ interface RuntimeDeno {
   }
 }
 
-function normalizeOptions(
-  options: FetchServerOptionsInput,
+function normalizeEntries(
+  entries: FetchServerOptions | FetchServerOptions[] | undefined,
 ): FetchServerOptions[] {
-  const list = Array.isArray(options) ? options : [options]
+  const list = Array.isArray(entries)
+    ? entries
+    : entries
+      ? [entries]
+      : [{}]
   return list.length > 0 ? list : [{}]
 }
 
-function resolvePlaygroundInput(list: FetchServerOptions[]) {
-  for (const entry of list) {
-    if (typeof entry.playground !== 'undefined') {
-      return entry.playground
-    }
+function normalizeOptions(
+  options: FetchServerOptionsInput,
+): { entries: FetchServerOptions[], playground?: FetchServerOptionsConfig['playground'] } {
+  return {
+    entries: normalizeEntries(options.entries),
+    playground: options.playground,
   }
-  return undefined
 }
 
 function resolveFirst<T>(
@@ -233,12 +247,13 @@ async function createWatcher(params: {
 export async function createFetchServer(
   options: FetchServerOptionsInput = {},
 ): Promise<FetchServer> {
-  const optionList = normalizeOptions(options)
+  const normalized = normalizeOptions(options)
+  const optionList = normalized.entries
   const root = resolveRoot(optionList)
   const logEnabled = optionList.every(entry => entry.log !== false)
   const watchEnabled = optionList.every(entry => entry.watch !== false)
   const logger = createLogger(logEnabled)
-  const playgroundConfig = resolvePlaygroundOptions(resolvePlaygroundInput(optionList))
+  const playgroundConfig = resolvePlaygroundOptions(normalized.playground)
   const dirs = resolveAllDirs(optionList, root)
 
   const routeCounts: RouteCounts = {}

@@ -3,7 +3,7 @@
   "changelog": [
     "@icebreakers/changelog-github",
     {
-      "repo": "sonofmagic/moku"
+      "repo": "sonofmagic/mokup"
     }
   ],
   "commit": false,

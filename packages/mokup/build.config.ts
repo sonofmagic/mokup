@@ -9,6 +9,7 @@ export default defineBuildConfig({
     'src/index',
     'src/runtime',
     'src/server',
+    'src/server/node',
     'src/server/worker',
     'src/vite',
     'src/webpack',

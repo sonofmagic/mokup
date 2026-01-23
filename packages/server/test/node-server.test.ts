@@ -49,9 +49,11 @@ describe('node server', () => {
     )
 
     const fetchServer = await createFetchServer({
-      dir: mockDir,
-      log: false,
-      watch: false,
+      entries: {
+        dir: mockDir,
+        log: false,
+        watch: false,
+      },
     })
     const nodeServer = createAdaptorServer({ fetch: fetchServer.fetch })
 
@@ -94,10 +96,12 @@ describe('node server', () => {
       'utf8',
     )
 
-    const fetchServer = await createFetchServer([
-      { dir: mockDir, watch: false, log: false },
-      { dir: extraDir, prefix: '/api', watch: false, log: false },
-    ])
+    const fetchServer = await createFetchServer({
+      entries: [
+        { dir: mockDir, watch: false, log: false },
+        { dir: extraDir, prefix: '/api', watch: false, log: false },
+      ],
+    })
     const nodeServer = createAdaptorServer({ fetch: fetchServer.fetch })
 
     try {

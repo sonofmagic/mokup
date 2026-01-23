@@ -6,6 +6,10 @@ export interface FetchWorker {
   fetch: (request: Request) => Promise<Response>
 }
 
+function isStringInput(value: unknown): value is string {
+  return typeof value === 'string'
+}
+
 function isManifest(value: WorkerInput): value is WorkerBundle['manifest'] {
   return typeof value === 'object'
     && value !== null
@@ -38,9 +42,9 @@ function createWorker(handlerOptions: ServerOptions): FetchWorker {
 }
 
 export function createMokupWorker(
-  input: Exclude<WorkerInput, string>,
+  input: WorkerInput,
 ): FetchWorker {
-  if (typeof input === 'string') {
+  if (isStringInput(input)) {
     throw new TypeError('createMokupWorker(dir) is only supported in Node runtimes.')
   }
   if (isManifest(input)) {

@@ -1,18 +1,21 @@
 # Server Adapters
 
-`mokup/server` ships adapters for multiple frameworks, all sharing `ServerOptions`.
+`mokup/server` ships runtime-agnostic handlers, while Node adapters live under
+`mokup/server/node`. All adapters share `ServerOptions`.
 
-## Fetch server (Node/Deno/Bun)
+## Fetch server (Node)
 
 ```ts
-import { serve } from '@hono/node-server'
-import { createFetchServer } from 'mokup/server'
+import { createFetchServer, serve } from 'mokup/server/node'
 
-const app = await createFetchServer({ dir: 'mock', playground: false })
+const app = await createFetchServer({
+  entries: { dir: 'mock' },
+  playground: false,
+})
 serve({ fetch: app.fetch, port: 3000 })
 ```
 
-In Deno/Bun, call `app.fetch` directly:
+You can call `app.fetch` directly:
 
 ```ts
 const response = await app.fetch(new Request('http://localhost/api/users'))
@@ -56,7 +59,7 @@ Pass `options` to any adapter below. For brevity, the examples use `manifest` di
 ## Express
 
 ```ts
-import { createExpressMiddleware } from 'mokup/server'
+import { createExpressMiddleware } from 'mokup/server/node'
 
 app.use(createExpressMiddleware({ manifest }))
 ```
@@ -64,7 +67,7 @@ app.use(createExpressMiddleware({ manifest }))
 ## Connect
 
 ```ts
-import { createConnectMiddleware } from 'mokup/server'
+import { createConnectMiddleware } from 'mokup/server/node'
 
 app.use(createConnectMiddleware({ manifest }))
 ```
@@ -72,7 +75,7 @@ app.use(createConnectMiddleware({ manifest }))
 ## Koa
 
 ```ts
-import { createKoaMiddleware } from 'mokup/server'
+import { createKoaMiddleware } from 'mokup/server/node'
 
 app.use(createKoaMiddleware({ manifest }))
 ```
@@ -80,7 +83,7 @@ app.use(createKoaMiddleware({ manifest }))
 ## Hono
 
 ```ts
-import { createHonoMiddleware } from 'mokup/server'
+import { createHonoMiddleware } from 'mokup/server/node'
 
 app.use(createHonoMiddleware({ manifest }))
 ```
@@ -88,7 +91,7 @@ app.use(createHonoMiddleware({ manifest }))
 ## Fastify
 
 ```ts
-import { createFastifyPlugin } from 'mokup/server'
+import { createFastifyPlugin } from 'mokup/server/node'
 
 await app.register(createFastifyPlugin({ manifest }))
 ```

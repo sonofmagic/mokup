@@ -8,6 +8,8 @@ export interface FetchWorker {
   fetch: (request: Request) => Promise<Response>
 }
 
+export type NodeWorkerInput = string | WorkerInput
+
 function isManifest(value: WorkerInput): value is WorkerBundle['manifest'] {
   return typeof value === 'object'
     && value !== null
@@ -76,11 +78,9 @@ function createWorker(handlerOptions: ServerOptions): FetchWorker {
 }
 
 export function createMokupWorker(input: string): Promise<FetchWorker>
+export function createMokupWorker(input: WorkerInput): FetchWorker
 export function createMokupWorker(
-  input: Exclude<WorkerInput, string>,
-): FetchWorker
-export function createMokupWorker(
-  input: WorkerInput,
+  input: NodeWorkerInput,
 ): FetchWorker | Promise<FetchWorker> {
   if (typeof input === 'string') {
     return loadBundleFromDir(input)

@@ -16,9 +16,11 @@ describe('fetch server', () => {
     )
 
     const server = await createFetchServer({
-      dir: mockDir,
-      log: false,
-      watch: false,
+      entries: {
+        dir: mockDir,
+        log: false,
+        watch: false,
+      },
       playground: false,
     })
 
@@ -45,9 +47,11 @@ describe('fetch server', () => {
     await mkdir(mockDir, { recursive: true })
 
     const server = await createFetchServer({
-      dir: mockDir,
-      log: false,
-      watch: false,
+      entries: {
+        dir: mockDir,
+        log: false,
+        watch: false,
+      },
       playground: false,
     })
 
@@ -64,22 +68,23 @@ describe('fetch server', () => {
     await writeFile(join(dirA, 'users.get.json'), '{"id":1}', 'utf8')
     await writeFile(join(dirB, 'teams.get.json'), '{"id":2}', 'utf8')
 
-    const server = await createFetchServer([
-      {
-        dir: dirA,
-        prefix: '/api',
-        log: false,
-        watch: false,
-        playground: false,
-      },
-      {
-        dir: dirB,
-        prefix: '/v2',
-        log: false,
-        watch: false,
-        playground: false,
-      },
-    ])
+    const server = await createFetchServer({
+      entries: [
+        {
+          dir: dirA,
+          prefix: '/api',
+          log: false,
+          watch: false,
+        },
+        {
+          dir: dirB,
+          prefix: '/v2',
+          log: false,
+          watch: false,
+        },
+      ],
+      playground: false,
+    })
 
     const users = await server.fetch(new Request('http://localhost/api/users'))
     expect(users.status).toBe(200)

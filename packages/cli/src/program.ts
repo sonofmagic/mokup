@@ -1,8 +1,7 @@
-import type { FetchServerOptions } from '@mokup/server'
+import type { FetchServerOptions, FetchServerOptionsConfig } from '@mokup/server/node'
 import type { BuildOptions } from './manifest/types'
 import process from 'node:process'
-import { createFetchServer } from '@mokup/server'
-import { serve } from '@mokup/server/node'
+import { createFetchServer, serve } from '@mokup/server/node'
 import { Command } from 'commander'
 import { buildManifest } from './manifest'
 
@@ -63,7 +62,7 @@ function toServeOptions(options: {
   watch?: boolean
   playground?: boolean
   log?: boolean
-}): FetchServerOptions {
+}): { entry: FetchServerOptions, playground?: FetchServerOptionsConfig['playground'] } {
   const serveOptions: FetchServerOptions = {
     watch: options.watch !== false,
     log: options.log !== false,
@@ -93,10 +92,10 @@ function toServeOptions(options: {
     }
     serveOptions.port = parsed
   }
-  if (typeof options.playground !== 'undefined') {
-    serveOptions.playground = options.playground
+  return {
+    entry: serveOptions,
+    playground: options.playground,
   }
-  return serveOptions
 }
 
 export function createCli() {
@@ -136,11 +135,15 @@ export function createCli() {
     .option('--no-log', 'Disable logging')
     .action(async (options) => {
       const serveOptions = toServeOptions(options)
-      const host = serveOptions.host ?? 'localhost'
-      const port = serveOptions.port ?? 8080
-      const playgroundEnabled = serveOptions.playground !== false
+      const { entry, playground } = serveOptions
+      const host = entry.host ?? 'localhost'
+      const port = entry.port ?? 8080
+      const playgroundEnabled = playground !== false
       const playgroundPath = '/_mokup'
-      const server = await createFetchServer(serveOptions)
+      const server = await createFetchServer({
+        entries: entry,
+        playground,
+      })
       const nodeServer = serve(
         {
           fetch: server.fetch,

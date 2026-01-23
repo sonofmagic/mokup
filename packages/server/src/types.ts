@@ -13,4 +13,4 @@ export interface WorkerBundle {
   onNotFound?: 'next' | 'response'
 }
 
-export type WorkerInput = string | Manifest | WorkerBundle
+export type WorkerInput = Manifest | WorkerBundle

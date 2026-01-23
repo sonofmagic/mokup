@@ -1,18 +1,20 @@
 # Server 适配器
 
-`mokup/server` 提供多种框架的适配器，统一使用 `ServerOptions`。
+`mokup/server` 提供运行时无关的处理器，Node 适配器在 `mokup/server/node` 下。所有适配器统一使用 `ServerOptions`。
 
-## Fetch 入口（Node/Deno/Bun）
+## Fetch 入口（Node）
 
 ```ts
-import { serve } from '@hono/node-server'
-import { createFetchServer } from 'mokup/server'
+import { createFetchServer, serve } from 'mokup/server/node'
 
-const app = await createFetchServer({ dir: 'mock', playground: false })
+const app = await createFetchServer({
+  entries: { dir: 'mock' },
+  playground: false,
+})
 serve({ fetch: app.fetch, port: 3000 })
 ```
 
-在 Deno/Bun 中直接调用 `app.fetch`：
+可以直接调用 `app.fetch`：
 
 ```ts
 const response = await app.fetch(new Request('http://localhost/api/users'))
@@ -56,7 +58,7 @@ const options = {
 ## Express
 
 ```ts
-import { createExpressMiddleware } from 'mokup/server'
+import { createExpressMiddleware } from 'mokup/server/node'
 
 app.use(createExpressMiddleware({ manifest }))
 ```
@@ -64,7 +66,7 @@ app.use(createExpressMiddleware({ manifest }))
 ## Connect
 
 ```ts
-import { createConnectMiddleware } from 'mokup/server'
+import { createConnectMiddleware } from 'mokup/server/node'
 
 app.use(createConnectMiddleware({ manifest }))
 ```
@@ -72,7 +74,7 @@ app.use(createConnectMiddleware({ manifest }))
 ## Koa
 
 ```ts
-import { createKoaMiddleware } from 'mokup/server'
+import { createKoaMiddleware } from 'mokup/server/node'
 
 app.use(createKoaMiddleware({ manifest }))
 ```
@@ -80,7 +82,7 @@ app.use(createKoaMiddleware({ manifest }))
 ## Hono
 
 ```ts
-import { createHonoMiddleware } from 'mokup/server'
+import { createHonoMiddleware } from 'mokup/server/node'
 
 app.use(createHonoMiddleware({ manifest }))
 ```
@@ -88,7 +90,7 @@ app.use(createHonoMiddleware({ manifest }))
 ## Fastify
 
 ```ts
-import { createFastifyPlugin } from 'mokup/server'
+import { createFastifyPlugin } from 'mokup/server/node'
 
 await app.register(createFastifyPlugin({ manifest }))
 ```

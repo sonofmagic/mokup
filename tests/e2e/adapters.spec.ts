@@ -13,7 +13,7 @@ import {
   createFetchServer,
   createHonoMiddleware,
   createKoaMiddleware,
-} from '../../packages/server/src/index'
+} from '../../packages/server/src/node'
 import { Hono } from '../../packages/shared/src/hono'
 import { runMokup } from './utils/command'
 import { readJson } from './utils/fs'
@@ -226,10 +226,12 @@ test('hono middleware serves JSON', async () => {
 
 test('fetch server serves JSON', async () => {
   const server = await createFetchServer({
-    dir: mockDir,
-    root: repoRoot,
-    log: false,
-    watch: false,
+    entries: {
+      dir: mockDir,
+      root: repoRoot,
+      log: false,
+      watch: false,
+    },
   })
 
   const response = await server.fetch(new Request('http://localhost/profile'))

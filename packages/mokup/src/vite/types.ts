@@ -1,4 +1,5 @@
 import type { RouteToken } from '@mokup/runtime'
+import type { MockEntryOptions, PlaygroundOptionsInput } from '@mokup/shared'
 import type { Context, MiddlewareHandler } from '@mokup/shared/hono'
 
 export type HttpMethod
@@ -47,10 +48,7 @@ export interface ServiceWorkerOptions {
   basePath?: string | string[]
 }
 
-export type PlaygroundOptionsInput = boolean | {
-  path?: string
-  enabled?: boolean
-} | undefined
+export type { DirInput, MockEntryOptions, PlaygroundOptionsInput } from '@mokup/shared'
 
 export interface RouteDirectoryConfig {
   headers?: Record<string, string>
@@ -69,14 +67,7 @@ export interface ResolvedMiddleware {
   index: number
 }
 
-export interface VitePluginOptions {
-  dir?: string | string[] | ((root: string) => string | string[])
-  prefix?: string
-  include?: RegExp | RegExp[]
-  exclude?: RegExp | RegExp[]
-  ignorePrefix?: string | string[]
-  watch?: boolean
-  log?: boolean
+export interface VitePluginOptions extends MockEntryOptions {
   mode?: RuntimeMode
   sw?: ServiceWorkerOptions
 }

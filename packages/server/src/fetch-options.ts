@@ -1,19 +1,14 @@
-import type { DirInput } from './dev/utils'
+import type { MockEntryOptions, PlaygroundOptionsInput } from '@mokup/shared'
 
-export interface FetchServerOptions {
-  dir?: DirInput
-  prefix?: string
-  include?: RegExp | RegExp[]
-  exclude?: RegExp | RegExp[]
-  ignorePrefix?: string | string[]
-  watch?: boolean
-  log?: boolean
-  playground?: boolean | { path?: string, enabled?: boolean }
+export interface FetchServerOptions extends MockEntryOptions {
   host?: string
   port?: number
   root?: string
 }
 
-export type FetchServerOptionsInput
-  = | FetchServerOptions
-    | FetchServerOptions[]
+export interface FetchServerOptionsConfig {
+  entries?: FetchServerOptions | FetchServerOptions[]
+  playground?: PlaygroundOptionsInput
+}
+
+export type FetchServerOptionsInput = FetchServerOptionsConfig
