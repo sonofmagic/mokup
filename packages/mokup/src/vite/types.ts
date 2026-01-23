@@ -10,11 +10,23 @@ export type HttpMethod
     | 'OPTIONS'
     | 'HEAD'
 
+export type RouteStaticResponse
+  = | string
+    | number
+    | boolean
+    | bigint
+    | symbol
+    | null
+    | undefined
+    | object
+
+export type RouteHandlerResult = RouteStaticResponse | Response
+
 export type RequestHandler = (
   context: Context,
-) => Response | Promise<Response> | unknown
+) => RouteHandlerResult | Promise<RouteHandlerResult>
 
-export type RouteResponse = unknown | RequestHandler
+export type RouteResponse = RouteStaticResponse | RequestHandler
 
 export interface RouteRule {
   handler: RouteResponse
