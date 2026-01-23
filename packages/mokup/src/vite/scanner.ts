@@ -108,14 +108,17 @@ export async function scanRoutes(params: {
   for (const fileInfo of files) {
     if (isConfigFile(fileInfo.file)) {
       if (shouldCollectConfig) {
-        const config = await resolveDirectoryConfig({
+        const configParams: Parameters<typeof resolveDirectoryConfig>[0] = {
           file: fileInfo.file,
           rootDir: fileInfo.rootDir,
-          server: params.server,
           logger: params.logger,
           configCache,
           fileCache,
-        })
+        }
+        if (params.server) {
+          configParams.server = params.server
+        }
+        const config = await resolveDirectoryConfig(configParams)
         params.onConfig?.({ file: fileInfo.file, enabled: config.enabled !== false })
       }
       continue

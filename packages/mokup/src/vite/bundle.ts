@@ -10,7 +10,9 @@ export function buildBundleModule(params: {
   const { manifest, modules } = buildManifestData({
     routes: params.routes,
     root: params.root,
-    resolveModulePath: params.resolveModulePath,
+    ...(params.resolveModulePath
+      ? { resolveModulePath: params.resolveModulePath }
+      : {}),
   })
 
   const imports: string[] = []
