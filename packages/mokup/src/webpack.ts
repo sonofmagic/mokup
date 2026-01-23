@@ -14,4 +14,4 @@ export type {
   VitePluginOptionsInput,
 } from './vite/types'
 
-export { createMokupWebpackPlugin, createMokupWebpackPlugin as default } from './webpack/plugin'
+export { createMokupWebpackPlugin } from './webpack/plugin'

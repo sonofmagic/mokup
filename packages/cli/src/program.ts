@@ -30,7 +30,7 @@ function toBuildOptions(options: {
   const buildOptions: BuildOptions = {
     handlers: options.handlers !== false,
     log: (message: string) => {
-      logger.log(message)
+      logger.info(message)
     },
   }
   if (options.dir && options.dir.length > 0) {
