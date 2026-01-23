@@ -1,5 +1,12 @@
 # middleware-demo
 
+## 0.0.5
+
+### Patch Changes
+
+- 📦 **Dependencies** [`fd1e240`](https://github.com/sonofmagic/mokup/commit/fd1e240c9d818c20e87954ca3c4a0d40715f07d2)
+  → `mokup@2.0.2`
+
 ## 0.0.4
 
 ### Patch Changes
