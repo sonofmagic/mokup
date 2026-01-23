@@ -26,7 +26,7 @@ const mimeTypes: Record<string, string> = {
 
 function normalizePlaygroundPath(value?: string) {
   if (!value) {
-    return '/_mokup'
+    return '/__mokup'
   }
   const normalized = value.startsWith('/') ? value : `/${value}`
   return normalized.length > 1 && normalized.endsWith('/')
@@ -38,7 +38,7 @@ export function resolvePlaygroundOptions(
   playground: { path?: string, enabled?: boolean } | boolean | undefined,
 ): PlaygroundConfig {
   if (playground === false) {
-    return { enabled: false, path: '/_mokup' }
+    return { enabled: false, path: '/__mokup' }
   }
   if (playground && typeof playground === 'object') {
     return {
@@ -46,7 +46,7 @@ export function resolvePlaygroundOptions(
       path: normalizePlaygroundPath(playground.path),
     }
   }
-  return { enabled: true, path: '/_mokup' }
+  return { enabled: true, path: '/__mokup' }
 }
 
 function resolvePlaygroundDist() {

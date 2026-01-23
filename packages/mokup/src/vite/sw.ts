@@ -1,14 +1,11 @@
-import type { Manifest, ManifestResponse } from '@mokup/runtime'
 import type {
   Logger,
-  ResolvedRoute,
   RouteTable,
   VitePluginOptions,
 } from './types'
 
-import { Buffer } from 'node:buffer'
-import { isAbsolute, relative, resolve } from '@mokup/shared/pathe'
-import { normalizePrefix, toPosix } from './utils'
+import { buildManifestData, toViteImportPath } from './manifest'
+import { normalizePrefix } from './utils'
 
 export const defaultSwPath = '/mokup-sw.js'
 export const defaultSwScope = '/'
@@ -147,77 +144,6 @@ export function resolveSwUnregisterConfig(
   return resolveSwConfigFromEntries(options, logger)
 }
 
-function toViteImportPath(file: string, root: string) {
-  const absolute = isAbsolute(file) ? file : resolve(root, file)
-  const rel = relative(root, absolute)
-  if (!rel.startsWith('..') && !isAbsolute(rel)) {
-    return `/${toPosix(rel)}`
-  }
-  return `/@fs/${toPosix(absolute)}`
-}
-
-function shouldModuleize(handler: ResolvedRoute['handler']) {
-  if (typeof handler === 'function') {
-    return true
-  }
-  if (typeof Response !== 'undefined' && handler instanceof Response) {
-    return true
-  }
-  return false
-}
-
-function toBinaryBody(handler: ResolvedRoute['handler']) {
-  if (handler instanceof ArrayBuffer) {
-    return Buffer.from(new Uint8Array(handler)).toString('base64')
-  }
-  if (handler instanceof Uint8Array) {
-    return Buffer.from(handler).toString('base64')
-  }
-  if (Buffer.isBuffer(handler)) {
-    return handler.toString('base64')
-  }
-  return null
-}
-
-function buildManifestResponse(
-  route: ResolvedRoute,
-  moduleId: string | null,
-): ManifestResponse {
-  if (moduleId) {
-    const response: {
-      type: 'module'
-      module: string
-      ruleIndex?: number
-    } = {
-      type: 'module',
-      module: moduleId,
-    }
-    if (typeof route.ruleIndex === 'number') {
-      response.ruleIndex = route.ruleIndex
-    }
-    return response
-  }
-  const handler = route.handler
-  if (typeof handler === 'string') {
-    return {
-      type: 'text',
-      body: handler,
-    }
-  }
-  const binary = toBinaryBody(handler)
-  if (binary) {
-    return {
-      type: 'binary',
-      body: binary,
-      encoding: 'base64',
-    }
-  }
-  return {
-    type: 'json',
-    body: handler,
-  }
-}
-
 export function buildSwScript(params: {
   routes: RouteTable
   root: string
@@ -229,47 +155,11 @@ export function buildSwScript(params: {
   const runtimeImportPath = params.runtimeImportPath ?? 'mokup/runtime'
   const basePaths = params.basePaths ?? []
   const resolveModulePath = params.resolveModulePath ?? toViteImportPath
-  const ruleModules = new Map<string, string>()
-  const middlewareModules = new Map<string, string>()
-
-  const manifestRoutes = routes.map((route) => {
-    const moduleId = shouldModuleize(route.handler)
-      ? resolveModulePath(route.file, root)
-      : null
-
-    if (moduleId) {
-      ruleModules.set(moduleId, moduleId)
-    }
-
-    const middleware = route.middlewares?.map((entry) => {
-      const modulePath = resolveModulePath(entry.source, root)
-      middlewareModules.set(modulePath, modulePath)
-      return {
-        module: modulePath,
-        ruleIndex: entry.index,
-      }
-    })
-
-    const response = buildManifestResponse(route, moduleId)
-    const manifestRoute = {
-      method: route.method,
-      url: route.template,
-      ...(route.tokens ? { tokens: route.tokens } : {}),
-      ...(route.score ? { score: route.score } : {}),
-      ...(route.status ? { status: route.status } : {}),
-      ...(route.headers ? { headers: route.headers } : {}),
-      ...(route.delay ? { delay: route.delay } : {}),
-      ...(middleware && middleware.length > 0 ? { middleware } : {}),
-      response,
-    }
-
-    return manifestRoute
+  const { manifest, modules } = buildManifestData({
+    routes,
+    root,
+    resolveModulePath,
   })
-
-  const manifest: Manifest = {
-    version: 1,
-    routes: manifestRoutes,
-  }
 
   const imports: string[] = [
     `import { createRuntimeApp, handle } from ${JSON.stringify(runtimeImportPath)}`,
@@ -277,15 +167,10 @@ export function buildSwScript(params: {
   const moduleEntries: Array<{ id: string, name: string, kind: 'rule' | 'middleware' }> = []
   let moduleIndex = 0
 
-  for (const id of ruleModules.keys()) {
+  for (const entry of modules) {
     const name = `module${moduleIndex++}`
-    imports.push(`import * as ${name} from '${id}'`)
-    moduleEntries.push({ id, name, kind: 'rule' })
-  }
-  for (const id of middlewareModules.keys()) {
-    const name = `module${moduleIndex++}`
-    imports.push(`import * as ${name} from '${id}'`)
-    moduleEntries.push({ id, name, kind: 'middleware' })
+    imports.push(`import * as ${name} from '${entry.id}'`)
+    moduleEntries.push({ id: entry.id, name, kind: entry.kind })
   }
 
   const lines: string[] = []

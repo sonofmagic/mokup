@@ -33,7 +33,7 @@ pnpm dev
 ## 4. Verify
 
 - `http://localhost:5173/api/users`
-- `http://localhost:5173/_mokup`
+- `http://localhost:5173/__mokup`
 
 ## Next
 

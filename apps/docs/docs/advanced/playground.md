@@ -5,7 +5,7 @@ Playground is a built-in UI for browsing and debugging mock APIs.
 ## Default entry
 
 ```
-http://localhost:5173/_mokup
+http://localhost:5173/__mokup
 ```
 
 ## Configure path
@@ -21,7 +21,7 @@ export default {
         prefix: '/api',
       },
       playground: {
-        path: '/_mokup',
+        path: '/__mokup',
         enabled: true,
       },
     }),

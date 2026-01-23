@@ -35,7 +35,7 @@ function routesAliasPlugin() {
       ) => {
         const requestUrl = req.url ?? ''
         if (requestUrl === '/routes' || requestUrl.startsWith('/routes?')) {
-          req.url = requestUrl.replace('/routes', '/_mokup/routes')
+          req.url = requestUrl.replace('/routes', '/__mokup/routes')
         }
         next()
       }

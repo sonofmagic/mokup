@@ -5,8 +5,8 @@ import { registerPlaygroundRoutes, resolvePlaygroundOptions } from '../src/dev/p
 
 describe('dev playground', () => {
   it('normalizes playground options', () => {
-    expect(resolvePlaygroundOptions(false)).toEqual({ enabled: false, path: '/_mokup' })
-    expect(resolvePlaygroundOptions(true)).toEqual({ enabled: true, path: '/_mokup' })
+    expect(resolvePlaygroundOptions(false)).toEqual({ enabled: false, path: '/__mokup' })
+    expect(resolvePlaygroundOptions(true)).toEqual({ enabled: true, path: '/__mokup' })
     expect(resolvePlaygroundOptions({ path: 'custom/', enabled: true }))
       .toEqual({ enabled: true, path: '/custom' })
   })
@@ -62,10 +62,10 @@ describe('dev playground', () => {
       ],
       dirs: ['/tmp/mock'],
       logger,
-      config: resolvePlaygroundOptions({ path: '/_mokup', enabled: true }),
+      config: resolvePlaygroundOptions({ path: '/__mokup', enabled: true }),
     })
 
-    const response = await app.fetch(new Request('http://localhost/_mokup/routes'))
+    const response = await app.fetch(new Request('http://localhost/__mokup/routes'))
     expect(response.status).toBe(200)
     const data = await response.json()
 
@@ -93,7 +93,7 @@ describe('dev playground', () => {
       config: resolvePlaygroundOptions(false),
     })
 
-    const response = await app.fetch(new Request('http://localhost/_mokup/routes'))
+    const response = await app.fetch(new Request('http://localhost/__mokup/routes'))
     expect(response.status).toBe(404)
   })
 })

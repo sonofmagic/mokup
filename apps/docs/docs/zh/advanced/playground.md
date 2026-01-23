@@ -5,7 +5,7 @@ Playground 是一个内置的可视化面板，用于浏览和调试当前已加
 ## 默认入口
 
 ```
-http://localhost:5173/_mokup
+http://localhost:5173/__mokup
 ```
 
 ## 配置入口
@@ -21,7 +21,7 @@ export default {
         prefix: '/api',
       },
       playground: {
-        path: '/_mokup',
+        path: '/__mokup',
         enabled: true,
       },
     }),

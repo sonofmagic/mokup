@@ -121,7 +121,7 @@ describe('playground routes endpoint', () => {
     const { res, state } = createResponse()
     let nextCalled = false
     await middleware(
-      { url: '/_mokup/routes' } as IncomingMessage,
+      { url: '/__mokup/routes' } as IncomingMessage,
       res,
       () => {
         nextCalled = true
@@ -202,7 +202,7 @@ describe('playground middleware responses', () => {
     const { res, state } = createResponse()
     let nextCalled = false
     await middleware(
-      { url: '/_mokup' } as IncomingMessage,
+      { url: '/__mokup' } as IncomingMessage,
       res,
       () => {
         nextCalled = true
@@ -211,14 +211,14 @@ describe('playground middleware responses', () => {
 
     expect(nextCalled).toBe(false)
     expect(state.statusCode).toBe(302)
-    expect(state.headers.Location).toBe('/_mokup/')
+    expect(state.headers.Location).toBe('/__mokup/')
   })
 
   it('serves the playground index and injects HMR/SW scripts', async () => {
     const logger: Logger = { info: vi.fn(), warn: vi.fn(), error: vi.fn() }
     const middleware = createPlaygroundMiddleware({
       getRoutes: () => [],
-      config: resolvePlaygroundOptions({ path: '/_mokup' }),
+      config: resolvePlaygroundOptions({ path: '/__mokup' }),
       logger,
       getServer: () => ({
         ws: {},
@@ -230,7 +230,7 @@ describe('playground middleware responses', () => {
     const { res, state } = createResponse()
     let nextCalled = false
     await middleware(
-      { url: '/base/_mokup/' } as IncomingMessage,
+      { url: '/base/__mokup/' } as IncomingMessage,
       res,
       () => {
         nextCalled = true
@@ -254,7 +254,7 @@ describe('playground middleware responses', () => {
     const { res, state } = createResponse()
     let nextCalled = false
     await middleware(
-      { url: '/_mokup/assets/index.css' } as IncomingMessage,
+      { url: '/__mokup/assets/index.css' } as IncomingMessage,
       res,
       () => {
         nextCalled = true

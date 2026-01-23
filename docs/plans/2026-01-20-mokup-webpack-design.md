@@ -31,7 +31,7 @@
 ## Dev Server
 
 - Hook `devServer.setupMiddlewares` to add:
-  - playground middleware (`/_mokup`).
+  - playground middleware (`/__mokup`).
   - SW endpoint (served from in-memory build output).
   - mock API middleware (Hono-based) for server routes.
 - Watch mock dirs with `chokidar` when `watch !== false`.

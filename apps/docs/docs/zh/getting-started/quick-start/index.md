@@ -22,4 +22,4 @@
 - [Node.js API](../node-api) — 在 Node 中直接调用 runtime。
 - [服务端中间件](../server-middleware) — 接入已有服务端。
 
-Playground 默认在 Vite 开发中启用，路径为 `/_mokup`。
+Playground 默认在 Vite 开发中启用，路径为 `/__mokup`。

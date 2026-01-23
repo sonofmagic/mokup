@@ -9,6 +9,7 @@ import { isAbsolute, resolve } from 'node:path'
 import { cwd } from 'node:process'
 import { fileURLToPath } from 'node:url'
 import chokidar from '@mokup/shared/chokidar'
+import { buildBundleModule } from './bundle'
 import { createLogger } from './logger'
 import { createHonoApp, createMiddleware } from './middleware'
 import { createPlaygroundMiddleware, resolvePlaygroundOptions } from './playground'
@@ -144,6 +145,18 @@ function resolveRegisterScope(base: string, scope: string) {
   return `${normalizedBase}${normalizedScope.slice(1)}`
 }
 
+function formatPlaygroundUrl(baseUrl: string | undefined, playgroundPath: string) {
+  if (!baseUrl) {
+    return playgroundPath
+  }
+  try {
+    return new URL(playgroundPath, baseUrl).href
+  }
+  catch {
+    return playgroundPath
+  }
+}
+
 function resolveSwImportPath(base: string) {
   const normalizedBase = normalizeBase(base)
   return `${normalizedBase}@id/mokup/sw`
@@ -244,6 +257,8 @@ export function createMokupPlugin(options: MokupPluginOptions = {}): Plugin {
   let lastSignature: string | null = null
 
   const normalizedOptions = normalizeMokupOptions(options)
+  const runtime = normalizedOptions.runtime ?? 'vite'
+  const enableViteMiddleware = runtime !== 'worker'
   const optionList = normalizeOptions(normalizedOptions)
   const logEnabled = optionList.every(entry => entry.log !== false)
   const watchEnabled = optionList.every(entry => entry.watch !== false)
@@ -293,6 +308,8 @@ export function createMokupPlugin(options: MokupPluginOptions = {}): Plugin {
   const resolvedSwVirtualId = `\0${swVirtualId}`
   const swLifecycleVirtualId = 'virtual:mokup-sw-lifecycle'
   const resolvedSwLifecycleVirtualId = `\0${swLifecycleVirtualId}`
+  const bundleVirtualId = 'virtual:mokup-bundle'
+  const resolvedBundleVirtualId = `\0${bundleVirtualId}`
   let swLifecycleFileName: string | null = null
   let swLifecycleScript: string | null = null
 
@@ -404,7 +421,7 @@ export function createMokupPlugin(options: MokupPluginOptions = {}): Plugin {
     const resolvedConfigs = Array.from(configMap.values())
     configFiles = resolvedConfigs.filter(entry => entry.enabled)
     disabledConfigFiles = resolvedConfigs.filter(entry => !entry.enabled)
-    app = serverRoutes.length > 0 ? createHonoApp(serverRoutes) : null
+    app = enableViteMiddleware && serverRoutes.length > 0 ? createHonoApp(serverRoutes) : null
     const signature = buildRouteSignature(
       routes,
       disabledRoutes,
@@ -434,9 +451,34 @@ export function createMokupPlugin(options: MokupPluginOptions = {}): Plugin {
       if (id === swLifecycleVirtualId) {
         return resolvedSwLifecycleVirtualId
       }
+      if (id === bundleVirtualId) {
+        return resolvedBundleVirtualId
+      }
       return null
     },
     async load(id) {
+      if (id === resolvedBundleVirtualId) {
+        if (!lastSignature) {
+          await refreshRoutes(currentServer ?? undefined)
+        }
+        const dirs = resolveAllDirs()
+        for (const dir of dirs) {
+          this.addWatchFile(dir)
+        }
+        for (const route of serverRoutes) {
+          this.addWatchFile(route.file)
+          route.middlewares?.forEach((entry) => {
+            this.addWatchFile(entry.source)
+          })
+        }
+        for (const config of configFiles) {
+          this.addWatchFile(config.file)
+        }
+        for (const config of disabledConfigFiles) {
+          this.addWatchFile(config.file)
+        }
+        return buildBundleModule({ routes: serverRoutes, root })
+      }
       if (id !== resolvedSwVirtualId) {
         if (id !== resolvedSwLifecycleVirtualId) {
           return null
@@ -537,6 +579,14 @@ export function createMokupPlugin(options: MokupPluginOptions = {}): Plugin {
       currentServer = server
       await refreshRoutes(server)
       addMiddlewareFirst(server, playgroundMiddleware)
+      if (playgroundConfig.enabled) {
+        const playgroundPath = resolveRegisterPath(base, playgroundConfig.path)
+        server.httpServer?.once('listening', () => {
+          const localUrl = server.resolvedUrls?.local?.[0]
+          const outputUrl = formatPlaygroundUrl(localUrl, playgroundPath)
+          server.config.logger.info(`  ➜  Playground: ${outputUrl}`)
+        })
+      }
       const swPath = swConfig ? resolveSwRequestPath(swConfig.path) : null
       if (swPath && hasSwRoutes()) {
         server.middlewares.use(async (req, res, next) => {
@@ -565,7 +615,7 @@ export function createMokupPlugin(options: MokupPluginOptions = {}): Plugin {
           }
         })
       }
-      if (serverRoutes.length > 0) {
+      if (enableViteMiddleware && serverRoutes.length > 0) {
         server.middlewares.use(createMiddleware(() => app, logger))
       }
       if (!watchEnabled) {
@@ -631,7 +681,7 @@ export function createMokupPlugin(options: MokupPluginOptions = {}): Plugin {
           }
         })
       }
-      if (serverRoutes.length > 0) {
+      if (enableViteMiddleware && serverRoutes.length > 0) {
         server.middlewares.use(createMiddleware(() => app, logger))
       }
       if (!watchEnabled) {

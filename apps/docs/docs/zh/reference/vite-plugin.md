@@ -29,10 +29,11 @@ export default {
 
 ### 插件选项
 
-| 选项         | 类型                                             | 说明            |
-| ------------ | ------------------------------------------------ | --------------- |
-| `entries`    | `VitePluginOptions / VitePluginOptions[]`        | mock 目录配置   |
-| `playground` | `boolean / { path?: string; enabled?: boolean }` | Playground 配置 |
+| 选项         | 类型                                             | 说明                        |
+| ------------ | ------------------------------------------------ | --------------------------- |
+| `entries`    | `VitePluginOptions / VitePluginOptions[]`        | mock 目录配置               |
+| `playground` | `boolean / { path?: string; enabled?: boolean }` | Playground 配置             |
+| `runtime`    | `'vite' / 'worker'`                              | 开发运行目标（默认 `vite`） |
 
 ### Entry 选项
 
@@ -47,6 +48,21 @@ export default {
 | `log`          | `boolean`                                                                                                                       | 是否输出日志                      |
 | `mode`         | `'server' / 'sw'`                                                                                                               | mock 运行模式                     |
 | `sw`           | `{ path?: string; scope?: string; register?: boolean; unregister?: boolean; fallback?: boolean; basePath?: string / string[] }` | Service Worker 配置（仅 SW 模式） |
+
+使用 `runtime: 'worker'` 可跳过 Vite dev 中间件，让 Worker 负责 mock 请求：
+
+```ts
+import mokup from 'mokup/vite'
+
+export default {
+  plugins: [
+    mokup({
+      runtime: 'worker',
+      entries: { dir: 'mock', prefix: '/api' },
+    }),
+  ],
+}
+```
 
 ## 路由备注
 

@@ -14,7 +14,7 @@
 ## Test Matrix
 
 - ui: `apps/web` Vite dev server loads, key UI panels render, API smoke requests via Playwright request.
-- playground: `/_mokup` UI loads, routes list is present, search/filter works, route detail shows response.
+- playground: `/__mokup` UI loads, routes list is present, search/filter works, route detail shows response.
 - cli: `mokup build` emits `mokup.manifest.*`, `mokup.bundle.*`, and handlers; ESM manifest importable.
 - adapters: server middleware coverage (connect/express/koa/fastify/hono/fetch) and worker bundle usage.
 

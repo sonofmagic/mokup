@@ -65,7 +65,7 @@ describe('node server', () => {
       expect(response.status).toBe(200)
       await expect(response.json()).resolves.toEqual({ id: 1 })
 
-      const routesResponse = await fetch(`${base}/_mokup/routes`)
+      const routesResponse = await fetch(`${base}/__mokup/routes`)
       expect(routesResponse.status).toBe(200)
       const payload = await routesResponse.json()
       expect(payload.count).toBe(1)

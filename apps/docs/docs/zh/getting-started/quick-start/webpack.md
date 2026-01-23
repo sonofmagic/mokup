@@ -33,7 +33,7 @@ module.exports = {
 ## 4. 验证
 
 - `http://localhost:8080/api/users`
-- `http://localhost:8080/_mokup`
+- `http://localhost:8080/__mokup`
 
 ## 下一步
 

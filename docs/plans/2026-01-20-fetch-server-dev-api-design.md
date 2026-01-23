@@ -60,7 +60,7 @@ Behavior:
 - `dir` resolved per entry relative to `root`.
 - `prefix`, `include`, `exclude` applied per entry during scan.
 - `watch` and `log` enabled only if all entries opt in.
-- `playground` resolved from the first entry that defines it, otherwise default to enabled at `/_mokup`.
+- `playground` resolved from the first entry that defines it, otherwise default to enabled at `/__mokup`.
 - `host`, `port`, `root` use the first provided value or fall back to defaults.
 
 ### Watch support

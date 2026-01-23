@@ -139,7 +139,7 @@ export function createCli() {
       const host = entry.host ?? 'localhost'
       const port = entry.port ?? 8080
       const playgroundEnabled = playground !== false
-      const playgroundPath = '/_mokup'
+      const playgroundPath = '/__mokup'
       const server = await createFetchServer({
         entries: entry,
         playground,

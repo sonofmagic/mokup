@@ -275,6 +275,9 @@ importers:
         specifier: ^4.6.0
         version: 4.6.4(vue@3.5.27(typescript@5.9.3))
     devDependencies:
+      '@cloudflare/vite-plugin':
+        specifier: ^1.21.2
+        version: 1.21.2(vite@7.3.1(@types/node@25.0.10)(jiti@2.6.1)(lightningcss@1.30.2)(terser@5.46.0)(tsx@4.21.0)(yaml@2.8.2))(workerd@1.20260120.0)(wrangler@4.60.0(@cloudflare/workers-types@4.20260120.0))
       '@tailwindcss/vite':
         specifier: 'catalog:'
         version: 4.1.18(vite@7.3.1(@types/node@25.0.10)(jiti@2.6.1)(lightningcss@1.30.2)(terser@5.46.0)(tsx@4.21.0)(yaml@2.8.2))
@@ -1269,6 +1272,12 @@ packages:
     peerDependenciesMeta:
       workerd:
         optional: true
+
+  '@cloudflare/vite-plugin@1.21.2':
+    resolution: {integrity: sha512-ozy7Zd03qQB0eLpSnAxfeP7fQLQp01KZOHZOylsDc1/bfMNw+ZFskvdo2iYuQwHy6VuE0iM06x6Ly2Tx6/cfJA==}
+    peerDependencies:
+      vite: ^6.1.0 || ^7.0.0
+      wrangler: ^4.60.0
 
   '@cloudflare/workerd-darwin-64@1.20260120.0':
     resolution: {integrity: sha512-JLHx3p5dpwz4wjVSis45YNReftttnI3ndhdMh5BUbbpdreN/g0jgxNt5Qp9tDFqEKl++N63qv+hxJiIIvSLR+Q==}
@@ -11768,6 +11777,19 @@ snapshots:
       unenv: 2.0.0-rc.24
     optionalDependencies:
       workerd: 1.20260120.0
+
+  '@cloudflare/vite-plugin@1.21.2(vite@7.3.1(@types/node@25.0.10)(jiti@2.6.1)(lightningcss@1.30.2)(terser@5.46.0)(tsx@4.21.0)(yaml@2.8.2))(workerd@1.20260120.0)(wrangler@4.60.0(@cloudflare/workers-types@4.20260120.0))':
+    dependencies:
+      '@cloudflare/unenv-preset': 2.11.0(unenv@2.0.0-rc.24)(workerd@1.20260120.0)
+      miniflare: 4.20260120.0
+      unenv: 2.0.0-rc.24
+      vite: 7.3.1(@types/node@25.0.10)(jiti@2.6.1)(lightningcss@1.30.2)(terser@5.46.0)(tsx@4.21.0)(yaml@2.8.2)
+      wrangler: 4.60.0(@cloudflare/workers-types@4.20260120.0)
+      ws: 8.18.0
+    transitivePeerDependencies:
+      - bufferutil
+      - utf-8-validate
+      - workerd
 
   '@cloudflare/workerd-darwin-64@1.20260120.0':
     optional: true

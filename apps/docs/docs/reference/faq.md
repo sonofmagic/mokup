@@ -14,7 +14,7 @@ dependencies into Workers.
 Check that:
 
 - The Vite plugin is enabled.
-- The path is `/_mokup` (or your custom path).
+- The path is `/__mokup` (or your custom path).
 - Mock filenames include method suffixes.
 
 ## Can JSON contain comments?

@@ -22,7 +22,7 @@
   - `host: 'localhost'`
   - `port: 8080`
   - `watch: true`
-  - `playground: true` (path `/_mokup`)
+  - `playground: true` (path `/__mokup`)
   - `log: true`
 
 Example:
@@ -71,7 +71,7 @@ serve({ fetch: app.fetch, port: 3000 })
 
 - Unit tests for `createFetchServer`:
   - Responds to a JSON mock route.
-  - `/ _mokup/routes` returns entries when playground is enabled.
+  - `/ __mokup/routes` returns entries when playground is enabled.
   - Watch mode refreshes route table after file changes.
 
 ## Open Questions

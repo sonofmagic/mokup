@@ -22,4 +22,4 @@ Create `mock/users.get.json`:
 - [Node.js API](../node-api) — call the runtime directly in Node.
 - [Server middleware](../server-middleware) — plug into existing servers.
 
-Playground defaults to `/_mokup` in Vite dev.
+Playground defaults to `/__mokup` in Vite dev.

@@ -5,11 +5,14 @@
   "private": true,
   "homepage": "https://mokup.icebreaker.top",
   "scripts": {
+    "predev": "pnpm --filter mokup build",
     "dev": "vite --host",
-    "build:manifest": "pnpm --filter mokup build && pnpm exec mokup build --dir mock --out worker/src/.mokup",
-    "worker:dev": "pnpm build:manifest && wrangler dev",
-    "worker:deploy": "pnpm build:manifest && wrangler deploy",
+    "preworker:dev": "pnpm --filter mokup build",
+    "worker:dev": "vite --host",
+    "prebuild": "pnpm --filter mokup build",
     "build": "vite build",
+    "preworker:deploy": "pnpm --filter mokup build",
+    "worker:deploy": "vite build && wrangler deploy",
     "preview": "vite preview",
     "lint": "eslint .",
     "typecheck": "tsc -p tsconfig.json --noEmit"
@@ -22,6 +25,7 @@
     "vue-router": "^4.6.0"
   },
   "devDependencies": {
+    "@cloudflare/vite-plugin": "^1.21.2",
     "@tailwindcss/vite": "catalog:",
     "@vitejs/plugin-vue": "catalog:",
     "tailwindcss": "catalog:",

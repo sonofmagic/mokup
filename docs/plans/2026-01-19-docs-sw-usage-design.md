@@ -21,7 +21,7 @@ Add Service Worker usage coverage to the docs site so users can choose browser-s
 
 1. Vite plugin reference: replace the broken options table with a clean 3-column table that includes `mode` and `sw`. Add a dedicated Service Worker section that describes defaults (path and scope), automatic registration, manual registration via `mokup/sw`, and `sw.fallback` behavior. Include examples for basic SW usage and a mixed server/SW setup to highlight per-entry configuration.
 
-2. Vite build output: add a Service Worker build section that explains that the SW script is emitted during `vite build` and is suitable for static hosting without a server runtime. Provide a minimal config example and a note that the playground requires a static `/_mokup/routes` JSON file when there is no server.
+2. Vite build output: add a Service Worker build section that explains that the SW script is emitted during `vite build` and is suitable for static hosting without a server runtime. Provide a minimal config example and a note that the playground requires a static `/__mokup/routes` JSON file when there is no server.
 
 3. Manifest schema: extend the schema snippet to include `middleware` and `ManifestModuleRef`. Add a short note on `ruleIndex` selection for array exports and the different `module` path formats used by CLI and SW builds.
 

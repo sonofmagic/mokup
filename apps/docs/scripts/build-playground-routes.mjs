@@ -8,7 +8,7 @@ const __dirname = path.dirname(fileURLToPath(import.meta.url))
 const rootDir = path.resolve(__dirname, '..')
 const mockDir = path.join(rootDir, 'mock')
 const distDir = path.join(rootDir, 'docs', '.vitepress', 'dist')
-const playgroundDir = path.join(distDir, '_mokup')
+const playgroundDir = path.join(distDir, '__mokup')
 const tempRoot = await mkdtemp(path.join(tmpdir(), 'mokup-docs-'))
 const outDir = path.join(tempRoot, 'manifest')
 
@@ -38,7 +38,7 @@ try {
   })
 
   const payload = {
-    basePath: '/_mokup',
+    basePath: '/__mokup',
     count: routes.length,
     groups,
     routes,

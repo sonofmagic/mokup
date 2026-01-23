@@ -399,7 +399,7 @@ mokup({
 
 ### Playground 路由
 
-默认会挂载 `/_mokup` 作为 mock 调试入口：
+默认会挂载 `/__mokup` 作为 mock 调试入口：
 
 ```ts
 mokup({
@@ -418,7 +418,7 @@ mokup({
     dir: 'mock',
   },
   playground: {
-    path: '/_mokup',
+    path: '/__mokup',
     enabled: true,
   },
 })
@@ -431,7 +431,7 @@ mokup({
 })
 ```
 
-Playground 会请求 `/_mokup/routes` 获取当前扫描到的 mock 列表，UI 由 Vue 3 + Tailwind CSS 4 构建。
+Playground 会请求 `/__mokup/routes` 获取当前扫描到的 mock 列表，UI 由 Vue 3 + Tailwind CSS 4 构建。
 
 ## 常见问题
 

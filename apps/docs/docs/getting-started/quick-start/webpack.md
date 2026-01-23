@@ -33,7 +33,7 @@ Run your webpack dev server (for example `pnpm webpack serve`).
 ## 4. Verify
 
 - `http://localhost:8080/api/users`
-- `http://localhost:8080/_mokup`
+- `http://localhost:8080/__mokup`
 
 ## Next
 

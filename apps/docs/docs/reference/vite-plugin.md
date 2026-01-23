@@ -29,10 +29,11 @@ export default {
 
 ### Plugin options
 
-| Option       | Type                                             | Description        |
-| ------------ | ------------------------------------------------ | ------------------ |
-| `entries`    | `VitePluginOptions / VitePluginOptions[]`        | Mock entry configs |
-| `playground` | `boolean / { path?: string; enabled?: boolean }` | Playground config  |
+| Option       | Type                                             | Description                         |
+| ------------ | ------------------------------------------------ | ----------------------------------- |
+| `entries`    | `VitePluginOptions / VitePluginOptions[]`        | Mock entry configs                  |
+| `playground` | `boolean / { path?: string; enabled?: boolean }` | Playground config                   |
+| `runtime`    | `'vite' / 'worker'`                              | Dev runtime target (default `vite`) |
 
 ### Entry options
 
@@ -47,6 +48,22 @@ export default {
 | `log`          | `boolean`                                                                                                                       | Enable logging                             |
 | `mode`         | `'server' / 'sw'`                                                                                                               | Mock runtime mode                          |
 | `sw`           | `{ path?: string; scope?: string; register?: boolean; unregister?: boolean; fallback?: boolean; basePath?: string / string[] }` | Service worker options (SW mode only)      |
+
+Use `runtime: 'worker'` to skip Vite dev middleware and let a Worker handle
+mock requests instead:
+
+```ts
+import mokup from 'mokup/vite'
+
+export default {
+  plugins: [
+    mokup({
+      runtime: 'worker',
+      entries: { dir: 'mock', prefix: '/api' },
+    }),
+  ],
+}
+```
 
 ## Routing notes
 

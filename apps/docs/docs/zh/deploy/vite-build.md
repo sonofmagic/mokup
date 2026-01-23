@@ -45,7 +45,7 @@ export default {
 }
 ```
 
-这种方式适合纯静态部署，因为 mock 请求在浏览器侧处理。如果你还需要 playground，请确保 `/_mokup/routes` 在构建期生成并作为静态 JSON 文件发布（可用 `mokup build` 或脚本生成）。
+这种方式适合纯静态部署，因为 mock 请求在浏览器侧处理。如果你还需要 playground，请确保 `/__mokup/routes` 在构建期生成并作为静态 JSON 文件发布（可用 `mokup build` 或脚本生成）。
 
 注意：
 

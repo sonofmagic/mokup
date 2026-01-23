@@ -8,7 +8,7 @@ When running in server mode, track mock route call counts on the server and push
 
 - Count calls on the server (global counts, in-memory).
 - Push a snapshot on WebSocket connect, then increment events after each response.
-- Use `/\_mokup/ws` as the playground WebSocket endpoint.
+- Use `/\__mokup/ws` as the playground WebSocket endpoint.
 - Keep the client UI in sync without polling.
 
 ## Non-goals
@@ -23,7 +23,7 @@ When running in server mode, track mock route call counts on the server and push
 - In `createFetchServer`, maintain `routeCounts` and `totalCount` keyed by `method + " " + template`.
 - Broadcast `{ type: "increment", routeKey, total }` to all WebSocket clients after each response.
 - On WebSocket open, send `{ type: "snapshot", total, perRoute }`.
-- Use `@hono/node-ws` to register a `/\_mokup/ws` endpoint and expose `injectWebSocket` for Node servers.
+- Use `@hono/node-ws` to register a `/\__mokup/ws` endpoint and expose `injectWebSocket` for Node servers.
 - In the playground, connect to `${basePath}/ws`, apply snapshot, then apply increments.
 - When WS is connected, disable local increments; on close/error, fall back to local counting.
 

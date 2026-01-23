@@ -14,4 +14,5 @@ export type {
   ServiceWorkerOptions,
   VitePluginOptions,
   VitePluginOptionsInput,
+  ViteRuntime,
 } from './vite/types'

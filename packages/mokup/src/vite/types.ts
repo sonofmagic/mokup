@@ -38,6 +38,7 @@ export interface RouteRule {
 }
 
 export type RuntimeMode = 'server' | 'sw'
+export type ViteRuntime = 'vite' | 'worker'
 
 export interface ServiceWorkerOptions {
   path?: string
@@ -75,6 +76,7 @@ export interface VitePluginOptions extends MockEntryOptions {
 export interface MokupPluginOptions {
   entries?: VitePluginOptions | VitePluginOptions[]
   playground?: PlaygroundOptionsInput
+  runtime?: ViteRuntime
 }
 
 export type VitePluginOptionsInput = MokupPluginOptions

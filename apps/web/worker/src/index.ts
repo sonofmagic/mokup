@@ -1,4 +1,4 @@
 import { createMokupWorker } from 'mokup/server/worker'
-import mokupBundle from './.mokup/mokup.bundle.mjs'
+import mokupBundle from 'virtual:mokup-bundle'
 
 export default createMokupWorker(mokupBundle)

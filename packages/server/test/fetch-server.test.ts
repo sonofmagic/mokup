@@ -55,7 +55,7 @@ describe('fetch server', () => {
       playground: false,
     })
 
-    const response = await server.fetch(new Request('http://localhost/_mokup'))
+    const response = await server.fetch(new Request('http://localhost/__mokup'))
     expect(response.status).toBe(404)
   })
 
