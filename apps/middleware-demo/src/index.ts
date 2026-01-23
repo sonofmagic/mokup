@@ -3,7 +3,7 @@ import path from 'node:path'
 import process from 'node:process'
 import { fileURLToPath } from 'node:url'
 import express from 'express'
-import { createExpressMiddleware } from 'mokup/server/node'
+import { createExpressMiddleware } from 'mokup/server'
 
 const rootDir = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..')
 

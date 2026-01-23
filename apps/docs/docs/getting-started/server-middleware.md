@@ -6,8 +6,8 @@ If you just need a dev server with hot reload, use `createFetchServer`.
 ## Dev server (recommended)
 
 ```ts
-import { serve } from '@hono/node-server'
-import { createFetchServer } from 'mokup/server/node'
+import { createFetchServer } from 'mokup/server'
+import { serve } from 'mokup/server/node'
 
 const app = await createFetchServer({ entries: { dir: 'mock' } })
 serve({ fetch: app.fetch, port: 3000 })
@@ -37,7 +37,7 @@ const options = {
 
 ```ts
 import express from 'express'
-import { createExpressMiddleware } from 'mokup/server/node'
+import { createExpressMiddleware } from 'mokup/server'
 
 const app = express()
 app.use(createExpressMiddleware(options))
@@ -47,7 +47,7 @@ app.use(createExpressMiddleware(options))
 
 ```ts
 import Koa from 'koa'
-import { createKoaMiddleware } from 'mokup/server/node'
+import { createKoaMiddleware } from 'mokup/server'
 
 const app = new Koa()
 app.use(createKoaMiddleware(options))
@@ -57,7 +57,7 @@ app.use(createKoaMiddleware(options))
 
 ```ts
 import Fastify from 'fastify'
-import { createFastifyPlugin } from 'mokup/server/node'
+import { createFastifyPlugin } from 'mokup/server'
 
 const app = Fastify()
 await app.register(createFastifyPlugin(options))
@@ -67,7 +67,7 @@ await app.register(createFastifyPlugin(options))
 
 ```ts
 import { Hono } from 'hono'
-import { createHonoMiddleware } from 'mokup/server/node'
+import { createHonoMiddleware } from 'mokup/server'
 
 const app = new Hono()
 app.use(createHonoMiddleware(options))

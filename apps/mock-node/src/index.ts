@@ -1,7 +1,7 @@
 import process from 'node:process'
 import { fileURLToPath } from 'node:url'
-import { serve } from '@hono/node-server'
-import { createFetchServer } from 'mokup/server/node'
+import { createFetchServer } from 'mokup/server'
+import { serve } from 'mokup/server/node'
 
 async function start() {
   const root = fileURLToPath(new URL('..', import.meta.url))

@@ -1,12 +1,13 @@
 # Server Adapters
 
-`mokup/server` ships runtime-agnostic handlers, while Node adapters live under
-`mokup/server/node`. All adapters share `ServerOptions`.
+`mokup/server` bundles the Node adapters and dev server helpers. Use
+`mokup/server/worker` for Workers or `mokup/server/fetch` for runtime-agnostic fetch handlers.
 
 ## Fetch server (Node)
 
 ```ts
-import { createFetchServer, serve } from 'mokup/server/node'
+import { createFetchServer } from 'mokup/server'
+import { serve } from 'mokup/server/node'
 
 const app = await createFetchServer({
   entries: { dir: 'mock' },
@@ -59,7 +60,7 @@ Pass `options` to any adapter below. For brevity, the examples use `manifest` di
 ## Express
 
 ```ts
-import { createExpressMiddleware } from 'mokup/server/node'
+import { createExpressMiddleware } from 'mokup/server'
 
 app.use(createExpressMiddleware({ manifest }))
 ```
@@ -67,7 +68,7 @@ app.use(createExpressMiddleware({ manifest }))
 ## Connect
 
 ```ts
-import { createConnectMiddleware } from 'mokup/server/node'
+import { createConnectMiddleware } from 'mokup/server'
 
 app.use(createConnectMiddleware({ manifest }))
 ```
@@ -75,7 +76,7 @@ app.use(createConnectMiddleware({ manifest }))
 ## Koa
 
 ```ts
-import { createKoaMiddleware } from 'mokup/server/node'
+import { createKoaMiddleware } from 'mokup/server'
 
 app.use(createKoaMiddleware({ manifest }))
 ```
@@ -83,7 +84,7 @@ app.use(createKoaMiddleware({ manifest }))
 ## Hono
 
 ```ts
-import { createHonoMiddleware } from 'mokup/server/node'
+import { createHonoMiddleware } from 'mokup/server'
 
 app.use(createHonoMiddleware({ manifest }))
 ```
@@ -91,7 +92,7 @@ app.use(createHonoMiddleware({ manifest }))
 ## Fastify
 
 ```ts
-import { createFastifyPlugin } from 'mokup/server/node'
+import { createFastifyPlugin } from 'mokup/server'
 
 await app.register(createFastifyPlugin({ manifest }))
 ```
@@ -99,7 +100,7 @@ await app.register(createFastifyPlugin({ manifest }))
 ## Fetch / Worker
 
 ```ts
-import { createFetchHandler } from 'mokup/server'
+import { createFetchHandler } from 'mokup/server/fetch'
 
 const handler = createFetchHandler({ manifest })
 const response = await handler(new Request('https://example.com/api'))
@@ -107,7 +108,9 @@ const response = await handler(new Request('https://example.com/api'))
 
 ## Worker entry
 
-For Workers (including Cloudflare Workers), use:
+For Workers (including Cloudflare Workers), use the helper entry. It wraps
+`createFetchHandler` from `mokup/server/fetch` and returns a 404 response when
+the handler yields `null`:
 
 ```ts
 import { createMokupWorker } from 'mokup/server/worker'

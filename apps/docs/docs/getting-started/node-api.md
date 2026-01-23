@@ -5,8 +5,8 @@ Use the Node dev server during development, and fall back to the runtime API for
 ## Dev mode (recommended)
 
 ```ts
-import { serve } from '@hono/node-server'
-import { createFetchServer } from 'mokup/server/node'
+import { createFetchServer } from 'mokup/server'
+import { serve } from 'mokup/server/node'
 
 const app = await createFetchServer({ entries: { dir: 'mock' } })
 serve({ fetch: app.fetch, port: 3000 })
@@ -19,16 +19,13 @@ const app = await createFetchServer({ entries: [{ dir: 'mock' }, { dir: 'fixture
 serve({ fetch: app.fetch, port: 3000 })
 ```
 
-## Deno / Bun (fetch server)
+## Deno / Bun (fetch handler)
 
 ```ts
-import { createFetchServer } from 'mokup/server/node'
+import { createFetchHandler } from 'mokup/server/fetch'
 
-const app = await createFetchServer({
-  entries: { dir: 'mock' },
-  playground: false,
-})
-const response = await app.fetch(new Request('http://localhost/api/users'))
+const handler = createFetchHandler({ manifest })
+const response = await handler(new Request('http://localhost/api/users'))
 ```
 
 ## Build mode

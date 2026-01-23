@@ -9,4 +9,3 @@ export type {
   WorkerInput,
 } from '@mokup/server'
 export { createFetchHandler } from '@mokup/server/fetch'
-export * from '@mokup/server/node'

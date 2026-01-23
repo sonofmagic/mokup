@@ -1,11 +1,12 @@
 # Server 适配器
 
-`mokup/server` 提供运行时无关的处理器，Node 适配器在 `mokup/server/node` 下。所有适配器统一使用 `ServerOptions`。
+`mokup/server` 提供 Node 适配器与开发服务器。Worker 请使用 `mokup/server/worker`，运行时无关的 fetch 入口请使用 `mokup/server/fetch`。
 
 ## Fetch 入口（Node）
 
 ```ts
-import { createFetchServer, serve } from 'mokup/server/node'
+import { createFetchServer } from 'mokup/server'
+import { serve } from 'mokup/server/node'
 
 const app = await createFetchServer({
   entries: { dir: 'mock' },
@@ -58,7 +59,7 @@ const options = {
 ## Express
 
 ```ts
-import { createExpressMiddleware } from 'mokup/server/node'
+import { createExpressMiddleware } from 'mokup/server'
 
 app.use(createExpressMiddleware({ manifest }))
 ```
@@ -66,7 +67,7 @@ app.use(createExpressMiddleware({ manifest }))
 ## Connect
 
 ```ts
-import { createConnectMiddleware } from 'mokup/server/node'
+import { createConnectMiddleware } from 'mokup/server'
 
 app.use(createConnectMiddleware({ manifest }))
 ```
@@ -74,7 +75,7 @@ app.use(createConnectMiddleware({ manifest }))
 ## Koa
 
 ```ts
-import { createKoaMiddleware } from 'mokup/server/node'
+import { createKoaMiddleware } from 'mokup/server'
 
 app.use(createKoaMiddleware({ manifest }))
 ```
@@ -82,7 +83,7 @@ app.use(createKoaMiddleware({ manifest }))
 ## Hono
 
 ```ts
-import { createHonoMiddleware } from 'mokup/server/node'
+import { createHonoMiddleware } from 'mokup/server'
 
 app.use(createHonoMiddleware({ manifest }))
 ```
@@ -90,7 +91,7 @@ app.use(createHonoMiddleware({ manifest }))
 ## Fastify
 
 ```ts
-import { createFastifyPlugin } from 'mokup/server/node'
+import { createFastifyPlugin } from 'mokup/server'
 
 await app.register(createFastifyPlugin({ manifest }))
 ```
@@ -98,7 +99,7 @@ await app.register(createFastifyPlugin({ manifest }))
 ## Fetch / Worker
 
 ```ts
-import { createFetchHandler } from 'mokup/server'
+import { createFetchHandler } from 'mokup/server/fetch'
 
 const handler = createFetchHandler({ manifest })
 const response = await handler(new Request('https://example.com/api'))
@@ -106,7 +107,9 @@ const response = await handler(new Request('https://example.com/api'))
 
 ## Worker 入口
 
-Worker 环境（含 Cloudflare Workers）请使用：
+Worker 环境（含 Cloudflare Workers）请使用 helper 入口，它基于
+`mokup/server/fetch` 的 `createFetchHandler` 封装，并在 handler 返回 `null`
+时统一输出 404：
 
 ```ts
 import { createMokupWorker } from 'mokup/server/worker'

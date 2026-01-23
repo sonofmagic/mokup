@@ -5,8 +5,8 @@
 ## Dev 模式（推荐）
 
 ```ts
-import { serve } from '@hono/node-server'
-import { createFetchServer } from 'mokup/server/node'
+import { createFetchServer } from 'mokup/server'
+import { serve } from 'mokup/server/node'
 
 const app = await createFetchServer({ entries: { dir: 'mock' } })
 serve({ fetch: app.fetch, port: 3000 })
@@ -22,13 +22,10 @@ serve({ fetch: app.fetch, port: 3000 })
 ## Deno / Bun（fetch 入口）
 
 ```ts
-import { createFetchServer } from 'mokup/server/node'
+import { createFetchHandler } from 'mokup/server/fetch'
 
-const app = await createFetchServer({
-  entries: { dir: 'mock' },
-  playground: false,
-})
-const response = await app.fetch(new Request('http://localhost/api/users'))
+const handler = createFetchHandler({ manifest })
+const response = await handler(new Request('http://localhost/api/users'))
 ```
 
 ## Build 模式

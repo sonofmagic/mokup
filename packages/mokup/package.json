@@ -26,6 +26,11 @@
       "import": "./dist/server.mjs",
       "require": "./dist/server.cjs"
     },
+    "./server/fetch": {
+      "types": "./dist/server/fetch.d.ts",
+      "import": "./dist/server/fetch.mjs",
+      "require": "./dist/server/fetch.cjs"
+    },
     "./server/node": {
       "types": "./dist/server/node.d.ts",
       "import": "./dist/server/node.mjs",
