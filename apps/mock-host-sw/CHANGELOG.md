@@ -1,5 +1,12 @@
 # mock-host-sw
 
+## 0.0.6
+
+### Patch Changes
+
+- 📦 **Dependencies** [`aba183d`](https://github.com/sonofmagic/mokup/commit/aba183d4a9cda9dd1796a10d70e9db32628a733c)
+  → `mokup@2.0.1`
+
 ## 0.0.5
 
 ### Patch Changes

@@ -1,5 +1,11 @@
 # @mokup/playground
 
+## 0.0.10
+
+### Patch Changes
+
+- 🐛 **fix: add config/ignored distinctions in playground route lists** [`aba183d`](https://github.com/sonofmagic/mokup/commit/aba183d4a9cda9dd1796a10d70e9db32628a733c) by @sonofmagic
+
 ## 0.0.9
 
 ### Patch Changes
