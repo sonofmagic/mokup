@@ -1,7 +1,7 @@
 {
   "name": "middleware-demo",
   "type": "module",
-  "version": "0.0.3",
+  "version": "0.0.4",
   "private": true,
   "scripts": {
     "build:mock": "pnpm exec mokup build --dir mock --out .mokup",
