@@ -6,7 +6,7 @@ export const zhNav: DefaultTheme.NavItem[] = [
   { text: '参考', link: '/zh/reference/cli' },
   {
     text: 'Playground',
-    link: '/_mokup/',
+    link: '/__mokup/',
     target: '_blank',
     rel: 'noreferrer',
   },
@@ -18,7 +18,7 @@ export const enNav: DefaultTheme.NavItem[] = [
   { text: 'Reference', link: '/reference/cli' },
   {
     text: 'Playground',
-    link: '/_mokup/',
+    link: '/__mokup/',
     target: '_blank',
     rel: 'noreferrer',
   },

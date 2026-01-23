@@ -32,6 +32,16 @@
       "outputs": []
     },
     "dev": {
+      "dependsOn": [
+        "^build"
+      ],
+      "cache": false,
+      "persistent": true
+    },
+    "worker:dev": {
+      "dependsOn": [
+        "^build"
+      ],
       "cache": false,
       "persistent": true
     },

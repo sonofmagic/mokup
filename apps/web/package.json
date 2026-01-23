@@ -5,9 +5,7 @@
   "private": true,
   "homepage": "https://mokup.icebreaker.top",
   "scripts": {
-    "predev": "pnpm --filter mokup build",
     "dev": "vite --host",
-    "preworker:dev": "pnpm --filter mokup build",
     "worker:dev": "vite --host",
     "prebuild": "pnpm --filter mokup build",
     "build": "vite build",

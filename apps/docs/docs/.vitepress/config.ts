@@ -33,7 +33,7 @@ const vitePlugins = [
       },
     },
     playground: {
-      path: '/_mokup',
+
     },
   }),
 ] as unknown as any[]
