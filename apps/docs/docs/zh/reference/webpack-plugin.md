@@ -16,8 +16,10 @@ const { createMokupWebpackPlugin } = require('mokup/webpack')
 module.exports = {
   plugins: [
     createMokupWebpackPlugin({
-      dir: 'mock',
-      prefix: '/api',
+      entries: {
+        dir: 'mock',
+        prefix: '/api',
+      },
     }),
   ],
   devServer: {
@@ -34,12 +36,14 @@ const { createMokupWebpackPlugin } = require('mokup/webpack')
 module.exports = {
   plugins: [
     createMokupWebpackPlugin({
-      dir: 'mock',
-      prefix: '/api',
-      mode: 'sw',
-      sw: {
-        path: '/mokup-sw.js',
-        scope: '/',
+      entries: {
+        dir: 'mock',
+        prefix: '/api',
+        mode: 'sw',
+        sw: {
+          path: '/mokup-sw.js',
+          scope: '/',
+        },
       },
     }),
   ],
@@ -48,7 +52,7 @@ module.exports = {
 
 ## 选项
 
-选项与 Vite 插件一致，详见 [Vite 插件](./vite-plugin)。
+选项与 Vite 插件一致：顶层 `entries` + `playground`，以及每个 entry 的配置，详见 [Vite 插件](./vite-plugin)。
 
 ## 注意
 

@@ -52,8 +52,36 @@ export default {
 
 - `index` 文件会合并为目录根路径；若需要 `/api/index`，请使用 `mock/api/index/index.get.ts`。
 - 以 `ignorePrefix` 指定前缀开头的目录或文件会被忽略，默认忽略 `.`。
-- `index.config.ts` 可在目录级覆盖 `ignorePrefix/include/exclude`。
+- `index.config.ts` 可覆盖 `headers/status/delay/enabled/ignorePrefix/include/exclude` 并添加目录中间件。
 - TS/JS mock 可通过 `enabled: false` 暂停单个接口。
+
+## 目录配置
+
+在目录内新增 `index.config.ts`，可配置匹配与默认行为：
+
+```ts
+import type { RouteDirectoryConfig } from 'mokup'
+
+const config: RouteDirectoryConfig = {
+  enabled: true,
+  headers: { 'x-mokup-scope': 'api' },
+  status: 200,
+  delay: 120,
+  ignorePrefix: ['.', '_'],
+  include: /users/,
+  exclude: /skip/,
+  middleware: [
+    async (c, next) => {
+      c.header('x-mokup', 'dir')
+      return await next()
+    },
+  ],
+}
+
+export default config
+```
+
+配置会从根目录向下合并。headers 会合并，middleware 按顺序追加。
 
 ## Service Worker 模式
 

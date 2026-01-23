@@ -43,7 +43,7 @@ import mokupBundle from './.mokup/mokup.bundle.mjs'
 const runtime = createRuntime({
   manifest: mokupBundle.manifest,
   moduleMap: mokupBundle.moduleMap,
-  moduleBase: new URL('./.mokup/', import.meta.url),
+  moduleBase: mokupBundle.moduleBase,
 })
 ```
 

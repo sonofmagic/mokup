@@ -2,7 +2,7 @@ import type { PreviewServer, ViteDevServer } from 'vite'
 
 import type { HttpMethod, Logger, RouteDirectoryConfig, RouteRule, RouteTable } from './types'
 import { resolveDirectoryConfig } from './config'
-import { collectFiles, isSupportedFile } from './files'
+import { collectFiles, isConfigFile, isSupportedFile } from './files'
 import { loadRules } from './loader'
 import { deriveRouteFromFile, resolveRule, sortRoutes } from './routes'
 import { hasIgnoredPrefix, matchesFilter, normalizeIgnorePrefix } from './utils'
@@ -14,11 +14,25 @@ export type RouteSkipReason
     | 'ignore-prefix'
     | 'include'
 
+export type RouteIgnoreReason
+  = | 'unsupported'
+    | 'invalid-route'
+
+export interface RouteConfigInfo {
+  file: string
+  enabled: boolean
+}
+
 export interface RouteSkipInfo {
   file: string
   reason: RouteSkipReason
   method?: HttpMethod
   url?: string
+}
+
+export interface RouteIgnoreInfo {
+  file: string
+  reason: RouteIgnoreReason
 }
 
 const silentLogger: Logger = {
@@ -78,6 +92,8 @@ export async function scanRoutes(params: {
   server?: ViteDevServer | PreviewServer
   logger: Logger
   onSkip?: (info: RouteSkipInfo) => void
+  onIgnore?: (info: RouteIgnoreInfo) => void
+  onConfig?: (info: RouteConfigInfo) => void
 }): Promise<RouteTable> {
   const routes: RouteTable = []
   const seen = new Set<string>()
@@ -86,7 +102,23 @@ export async function scanRoutes(params: {
   const configCache = new Map<string, RouteDirectoryConfig | null>()
   const fileCache = new Map<string, string | null>()
   const shouldCollectSkip = typeof params.onSkip === 'function'
+  const shouldCollectIgnore = typeof params.onIgnore === 'function'
+  const shouldCollectConfig = typeof params.onConfig === 'function'
   for (const fileInfo of files) {
+    if (isConfigFile(fileInfo.file)) {
+      if (shouldCollectConfig) {
+        const config = await resolveDirectoryConfig({
+          file: fileInfo.file,
+          rootDir: fileInfo.rootDir,
+          server: params.server,
+          logger: params.logger,
+          configCache,
+          fileCache,
+        })
+        params.onConfig?.({ file: fileInfo.file, enabled: config.enabled !== false })
+      }
+      continue
+    }
     const configParams: Parameters<typeof resolveDirectoryConfig>[0] = {
       file: fileInfo.file,
       rootDir: fileInfo.rootDir,
@@ -124,6 +156,9 @@ export async function scanRoutes(params: {
       continue
     }
     if (!isSupportedFile(fileInfo.file)) {
+      if (shouldCollectIgnore) {
+        params.onIgnore?.({ file: fileInfo.file, reason: 'unsupported' })
+      }
       continue
     }
     const effectiveInclude = typeof config.include !== 'undefined'
@@ -148,6 +183,9 @@ export async function scanRoutes(params: {
     }
     const derived = deriveRouteFromFile(fileInfo.file, fileInfo.rootDir, params.logger)
     if (!derived) {
+      if (shouldCollectIgnore) {
+        params.onIgnore?.({ file: fileInfo.file, reason: 'invalid-route' })
+      }
       continue
     }
     const rules = await loadRules(fileInfo.file, params.server, params.logger)

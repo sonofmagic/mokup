@@ -52,8 +52,36 @@ export default {
 
 - `index` files collapse to the directory root; use `mock/api/index/index.get.ts` for `/api/index`.
 - Any directory or file segment starting with `ignorePrefix` is ignored (default `.`).
-- `index.config.ts` can override `ignorePrefix/include/exclude` per directory.
+- `index.config.ts` can override `headers/status/delay/enabled/ignorePrefix/include/exclude` and add directory middleware.
 - TS/JS mocks can disable a single route with `enabled: false`.
+
+## Directory config
+
+Use `index.config.ts` in any directory to customize matching and defaults:
+
+```ts
+import type { RouteDirectoryConfig } from 'mokup'
+
+const config: RouteDirectoryConfig = {
+  enabled: true,
+  headers: { 'x-mokup-scope': 'api' },
+  status: 200,
+  delay: 120,
+  ignorePrefix: ['.', '_'],
+  include: /users/,
+  exclude: /skip/,
+  middleware: [
+    async (c, next) => {
+      c.header('x-mokup', 'dir')
+      return await next()
+    },
+  ],
+}
+
+export default config
+```
+
+Configs cascade from root to leaf. Headers merge, and middleware chains are appended in order.
 
 ## Service Worker mode
 

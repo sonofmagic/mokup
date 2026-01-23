@@ -1,7 +1,7 @@
 import type { Hono } from '@mokup/shared/hono'
 import type { IncomingMessage, ServerResponse } from 'node:http'
 import type { Plugin, PreviewServer, ViteDevServer } from 'vite'
-import type { RouteSkipInfo } from './scanner'
+import type { RouteConfigInfo, RouteIgnoreInfo, RouteSkipInfo } from './scanner'
 import type { MokupPluginOptions, RouteTable, VitePluginOptions } from './types'
 
 import { existsSync } from 'node:fs'
@@ -17,7 +17,13 @@ import { scanRoutes } from './scanner'
 import { buildSwScript, resolveSwConfig, resolveSwUnregisterConfig } from './sw'
 import { createDebouncer, isInDirs, resolveDirs } from './utils'
 
-function buildRouteSignature(routes: RouteTable, disabledRoutes: RouteSkipInfo[]) {
+function buildRouteSignature(
+  routes: RouteTable,
+  disabledRoutes: RouteSkipInfo[],
+  ignoredRoutes: RouteIgnoreInfo[],
+  configFiles: RouteConfigInfo[],
+  disabledConfigFiles: RouteConfigInfo[],
+) {
   return routes
     .map(route =>
       [
@@ -38,6 +44,20 @@ function buildRouteSignature(routes: RouteTable, disabledRoutes: RouteSkipInfo[]
           route.url ?? '',
         ].join('|'),
       ),
+    )
+    .concat(
+      ignoredRoutes.map(route =>
+        [
+          route.reason,
+          route.file,
+        ].join('|'),
+      ),
+    )
+    .concat(
+      configFiles.map(route => route.file),
+    )
+    .concat(
+      disabledConfigFiles.map(route => route.file),
     )
     .join('\n')
 }
@@ -214,6 +234,9 @@ export function createMokupPlugin(options: MokupPluginOptions = {}): Plugin {
   let serverRoutes: RouteTable = []
   let swRoutes: RouteTable = []
   let disabledRoutes: RouteSkipInfo[] = []
+  let ignoredRoutes: RouteIgnoreInfo[] = []
+  let configFiles: RouteConfigInfo[] = []
+  let disabledConfigFiles: RouteConfigInfo[] = []
   let app: Hono | null = null
   type Watcher = ReturnType<typeof chokidar.watch>
   let previewWatcher: Watcher | null = null
@@ -321,6 +344,9 @@ export function createMokupPlugin(options: MokupPluginOptions = {}): Plugin {
   const playgroundMiddleware = createPlaygroundMiddleware({
     getRoutes: () => routes,
     getDisabledRoutes: () => disabledRoutes,
+    getIgnoredRoutes: () => ignoredRoutes,
+    getConfigFiles: () => configFiles,
+    getDisabledConfigFiles: () => disabledConfigFiles,
     config: playgroundConfig,
     logger,
     getServer: () => currentServer,
@@ -333,6 +359,8 @@ export function createMokupPlugin(options: MokupPluginOptions = {}): Plugin {
     const collectedServer: RouteTable = []
     const collectedSw: RouteTable = []
     const collectedDisabled: RouteSkipInfo[] = []
+    const collectedIgnored: RouteIgnoreInfo[] = []
+    const collectedConfigs: RouteConfigInfo[] = []
     for (const entry of optionList) {
       const dirs = resolveDirs(entry.dir, root)
       const scanParams: Parameters<typeof scanRoutes>[0] = {
@@ -340,6 +368,8 @@ export function createMokupPlugin(options: MokupPluginOptions = {}): Plugin {
         prefix: entry.prefix ?? '',
         logger,
         onSkip: info => collectedDisabled.push(info),
+        onIgnore: info => collectedIgnored.push(info),
+        onConfig: info => collectedConfigs.push(info),
       }
       if (entry.include) {
         scanParams.include = entry.include
@@ -369,8 +399,19 @@ export function createMokupPlugin(options: MokupPluginOptions = {}): Plugin {
     serverRoutes = sortRoutes(collectedServer)
     swRoutes = sortRoutes(collectedSw)
     disabledRoutes = collectedDisabled
+    ignoredRoutes = collectedIgnored
+    const configMap = new Map(collectedConfigs.map(entry => [entry.file, entry]))
+    const resolvedConfigs = Array.from(configMap.values())
+    configFiles = resolvedConfigs.filter(entry => entry.enabled)
+    disabledConfigFiles = resolvedConfigs.filter(entry => !entry.enabled)
     app = serverRoutes.length > 0 ? createHonoApp(serverRoutes) : null
-    const signature = buildRouteSignature(routes, disabledRoutes)
+    const signature = buildRouteSignature(
+      routes,
+      disabledRoutes,
+      ignoredRoutes,
+      configFiles,
+      disabledConfigFiles,
+    )
     if (isViteDevServer(server) && server.ws) {
       if (lastSignature && signature !== lastSignature) {
         server.ws.send({

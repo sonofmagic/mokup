@@ -96,6 +96,22 @@ describe('playground routes endpoint', () => {
           url: '/hidden',
         },
       ],
+      getIgnoredRoutes: () => [
+        {
+          file: path.join(mockDir, 'assets', 'logo.png'),
+          reason: 'unsupported',
+        },
+      ],
+      getConfigFiles: () => [
+        {
+          file: path.join(mockDir, 'index.config.ts'),
+        },
+      ],
+      getDisabledConfigFiles: () => [
+        {
+          file: path.join(mockDir, 'disabled-dir', 'index.config.ts'),
+        },
+      ],
       config: resolvePlaygroundOptions(true),
       logger,
       getDirs: () => [mockDir, extraDir],
@@ -116,6 +132,9 @@ describe('playground routes endpoint', () => {
       groups: { key: string, label: string }[]
       routes: { group?: string, groupKey?: string, file: string, url: string }[]
       disabled: { group?: string, groupKey?: string, file: string, url?: string, reason: string }[]
+      ignored: { group?: string, groupKey?: string, file: string, reason: string }[]
+      configs: { group?: string, groupKey?: string, file: string }[]
+      disabledConfigs: { group?: string, groupKey?: string, file: string }[]
     }
     const expectedGroups = [
       { key: normalizePath(mockDir), label: 'mock' },
@@ -145,6 +164,28 @@ describe('playground routes endpoint', () => {
       groupKey: expectedGroups[0].key,
       file: 'mock/.draft/hidden.get.ts',
       reason: 'ignore-prefix',
+    })
+
+    const ignoredRoute = payload.ignored.find(route => route.file === 'mock/assets/logo.png')
+    expect(ignoredRoute).toMatchObject({
+      group: 'mock',
+      groupKey: expectedGroups[0].key,
+      file: 'mock/assets/logo.png',
+      reason: 'unsupported',
+    })
+
+    const configFile = payload.configs.find(entry => entry.file === 'mock/index.config.ts')
+    expect(configFile).toMatchObject({
+      group: 'mock',
+      groupKey: expectedGroups[0].key,
+      file: 'mock/index.config.ts',
+    })
+
+    const disabledConfigFile = payload.disabledConfigs.find(entry => entry.file === 'mock/disabled-dir/index.config.ts')
+    expect(disabledConfigFile).toMatchObject({
+      group: 'mock',
+      groupKey: expectedGroups[0].key,
+      file: 'mock/disabled-dir/index.config.ts',
     })
   })
 })

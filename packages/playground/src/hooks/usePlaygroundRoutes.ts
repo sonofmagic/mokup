@@ -1,6 +1,8 @@
 import type {
+  PlaygroundConfigFile,
   PlaygroundDisabledRoute,
   PlaygroundGroup,
+  PlaygroundIgnoredRoute,
   PlaygroundResponse,
   PlaygroundRoute,
 } from '../types'
@@ -10,7 +12,12 @@ import { normalizeBasePath } from '../utils/path'
 export function usePlaygroundRoutes() {
   const routes = ref<PlaygroundRoute[]>([])
   const disabledRoutes = ref<PlaygroundDisabledRoute[]>([])
+  const ignoredRoutes = ref<PlaygroundIgnoredRoute[]>([])
+  const configFiles = ref<PlaygroundConfigFile[]>([])
+  const disabledConfigFiles = ref<PlaygroundConfigFile[]>([])
   const filtered = ref<PlaygroundRoute[]>([])
+  const configFiltered = ref<PlaygroundConfigFile[]>([])
+  const disabledConfigFiltered = ref<PlaygroundConfigFile[]>([])
   const selected = ref<PlaygroundRoute | null>(null)
   const groups = ref<PlaygroundGroup[]>([])
   const activeGroup = ref('all')
@@ -23,6 +30,9 @@ export function usePlaygroundRoutes() {
   const searchTerm = computed(() => search.value.trim().toLowerCase())
   const routeCount = computed(() => filtered.value.length)
   const disabledCount = computed(() => disabledRoutes.value.length)
+  const ignoredCount = computed(() => ignoredRoutes.value.length)
+  const configCount = computed(() => configFiles.value.length)
+  const disabledConfigCount = computed(() => disabledConfigFiles.value.length)
   const routesEndpoint = computed(() => {
     const base = basePath.value || ''
     return `${base}/routes`
@@ -46,6 +56,34 @@ export function usePlaygroundRoutes() {
       : [...list]
   }
 
+  function getGroupConfigs() {
+    return activeGroup.value === 'all'
+      ? configFiles.value
+      : configFiles.value.filter(entry => entry.groupKey === activeGroup.value)
+  }
+
+  function applyConfigFilter() {
+    const term = searchTerm.value
+    const list = getGroupConfigs()
+    configFiltered.value = term
+      ? list.filter(entry => entry.file.toLowerCase().includes(term))
+      : [...list]
+  }
+
+  function getGroupDisabledConfigs() {
+    return activeGroup.value === 'all'
+      ? disabledConfigFiles.value
+      : disabledConfigFiles.value.filter(entry => entry.groupKey === activeGroup.value)
+  }
+
+  function applyDisabledConfigFilter() {
+    const term = searchTerm.value
+    const list = getGroupDisabledConfigs()
+    disabledConfigFiltered.value = term
+      ? list.filter(entry => entry.file.toLowerCase().includes(term))
+      : [...list]
+  }
+
   const disabledFiltered = computed(() => {
     const term = searchTerm.value
     if (!term) {
@@ -58,9 +96,21 @@ export function usePlaygroundRoutes() {
     )
   })
 
+  const ignoredFiltered = computed(() => {
+    const term = searchTerm.value
+    if (!term) {
+      return [...ignoredRoutes.value]
+    }
+    return ignoredRoutes.value.filter(route =>
+      `${route.file} ${route.reason}`.toLowerCase().includes(term),
+    )
+  })
+
   function setActiveGroup(key: string) {
     activeGroup.value = key
     applyFilter()
+    applyConfigFilter()
+    applyDisabledConfigFilter()
     if (selected.value) {
       const selectedInList = filtered.value.some(route => routeKey(route) === routeKey(selected.value!))
       if (selectedInList) {
@@ -91,6 +141,9 @@ export function usePlaygroundRoutes() {
       const data = await response.json() as PlaygroundResponse
       routes.value = data.routes ?? []
       disabledRoutes.value = data.disabled ?? []
+      ignoredRoutes.value = data.ignored ?? []
+      configFiles.value = data.configs ?? []
+      disabledConfigFiles.value = data.disabledConfigs ?? []
       groups.value = data.groups ?? []
       workspaceRoot.value = data.root ?? ''
       if (previousGroup !== 'all') {
@@ -100,6 +153,8 @@ export function usePlaygroundRoutes() {
         }
       }
       applyFilter()
+      applyConfigFilter()
+      applyDisabledConfigFilter()
       if (previousKey) {
         const match = filtered.value.find(route => routeKey(route) === previousKey)
         selected.value = match ?? filtered.value[0] ?? null
@@ -118,12 +173,20 @@ export function usePlaygroundRoutes() {
 
   watch(search, () => {
     applyFilter()
+    applyConfigFilter()
+    applyDisabledConfigFilter()
   })
 
   return {
     routes,
     disabledRoutes,
+    ignoredRoutes,
+    configFiles,
+    disabledConfigFiles,
     disabledFiltered,
+    ignoredFiltered,
+    configFiltered,
+    disabledConfigFiltered,
     filtered,
     selected,
     groups,
@@ -136,6 +199,9 @@ export function usePlaygroundRoutes() {
     searchTerm,
     routeCount,
     disabledCount,
+    ignoredCount,
+    configCount,
+    disabledConfigCount,
     routeKey,
     loadRoutes,
     setActiveGroup,

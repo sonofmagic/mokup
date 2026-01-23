@@ -8,8 +8,7 @@ import { pathToFileURL } from 'node:url'
 
 import { build as esbuild } from '@mokup/shared/esbuild'
 import { dirname, join, normalize } from '@mokup/shared/pathe'
-
-const configExtensions = ['.ts', '.js', '.mjs', '.cjs']
+import { configExtensions } from './constants'
 
 async function loadModule(file: string) {
   const ext = configExtensions.find(extension => file.endsWith(extension))

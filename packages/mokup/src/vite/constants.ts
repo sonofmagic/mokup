@@ -22,3 +22,5 @@ export const supportedExtensions = new Set([
   '.mjs',
   '.cjs',
 ])
+
+export const configExtensions = ['.ts', '.js', '.mjs', '.cjs'] as const

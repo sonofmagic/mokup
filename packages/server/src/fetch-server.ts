@@ -1,5 +1,5 @@
 import type { Server } from 'node:http'
-import type { RouteSkipInfo } from './dev/scanner'
+import type { RouteConfigInfo, RouteIgnoreInfo, RouteSkipInfo } from './dev/scanner'
 import type { Logger, MiddlewareHandler, ResolvedRoute, RouteTable } from './dev/types'
 
 import type { FetchServerOptions, FetchServerOptionsInput } from './fetch-options'
@@ -104,6 +104,9 @@ type PlaygroundWsHandler = MiddlewareHandler<any, string, { outputFormat: 'ws' }
 function buildApp(params: {
   routes: RouteTable
   disabledRoutes: RouteSkipInfo[]
+  ignoredRoutes: RouteIgnoreInfo[]
+  configFiles: RouteConfigInfo[]
+  disabledConfigFiles: RouteConfigInfo[]
   dirs: string[]
   playground: ReturnType<typeof resolvePlaygroundOptions>
   root: string
@@ -116,6 +119,9 @@ function buildApp(params: {
     app,
     routes: params.routes,
     disabledRoutes: params.disabledRoutes,
+    ignoredRoutes: params.ignoredRoutes,
+    configFiles: params.configFiles,
+    disabledConfigFiles: params.disabledConfigFiles,
     dirs: params.dirs,
     logger: params.logger,
     config: params.playground,
@@ -315,9 +321,15 @@ export async function createFetchServer(
 
   let routes: RouteTable = []
   let disabledRoutes: RouteSkipInfo[] = []
+  let ignoredRoutes: RouteIgnoreInfo[] = []
+  let configFiles: RouteConfigInfo[] = []
+  let disabledConfigFiles: RouteConfigInfo[] = []
   let app = buildApp({
     routes,
     disabledRoutes,
+    ignoredRoutes,
+    configFiles,
+    disabledConfigFiles,
     dirs,
     playground: playgroundConfig,
     root,
@@ -330,12 +342,16 @@ export async function createFetchServer(
     try {
       const collected: RouteTable = []
       const collectedDisabled: RouteSkipInfo[] = []
+      const collectedIgnored: RouteIgnoreInfo[] = []
+      const collectedConfigs: RouteConfigInfo[] = []
       for (const entry of optionList) {
         const scanParams: Parameters<typeof scanRoutes>[0] = {
           dirs: resolveDirs(entry.dir, root),
           prefix: entry.prefix ?? '',
           logger,
           onSkip: info => collectedDisabled.push(info),
+          onIgnore: info => collectedIgnored.push(info),
+          onConfig: info => collectedConfigs.push(info),
         }
         if (entry.include) {
           scanParams.include = entry.include
@@ -352,9 +368,17 @@ export async function createFetchServer(
       const resolvedRoutes = sortRoutes(collected)
       routes = resolvedRoutes
       disabledRoutes = collectedDisabled
+      ignoredRoutes = collectedIgnored
+      const configMap = new Map(collectedConfigs.map(entry => [entry.file, entry]))
+      const resolvedConfigs = Array.from(configMap.values())
+      configFiles = resolvedConfigs.filter(entry => entry.enabled)
+      disabledConfigFiles = resolvedConfigs.filter(entry => !entry.enabled)
       app = buildApp({
         routes,
         disabledRoutes,
+        ignoredRoutes,
+        configFiles,
+        disabledConfigFiles,
         dirs,
         playground: playgroundConfig,
         root,

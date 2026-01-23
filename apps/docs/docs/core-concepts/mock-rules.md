@@ -3,6 +3,7 @@
 A mock file can export a single rule or an array. Rule fields:
 
 - `handler`: response content or handler function (required)
+- `enabled`: enable/disable the rule (default `true`)
 - `status`: status code
 - `headers`: response headers
 - `delay`: delay in ms

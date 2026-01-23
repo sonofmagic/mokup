@@ -1,8 +1,10 @@
 <script setup lang="ts">
 import type { ComponentPublicInstance } from 'vue'
 import type {
+  PlaygroundConfigFile,
   PlaygroundDisabledRoute,
   PlaygroundGroup,
+  PlaygroundIgnoredRoute,
   PlaygroundRoute,
   TreeMode,
   TreeRow,
@@ -25,13 +27,23 @@ const props = defineProps<{
   groups: PlaygroundGroup[]
   activeGroup: string
   treeMode: TreeMode
-  isDisabledMode: boolean
+  routeMode: 'active' | 'disabled' | 'ignored'
+  enabledMode: 'api' | 'config'
+  disabledMode: 'api' | 'config'
   activeTotal: number
+  apiTotal: number
   disabledTotal: number
+  ignoredTotal: number
+  configTotal: number
+  disabledApiTotal: number
+  disabledConfigTotal: number
   error?: string
   loading: boolean
   filtered: PlaygroundRoute[]
   disabledFiltered: PlaygroundDisabledRoute[]
+  ignoredFiltered: PlaygroundIgnoredRoute[]
+  configFiltered: PlaygroundConfigFile[]
+  disabledConfigFiltered: PlaygroundConfigFile[]
   treeRows: TreeRow[]
   workspaceRoot?: string
   getRouteCount?: (route: PlaygroundRoute) => number
@@ -40,7 +52,9 @@ const props = defineProps<{
 const emit = defineEmits<{
   (event: 'update:search', value: string): void
   (event: 'select-group', key: string): void
-  (event: 'set-route-mode', mode: 'active' | 'disabled'): void
+  (event: 'set-route-mode', mode: 'active' | 'disabled' | 'ignored'): void
+  (event: 'set-enabled-mode', mode: 'api' | 'config'): void
+  (event: 'set-disabled-mode', mode: 'api' | 'config'): void
   (event: 'update:treeMode', mode: TreeMode): void
   (event: 'toggle', id: string): void
   (event: 'select-route', route: PlaygroundRoute): void
@@ -81,6 +95,11 @@ function toggleMore() {
 function reasonLabel(reason?: string) {
   const key = reason ?? 'unknown'
   return t(`disabled.reason.${key}`)
+}
+
+function ignoredReasonLabel(reason?: string) {
+  const key = reason ?? 'unknown'
+  return t(`ignored.reason.${key}`)
 }
 
 function formatRoutePath(value?: string) {
@@ -180,17 +199,62 @@ onBeforeUnmount(() => {
       <div class="mt-2 flex flex-wrap items-center gap-2">
         <UiChipButton
           size="md"
-          :active="!props.isDisabledMode"
+          :active="props.routeMode === 'active'"
           @click="emit('set-route-mode', 'active')"
         >
           {{ t('disabled.active', { count: props.activeTotal }) }}
         </UiChipButton>
         <UiChipButton
           size="md"
-          :active="props.isDisabledMode"
+          :active="props.routeMode === 'disabled'"
           @click="emit('set-route-mode', 'disabled')"
         >
           {{ t('disabled.disabled', { count: props.disabledTotal }) }}
+        </UiChipButton>
+        <UiChipButton
+          size="md"
+          :active="props.routeMode === 'ignored'"
+          @click="emit('set-route-mode', 'ignored')"
+        >
+          {{ t('disabled.ignored', { count: props.ignoredTotal }) }}
+        </UiChipButton>
+      </div>
+      <div
+        v-if="props.routeMode === 'active'"
+        class="mt-2 flex flex-wrap items-center gap-2"
+      >
+        <UiChipButton
+          size="sm"
+          :active="props.enabledMode === 'api'"
+          @click="emit('set-enabled-mode', 'api')"
+        >
+          {{ t('enabled.api', { count: props.apiTotal }) }}
+        </UiChipButton>
+        <UiChipButton
+          size="sm"
+          :active="props.enabledMode === 'config'"
+          @click="emit('set-enabled-mode', 'config')"
+        >
+          {{ t('enabled.config', { count: props.configTotal }) }}
+        </UiChipButton>
+      </div>
+      <div
+        v-else-if="props.routeMode === 'disabled'"
+        class="mt-2 flex flex-wrap items-center gap-2"
+      >
+        <UiChipButton
+          size="sm"
+          :active="props.disabledMode === 'api'"
+          @click="emit('set-disabled-mode', 'api')"
+        >
+          {{ t('enabled.api', { count: props.disabledApiTotal }) }}
+        </UiChipButton>
+        <UiChipButton
+          size="sm"
+          :active="props.disabledMode === 'config'"
+          @click="emit('set-disabled-mode', 'config')"
+        >
+          {{ t('enabled.config', { count: props.disabledConfigTotal }) }}
         </UiChipButton>
       </div>
       <div
@@ -222,18 +286,30 @@ onBeforeUnmount(() => {
       </div>
       <template v-else>
         <div
-          v-if="props.isDisabledMode && !props.disabledFiltered.length"
+          v-if="props.routeMode === 'disabled' && props.disabledMode === 'api' && !props.disabledFiltered.length"
           class="rounded-2xl border px-4 py-6 text-sm border-pg-border bg-pg-surface-soft text-pg-text-muted"
         >
           {{ t('states.emptyDisabledRoutes') }}
         </div>
         <div
-          v-else-if="!props.isDisabledMode && !props.filtered.length"
+          v-else-if="props.routeMode === 'ignored' && !props.ignoredFiltered.length"
+          class="rounded-2xl border px-4 py-6 text-sm border-pg-border bg-pg-surface-soft text-pg-text-muted"
+        >
+          {{ t('states.emptyIgnoredRoutes') }}
+        </div>
+        <div
+          v-else-if="props.routeMode === 'active' && props.enabledMode === 'api' && !props.filtered.length"
           class="rounded-2xl border px-4 py-6 text-sm border-pg-border bg-pg-surface-soft text-pg-text-muted"
         >
           {{ t('states.emptyRoutes') }}
         </div>
-        <div v-else-if="props.isDisabledMode" class="flex flex-col gap-2">
+        <div
+          v-else-if="props.routeMode === 'active' && props.enabledMode === 'config' && !props.configFiltered.length"
+          class="rounded-2xl border px-4 py-6 text-sm border-pg-border bg-pg-surface-soft text-pg-text-muted"
+        >
+          {{ t('states.emptyConfigFiles') }}
+        </div>
+        <div v-else-if="props.routeMode === 'disabled' && props.disabledMode === 'api'" class="flex flex-col gap-2">
           <div
             v-for="route in props.disabledFiltered"
             :key="`${route.file}-${route.reason}-${route.method ?? ''}-${route.url ?? ''}`"
@@ -266,6 +342,102 @@ onBeforeUnmount(() => {
                   :aria-label="`Open ${route.file} in VS Code`"
                   :title="t('detail.openInVscode')"
                   @click="openInEditor(route.file)"
+                >
+                  <span class="i-[carbon--launch] h-3.5 w-3.5" aria-hidden="true" />
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div
+          v-else-if="props.routeMode === 'disabled' && props.disabledMode === 'config' && !props.disabledConfigFiltered.length"
+          class="rounded-2xl border px-4 py-6 text-sm border-pg-border bg-pg-surface-soft text-pg-text-muted"
+        >
+          {{ t('states.emptyDisabledConfigFiles') }}
+        </div>
+        <div v-else-if="props.routeMode === 'disabled' && props.disabledMode === 'config'" class="flex flex-col gap-2">
+          <div
+            v-for="entry in props.disabledConfigFiltered"
+            :key="entry.file"
+            class="rounded-2xl border px-4 py-3 text-xs border-pg-border bg-pg-surface-soft text-pg-text-soft"
+          >
+            <div class="flex flex-wrap items-center justify-between gap-2">
+              <div class="flex flex-col gap-1">
+                <span class="text-[0.7rem] uppercase tracking-[0.18em] text-pg-text-muted">
+                  {{ entry.file }}
+                </span>
+              </div>
+              <div class="flex items-center gap-2">
+                <UiPill tone="strong" size="sm" tracking="tight">
+                  {{ t('enabled.configLabel') }}
+                </UiPill>
+                <button
+                  v-if="resolveEditorPath(entry.file)"
+                  class="flex h-7 w-7 items-center justify-center rounded-md transition text-pg-text-muted hover:bg-pg-hover-strong hover:text-pg-text-soft"
+                  type="button"
+                  :aria-label="`Open ${entry.file} in VS Code`"
+                  :title="t('detail.openInVscode')"
+                  @click="openInEditor(entry.file)"
+                >
+                  <span class="i-[carbon--launch] h-3.5 w-3.5" aria-hidden="true" />
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div v-else-if="props.routeMode === 'ignored'" class="flex flex-col gap-2">
+          <div
+            v-for="route in props.ignoredFiltered"
+            :key="`${route.file}-${route.reason}`"
+            class="rounded-2xl border px-4 py-3 text-xs border-pg-border bg-pg-surface-soft text-pg-text-soft"
+          >
+            <div class="flex flex-wrap items-center justify-between gap-2">
+              <div class="flex flex-col gap-1">
+                <span class="text-[0.7rem] uppercase tracking-[0.18em] text-pg-text-muted">
+                  {{ route.file }}
+                </span>
+              </div>
+              <div class="flex items-center gap-2">
+                <UiPill tone="strong" size="sm" tracking="tight">
+                  {{ ignoredReasonLabel(route.reason) }}
+                </UiPill>
+                <button
+                  v-if="resolveEditorPath(route.file)"
+                  class="flex h-7 w-7 items-center justify-center rounded-md transition text-pg-text-muted hover:bg-pg-hover-strong hover:text-pg-text-soft"
+                  type="button"
+                  :aria-label="`Open ${route.file} in VS Code`"
+                  :title="t('detail.openInVscode')"
+                  @click="openInEditor(route.file)"
+                >
+                  <span class="i-[carbon--launch] h-3.5 w-3.5" aria-hidden="true" />
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div v-else-if="props.routeMode === 'active' && props.enabledMode === 'config'" class="flex flex-col gap-2">
+          <div
+            v-for="entry in props.configFiltered"
+            :key="entry.file"
+            class="rounded-2xl border px-4 py-3 text-xs border-pg-border bg-pg-surface-soft text-pg-text-soft"
+          >
+            <div class="flex flex-wrap items-center justify-between gap-2">
+              <div class="flex flex-col gap-1">
+                <span class="text-[0.7rem] uppercase tracking-[0.18em] text-pg-text-muted">
+                  {{ entry.file }}
+                </span>
+              </div>
+              <div class="flex items-center gap-2">
+                <UiPill tone="strong" size="sm" tracking="tight">
+                  {{ t('enabled.configLabel') }}
+                </UiPill>
+                <button
+                  v-if="resolveEditorPath(entry.file)"
+                  class="flex h-7 w-7 items-center justify-center rounded-md transition text-pg-text-muted hover:bg-pg-hover-strong hover:text-pg-text-soft"
+                  type="button"
+                  :aria-label="`Open ${entry.file} in VS Code`"
+                  :title="t('detail.openInVscode')"
+                  @click="openInEditor(entry.file)"
                 >
                   <span class="i-[carbon--launch] h-3.5 w-3.5" aria-hidden="true" />
                 </button>

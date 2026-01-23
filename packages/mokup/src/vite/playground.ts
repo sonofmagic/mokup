@@ -227,6 +227,30 @@ interface PlaygroundDisabledRoute {
   groupKey?: string
 }
 
+type PlaygroundIgnoredReason = 'unsupported' | 'invalid-route' | 'unknown'
+
+interface PlaygroundIgnoredRouteInput {
+  file: string
+  reason?: string
+}
+
+interface PlaygroundIgnoredRoute {
+  file: string
+  reason: PlaygroundIgnoredReason
+  group?: string
+  groupKey?: string
+}
+
+interface PlaygroundConfigFileInput {
+  file: string
+}
+
+interface PlaygroundConfigFile {
+  file: string
+  group?: string
+  groupKey?: string
+}
+
 const disabledReasonSet = new Set<PlaygroundDisabledReason>([
   'disabled',
   'disabled-dir',
@@ -236,9 +260,22 @@ const disabledReasonSet = new Set<PlaygroundDisabledReason>([
   'unknown',
 ])
 
+const ignoredReasonSet = new Set<PlaygroundIgnoredReason>([
+  'unsupported',
+  'invalid-route',
+  'unknown',
+])
+
 function normalizeDisabledReason(reason?: string): PlaygroundDisabledReason {
   if (reason && disabledReasonSet.has(reason as PlaygroundDisabledReason)) {
     return reason as PlaygroundDisabledReason
+  }
+  return 'unknown'
+}
+
+function normalizeIgnoredReason(reason?: string): PlaygroundIgnoredReason {
+  if (reason && ignoredReasonSet.has(reason as PlaygroundIgnoredReason)) {
+    return reason as PlaygroundIgnoredReason
   }
   return 'unknown'
 }
@@ -334,9 +371,45 @@ function toPlaygroundDisabledRoute(
   return disabled
 }
 
+function toPlaygroundIgnoredRoute(
+  route: PlaygroundIgnoredRouteInput,
+  root: string | undefined,
+  groups: PlaygroundGroup[],
+): PlaygroundIgnoredRoute {
+  const matchedGroup = resolveRouteGroup(route.file, groups)
+  const ignored: PlaygroundIgnoredRoute = {
+    file: formatRouteFile(route.file, root),
+    reason: normalizeIgnoredReason(route.reason),
+  }
+  if (matchedGroup) {
+    ignored.groupKey = matchedGroup.key
+    ignored.group = matchedGroup.label
+  }
+  return ignored
+}
+
+function toPlaygroundConfigFile(
+  entry: PlaygroundConfigFileInput,
+  root: string | undefined,
+  groups: PlaygroundGroup[],
+): PlaygroundConfigFile {
+  const matchedGroup = resolveRouteGroup(entry.file, groups)
+  const configFile: PlaygroundConfigFile = {
+    file: formatRouteFile(entry.file, root),
+  }
+  if (matchedGroup) {
+    configFile.groupKey = matchedGroup.key
+    configFile.group = matchedGroup.label
+  }
+  return configFile
+}
+
 export function createPlaygroundMiddleware(params: {
   getRoutes: () => RouteTable
   getDisabledRoutes?: () => PlaygroundDisabledRouteInput[]
+  getIgnoredRoutes?: () => PlaygroundIgnoredRouteInput[]
+  getConfigFiles?: () => PlaygroundConfigFileInput[]
+  getDisabledConfigFiles?: () => PlaygroundConfigFileInput[]
   config: PlaygroundConfig
   logger: Logger
   getServer?: () => ViteDevServer | PreviewServer | null
@@ -398,6 +471,9 @@ export function createPlaygroundMiddleware(params: {
       const groups = resolveGroups(dirs, baseRoot)
       const routes = params.getRoutes()
       const disabledRoutes = params.getDisabledRoutes?.() ?? []
+      const ignoredRoutes = params.getIgnoredRoutes?.() ?? []
+      const configFiles = params.getConfigFiles?.() ?? []
+      const disabledConfigFiles = params.getDisabledConfigFiles?.() ?? []
       sendJson(res, {
         basePath: matchedPath,
         root: baseRoot,
@@ -405,6 +481,9 @@ export function createPlaygroundMiddleware(params: {
         groups: groups.map(group => ({ key: group.key, label: group.label })),
         routes: routes.map(route => toPlaygroundRoute(route, baseRoot, groups)),
         disabled: disabledRoutes.map(route => toPlaygroundDisabledRoute(route, baseRoot, groups)),
+        ignored: ignoredRoutes.map(route => toPlaygroundIgnoredRoute(route, baseRoot, groups)),
+        configs: configFiles.map(entry => toPlaygroundConfigFile(entry, baseRoot, groups)),
+        disabledConfigs: disabledConfigFiles.map(entry => toPlaygroundConfigFile(entry, baseRoot, groups)),
       })
       return
     }

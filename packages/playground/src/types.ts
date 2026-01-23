@@ -28,6 +28,24 @@ export interface PlaygroundDisabledRoute {
   groupKey?: string
 }
 
+export interface PlaygroundConfigFile {
+  file: string
+  group?: string
+  groupKey?: string
+}
+
+export type PlaygroundIgnoredReason
+  = | 'unsupported'
+    | 'invalid-route'
+    | 'unknown'
+
+export interface PlaygroundIgnoredRoute {
+  file: string
+  reason: PlaygroundIgnoredReason
+  group?: string
+  groupKey?: string
+}
+
 export interface PlaygroundGroup {
   key: string
   label: string
@@ -40,6 +58,9 @@ export interface PlaygroundResponse {
   groups?: PlaygroundGroup[]
   routes: PlaygroundRoute[]
   disabled?: PlaygroundDisabledRoute[]
+  ignored?: PlaygroundIgnoredRoute[]
+  configs?: PlaygroundConfigFile[]
+  disabledConfigs?: PlaygroundConfigFile[]
 }
 
 export type BodyType = 'json' | 'text' | 'form' | 'multipart' | 'base64'

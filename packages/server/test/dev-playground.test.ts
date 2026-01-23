@@ -44,6 +44,22 @@ describe('dev playground', () => {
           url: '/ignored',
         },
       ],
+      ignoredRoutes: [
+        {
+          file: '/tmp/mock/assets/logo.png',
+          reason: 'unsupported',
+        },
+      ],
+      configFiles: [
+        {
+          file: '/tmp/mock/index.config.ts',
+        },
+      ],
+      disabledConfigFiles: [
+        {
+          file: '/tmp/mock/disabled-dir/index.config.ts',
+        },
+      ],
       dirs: ['/tmp/mock'],
       logger,
       config: resolvePlaygroundOptions({ path: '/_mokup', enabled: true }),
@@ -59,6 +75,10 @@ describe('dev playground', () => {
     expect(data.routes[0]?.group).toBe('mock')
     expect(data.disabled[0]?.url).toBe('/ignored')
     expect(data.disabled[0]?.reason).toBe('ignore-prefix')
+    expect(data.ignored[0]?.file).toBe('mock/assets/logo.png')
+    expect(data.ignored[0]?.reason).toBe('unsupported')
+    expect(data.configs[0]?.file).toBe('mock/index.config.ts')
+    expect(data.disabledConfigs[0]?.file).toBe('mock/disabled-dir/index.config.ts')
   })
 
   it('skips route registration when playground is disabled', async () => {

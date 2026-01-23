@@ -17,7 +17,8 @@ const props = defineProps<{
   responseStatus: string
   responseTime: string
   isSwRegistering: boolean
-  isDisabledMode: boolean
+  routeMode: 'active' | 'disabled' | 'ignored'
+  enabledMode: 'api' | 'config'
 }>()
 
 const emit = defineEmits<{
@@ -29,6 +30,26 @@ const emit = defineEmits<{
 }>()
 
 const { t } = useI18n()
+
+const isActiveMode = computed(() => props.routeMode === 'active' && props.enabledMode === 'api')
+const modeTitle = computed(() => {
+  if (props.routeMode === 'disabled') {
+    return t('states.disabledTitle')
+  }
+  if (props.routeMode === 'ignored') {
+    return t('states.ignoredTitle')
+  }
+  return t('states.configTitle')
+})
+const modeHint = computed(() => {
+  if (props.routeMode === 'disabled') {
+    return t('states.disabledHint')
+  }
+  if (props.routeMode === 'ignored') {
+    return t('states.ignoredHint')
+  }
+  return t('states.configHint')
+})
 
 const queryModel = computed({
   get: () => props.queryText,
@@ -55,7 +76,7 @@ function handleRun() {
 
 <template>
   <RouteDetail
-    v-if="!props.isDisabledMode"
+    v-if="isActiveMode"
     v-model:queryText="queryModel"
     v-model:headersText="headersModel"
     v-model:bodyText="bodyModel"
@@ -76,10 +97,10 @@ function handleRun() {
     class="flex h-full flex-col items-center justify-center gap-3 rounded-3xl border p-6 text-center shadow-xl border-pg-border bg-pg-surface-card text-pg-text-muted"
   >
     <p class="text-xl font-display text-pg-text-strong">
-      {{ t('states.disabledTitle') }}
+      {{ modeTitle }}
     </p>
     <p class="text-sm">
-      {{ t('states.disabledHint') }}
+      {{ modeHint }}
     </p>
   </div>
 </template>

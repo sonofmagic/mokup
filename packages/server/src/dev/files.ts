@@ -2,7 +2,7 @@ import { promises as fs } from 'node:fs'
 
 import { basename, extname, join } from '@mokup/shared/pathe'
 
-import { supportedExtensions } from './constants'
+import { configExtensions, supportedExtensions } from './constants'
 
 export interface FileInfo {
   file: string
@@ -55,9 +55,21 @@ export function isSupportedFile(file: string) {
   if (file.endsWith('.d.ts')) {
     return false
   }
-  if (basename(file).startsWith('index.config.')) {
+  if (isConfigFile(file)) {
     return false
   }
   const ext = extname(file).toLowerCase()
   return supportedExtensions.has(ext)
+}
+
+export function isConfigFile(file: string) {
+  if (file.endsWith('.d.ts')) {
+    return false
+  }
+  const base = basename(file)
+  if (!base.startsWith('index.config.')) {
+    return false
+  }
+  const ext = extname(file).toLowerCase()
+  return configExtensions.includes(ext as (typeof configExtensions)[number])
 }

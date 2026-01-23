@@ -14,8 +14,10 @@ const { createMokupWebpackPlugin } = require('mokup/webpack')
 module.exports = {
   plugins: [
     createMokupWebpackPlugin({
-      dir: 'mock',
-      prefix: '/api',
+      entries: {
+        dir: 'mock',
+        prefix: '/api',
+      },
     }),
   ],
   devServer: {

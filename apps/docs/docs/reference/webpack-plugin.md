@@ -16,8 +16,10 @@ const { createMokupWebpackPlugin } = require('mokup/webpack')
 module.exports = {
   plugins: [
     createMokupWebpackPlugin({
-      dir: 'mock',
-      prefix: '/api',
+      entries: {
+        dir: 'mock',
+        prefix: '/api',
+      },
     }),
   ],
   devServer: {
@@ -34,12 +36,14 @@ const { createMokupWebpackPlugin } = require('mokup/webpack')
 module.exports = {
   plugins: [
     createMokupWebpackPlugin({
-      dir: 'mock',
-      prefix: '/api',
-      mode: 'sw',
-      sw: {
-        path: '/mokup-sw.js',
-        scope: '/',
+      entries: {
+        dir: 'mock',
+        prefix: '/api',
+        mode: 'sw',
+        sw: {
+          path: '/mokup-sw.js',
+          scope: '/',
+        },
       },
     }),
   ],
@@ -48,7 +52,7 @@ module.exports = {
 
 ## Options
 
-Options match the Vite plugin options. See [Vite Plugin](./vite-plugin) for the full list.
+Options match the Vite plugin: top-level `entries` + `playground`, plus entry options for each item. See [Vite Plugin](./vite-plugin) for the full list.
 
 ## Notes
 

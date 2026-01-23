@@ -18,8 +18,10 @@ declare global {
 const {
   routes,
   filtered,
-  disabledRoutes,
   disabledFiltered,
+  ignoredFiltered,
+  configFiltered,
+  disabledConfigFiltered,
   selected,
   groups,
   activeGroup,
@@ -30,6 +32,10 @@ const {
   workspaceRoot,
   searchTerm,
   routeCount,
+  disabledCount,
+  ignoredCount,
+  configCount,
+  disabledConfigCount,
   routeKey,
   loadRoutes,
   setActiveGroup,
@@ -56,13 +62,31 @@ const {
 } = usePlaygroundRequest(selected, { basePath })
 
 const selectedKey = computed(() => (selected.value ? routeKey(selected.value) : ''))
-const routeMode = ref<'active' | 'disabled'>('active')
+const routeMode = ref<'active' | 'disabled' | 'ignored'>('active')
+const enabledMode = ref<'api' | 'config'>('api')
+const disabledMode = ref<'api' | 'config'>('api')
 const isDisabledMode = computed(() => routeMode.value === 'disabled')
-const activeTotal = computed(() => routes.value.length)
-const disabledTotal = computed(() => disabledRoutes.value.length)
-const visibleCount = computed(() =>
-  isDisabledMode.value ? disabledFiltered.value.length : routeCount.value,
-)
+const isIgnoredMode = computed(() => routeMode.value === 'ignored')
+const activeTotal = computed(() => routes.value.length + configCount.value)
+const apiTotal = computed(() => routes.value.length)
+const disabledTotal = computed(() => disabledCount.value + disabledConfigCount.value)
+const ignoredTotal = computed(() => ignoredCount.value)
+const configTotal = computed(() => configCount.value)
+const disabledConfigTotal = computed(() => disabledConfigCount.value)
+const disabledApiTotal = computed(() => disabledCount.value)
+const visibleCount = computed(() => {
+  if (isDisabledMode.value) {
+    return disabledMode.value === 'config'
+      ? disabledConfigFiltered.value.length
+      : disabledFiltered.value.length
+  }
+  if (isIgnoredMode.value) {
+    return ignoredFiltered.value.length
+  }
+  return enabledMode.value === 'config'
+    ? configFiltered.value.length
+    : routeCount.value
+})
 
 const splitStorageKey = 'mokup:playground:split-width'
 const minSplitWidth = 240
@@ -83,11 +107,30 @@ const { treeMode, treeRows, toggleExpanded, setTreeMode } = useRouteTree({
   getRouteKey: routeKey,
 })
 
-function setRouteMode(mode: 'active' | 'disabled') {
+function setRouteMode(mode: 'active' | 'disabled' | 'ignored') {
   routeMode.value = mode
-  if (mode === 'disabled') {
+  if (mode !== 'active') {
     selectRoute(null)
+    return
   }
+  if (enabledMode.value === 'api' && !selected.value) {
+    selectRoute(filtered.value[0] ?? null)
+  }
+}
+
+function setEnabledMode(mode: 'api' | 'config') {
+  enabledMode.value = mode
+  if (mode === 'config') {
+    selectRoute(null)
+    return
+  }
+  if (!selected.value) {
+    selectRoute(filtered.value[0] ?? null)
+  }
+}
+
+function setDisabledMode(mode: 'api' | 'config') {
+  disabledMode.value = mode
 }
 
 function clampSplitWidth(value: number) {
@@ -161,18 +204,30 @@ onBeforeUnmount(() => {
               :groups="groups"
               :active-group="activeGroup"
               :tree-mode="treeMode"
-              :is-disabled-mode="isDisabledMode"
+              :route-mode="routeMode"
+              :enabled-mode="enabledMode"
+              :disabled-mode="disabledMode"
               :active-total="activeTotal"
+              :api-total="apiTotal"
               :disabled-total="disabledTotal"
+              :ignored-total="ignoredTotal"
+              :config-total="configTotal"
+              :disabled-api-total="disabledApiTotal"
+              :disabled-config-total="disabledConfigTotal"
               :error="error"
               :loading="loading"
               :filtered="filtered"
               :disabled-filtered="disabledFiltered"
+              :ignored-filtered="ignoredFiltered"
+              :config-filtered="configFiltered"
+              :disabled-config-filtered="disabledConfigFiltered"
               :tree-rows="treeRows"
               :workspace-root="workspaceRoot"
               :get-route-count="getRouteCount"
               @select-group="setActiveGroup"
               @set-route-mode="setRouteMode"
+              @set-enabled-mode="setEnabledMode"
+              @set-disabled-mode="setDisabledMode"
               @toggle="toggleExpanded"
               @select-route="selectRoute"
               @update:treeMode="setTreeMode"
@@ -212,7 +267,8 @@ onBeforeUnmount(() => {
                   :is-sw-registering="isSwRegistering"
                   :route-params="routeParams"
                   :param-values="paramValues"
-                  :is-disabled-mode="isDisabledMode"
+                  :route-mode="routeMode"
+                  :enabled-mode="enabledMode"
                   @update:param-value="setParamValue"
                   @run="runRequest"
                 />

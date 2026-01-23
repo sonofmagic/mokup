@@ -7,9 +7,8 @@ import { pathToFileURL } from 'node:url'
 
 import { build as esbuild } from '@mokup/shared/esbuild'
 import { dirname, join, normalize } from '@mokup/shared/pathe'
+import { configExtensions } from './constants'
 import { ensureTsxRegister } from './tsx-loader'
-
-const configExtensions = ['.ts', '.js', '.mjs', '.cjs']
 
 function isUnknownFileExtensionError(error: unknown) {
   if (!error || typeof error !== 'object') {
