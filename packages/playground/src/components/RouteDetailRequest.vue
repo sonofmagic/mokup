@@ -2,10 +2,11 @@
 import type { BodyType, PlaygroundRoute, RouteParamField } from '../types'
 import { computed, ref, toRefs, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
-import { resolveEditorUrl } from '../utils/editor'
+import RouteDetailConfigChain from './RouteDetailConfigChain.vue'
+import RouteDetailMiddlewares from './RouteDetailMiddlewares.vue'
+import RouteDetailRequestHeader from './RouteDetailRequestHeader.vue'
 import UiChipButton from './ui/UiChipButton.vue'
 import UiField from './ui/UiField.vue'
-import UiPill from './ui/UiPill.vue'
 import UiTextarea from './ui/UiTextarea.vue'
 import UiTextInput from './ui/UiTextInput.vue'
 
@@ -33,20 +34,10 @@ const emit = defineEmits<{
 }>()
 const { t } = useI18n()
 const { bodyType } = toRefs(props)
-const methodBadge = (method: string) => `method-${method.toLowerCase()}`
 function paramPlaceholder(param: RouteParamField) {
   return param.kind === 'param'
     ? t('detail.paramPlaceholder')
     : t('detail.paramPlaceholderCatchall')
-}
-function resolveMiddlewareLink(source: string) {
-  const trimmed = source.trim()
-  if (!trimmed) {
-    return ''
-  }
-  return resolveEditorUrl(trimmed, props.workspaceRoot, {
-    allowAbsoluteWithoutRoot: true,
-  }) ?? ''
 }
 const activeTab = ref<RequestTab>('query')
 function resolveDefaultTab() {
@@ -95,204 +86,26 @@ function resolveBodyPlaceholder() {
   }
 }
 
-const preMiddlewares = computed(() => {
-  return props.selected.preMiddlewares ?? []
-})
-
-const normalMiddlewares = computed(() => {
-  if (props.selected.normalMiddlewares) {
-    return props.selected.normalMiddlewares
-  }
-  if (props.selected.preMiddlewares || props.selected.postMiddlewares) {
-    return []
-  }
-  return props.selected.middlewares ?? []
-})
-
-const postMiddlewares = computed(() => {
-  return props.selected.postMiddlewares ?? []
-})
-
-const preCount = computed(() => {
-  return props.selected.preMiddlewareCount ?? preMiddlewares.value.length
-})
-
-const normalCount = computed(() => {
-  return props.selected.normalMiddlewareCount ?? normalMiddlewares.value.length
-})
-
-const postCount = computed(() => {
-  return props.selected.postMiddlewareCount ?? postMiddlewares.value.length
-})
-
-const totalCount = computed(() => {
-  return props.selected.middlewareCount ?? (preCount.value + normalCount.value + postCount.value)
-})
-
 const configChain = computed(() => props.selected.configChain ?? [])
-
-const configItems = computed(() => {
-  return configChain.value.map((file, index) => ({
-    file,
-    order: index + 1,
-    disabled: props.configStatusMap.get(file) === 'disabled',
-  }))
-})
 </script>
 
 <template>
   <section class="rounded-2xl border shadow-sm border-pg-border bg-pg-surface-card">
-    <div class="flex items-center justify-between border-b px-4 py-3 text-[0.65rem] uppercase tracking-[0.3em] border-pg-border text-pg-text-muted">
-      <span>{{ t('detail.requestLabel') }}</span>
-      <span class="truncate text-[0.65rem] normal-case tracking-normal text-pg-text-subtle">
-        {{ props.selected.file }}
-      </span>
-    </div>
-    <div class="flex flex-wrap items-center gap-3 px-4 py-3">
-      <span
-        class="rounded-full px-3 py-1 text-[0.6rem] uppercase tracking-[0.2em]"
-        :class="methodBadge(props.selected.method)"
-      >
-        {{ props.selected.method }}
-      </span>
-      <UiTextInput
-        :value="props.requestUrl"
-        readonly
-        class="min-w-[220px] flex-1"
-      />
-      <button
-        class="flex items-center gap-2 rounded-full px-4 py-2 text-[0.65rem] uppercase tracking-[0.3em] shadow-sm transition hover:-translate-y-0.5 disabled:cursor-not-allowed disabled:opacity-70 disabled:hover:translate-y-0 bg-pg-accent text-pg-on-accent"
-        data-testid="playground-run"
-        :disabled="props.isSwRegistering"
-        :aria-busy="props.isSwRegistering"
-        @click="emit('run')"
-      >
-        <span
-          v-if="props.isSwRegistering"
-          class="i-[carbon--circle-dash] h-3.5 w-3.5 animate-spin"
-          aria-hidden="true"
-        />
-        {{ t('detail.run') }}
-      </button>
-    </div>
-    <div class="flex flex-wrap items-center gap-2 border-t px-4 py-3 text-[0.6rem] uppercase tracking-[0.2em] border-pg-border text-pg-text-muted">
-      <span>{{ t('detail.configChain') }}</span>
-      <UiPill tone="chip" size="xxs" :caps="false">
-        {{ configItems.length }}
-      </UiPill>
-    </div>
-    <div
-      v-if="configItems.length > 0"
-      class="flex flex-col gap-2 border-t px-4 py-3 text-xs border-pg-border text-pg-text-soft"
-    >
-      <div
-        v-for="item in configItems"
-        :key="`config-${item.order}-${item.file}`"
-        class="flex flex-wrap items-center gap-2"
-      >
-        <span class="rounded-full border px-2 py-0.5 text-[0.55rem] uppercase tracking-[0.2em] border-pg-border bg-pg-surface-strong text-pg-text-soft">
-          {{ item.order }}
-        </span>
-        <span class="text-[0.7rem] text-pg-text-subtle">
-          {{ item.file }}
-        </span>
-        <UiPill v-if="item.disabled" tone="strong" size="xxs" :caps="false">
-          {{ t('configPanel.statusDisabled') }}
-        </UiPill>
-      </div>
-    </div>
-    <div
-      v-else
-      class="border-t px-4 py-3 text-xs border-pg-border text-pg-text-muted"
-    >
-      {{ t('detail.configChainEmpty') }}
-    </div>
-    <div class="flex flex-wrap items-center gap-2 border-t px-4 py-3 text-[0.6rem] uppercase tracking-[0.2em] border-pg-border text-pg-text-muted">
-      <span>{{ t('detail.middlewares') }}</span>
-      <UiPill tone="chip" size="xxs" :caps="false">
-        {{ totalCount }}
-      </UiPill>
-    </div>
-    <div
-      v-if="preMiddlewares.length > 0 || normalMiddlewares.length > 0 || postMiddlewares.length > 0"
-      class="flex flex-col gap-3 border-t px-4 py-3 text-xs border-pg-border text-pg-text-soft"
-    >
-      <div v-if="preMiddlewares.length > 0" class="flex flex-col gap-2">
-        <div class="flex flex-wrap items-center gap-2 text-[0.6rem] uppercase tracking-[0.2em] text-pg-text-muted">
-          <span>{{ t('detail.middlewarePre') }}</span>
-          <UiPill tone="chip" size="xxs" :caps="false">
-            {{ preCount }}
-          </UiPill>
-        </div>
-        <div class="flex flex-wrap gap-2">
-          <span
-            v-for="middleware in preMiddlewares"
-            :key="`pre-${middleware}`"
-            class="inline-flex items-center gap-2 rounded-full border px-3 py-1 text-[0.6rem] border-pg-border bg-pg-surface-strong"
-          >
-            {{ middleware }}
-            <a
-              v-if="resolveMiddlewareLink(middleware)"
-              :href="resolveMiddlewareLink(middleware)"
-              class="text-pg-text-soft transition hover:text-pg-text"
-              :title="t('detail.openInVscode')"
-            >
-              <span class="i-[carbon--launch] h-3.5 w-3.5" aria-hidden="true" />
-            </a>
-          </span>
-        </div>
-      </div>
-      <div v-if="normalMiddlewares.length > 0" class="flex flex-col gap-2">
-        <div class="flex flex-wrap items-center gap-2 text-[0.6rem] uppercase tracking-[0.2em] text-pg-text-muted">
-          <span>{{ t('detail.middlewareNormal') }}</span>
-          <UiPill tone="chip" size="xxs" :caps="false">
-            {{ normalCount }}
-          </UiPill>
-        </div>
-        <div class="flex flex-wrap gap-2">
-          <span
-            v-for="middleware in normalMiddlewares"
-            :key="`normal-${middleware}`"
-            class="inline-flex items-center gap-2 rounded-full border px-3 py-1 text-[0.6rem] border-pg-border bg-pg-surface-strong"
-          >
-            {{ middleware }}
-            <a
-              v-if="resolveMiddlewareLink(middleware)"
-              :href="resolveMiddlewareLink(middleware)"
-              class="text-pg-text-soft transition hover:text-pg-text"
-              :title="t('detail.openInVscode')"
-            >
-              <span class="i-[carbon--launch] h-3.5 w-3.5" aria-hidden="true" />
-            </a>
-          </span>
-        </div>
-      </div>
-      <div v-if="postMiddlewares.length > 0" class="flex flex-col gap-2">
-        <div class="flex flex-wrap items-center gap-2 text-[0.6rem] uppercase tracking-[0.2em] text-pg-text-muted">
-          <span>{{ t('detail.middlewarePost') }}</span>
-          <UiPill tone="chip" size="xxs" :caps="false">
-            {{ postCount }}
-          </UiPill>
-        </div>
-        <div class="flex flex-wrap gap-2">
-          <span
-            v-for="middleware in postMiddlewares"
-            :key="`post-${middleware}`"
-            class="inline-flex items-center gap-2 rounded-full border px-3 py-1 text-[0.6rem] border-pg-border bg-pg-surface-strong"
-          >
-            {{ middleware }}
-            <a
-              v-if="resolveMiddlewareLink(middleware)"
-              :href="resolveMiddlewareLink(middleware)"
-              class="text-pg-text-soft transition hover:text-pg-text"
-              :title="t('detail.openInVscode')"
-            >
-              <span class="i-[carbon--launch] h-3.5 w-3.5" aria-hidden="true" />
-            </a>
-          </span>
-        </div>
-      </div>
-    </div>
+    <RouteDetailRequestHeader
+      :method="props.selected.method"
+      :request-url="props.requestUrl"
+      :file="props.selected.file"
+      :is-sw-registering="props.isSwRegistering"
+      @run="emit('run')"
+    />
+    <RouteDetailConfigChain
+      :config-chain="configChain"
+      :config-status-map="props.configStatusMap"
+    />
+    <RouteDetailMiddlewares
+      :selected="props.selected"
+      :workspace-root="props.workspaceRoot"
+    />
     <div class="border-t p-4 border-pg-border">
       <div class="flex flex-wrap gap-2">
         <UiChipButton

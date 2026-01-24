@@ -1,5 +1,6 @@
 import type { PreviewServer, ViteDevServer } from 'vite'
-import type { VitePluginOptions } from '../../shared/types'
+import type { RouteConfigInfo, RouteIgnoreInfo, RouteSkipInfo } from '../../core/scanner'
+import type { RouteTable, VitePluginOptions } from '../../shared/types'
 import type { PluginState } from './state'
 import { createHonoApp } from '../../core/middleware'
 import { sortRoutes } from '../../core/routes'
@@ -18,12 +19,12 @@ function createRouteRefresher(params: {
   const { state, optionList, root, logger, enableViteMiddleware } = params
 
   return async (server?: ViteDevServer | PreviewServer) => {
-    const collected = []
-    const collectedServer = []
-    const collectedSw = []
-    const collectedDisabled = []
-    const collectedIgnored = []
-    const collectedConfigs = []
+    const collected: RouteTable = []
+    const collectedServer: RouteTable = []
+    const collectedSw: RouteTable = []
+    const collectedDisabled: RouteSkipInfo[] = []
+    const collectedIgnored: RouteIgnoreInfo[] = []
+    const collectedConfigs: RouteConfigInfo[] = []
     for (const entry of optionList) {
       const dirs = resolveDirs(entry.dir, root())
       const scanParams: Parameters<typeof scanRoutes>[0] = {

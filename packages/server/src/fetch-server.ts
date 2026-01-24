@@ -79,7 +79,7 @@ export async function createFetchServer(
   let ignoredRoutes: RouteIgnoreInfo[] = []
   let configFiles: RouteConfigInfo[] = []
   let disabledConfigFiles: RouteConfigInfo[] = []
-  let app = buildFetchServerApp({
+  const appParams: Parameters<typeof buildFetchServerApp>[0] = {
     routes,
     disabledRoutes,
     ignoredRoutes,
@@ -90,8 +90,12 @@ export async function createFetchServer(
     root,
     logger,
     onResponse: playgroundWs.handleRouteResponse,
-    ...(playgroundWs.getWsHandler() ? { wsHandler: playgroundWs.getWsHandler() } : {}),
-  })
+  }
+  const initialWsHandler = playgroundWs.getWsHandler()
+  if (initialWsHandler) {
+    appParams.wsHandler = initialWsHandler
+  }
+  let app = buildFetchServerApp(appParams)
 
   const refreshRoutes = async () => {
     try {
@@ -128,7 +132,7 @@ export async function createFetchServer(
       const resolvedConfigs = Array.from(configMap.values())
       configFiles = resolvedConfigs.filter(entry => entry.enabled)
       disabledConfigFiles = resolvedConfigs.filter(entry => !entry.enabled)
-      app = buildFetchServerApp({
+      const refreshedParams: Parameters<typeof buildFetchServerApp>[0] = {
         routes,
         disabledRoutes,
         ignoredRoutes,
@@ -139,8 +143,12 @@ export async function createFetchServer(
         root,
         logger,
         onResponse: playgroundWs.handleRouteResponse,
-        ...(playgroundWs.getWsHandler() ? { wsHandler: playgroundWs.getWsHandler() } : {}),
-      })
+      }
+      const refreshedWsHandler = playgroundWs.getWsHandler()
+      if (refreshedWsHandler) {
+        refreshedParams.wsHandler = refreshedWsHandler
+      }
+      app = buildFetchServerApp(refreshedParams)
       logger.info(`Loaded ${routes.length} mock routes.`)
     }
     catch (error) {
@@ -171,9 +179,10 @@ export async function createFetchServer(
     fetch,
     refresh: refreshRoutes,
     getRoutes: () => routes,
-    ...(playgroundWs.getInjectWebSocket()
-      ? { injectWebSocket: playgroundWs.getInjectWebSocket() }
-      : {}),
+  }
+  const injectWebSocket = playgroundWs.getInjectWebSocket()
+  if (injectWebSocket) {
+    server.injectWebSocket = injectWebSocket
   }
 
   if (watcher) {

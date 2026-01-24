@@ -155,12 +155,7 @@ function toPlaygroundDisabledRoute(
     disabled.configChain = route.configChain.map(entry => formatRouteFile(entry, root))
   }
   if (route.decisionChain && route.decisionChain.length > 0) {
-    disabled.decisionChain = route.decisionChain.map(entry => ({
-      ...entry,
-      source: entry.source && isAbsolute(entry.source)
-        ? formatRouteFile(entry.source, root)
-        : entry.source,
-    }))
+    disabled.decisionChain = formatDecisionChain(route.decisionChain, root)
   }
   if (route.effectiveConfig && Object.keys(route.effectiveConfig).length > 0) {
     disabled.effectiveConfig = route.effectiveConfig
@@ -190,12 +185,7 @@ function toPlaygroundIgnoredRoute(
     ignored.configChain = route.configChain.map(entry => formatRouteFile(entry, root))
   }
   if (route.decisionChain && route.decisionChain.length > 0) {
-    ignored.decisionChain = route.decisionChain.map(entry => ({
-      ...entry,
-      source: entry.source && isAbsolute(entry.source)
-        ? formatRouteFile(entry.source, root)
-        : entry.source,
-    }))
+    ignored.decisionChain = formatDecisionChain(route.decisionChain, root)
   }
   if (route.effectiveConfig && Object.keys(route.effectiveConfig).length > 0) {
     ignored.effectiveConfig = route.effectiveConfig
@@ -217,6 +207,28 @@ function toPlaygroundConfigFile(
     configFile.group = matchedGroup.label
   }
   return configFile
+}
+
+function formatDecisionChain(
+  chain: RouteDecisionStep[],
+  root: string | undefined,
+) {
+  return chain.map((entry) => {
+    const formatted: RouteDecisionStep = {
+      step: entry.step,
+      result: entry.result,
+    }
+    if (typeof entry.detail !== 'undefined') {
+      formatted.detail = entry.detail
+    }
+    if (typeof entry.source !== 'undefined') {
+      const source = entry.source
+      formatted.source = source && isAbsolute(source)
+        ? formatRouteFile(source, root)
+        : source
+    }
+    return formatted
+  })
 }
 
 export type {

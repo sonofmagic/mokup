@@ -3,9 +3,12 @@ import { computed, onBeforeUnmount, onMounted, ref } from 'vue'
 import PlaygroundContent from './components/PlaygroundContent.vue'
 import PlaygroundHeader from './components/PlaygroundHeader.vue'
 import PlaygroundSidebar from './components/PlaygroundSidebar.vue'
+import { usePlaygroundCounts } from './hooks/usePlaygroundCounts'
+import { usePlaygroundModeHandlers } from './hooks/usePlaygroundModeHandlers'
 import { usePlaygroundRequest } from './hooks/usePlaygroundRequest'
 import { usePlaygroundRoutes } from './hooks/usePlaygroundRoutes'
 import { useRouteTree } from './hooks/useRouteTree'
+import { useSplitPane } from './hooks/useSplitPane'
 
 declare global {
   interface Window {
@@ -73,41 +76,67 @@ const selectedKey = computed(() => (selected.value ? routeKey(selected.value) : 
 const routeMode = ref<'active' | 'disabled' | 'ignored'>('active')
 const enabledMode = ref<'api' | 'config'>('api')
 const disabledMode = ref<'api' | 'config'>('api')
-const isDisabledMode = computed(() => routeMode.value === 'disabled')
-const isIgnoredMode = computed(() => routeMode.value === 'ignored')
-const activeTotal = computed(() => routes.value.length + configCount.value)
-const apiTotal = computed(() => routes.value.length)
-const disabledTotal = computed(() => disabledCount.value + disabledConfigCount.value)
-const ignoredTotal = computed(() => ignoredCount.value)
-const configTotal = computed(() => configCount.value)
-const disabledConfigTotal = computed(() => disabledConfigCount.value)
-const disabledApiTotal = computed(() => disabledCount.value)
-const visibleCount = computed(() => {
-  if (isDisabledMode.value) {
-    return disabledMode.value === 'config'
-      ? disabledConfigFiltered.value.length
-      : disabledFiltered.value.length
-  }
-  if (isIgnoredMode.value) {
-    return ignoredFiltered.value.length
-  }
-  return enabledMode.value === 'config'
-    ? configFiltered.value.length
-    : routeCount.value
+const {
+  activeTotal,
+  apiTotal,
+  disabledTotal,
+  ignoredTotal,
+  configTotal,
+  disabledConfigTotal,
+  disabledApiTotal,
+  visibleCount,
+} = usePlaygroundCounts({
+  routes,
+  configCount,
+  disabledCount,
+  ignoredCount,
+  disabledConfigCount,
+  routeCount,
+  disabledFiltered,
+  ignoredFiltered,
+  configFiltered,
+  disabledConfigFiltered,
+  routeMode,
+  enabledMode,
+  disabledMode,
 })
 
-const splitStorageKey = 'mokup:playground:split-width'
-const minSplitWidth = 240
-const maxSplitWidth = 560
-const splitWidth = ref(320)
-const isDragging = ref(false)
-let dragStartX = 0
-let dragStartWidth = 0
-
-const splitStyle = computed(() => ({
-  '--left-width': `${splitWidth.value}px`,
-}))
-
+const {
+  setRouteMode,
+  setEnabledMode,
+  setDisabledMode,
+  handleSelectRoute,
+  handleSelectConfig,
+  handleSelectDisabled,
+  handleSelectIgnored,
+} = usePlaygroundModeHandlers({
+  routeMode,
+  enabledMode,
+  disabledMode,
+  selected,
+  selectedDisabled,
+  selectedIgnored,
+  selectedConfig,
+  filtered,
+  disabledFiltered,
+  ignoredFiltered,
+  selectRoute,
+  selectDisabledRoute,
+  selectIgnoredRoute,
+  selectConfig,
+})
+const {
+  splitStyle,
+  isDragging,
+  handleDragStart,
+  restoreSplitWidth,
+  stopDrag,
+} = useSplitPane({
+  storageKey: 'mokup:playground:split-width',
+  defaultWidth: 320,
+  minWidth: 240,
+  maxWidth: 560,
+})
 const { treeMode, treeRows, toggleExpanded, setTreeMode } = useRouteTree({
   routes: filtered,
   selectedKey,
@@ -115,129 +144,13 @@ const { treeMode, treeRows, toggleExpanded, setTreeMode } = useRouteTree({
   getRouteKey: routeKey,
 })
 
-function setRouteMode(mode: 'active' | 'disabled' | 'ignored') {
-  routeMode.value = mode
-  if (mode !== 'active') {
-    selectRoute(null)
-    selectConfig(null)
-    if (mode === 'disabled' && disabledMode.value === 'api') {
-      selectDisabledRoute(disabledFiltered.value[0] ?? null)
-      selectIgnoredRoute(null)
-    }
-    if (mode === 'ignored') {
-      selectIgnoredRoute(ignoredFiltered.value[0] ?? null)
-      selectDisabledRoute(null)
-    }
-    return
-  }
-  selectDisabledRoute(null)
-  selectIgnoredRoute(null)
-  if (enabledMode.value === 'api' && !selected.value) {
-    selectRoute(filtered.value[0] ?? null)
-  }
-  if (enabledMode.value !== 'config') {
-    selectConfig(null)
-  }
-}
-
-function setEnabledMode(mode: 'api' | 'config') {
-  enabledMode.value = mode
-  if (mode === 'config') {
-    selectRoute(null)
-    return
-  }
-  selectConfig(null)
-  selectDisabledRoute(null)
-  selectIgnoredRoute(null)
-  if (!selected.value) {
-    selectRoute(filtered.value[0] ?? null)
-  }
-}
-
-function setDisabledMode(mode: 'api' | 'config') {
-  disabledMode.value = mode
-  if (mode === 'config') {
-    selectDisabledRoute(null)
-    return
-  }
-  selectConfig(null)
-  if (!selectedDisabled.value) {
-    selectDisabledRoute(disabledFiltered.value[0] ?? null)
-  }
-}
-
-function clampSplitWidth(value: number) {
-  return Math.min(maxSplitWidth, Math.max(minSplitWidth, value))
-}
-
-function handleDragMove(event: PointerEvent) {
-  if (!isDragging.value) {
-    return
-  }
-  const delta = event.clientX - dragStartX
-  splitWidth.value = clampSplitWidth(dragStartWidth + delta)
-}
-
-function stopDrag() {
-  if (!isDragging.value) {
-    return
-  }
-  isDragging.value = false
-  window.removeEventListener('pointermove', handleDragMove)
-  window.removeEventListener('pointerup', stopDrag)
-  localStorage.setItem(splitStorageKey, String(splitWidth.value))
-}
-
-function handleDragStart(event: PointerEvent) {
-  if (event.button !== 0) {
-    return
-  }
-  event.preventDefault()
-  isDragging.value = true
-  dragStartX = event.clientX
-  dragStartWidth = splitWidth.value
-  window.addEventListener('pointermove', handleDragMove)
-  window.addEventListener('pointerup', stopDrag)
-}
-
 function handleRefresh() {
   loadRoutes().catch(() => undefined)
 }
 
-function handleSelectRoute(route: (typeof selected.value)) {
-  selectConfig(null)
-  selectDisabledRoute(null)
-  selectIgnoredRoute(null)
-  selectRoute(route)
-}
-
-function handleSelectConfig(config: (typeof selectedConfig.value)) {
-  selectRoute(null)
-  selectDisabledRoute(null)
-  selectIgnoredRoute(null)
-  selectConfig(config)
-}
-
-function handleSelectDisabled(route: (typeof selectedDisabled.value)) {
-  selectRoute(null)
-  selectConfig(null)
-  selectIgnoredRoute(null)
-  selectDisabledRoute(route)
-}
-
-function handleSelectIgnored(route: (typeof selectedIgnored.value)) {
-  selectRoute(null)
-  selectConfig(null)
-  selectDisabledRoute(null)
-  selectIgnoredRoute(route)
-}
-
 onMounted(() => {
   setBasePath(window.location.pathname)
-  const stored = Number(localStorage.getItem(splitStorageKey))
-  if (Number.isFinite(stored) && stored > 0) {
-    splitWidth.value = clampSplitWidth(stored)
-  }
+  restoreSplitWidth()
   window.__MOKUP_PLAYGROUND__ = {
     reloadRoutes: handleRefresh,
   }

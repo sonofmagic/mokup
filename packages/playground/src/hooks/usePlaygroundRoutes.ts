@@ -9,6 +9,7 @@ import type {
 } from '../types'
 import { computed, ref, watch } from 'vue'
 import { normalizeBasePath } from '../utils/path'
+import { buildConfigImpactRoutes } from './playground-config-impact'
 
 /**
  * Vue composable for loading and filtering playground route data.
@@ -243,51 +244,12 @@ export function usePlaygroundRoutes() {
   })
 
   const configImpactRoutes = computed<PlaygroundConfigImpactRoute[]>(() => {
-    const selectedFile = selectedConfig.value?.file
-    if (!selectedFile) {
-      return []
-    }
-    const matches = (chain?: string[]) => Boolean(chain?.includes(selectedFile))
-    const results: PlaygroundConfigImpactRoute[] = []
-    for (const route of routes.value) {
-      if (matches(route.configChain)) {
-        const entry: PlaygroundConfigImpactRoute = {
-          kind: 'active',
-          file: route.file,
-        }
-        if (route.method) {
-          entry.method = route.method
-        }
-        if (route.url) {
-          entry.url = route.url
-        }
-        results.push(entry)
-      }
-    }
-    for (const route of disabledRoutes.value) {
-      if (matches(route.configChain)) {
-        const entry: PlaygroundConfigImpactRoute = {
-          kind: 'disabled',
-          file: route.file,
-        }
-        if (route.method) {
-          entry.method = route.method
-        }
-        if (route.url) {
-          entry.url = route.url
-        }
-        results.push(entry)
-      }
-    }
-    for (const route of ignoredRoutes.value) {
-      if (matches(route.configChain)) {
-        results.push({
-          kind: 'ignored',
-          file: route.file,
-        })
-      }
-    }
-    return results
+    return buildConfigImpactRoutes({
+      selectedFile: selectedConfig.value?.file,
+      routes: routes.value,
+      disabledRoutes: disabledRoutes.value,
+      ignoredRoutes: ignoredRoutes.value,
+    })
   })
 
   return {

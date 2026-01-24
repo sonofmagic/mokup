@@ -1,5 +1,7 @@
 import type { MiddlewareHandler } from '@mokup/shared/hono'
 
+export type { MiddlewareHandler } from '@mokup/shared/hono'
+
 /**
  * Options for building a mokup manifest.
  *
