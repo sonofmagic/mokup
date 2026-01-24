@@ -9,14 +9,46 @@
 
 Dev tooling (Vite plugin + CLI):
 
-```bash
+::: code-group
+
+```bash [pnpm]
 pnpm add -D mokup
 ```
 
+```bash [npm]
+npm install -D mokup
+```
+
+```bash [yarn]
+yarn add -D mokup
+```
+
+```bash [bun]
+bun add -d mokup
+```
+
+:::
+
 Runtime / server adapters (deploy or middleware):
 
-```bash
+::: code-group
+
+```bash [pnpm]
 pnpm add mokup
 ```
+
+```bash [npm]
+npm install mokup
+```
+
+```bash [yarn]
+yarn add mokup
+```
+
+```bash [bun]
+bun add mokup
+```
+
+:::
 
 If you only need Vite dev mocks, install `mokup` as a dev dependency.

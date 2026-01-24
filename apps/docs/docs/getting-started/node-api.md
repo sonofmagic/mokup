@@ -32,9 +32,25 @@ const response = await handler(new Request('http://localhost/api/users'))
 
 Use build mode when you want a stable bundle for production.
 
-```bash
+::: code-group
+
+```bash [pnpm]
 pnpm exec mokup build --dir mock --out .mokup
 ```
+
+```bash [npm]
+npm exec mokup build --dir mock --out .mokup
+```
+
+```bash [yarn]
+yarn mokup build --dir mock --out .mokup
+```
+
+```bash [bun]
+bunx mokup build --dir mock --out .mokup
+```
+
+:::
 
 ```ts
 import { createRuntime } from 'mokup/runtime'

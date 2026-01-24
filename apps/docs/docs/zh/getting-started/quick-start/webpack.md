@@ -2,9 +2,25 @@
 
 ## 1. 安装
 
-```bash
+::: code-group
+
+```bash [pnpm]
 pnpm add -D mokup
 ```
+
+```bash [npm]
+npm install -D mokup
+```
+
+```bash [yarn]
+yarn add -D mokup
+```
+
+```bash [bun]
+bun add -d mokup
+```
+
+:::
 
 ## 2. 添加插件
 
@@ -28,7 +44,27 @@ module.exports = {
 
 ## 3. 启动开发服务
 
-启动 webpack dev server（例如 `pnpm webpack serve`）。
+启动 webpack dev server：
+
+::: code-group
+
+```bash [pnpm]
+pnpm webpack serve
+```
+
+```bash [npm]
+npm exec webpack serve
+```
+
+```bash [yarn]
+yarn webpack serve
+```
+
+```bash [bun]
+bunx webpack serve
+```
+
+:::
 
 ## 4. 验证
 

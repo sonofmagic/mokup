@@ -2,9 +2,25 @@
 
 ## 1. Install
 
-```bash
+::: code-group
+
+```bash [pnpm]
 pnpm add -D mokup
 ```
+
+```bash [npm]
+npm install -D mokup
+```
+
+```bash [yarn]
+yarn add -D mokup
+```
+
+```bash [bun]
+bun add -d mokup
+```
+
+:::
 
 ## 2. Add the plugin
 
@@ -28,7 +44,27 @@ module.exports = {
 
 ## 3. Start dev server
 
-Run your webpack dev server (for example `pnpm webpack serve`).
+Run your webpack dev server:
+
+::: code-group
+
+```bash [pnpm]
+pnpm webpack serve
+```
+
+```bash [npm]
+npm exec webpack serve
+```
+
+```bash [yarn]
+yarn webpack serve
+```
+
+```bash [bun]
+bunx webpack serve
+```
+
+:::
 
 ## 4. Verify
 

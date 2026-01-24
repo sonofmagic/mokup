@@ -4,9 +4,25 @@ Use `mokup/webpack` to integrate Mokup with webpack-dev-server and webpack build
 
 ## Install
 
-```bash
+::: code-group
+
+```bash [pnpm]
 pnpm add -D mokup
 ```
+
+```bash [npm]
+npm install -D mokup
+```
+
+```bash [yarn]
+yarn add -D mokup
+```
+
+```bash [bun]
+bun add -d mokup
+```
+
+:::
 
 ## Usage
 

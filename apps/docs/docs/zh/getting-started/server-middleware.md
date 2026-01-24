@@ -17,9 +17,25 @@ serve({ fetch: app.fetch, port: 3000 })
 
 如果你需要稳定的生产构建，请使用 build 模式。
 
-```bash
+::: code-group
+
+```bash [pnpm]
 pnpm exec mokup build --dir mock --out .mokup
 ```
+
+```bash [npm]
+npm exec mokup build --dir mock --out .mokup
+```
+
+```bash [yarn]
+yarn mokup build --dir mock --out .mokup
+```
+
+```bash [bun]
+bunx mokup build --dir mock --out .mokup
+```
+
+:::
 
 ```ts
 import mokupBundle from './.mokup/mokup.bundle.mjs'

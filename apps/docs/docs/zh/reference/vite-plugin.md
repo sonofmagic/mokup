@@ -4,9 +4,25 @@ Mokup 的 Vite 插件入口为 `mokup/vite`。
 
 ## 安装
 
-```bash
+::: code-group
+
+```bash [pnpm]
 pnpm add -D mokup
 ```
+
+```bash [npm]
+npm install -D mokup
+```
+
+```bash [yarn]
+yarn add -D mokup
+```
+
+```bash [bun]
+bun add -d mokup
+```
+
+:::
 
 ## 基本用法
 

@@ -9,14 +9,46 @@
 
 开发工具（Vite 插件 + CLI）：
 
-```bash
+::: code-group
+
+```bash [pnpm]
 pnpm add -D mokup
 ```
 
+```bash [npm]
+npm install -D mokup
+```
+
+```bash [yarn]
+yarn add -D mokup
+```
+
+```bash [bun]
+bun add -d mokup
+```
+
+:::
+
 运行时/服务端适配器（部署或中间件）：
 
-```bash
+::: code-group
+
+```bash [pnpm]
 pnpm add mokup
 ```
+
+```bash [npm]
+npm install mokup
+```
+
+```bash [yarn]
+yarn add mokup
+```
+
+```bash [bun]
+bun add mokup
+```
+
+:::
 
 如果你只做本地 Vite 开发，把 `mokup` 装在 devDependencies 即可。

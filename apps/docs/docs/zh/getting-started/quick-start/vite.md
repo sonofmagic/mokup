@@ -2,9 +2,25 @@
 
 ## 1. 安装
 
-```bash
+::: code-group
+
+```bash [pnpm]
 pnpm add -D mokup
 ```
+
+```bash [npm]
+npm install -D mokup
+```
+
+```bash [yarn]
+yarn add -D mokup
+```
+
+```bash [bun]
+bun add -d mokup
+```
+
+:::
 
 ## 2. 启用插件
 
@@ -26,9 +42,25 @@ export default defineConfig({
 
 ## 3. 启动开发服务
 
-```bash
+::: code-group
+
+```bash [pnpm]
 pnpm dev
 ```
+
+```bash [npm]
+npm run dev
+```
+
+```bash [yarn]
+yarn dev
+```
+
+```bash [bun]
+bun run dev
+```
+
+:::
 
 ## 4. 验证
 

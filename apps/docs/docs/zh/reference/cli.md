@@ -6,9 +6,25 @@
 
 生成供服务端适配器与 Worker 使用的 `.mokup` 构建产物。
 
-```bash
+::: code-group
+
+```bash [pnpm]
 pnpm exec mokup build --dir mock --out .mokup
 ```
+
+```bash [npm]
+npm exec mokup build --dir mock --out .mokup
+```
+
+```bash [yarn]
+yarn mokup build --dir mock --out .mokup
+```
+
+```bash [bun]
+bunx mokup build --dir mock --out .mokup
+```
+
+:::
 
 ### Build 选项
 
@@ -26,9 +42,25 @@ pnpm exec mokup build --dir mock --out .mokup
 
 从目录直接启动独立的 mock 服务。
 
-```bash
+::: code-group
+
+```bash [pnpm]
 pnpm exec mokup serve --dir mock --prefix /api --port 3000
 ```
+
+```bash [npm]
+npm exec mokup serve --dir mock --prefix /api --port 3000
+```
+
+```bash [yarn]
+yarn mokup serve --dir mock --prefix /api --port 3000
+```
+
+```bash [bun]
+bunx mokup serve --dir mock --prefix /api --port 3000
+```
+
+:::
 
 ### Serve 选项
 

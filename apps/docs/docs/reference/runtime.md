@@ -21,9 +21,25 @@ const result = await runtime.handle({
 
 Use the CLI bundle to load a manifest and handler module map in your runtime:
 
-```bash
+::: code-group
+
+```bash [pnpm]
 pnpm exec mokup build --dir mock --out .mokup
 ```
+
+```bash [npm]
+npm exec mokup build --dir mock --out .mokup
+```
+
+```bash [yarn]
+yarn mokup build --dir mock --out .mokup
+```
+
+```bash [bun]
+bunx mokup build --dir mock --out .mokup
+```
+
+:::
 
 ```ts
 import { createRuntime } from 'mokup/runtime'

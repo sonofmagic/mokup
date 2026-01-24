@@ -21,9 +21,25 @@ const result = await runtime.handle({
 
 可直接加载 CLI 生成的 bundle：
 
-```bash
+::: code-group
+
+```bash [pnpm]
 pnpm exec mokup build --dir mock --out .mokup
 ```
+
+```bash [npm]
+npm exec mokup build --dir mock --out .mokup
+```
+
+```bash [yarn]
+yarn mokup build --dir mock --out .mokup
+```
+
+```bash [bun]
+bunx mokup build --dir mock --out .mokup
+```
+
+:::
 
 ```ts
 import { createRuntime } from 'mokup/runtime'

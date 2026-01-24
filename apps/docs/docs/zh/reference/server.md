@@ -40,9 +40,25 @@ Hono 适配器可在 Hono 支持的运行时中使用，Cloudflare Worker 请使
 
 可直接加载 CLI 生成的 bundle：
 
-```bash
+::: code-group
+
+```bash [pnpm]
 pnpm exec mokup build --dir mock --out .mokup
 ```
+
+```bash [npm]
+npm exec mokup build --dir mock --out .mokup
+```
+
+```bash [yarn]
+yarn mokup build --dir mock --out .mokup
+```
+
+```bash [bun]
+bunx mokup build --dir mock --out .mokup
+```
+
+:::
 
 ```ts
 import mokupBundle from './.mokup/mokup.bundle.mjs'

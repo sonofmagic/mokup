@@ -6,9 +6,25 @@
 
 Generate `.mokup` outputs for server adapters and workers.
 
-```bash
+::: code-group
+
+```bash [pnpm]
 pnpm exec mokup build --dir mock --out .mokup
 ```
+
+```bash [npm]
+npm exec mokup build --dir mock --out .mokup
+```
+
+```bash [yarn]
+yarn mokup build --dir mock --out .mokup
+```
+
+```bash [bun]
+bunx mokup build --dir mock --out .mokup
+```
+
+:::
 
 ### Build options
 
@@ -26,9 +42,25 @@ pnpm exec mokup build --dir mock --out .mokup
 
 Start a standalone mock server from a directory.
 
-```bash
+::: code-group
+
+```bash [pnpm]
 pnpm exec mokup serve --dir mock --prefix /api --port 3000
 ```
+
+```bash [npm]
+npm exec mokup serve --dir mock --prefix /api --port 3000
+```
+
+```bash [yarn]
+yarn mokup serve --dir mock --prefix /api --port 3000
+```
+
+```bash [bun]
+bunx mokup serve --dir mock --prefix /api --port 3000
+```
+
+:::
 
 ### Serve options
 
