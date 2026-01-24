@@ -13,3 +13,4 @@ Use these prompt templates to generate Mokup response bodies from DTS or OpenAPI
 
 - [DTS prompt templates](./prompt-templates-dts)
 - [OpenAPI prompt templates](./prompt-templates-openapi)
+- [llms.txt](./llms-txt)

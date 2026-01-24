@@ -1,5 +1,7 @@
 # Cloudflare Worker
 
+> 快速上手请参考 [入门指南 - Cloudflare](../getting-started/cloudflare)。
+
 Mokup 可以直接运行在 Worker 中，推荐使用 `mokup/server/fetch`。如需更简洁的
 Worker 封装，也可使用 `mokup/server/worker`。
 

@@ -13,6 +13,7 @@ export const zhSidebar: DefaultTheme.Sidebar = {
         { text: 'Webpack 快速开始', link: '/zh/getting-started/quick-start/webpack' },
         { text: 'Node.js API', link: '/zh/getting-started/node-api' },
         { text: '服务端中间件', link: '/zh/getting-started/server-middleware' },
+        { text: 'Cloudflare', link: '/zh/getting-started/cloudflare' },
       ],
     },
     {
@@ -52,6 +53,7 @@ export const zhSidebar: DefaultTheme.Sidebar = {
         { text: '概览', link: '/zh/ai/' },
         { text: 'DTS 模板', link: '/zh/ai/prompt-templates-dts' },
         { text: 'OpenAPI 模板', link: '/zh/ai/prompt-templates-openapi' },
+        { text: 'llms.txt', link: '/zh/ai/llms-txt' },
       ],
     },
   ],
@@ -85,6 +87,7 @@ export const enSidebar: DefaultTheme.Sidebar = {
         { text: 'Webpack Quick Start', link: '/getting-started/quick-start/webpack' },
         { text: 'Node.js API', link: '/getting-started/node-api' },
         { text: 'Server Middleware', link: '/getting-started/server-middleware' },
+        { text: 'Cloudflare', link: '/getting-started/cloudflare' },
       ],
     },
     {
@@ -124,6 +127,7 @@ export const enSidebar: DefaultTheme.Sidebar = {
         { text: 'Overview', link: '/ai/' },
         { text: 'DTS Templates', link: '/ai/prompt-templates-dts' },
         { text: 'OpenAPI Templates', link: '/ai/prompt-templates-openapi' },
+        { text: 'llms.txt', link: '/ai/llms-txt' },
       ],
     },
   ],

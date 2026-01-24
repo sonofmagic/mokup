@@ -1,5 +1,7 @@
 # Cloudflare Worker
 
+> Looking for a quick start? See [Getting Started - Cloudflare](../getting-started/cloudflare).
+
 Run Mokup in Workers with `mokup/server/fetch`. The `mokup/server/worker` entry
 is still available for a more compact Worker wrapper.
 

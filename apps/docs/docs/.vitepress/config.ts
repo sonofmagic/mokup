@@ -39,7 +39,33 @@ const vitePlugins = [
     },
   }),
   groupIconVitePlugin(),
-  llmstxt(),
+  llmstxt({
+    domain: siteUrl,
+    generateLLMsTxt: true,
+    generateLLMsFullTxt: true,
+    generateLLMFriendlyDocsForEachPage: true,
+    customTemplateVariables: {
+      title: `${siteTitle} Documentation`,
+      description: siteDescription,
+      details: [
+        '- Bilingual docs: English + Simplified Chinese.',
+        '- Full bundle: /llms-full.txt.',
+        '- AI prompt templates: /ai/.',
+      ].join('\n'),
+    },
+    customLLMsTxtTemplate: [
+      '# {title}',
+      '',
+      '> {description}',
+      '',
+      '{details}',
+      '',
+      '## Table of Contents',
+      '',
+      '{toc}',
+      '',
+    ].join('\n'),
+  }),
 ] as unknown as any[]
 
 export default defineConfig({

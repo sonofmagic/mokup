@@ -13,3 +13,4 @@
 
 - [DTS 提示词模板](./prompt-templates-dts)
 - [OpenAPI 提示词模板](./prompt-templates-openapi)
+- [llms.txt](./llms-txt)
