@@ -1,5 +1,15 @@
 # @mokup/cli
 
+## 1.0.6
+
+### Patch Changes
+
+- 🐛 **refactor: replace before/after middleware positions with pre/normal/post, add defineConfig exports, and introduce defineHandler for route file type hints; update playground middleware display to match.** [`74d29de`](https://github.com/sonofmagic/mokup/commit/74d29de5729b62d96d49ef7bac1dc89b64655f50) by @sonofmagic
+
+- 🐛 **Move consola-backed logger utilities into @mokup/shared and use them across runtime and CLI output.** [`9701b83`](https://github.com/sonofmagic/mokup/commit/9701b838e19e50d46142bcae5ba6fe2aef39bc8b) by @sonofmagic
+- 📦 **Dependencies** [`74d29de`](https://github.com/sonofmagic/mokup/commit/74d29de5729b62d96d49ef7bac1dc89b64655f50)
+  → `@mokup/server@1.1.3`, `@mokup/shared@1.0.2`, `@mokup/runtime@1.0.3`
+
 ## 1.0.5
 
 ### Patch Changes

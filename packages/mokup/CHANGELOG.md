@@ -1,5 +1,22 @@
 # mokup
 
+## 2.1.0
+
+### Minor Changes
+
+- ✨ **Add a Vite virtual bundle module for Worker entries so builds no longer need a generated .mokup bundle.** [`69e852c`](https://github.com/sonofmagic/mokup/commit/69e852c2571d35a4def30b5b7b096c4a07adebc2) by @sonofmagic
+
+### Patch Changes
+
+- 🐛 **Ship built-in type declarations for the `virtual:mokup-bundle` module.** [`69e852c`](https://github.com/sonofmagic/mokup/commit/69e852c2571d35a4def30b5b7b096c4a07adebc2) by @sonofmagic
+
+- 🐛 **refactor: replace before/after middleware positions with pre/normal/post, add defineConfig exports, and introduce defineHandler for route file type hints; update playground middleware display to match.** [`74d29de`](https://github.com/sonofmagic/mokup/commit/74d29de5729b62d96d49ef7bac1dc89b64655f50) by @sonofmagic
+
+- 🐛 **Move consola-backed logger utilities into @mokup/shared and use them across runtime and CLI output.** [`9701b83`](https://github.com/sonofmagic/mokup/commit/9701b838e19e50d46142bcae5ba6fe2aef39bc8b) by @sonofmagic
+
+- 🐛 **Colorize the Mokup Playground URL in Vite dev output and place it after Local/Network.** [`a715a4e`](https://github.com/sonofmagic/mokup/commit/a715a4edddaa2ff056aefe8a9ef2c613667e9d20) by @sonofmagic
+- 📦 Updated 5 dependencies [`74d29de`](https://github.com/sonofmagic/mokup/commit/74d29de5729b62d96d49ef7bac1dc89b64655f50)
+
 ## 2.0.2
 
 ### Patch Changes

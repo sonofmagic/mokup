@@ -1,5 +1,11 @@
 # @mokup/shared
 
+## 1.0.2
+
+### Patch Changes
+
+- 🐛 **Move consola-backed logger utilities into @mokup/shared and use them across runtime and CLI output.** [`9701b83`](https://github.com/sonofmagic/mokup/commit/9701b838e19e50d46142bcae5ba6fe2aef39bc8b) by @sonofmagic
+
 ## 1.0.1
 
 ### Patch Changes
