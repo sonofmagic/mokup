@@ -31,6 +31,7 @@ export const zhSidebar: DefaultTheme.Sidebar = {
       items: [
         { text: '多目录与前缀', link: '/zh/advanced/multi-dir-prefix' },
         { text: 'Playground', link: '/zh/advanced/playground' },
+        { text: '中间件顺序', link: '/zh/advanced/middleware-ordering' },
         { text: '热更新与调试', link: '/zh/advanced/hot-reload' },
       ],
     },
@@ -102,6 +103,7 @@ export const enSidebar: DefaultTheme.Sidebar = {
       items: [
         { text: 'Multi-Dir & Prefix', link: '/advanced/multi-dir-prefix' },
         { text: 'Playground', link: '/advanced/playground' },
+        { text: 'Middleware Ordering', link: '/advanced/middleware-ordering' },
         { text: 'Hot Reload & Debug', link: '/advanced/hot-reload' },
       ],
     },
