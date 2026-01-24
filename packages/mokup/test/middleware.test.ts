@@ -1,10 +1,10 @@
 import type { IncomingMessage, ServerResponse } from 'node:http'
-import type { RouteTable } from '../src/vite/types'
+import type { RouteTable } from '../src/shared/types'
 import { Buffer } from 'node:buffer'
 import { EventEmitter } from 'node:events'
 import { parseRouteTemplate } from '@mokup/runtime'
 import { describe, expect, it, vi } from 'vitest'
-import { createHonoApp, createMiddleware } from '../src/vite/middleware'
+import { createHonoApp, createMiddleware } from '../src/core/middleware'
 
 function createRouteTable(): RouteTable {
   const parsed = parseRouteTemplate('/users/[id]')

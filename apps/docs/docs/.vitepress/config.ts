@@ -2,6 +2,8 @@ import type { DefaultTheme } from 'vitepress'
 import tailwindcss from '@tailwindcss/vite'
 import mokup from 'mokup/vite'
 import { defineConfig } from 'vitepress'
+import { groupIconMdPlugin, groupIconVitePlugin } from 'vitepress-plugin-group-icons'
+import llmstxt from 'vitepress-plugin-llms'
 import { enNav, zhNav } from './config/nav'
 import { enSidebar, zhSidebar } from './config/sidebar'
 
@@ -36,6 +38,8 @@ const vitePlugins = [
 
     },
   }),
+  groupIconVitePlugin(),
+  llmstxt(),
 ] as unknown as any[]
 
 export default defineConfig({
@@ -95,4 +99,9 @@ export default defineConfig({
     },
   },
   themeConfig,
+  markdown: {
+    config(md) {
+      md.use(groupIconMdPlugin)
+    },
+  },
 })

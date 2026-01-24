@@ -1,9 +1,9 @@
 import type { Manifest } from '@mokup/runtime'
-import type { ResolvedRoute } from '../src/vite/types'
+import type { ResolvedRoute } from '../src/shared/types'
 import path from 'node:path'
 import { parseRouteTemplate } from '@mokup/runtime'
 import { describe, expect, it } from 'vitest'
-import { buildBundleModule } from '../src/vite/bundle'
+import { buildBundleModule } from '../src/core/bundle'
 
 function extractManifest(code: string): Manifest {
   const marker = 'const manifest = '

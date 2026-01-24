@@ -1,7 +1,7 @@
 import path from 'node:path'
 import { parseRouteTemplate } from '@mokup/runtime'
 import { describe, expect, it } from 'vitest'
-import { deriveRouteFromFile, sortRoutes } from '../src/vite/routes'
+import { deriveRouteFromFile, sortRoutes } from '../src/core/routes'
 
 function createLogger() {
   const warnings: string[] = []

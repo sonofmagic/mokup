@@ -5,7 +5,7 @@
 <p align="center">File-based mock toolkit for Vite, CLI builds, and runtime usage.</p>
 <p align="center">
   <a href="http://mokup.icebreaker.top/">Website</a> ·
-  <a href="http://mokup.icebreaker.top/_mokup">Playground</a> ·
+  <a href="http://mokup.icebreaker.top/__mokup">Playground</a> ·
   <a href="https://github.com/sonofmagic/mokup">GitHub</a>
 </p>
 

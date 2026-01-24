@@ -1,11 +1,11 @@
 import type { IncomingMessage, ServerResponse } from 'node:http'
 import type { ViteDevServer } from 'vite'
-import type { Logger, ResolvedRoute, RouteTable } from '../src/vite/types'
+import type { Logger, ResolvedRoute, RouteTable } from '../src/shared/types'
 import { Buffer } from 'node:buffer'
 import path from 'node:path'
 import { parseRouteTemplate } from '@mokup/runtime'
 import { describe, expect, it, vi } from 'vitest'
-import { createPlaygroundMiddleware, resolvePlaygroundOptions } from '../src/vite/playground'
+import { createPlaygroundMiddleware, resolvePlaygroundOptions } from '../src/core/playground'
 
 function toPosixPath(value: string) {
   return value.replace(/\\/g, '/')

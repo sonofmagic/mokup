@@ -11,7 +11,7 @@ import {
   normalizePrefix,
   resolveDirs,
   toPosix,
-} from '../src/vite/utils'
+} from '../src/shared/utils'
 
 describe('vite utils', () => {
   it('normalizes HTTP methods and prefixes', () => {

@@ -1,7 +1,7 @@
 import { expect, test } from '@playwright/test'
 
 test('playground lists routes and runs request', async ({ page }) => {
-  await page.goto('/_mokup')
+  await page.goto('/__mokup')
 
   await page.getByTestId('playground-search').fill('profile')
   const row = page
