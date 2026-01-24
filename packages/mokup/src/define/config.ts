@@ -37,7 +37,7 @@ function attachMetadata(config: RouteDirectoryConfig, meta: MiddlewareMeta) {
  * @returns Route directory config with middleware metadata.
  *
  * @example
- * import { defineConfig } from 'mokup/vite'
+ * import { defineConfig } from 'mokup'
  *
  * export default defineConfig(({ pre, normal, post }) => {
  *   pre.use(async (c, next) => {
