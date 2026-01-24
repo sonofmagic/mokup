@@ -1,5 +1,17 @@
 # mokup
 
+## 2.1.1
+
+### Patch Changes
+
+- 🐛 **Refine Vite playground output formatting and share terminal helpers.** [`58727a9`](https://github.com/sonofmagic/mokup/commit/58727a95de71cb8f4a5eae9d2478d599664c843f) by @sonofmagic
+
+  - Fix playground route config impact typing.
+
+- 🐛 **Fix dev service worker logger import resolution for docs.** [`d7f2c14`](https://github.com/sonofmagic/mokup/commit/d7f2c142d8709997bcdaef9539018d036823800c) by @sonofmagic
+- 📦 **Dependencies** [`58727a9`](https://github.com/sonofmagic/mokup/commit/58727a95de71cb8f4a5eae9d2478d599664c843f)
+  → `@mokup/playground@0.0.12`, `@mokup/server@1.1.4`, `@mokup/cli@1.0.7`
+
 ## 2.1.0
 
 ### Minor Changes

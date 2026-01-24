@@ -1,5 +1,12 @@
 # web
 
+## 0.0.15
+
+### Patch Changes
+
+- 📦 **Dependencies** [`58727a9`](https://github.com/sonofmagic/mokup/commit/58727a95de71cb8f4a5eae9d2478d599664c843f)
+  → `mokup@2.1.1`
+
 ## 0.0.14
 
 ### Patch Changes
