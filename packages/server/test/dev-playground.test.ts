@@ -28,6 +28,7 @@ describe('dev playground', () => {
             handle: async (_c: unknown, next: () => Promise<void>) => await next(),
             source: '/tmp/mock/index.config.js',
             index: 0,
+            position: 'pre',
           },
         ],
       },
@@ -72,6 +73,10 @@ describe('dev playground', () => {
     expect(data.count).toBe(1)
     expect(data.routes[0]?.url).toBe('/users/[id]')
     expect(data.routes[0]?.middlewareCount).toBe(1)
+    expect(data.routes[0]?.preMiddlewareCount).toBe(1)
+    expect(data.routes[0]?.normalMiddlewareCount).toBe(0)
+    expect(data.routes[0]?.postMiddlewareCount).toBe(0)
+    expect(data.routes[0]?.preMiddlewares?.[0]).toBe('mock/index.config.js')
     expect(data.routes[0]?.group).toBe('mock')
     expect(data.disabled[0]?.url).toBe('/ignored')
     expect(data.disabled[0]?.reason).toBe('ignore-prefix')

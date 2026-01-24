@@ -242,6 +242,28 @@ export interface RouteDirectoryConfig {
 }
 
 /**
+ * Middleware execution position.
+ *
+ * @example
+ * import type { MiddlewarePosition } from 'mokup/vite'
+ *
+ * const position: MiddlewarePosition = 'pre'
+ */
+export type MiddlewarePosition = 'pre' | 'normal' | 'post'
+
+/**
+ * Middleware registry used by defineConfig.
+ *
+ * @example
+ * import type { MiddlewareRegistry } from 'mokup/vite'
+ *
+ * const registry: MiddlewareRegistry = { use: () => {} }
+ */
+export interface MiddlewareRegistry {
+  use: (...handlers: MiddlewareHandler[]) => void
+}
+
+/**
  * Normalized middleware metadata.
  *
  * @example
@@ -257,6 +279,12 @@ export interface ResolvedMiddleware {
   handle: MiddlewareHandler
   source: string
   index: number
+  /**
+   * Position in the middleware chain.
+   *
+   * @default "normal"
+   */
+  position: MiddlewarePosition
 }
 
 /**

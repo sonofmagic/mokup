@@ -34,6 +34,7 @@ describe('mokup bundle module', () => {
           handle: async () => undefined,
           source: configFile,
           index: 0,
+          position: 'normal',
         },
       ],
       status: 201,

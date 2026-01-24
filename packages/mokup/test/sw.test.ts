@@ -42,6 +42,7 @@ describe('mokup SW', () => {
           handle: async () => undefined,
           source: configFile,
           index: 0,
+          position: 'normal',
         },
       ],
       status: 201,

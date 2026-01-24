@@ -63,6 +63,8 @@ describe('dev config resolver', () => {
       expect(config.delay).toBe(10)
       expect(config.enabled).toBe(false)
       expect(config.middlewares).toHaveLength(2)
+      expect(config.middlewares[0]?.position).toBe('normal')
+      expect(config.middlewares[1]?.position).toBe('normal')
     }
     finally {
       await cleanupTempRoot(root)
@@ -106,6 +108,7 @@ describe('dev config resolver', () => {
 
       expect(config.headers).toEqual({ 'x-root': '1' })
       expect(config.middlewares).toHaveLength(1)
+      expect(config.middlewares[0]?.position).toBe('normal')
       expect(logger.warn).toHaveBeenCalled()
     }
     finally {

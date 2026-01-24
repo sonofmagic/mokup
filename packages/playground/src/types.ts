@@ -22,6 +22,12 @@ export interface PlaygroundRoute {
   delay?: number
   middlewareCount?: number
   middlewares?: string[]
+  preMiddlewareCount?: number
+  normalMiddlewareCount?: number
+  postMiddlewareCount?: number
+  preMiddlewares?: string[]
+  normalMiddlewares?: string[]
+  postMiddlewares?: string[]
 }
 
 /**

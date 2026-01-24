@@ -167,6 +167,28 @@ export interface RouteDirectoryConfig {
 }
 
 /**
+ * Middleware execution position.
+ *
+ * @example
+ * import type { MiddlewarePosition } from '@mokup/cli'
+ *
+ * const position: MiddlewarePosition = 'pre'
+ */
+export type MiddlewarePosition = 'pre' | 'normal' | 'post'
+
+/**
+ * Middleware registry used by defineConfig.
+ *
+ * @example
+ * import type { MiddlewareRegistry } from '@mokup/cli'
+ *
+ * const registry: MiddlewareRegistry = { use: () => {} }
+ */
+export interface MiddlewareRegistry {
+  use: (...handlers: MiddlewareHandler[]) => void
+}
+
+/**
  * File entry discovered during a build scan.
  *
  * @example

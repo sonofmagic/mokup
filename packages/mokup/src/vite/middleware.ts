@@ -128,6 +128,25 @@ function wrapMiddleware(
   }
 }
 
+function splitRouteMiddlewares(route: ResolvedRoute) {
+  const before: Array<ReturnType<typeof wrapMiddleware>> = []
+  const normal: Array<ReturnType<typeof wrapMiddleware>> = []
+  const after: Array<ReturnType<typeof wrapMiddleware>> = []
+  for (const entry of route.middlewares ?? []) {
+    const wrapped = wrapMiddleware(entry.handle)
+    if (entry.position === 'post') {
+      after.push(wrapped)
+    }
+    else if (entry.position === 'pre') {
+      before.push(wrapped)
+    }
+    else {
+      normal.push(wrapped)
+    }
+  }
+  return { before, normal, after }
+}
+
 /**
  * Build a Hono app for the resolved route table.
  *
@@ -143,12 +162,14 @@ export function createHonoApp(routes: RouteTable): Hono {
   const app = new Hono({ router: new PatternRouter(), strict: false })
 
   for (const route of routes) {
-    const middlewares = route.middlewares?.map(entry => wrapMiddleware(entry.handle)) ?? []
+    const { before, normal, after } = splitRouteMiddlewares(route)
     app.on(
       route.method,
       toHonoPath(route),
       createFinalizeMiddleware(route),
-      ...middlewares,
+      ...before,
+      ...normal,
+      ...after,
       createRouteHandler(route),
     )
   }

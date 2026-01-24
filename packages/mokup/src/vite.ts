@@ -1,3 +1,4 @@
+export { defineConfig } from './vite/define-config'
 /**
  * Vite plugin entry for mokup.
  *
@@ -14,6 +15,8 @@ export type {
   Context,
   HttpMethod,
   MiddlewareHandler,
+  MiddlewarePosition,
+  MiddlewareRegistry,
   MokupPluginOptions,
   PlaygroundOptionsInput,
   RequestHandler,

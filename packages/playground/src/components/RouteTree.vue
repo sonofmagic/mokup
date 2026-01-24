@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import type { PlaygroundRoute, TreeRow } from '../types'
+import { useI18n } from 'vue-i18n'
 import { toPosixPath } from '../utils/path'
 import UiPill from './ui/UiPill.vue'
 
@@ -13,6 +14,8 @@ const emit = defineEmits<{
   (event: 'toggle', id: string): void
   (event: 'select', row: TreeRow): void
 }>()
+
+const { t } = useI18n()
 
 const methodBadge = (method: string) => `method-${method.toLowerCase()}`
 
@@ -64,6 +67,32 @@ function handleRowClick(row: TreeRow) {
 function resolveRouteCount(route: PlaygroundRoute) {
   return props.getRouteCount ? props.getRouteCount(route) : 0
 }
+
+function resolveIndent(depth: number) {
+  return `${depth * 12}px`
+}
+
+function resolveSubIndent(depth: number) {
+  return `${depth * 12 + 22}px`
+}
+
+function resolvePreMiddlewares(route: PlaygroundRoute) {
+  return route.preMiddlewares ?? []
+}
+
+function resolveNormalMiddlewares(route: PlaygroundRoute) {
+  if (route.normalMiddlewares) {
+    return route.normalMiddlewares
+  }
+  if (route.preMiddlewares || route.postMiddlewares) {
+    return []
+  }
+  return route.middlewares ?? []
+}
+
+function resolvePostMiddlewares(route: PlaygroundRoute) {
+  return route.postMiddlewares ?? []
+}
 </script>
 
 <template>
@@ -76,33 +105,68 @@ function resolveRouteCount(route: PlaygroundRoute) {
       data-testid="playground-tree-row"
     >
       <button
-        class="flex min-w-0 flex-1 items-center gap-2 text-left"
+        class="flex min-w-0 flex-1 items-start gap-2 text-left"
         type="button"
         :title="row.title"
         @click="handleRowClick(row)"
       >
-        <div class="flex items-center gap-2" :style="{ paddingLeft: `${row.depth * 12}px` }">
-          <span
-            class="flex h-3.5 w-3.5 items-center justify-center"
-            :class="row.selected ? 'text-pg-on-accent-soft' : 'text-pg-text-muted'"
-          >
+        <div class="flex min-w-0 flex-1 flex-col gap-1">
+          <div class="flex items-center gap-2" :style="{ paddingLeft: resolveIndent(row.depth) }">
             <span
-              v-if="row.kind === 'folder'"
-              :class="row.expanded ? 'i-[carbon--chevron-down]' : 'i-[carbon--chevron-right]'"
-              class="h-3.5 w-3.5"
-              aria-hidden="true"
-            />
-          </span>
-          <span
-            v-if="row.kind === 'route' && row.route"
-            class="rounded-full px-1.5 py-0.5 text-[0.5rem] uppercase tracking-[0.2em]"
-            :class="methodBadge(row.route.method)"
+              class="flex h-3.5 w-3.5 items-center justify-center"
+              :class="row.selected ? 'text-pg-on-accent-soft' : 'text-pg-text-muted'"
+            >
+              <span
+                v-if="row.kind === 'folder'"
+                :class="row.expanded ? 'i-[carbon--chevron-down]' : 'i-[carbon--chevron-right]'"
+                class="h-3.5 w-3.5"
+                aria-hidden="true"
+              />
+            </span>
+            <span
+              v-if="row.kind === 'route' && row.route"
+              class="rounded-full px-1.5 py-0.5 text-[0.5rem] uppercase tracking-[0.2em]"
+              :class="methodBadge(row.route.method)"
+            >
+              {{ row.route.method }}
+            </span>
+            <span class="text-[0.78rem]" :class="row.kind === 'folder' ? 'font-semibold' : 'font-medium'">
+              {{ row.label }}
+            </span>
+          </div>
+          <div
+            v-if="row.kind === 'route' && row.route && (resolvePreMiddlewares(row.route).length > 0 || resolveNormalMiddlewares(row.route).length > 0 || resolvePostMiddlewares(row.route).length > 0)"
+            class="flex flex-col gap-1 text-[0.55rem] text-pg-text-muted"
+            :style="{ paddingLeft: resolveSubIndent(row.depth) }"
           >
-            {{ row.route.method }}
-          </span>
-          <span class="text-[0.78rem]" :class="row.kind === 'folder' ? 'font-semibold' : 'font-medium'">
-            {{ row.label }}
-          </span>
+            <div v-if="resolvePreMiddlewares(row.route).length > 0" class="flex flex-wrap items-center gap-2">
+              <span class="uppercase tracking-[0.2em]">{{ t('detail.middlewarePre') }}</span>
+              <UiPill tone="chip" size="xxs" :caps="false">
+                {{ resolvePreMiddlewares(row.route).length }}
+              </UiPill>
+              <span class="text-pg-text-subtle">
+                {{ resolvePreMiddlewares(row.route).join(', ') }}
+              </span>
+            </div>
+            <div v-if="resolveNormalMiddlewares(row.route).length > 0" class="flex flex-wrap items-center gap-2">
+              <span class="uppercase tracking-[0.2em]">{{ t('detail.middlewareNormal') }}</span>
+              <UiPill tone="chip" size="xxs" :caps="false">
+                {{ resolveNormalMiddlewares(row.route).length }}
+              </UiPill>
+              <span class="text-pg-text-subtle">
+                {{ resolveNormalMiddlewares(row.route).join(', ') }}
+              </span>
+            </div>
+            <div v-if="resolvePostMiddlewares(row.route).length > 0" class="flex flex-wrap items-center gap-2">
+              <span class="uppercase tracking-[0.2em]">{{ t('detail.middlewarePost') }}</span>
+              <UiPill tone="chip" size="xxs" :caps="false">
+                {{ resolvePostMiddlewares(row.route).length }}
+              </UiPill>
+              <span class="text-pg-text-subtle">
+                {{ resolvePostMiddlewares(row.route).join(', ') }}
+              </span>
+            </div>
+          </div>
         </div>
         <UiPill
           v-if="row.kind === 'route' && row.route && resolveRouteCount(row.route) > 0"

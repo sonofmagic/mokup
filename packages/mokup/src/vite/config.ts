@@ -1,14 +1,51 @@
 import type { PreviewServer, ViteDevServer } from 'vite'
-import type { Logger, MiddlewareHandler, ResolvedMiddleware, RouteDirectoryConfig } from './types'
+import type {
+  Logger,
+  MiddlewareHandler,
+  MiddlewarePosition,
+  ResolvedMiddleware,
+  RouteDirectoryConfig,
+} from './types'
 
 import { Buffer } from 'node:buffer'
-import { promises as fs } from 'node:fs'
+import { existsSync, promises as fs } from 'node:fs'
 import { createRequire } from 'node:module'
-import { pathToFileURL } from 'node:url'
+import { fileURLToPath, pathToFileURL } from 'node:url'
 
 import { build as esbuild } from '@mokup/shared/esbuild'
-import { dirname, join, normalize } from '@mokup/shared/pathe'
+import { dirname, join, normalize, resolve } from '@mokup/shared/pathe'
 import { configExtensions } from './constants'
+
+const middlewareSymbol = Symbol.for('mokup.config.middlewares')
+const sourceRoot = dirname(fileURLToPath(import.meta.url))
+const mokupSourceEntry = resolve(sourceRoot, '../index.ts')
+const mokupViteSourceEntry = resolve(sourceRoot, '../vite.ts')
+const hasMokupSourceEntry = existsSync(mokupSourceEntry)
+const hasMokupViteSourceEntry = existsSync(mokupViteSourceEntry)
+function resolveWorkspaceMokup() {
+  if (!hasMokupSourceEntry && !hasMokupViteSourceEntry) {
+    return null
+  }
+  return {
+    name: 'mokup:resolve-workspace',
+    setup(build: { onResolve: (options: { filter: RegExp }, cb: () => { path: string }) => void }) {
+      if (hasMokupSourceEntry) {
+        build.onResolve({ filter: /^mokup$/ }, () => ({ path: mokupSourceEntry }))
+      }
+      if (hasMokupViteSourceEntry) {
+        build.onResolve({ filter: /^mokup\/vite$/ }, () => ({ path: mokupViteSourceEntry }))
+      }
+    },
+  }
+}
+
+const workspaceResolvePlugin = resolveWorkspaceMokup()
+
+interface MiddlewareMeta {
+  pre?: unknown[]
+  normal?: unknown[]
+  post?: unknown[]
+}
 
 async function loadModule(file: string) {
   const ext = configExtensions.find(extension => file.endsWith(extension))
@@ -29,6 +66,7 @@ async function loadModule(file: string) {
       sourcemap: 'inline',
       target: 'es2020',
       write: false,
+      ...(workspaceResolvePlugin ? { plugins: [workspaceResolvePlugin] } : {}),
     })
     const output = result.outputFiles[0]
     const code = output?.text ?? ''
@@ -94,9 +132,10 @@ async function loadConfig(
 }
 
 function normalizeMiddlewares(
-  value: RouteDirectoryConfig['middleware'],
+  value: unknown,
   source: string,
   logger: Logger,
+  position: MiddlewarePosition,
 ): ResolvedMiddleware[] {
   if (!value) {
     return []
@@ -108,9 +147,27 @@ function normalizeMiddlewares(
       logger.warn(`Invalid middleware in ${source}`)
       continue
     }
-    middlewares.push({ handle: entry as MiddlewareHandler, source, index })
+    middlewares.push({
+      handle: entry as MiddlewareHandler,
+      source,
+      index,
+      position,
+    })
   }
   return middlewares
+}
+
+function readMiddlewareMeta(config: RouteDirectoryConfig): MiddlewareMeta | null {
+  const value = (config as Record<symbol, unknown>)[middlewareSymbol]
+  if (!value || typeof value !== 'object') {
+    return null
+  }
+  const meta = value as MiddlewareMeta
+  return {
+    pre: Array.isArray(meta.pre) ? meta.pre : [],
+    normal: Array.isArray(meta.normal) ? meta.normal : [],
+    post: Array.isArray(meta.post) ? meta.post : [],
+  }
 }
 
 /**
@@ -173,8 +230,10 @@ export async function resolveDirectoryConfig(params: {
     ignorePrefix?: string | string[]
     include?: RegExp | RegExp[]
     exclude?: RegExp | RegExp[]
-    middlewares: ResolvedMiddleware[]
-  } = { middlewares: [] }
+  } = {}
+  const preMiddlewares: ResolvedMiddleware[] = []
+  const normalMiddlewares: ResolvedMiddleware[] = []
+  const postMiddlewares: ResolvedMiddleware[] = []
 
   for (const dir of chain) {
     const configPath = await findConfigFile(dir, fileCache)
@@ -211,11 +270,47 @@ export async function resolveDirectoryConfig(params: {
     if (typeof config.exclude !== 'undefined') {
       merged.exclude = config.exclude
     }
-    const normalized = normalizeMiddlewares(config.middleware, configPath, logger)
-    if (normalized.length > 0) {
-      merged.middlewares.push(...normalized)
+    const meta = readMiddlewareMeta(config)
+    const normalizedPre = normalizeMiddlewares(
+      meta?.pre,
+      configPath,
+      logger,
+      'pre',
+    )
+    const normalizedNormal = normalizeMiddlewares(
+      meta?.normal,
+      configPath,
+      logger,
+      'normal',
+    )
+    const normalizedLegacy = normalizeMiddlewares(
+      config.middleware,
+      configPath,
+      logger,
+      'normal',
+    )
+    const normalizedPost = normalizeMiddlewares(
+      meta?.post,
+      configPath,
+      logger,
+      'post',
+    )
+    if (normalizedPre.length > 0) {
+      preMiddlewares.push(...normalizedPre)
+    }
+    if (normalizedNormal.length > 0) {
+      normalMiddlewares.push(...normalizedNormal)
+    }
+    if (normalizedLegacy.length > 0) {
+      normalMiddlewares.push(...normalizedLegacy)
+    }
+    if (normalizedPost.length > 0) {
+      postMiddlewares.push(...normalizedPost)
     }
   }
 
-  return merged
+  return {
+    ...merged,
+    middlewares: [...preMiddlewares, ...normalMiddlewares, ...postMiddlewares],
+  }
 }

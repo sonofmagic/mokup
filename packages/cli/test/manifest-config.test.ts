@@ -70,6 +70,8 @@ describe('resolveDirectoryConfig', () => {
       expect(config.exclude?.source).toBe('skip')
       expect(config.ignorePrefix).toBe('_')
       expect(config.middlewares).toHaveLength(2)
+      expect(config.middlewares[0]?.position).toBe('normal')
+      expect(config.middlewares[1]?.position).toBe('normal')
       expect(toPosix(config.middlewares[0]?.file ?? '')).toBe(
         toPosix(path.join(mockDir, 'index.config.js')),
       )
@@ -119,6 +121,7 @@ describe('resolveDirectoryConfig', () => {
 
       expect(config.headers).toEqual({ 'x-root': '1' })
       expect(config.middlewares).toHaveLength(1)
+      expect(config.middlewares[0]?.position).toBe('normal')
       expect(logs.some(message => message.includes('Invalid config'))).toBe(true)
       expect(logs.some(message => message.includes('Invalid middleware'))).toBe(true)
     }

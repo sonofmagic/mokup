@@ -1,0 +1,7 @@
+{
+  "ok": true,
+  "session": {
+    "id": "sess_demo",
+    "expiresIn": 3600
+  }
+}

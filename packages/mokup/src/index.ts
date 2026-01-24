@@ -2,6 +2,8 @@ export type {
   Context,
   HttpMethod,
   MiddlewareHandler,
+  MiddlewarePosition,
+  MiddlewareRegistry,
   MokupPluginOptions,
   PlaygroundOptionsInput,
   RequestHandler,
@@ -13,3 +15,5 @@ export type {
   VitePluginOptions,
   VitePluginOptionsInput,
 } from './vite'
+
+export { defineConfig } from './vite/define-config'

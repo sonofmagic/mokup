@@ -1,0 +1,6 @@
+{
+  "ok": true,
+  "example": "metrics",
+  "requests": 128,
+  "p95": 240
+}

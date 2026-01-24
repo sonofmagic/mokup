@@ -1,4 +1,25 @@
 /**
+ * Directory config helper for dev scans.
+ *
+ * @example
+ * import { defineConfig } from '@mokup/server'
+ */
+export { defineConfig } from './dev/define-config'
+/**
+ * Dev config and middleware types.
+ *
+ * @example
+ * import type { RouteDirectoryConfig } from '@mokup/server'
+ */
+export type {
+  MiddlewareHandler,
+  MiddlewarePosition,
+  MiddlewareRegistry,
+  ResolvedMiddleware,
+  RouteDirectoryConfig,
+  RouteRule,
+} from './dev/types'
+/**
  * Fetch handler factory.
  *
  * @example

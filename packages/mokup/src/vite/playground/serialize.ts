@@ -85,7 +85,20 @@ function toPlaygroundRoute(
   groups: PlaygroundGroup[],
 ) {
   const matchedGroup = resolveRouteGroup(route.file, groups)
-  const middlewareSources = route.middlewares?.map(entry => formatRouteFile(entry.source, root))
+  const preSources = route.middlewares
+    ?.filter(entry => entry.position === 'pre')
+    .map(entry => formatRouteFile(entry.source, root)) ?? []
+  const postSources = route.middlewares
+    ?.filter(entry => entry.position === 'post')
+    .map(entry => formatRouteFile(entry.source, root)) ?? []
+  const normalSources = route.middlewares
+    ?.filter(entry => entry.position !== 'pre' && entry.position !== 'post')
+    .map(entry => formatRouteFile(entry.source, root)) ?? []
+  const combinedSources = [
+    ...preSources,
+    ...normalSources,
+    ...postSources,
+  ]
   return {
     method: route.method,
     url: route.template,
@@ -93,8 +106,14 @@ function toPlaygroundRoute(
     type: typeof route.handler === 'function' ? 'handler' : 'static',
     status: route.status,
     delay: route.delay,
-    middlewareCount: middlewareSources?.length ?? 0,
-    middlewares: middlewareSources,
+    middlewareCount: combinedSources.length,
+    middlewares: combinedSources,
+    preMiddlewareCount: preSources.length,
+    normalMiddlewareCount: normalSources.length,
+    postMiddlewareCount: postSources.length,
+    preMiddlewares: preSources,
+    normalMiddlewares: normalSources,
+    postMiddlewares: postSources,
     groupKey: matchedGroup?.key,
     group: matchedGroup?.label,
   }

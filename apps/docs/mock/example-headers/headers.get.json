@@ -1,0 +1,5 @@
+{
+  "ok": true,
+  "example": "headers",
+  "note": "check response headers for pre/normal/post"
+}

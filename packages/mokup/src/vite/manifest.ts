@@ -118,9 +118,9 @@ function encodeBase64(bytes: Uint8Array) {
   }
   let output = ''
   for (let i = 0; i < bytes.length; i += 3) {
-    const a = bytes[i]
-    const b = i + 1 < bytes.length ? bytes[i + 1] : 0
-    const c = i + 2 < bytes.length ? bytes[i + 2] : 0
+    const a = bytes[i] ?? 0
+    const b = i + 1 < bytes.length ? (bytes[i + 1] ?? 0) : 0
+    const c = i + 2 < bytes.length ? (bytes[i + 2] ?? 0) : 0
     const triple = (a << 16) | (b << 8) | c
     output += BASE64_ALPHABET[(triple >> 18) & 63]
     output += BASE64_ALPHABET[(triple >> 12) & 63]

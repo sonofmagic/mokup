@@ -1,4 +1,4 @@
-import type { RouteDirectoryConfig } from './types'
+import type { MiddlewarePosition, RouteDirectoryConfig } from './types'
 
 import { Buffer } from 'node:buffer'
 import { promises as fs } from 'node:fs'
@@ -9,6 +9,13 @@ import { build as esbuild } from '@mokup/shared/esbuild'
 import { dirname, join, normalize } from '@mokup/shared/pathe'
 
 const configExtensions = ['.ts', '.js', '.mjs', '.cjs']
+const middlewareSymbol = Symbol.for('mokup.config.middlewares')
+
+interface MiddlewareMeta {
+  pre?: unknown[]
+  normal?: unknown[]
+  post?: unknown[]
+}
 
 async function loadModule(file: string) {
   const ext = configExtensions.find(extension => file.endsWith(extension))
@@ -79,23 +86,37 @@ async function loadConfig(file: string): Promise<RouteDirectoryConfig | null> {
 }
 
 function normalizeMiddlewares(
-  value: RouteDirectoryConfig['middleware'],
+  value: unknown,
   source: string,
-  log?: (message: string) => void,
+  log: ((message: string) => void) | undefined,
+  position: MiddlewarePosition,
 ) {
   if (!value) {
     return []
   }
   const list = Array.isArray(value) ? value : [value]
-  const middlewares: Array<{ file: string, index: number }> = []
+  const middlewares: Array<{ file: string, index: number, position: MiddlewarePosition }> = []
   list.forEach((entry, index) => {
     if (typeof entry !== 'function') {
       log?.(`Invalid middleware in ${source}`)
       return
     }
-    middlewares.push({ file: source, index })
+    middlewares.push({ file: source, index, position })
   })
   return middlewares
+}
+
+function readMiddlewareMeta(config: RouteDirectoryConfig): MiddlewareMeta | null {
+  const value = (config as Record<symbol, unknown>)[middlewareSymbol]
+  if (!value || typeof value !== 'object') {
+    return null
+  }
+  const meta = value as MiddlewareMeta
+  return {
+    pre: Array.isArray(meta.pre) ? meta.pre : [],
+    normal: Array.isArray(meta.normal) ? meta.normal : [],
+    post: Array.isArray(meta.post) ? meta.post : [],
+  }
 }
 
 /**
@@ -128,7 +149,7 @@ export async function resolveDirectoryConfig(params: {
   ignorePrefix?: string | string[]
   include?: RegExp | RegExp[]
   exclude?: RegExp | RegExp[]
-  middlewares: Array<{ file: string, index: number }>
+  middlewares: Array<{ file: string, index: number, position: MiddlewarePosition }>
 }> {
   const { file, rootDir, log, configCache, fileCache } = params
   const resolvedRoot = normalize(rootDir)
@@ -156,8 +177,10 @@ export async function resolveDirectoryConfig(params: {
     ignorePrefix?: string | string[]
     include?: RegExp | RegExp[]
     exclude?: RegExp | RegExp[]
-    middlewares: Array<{ file: string, index: number }>
-  } = { middlewares: [] }
+  } = {}
+  const preMiddlewares: Array<{ file: string, index: number, position: MiddlewarePosition }> = []
+  const normalMiddlewares: Array<{ file: string, index: number, position: MiddlewarePosition }> = []
+  const postMiddlewares: Array<{ file: string, index: number, position: MiddlewarePosition }> = []
 
   for (const dir of chain) {
     const configPath = await findConfigFile(dir, fileCache)
@@ -194,11 +217,47 @@ export async function resolveDirectoryConfig(params: {
     if (typeof config.exclude !== 'undefined') {
       merged.exclude = config.exclude
     }
-    const normalized = normalizeMiddlewares(config.middleware, configPath, log)
-    if (normalized.length > 0) {
-      merged.middlewares.push(...normalized)
+    const meta = readMiddlewareMeta(config)
+    const normalizedPre = normalizeMiddlewares(
+      meta?.pre,
+      configPath,
+      log,
+      'pre',
+    )
+    const normalizedNormal = normalizeMiddlewares(
+      meta?.normal,
+      configPath,
+      log,
+      'normal',
+    )
+    const normalizedLegacy = normalizeMiddlewares(
+      config.middleware,
+      configPath,
+      log,
+      'normal',
+    )
+    const normalizedPost = normalizeMiddlewares(
+      meta?.post,
+      configPath,
+      log,
+      'post',
+    )
+    if (normalizedPre.length > 0) {
+      preMiddlewares.push(...normalizedPre)
+    }
+    if (normalizedNormal.length > 0) {
+      normalMiddlewares.push(...normalizedNormal)
+    }
+    if (normalizedLegacy.length > 0) {
+      normalMiddlewares.push(...normalizedLegacy)
+    }
+    if (normalizedPost.length > 0) {
+      postMiddlewares.push(...normalizedPost)
     }
   }
 
-  return merged
+  return {
+    ...merged,
+    middlewares: [...preMiddlewares, ...normalMiddlewares, ...postMiddlewares],
+  }
 }
