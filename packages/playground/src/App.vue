@@ -23,6 +23,7 @@ const {
   configFiltered,
   disabledConfigFiltered,
   selected,
+  selectedConfig,
   groups,
   activeGroup,
   loading,
@@ -36,11 +37,14 @@ const {
   ignoredCount,
   configCount,
   disabledConfigCount,
+  configStatusMap,
   routeKey,
   loadRoutes,
   setActiveGroup,
   selectRoute,
+  selectConfig,
   setBasePath,
+  configImpactRoutes,
 } = usePlaygroundRoutes()
 
 const {
@@ -111,10 +115,14 @@ function setRouteMode(mode: 'active' | 'disabled' | 'ignored') {
   routeMode.value = mode
   if (mode !== 'active') {
     selectRoute(null)
+    selectConfig(null)
     return
   }
   if (enabledMode.value === 'api' && !selected.value) {
     selectRoute(filtered.value[0] ?? null)
+  }
+  if (enabledMode.value !== 'config') {
+    selectConfig(null)
   }
 }
 
@@ -124,6 +132,7 @@ function setEnabledMode(mode: 'api' | 'config') {
     selectRoute(null)
     return
   }
+  selectConfig(null)
   if (!selected.value) {
     selectRoute(filtered.value[0] ?? null)
   }
@@ -131,6 +140,9 @@ function setEnabledMode(mode: 'api' | 'config') {
 
 function setDisabledMode(mode: 'api' | 'config') {
   disabledMode.value = mode
+  if (mode !== 'config') {
+    selectConfig(null)
+  }
 }
 
 function clampSplitWidth(value: number) {
@@ -171,6 +183,16 @@ function handleRefresh() {
   loadRoutes().catch(() => undefined)
 }
 
+function handleSelectRoute(route: (typeof selected.value)) {
+  selectConfig(null)
+  selectRoute(route)
+}
+
+function handleSelectConfig(config: (typeof selectedConfig.value)) {
+  selectRoute(null)
+  selectConfig(config)
+}
+
 onMounted(() => {
   setBasePath(window.location.pathname)
   const stored = Number(localStorage.getItem(splitStorageKey))
@@ -207,6 +229,7 @@ onBeforeUnmount(() => {
               :route-mode="routeMode"
               :enabled-mode="enabledMode"
               :disabled-mode="disabledMode"
+              :selected-config="selectedConfig"
               :active-total="activeTotal"
               :api-total="apiTotal"
               :disabled-total="disabledTotal"
@@ -229,7 +252,8 @@ onBeforeUnmount(() => {
               @set-enabled-mode="setEnabledMode"
               @set-disabled-mode="setDisabledMode"
               @toggle="toggleExpanded"
-              @select-route="selectRoute"
+              @select-route="handleSelectRoute"
+              @select-config="handleSelectConfig"
               @update:treeMode="setTreeMode"
             />
 
@@ -259,6 +283,7 @@ onBeforeUnmount(() => {
                   v-model:bodyText="bodyText"
                   v-model:bodyType="bodyType"
                   :selected="selected"
+                  :selected-config="selectedConfig"
                   :request-url="requestUrl"
                   :workspace-root="workspaceRoot"
                   :response-text="responseText"
@@ -269,6 +294,8 @@ onBeforeUnmount(() => {
                   :param-values="paramValues"
                   :route-mode="routeMode"
                   :enabled-mode="enabledMode"
+                  :config-impact-routes="configImpactRoutes"
+                  :config-status-map="configStatusMap"
                   @update:param-value="setParamValue"
                   @run="runRequest"
                 />

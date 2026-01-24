@@ -1,7 +1,6 @@
 <script setup lang="ts">
 import type { PlaygroundRoute, TreeRow } from '../types'
-import { useI18n } from 'vue-i18n'
-import { toPosixPath } from '../utils/path'
+import { openInEditor, resolveEditorUrl } from '../utils/editor'
 import UiPill from './ui/UiPill.vue'
 
 const props = defineProps<{
@@ -15,45 +14,14 @@ const emit = defineEmits<{
   (event: 'select', row: TreeRow): void
 }>()
 
-const { t } = useI18n()
-
 const methodBadge = (method: string) => `method-${method.toLowerCase()}`
 
-function hasWorkspaceRoot() {
-  return (props.workspaceRoot ?? '').trim().length > 0
+function resolveEditorUrlForRoute(route: PlaygroundRoute) {
+  return resolveEditorUrl(route.file, props.workspaceRoot)
 }
 
-function isAbsolutePath(value: string) {
-  return value.startsWith('/') || /^[a-z]:\//i.test(value)
-}
-
-function resolveEditorPath(route: PlaygroundRoute) {
-  if (!hasWorkspaceRoot()) {
-    return null
-  }
-  const file = toPosixPath(route.file || '').trim()
-  if (!file) {
-    return null
-  }
-  if (isAbsolutePath(file)) {
-    return file
-  }
-  const root = toPosixPath((props.workspaceRoot ?? '').trim())
-  if (!root) {
-    return null
-  }
-  const normalizedRoot = root.replace(/\/$/, '')
-  const normalizedFile = file.replace(/^\/+/, '')
-  return `${normalizedRoot}/${normalizedFile}`
-}
-
-function openInEditor(route: PlaygroundRoute) {
-  const filePath = resolveEditorPath(route)
-  if (!filePath) {
-    return
-  }
-  const target = `vscode://file/${encodeURI(filePath)}`
-  window.location.href = target
+function openInEditorForRoute(route: PlaygroundRoute) {
+  openInEditor(route.file, props.workspaceRoot)
 }
 
 function handleRowClick(row: TreeRow) {
@@ -70,28 +38,6 @@ function resolveRouteCount(route: PlaygroundRoute) {
 
 function resolveIndent(depth: number) {
   return `${depth * 12}px`
-}
-
-function resolveSubIndent(depth: number) {
-  return `${depth * 12 + 22}px`
-}
-
-function resolvePreMiddlewares(route: PlaygroundRoute) {
-  return route.preMiddlewares ?? []
-}
-
-function resolveNormalMiddlewares(route: PlaygroundRoute) {
-  if (route.normalMiddlewares) {
-    return route.normalMiddlewares
-  }
-  if (route.preMiddlewares || route.postMiddlewares) {
-    return []
-  }
-  return route.middlewares ?? []
-}
-
-function resolvePostMiddlewares(route: PlaygroundRoute) {
-  return route.postMiddlewares ?? []
 }
 </script>
 
@@ -134,39 +80,6 @@ function resolvePostMiddlewares(route: PlaygroundRoute) {
               {{ row.label }}
             </span>
           </div>
-          <div
-            v-if="row.kind === 'route' && row.route && (resolvePreMiddlewares(row.route).length > 0 || resolveNormalMiddlewares(row.route).length > 0 || resolvePostMiddlewares(row.route).length > 0)"
-            class="flex flex-col gap-1 text-[0.55rem] text-pg-text-muted"
-            :style="{ paddingLeft: resolveSubIndent(row.depth) }"
-          >
-            <div v-if="resolvePreMiddlewares(row.route).length > 0" class="flex flex-wrap items-center gap-2">
-              <span class="uppercase tracking-[0.2em]">{{ t('detail.middlewarePre') }}</span>
-              <UiPill tone="chip" size="xxs" :caps="false">
-                {{ resolvePreMiddlewares(row.route).length }}
-              </UiPill>
-              <span class="text-pg-text-subtle">
-                {{ resolvePreMiddlewares(row.route).join(', ') }}
-              </span>
-            </div>
-            <div v-if="resolveNormalMiddlewares(row.route).length > 0" class="flex flex-wrap items-center gap-2">
-              <span class="uppercase tracking-[0.2em]">{{ t('detail.middlewareNormal') }}</span>
-              <UiPill tone="chip" size="xxs" :caps="false">
-                {{ resolveNormalMiddlewares(row.route).length }}
-              </UiPill>
-              <span class="text-pg-text-subtle">
-                {{ resolveNormalMiddlewares(row.route).join(', ') }}
-              </span>
-            </div>
-            <div v-if="resolvePostMiddlewares(row.route).length > 0" class="flex flex-wrap items-center gap-2">
-              <span class="uppercase tracking-[0.2em]">{{ t('detail.middlewarePost') }}</span>
-              <UiPill tone="chip" size="xxs" :caps="false">
-                {{ resolvePostMiddlewares(row.route).length }}
-              </UiPill>
-              <span class="text-pg-text-subtle">
-                {{ resolvePostMiddlewares(row.route).join(', ') }}
-              </span>
-            </div>
-          </div>
         </div>
         <UiPill
           v-if="row.kind === 'route' && row.route && resolveRouteCount(row.route) > 0"
@@ -179,12 +92,12 @@ function resolvePostMiddlewares(route: PlaygroundRoute) {
         </UiPill>
       </button>
       <button
-        v-if="row.kind === 'route' && row.route && resolveEditorPath(row.route)"
+        v-if="row.kind === 'route' && row.route && resolveEditorUrlForRoute(row.route)"
         class="flex h-6 w-6 items-center justify-center rounded-md transition text-pg-text-muted hover:bg-pg-hover-strong hover:text-pg-text-soft"
         :class="row.selected ? 'text-pg-on-accent-soft' : ''"
         type="button"
         :aria-label="`Open ${row.route.file} in VS Code`"
-        @click="openInEditor(row.route)"
+        @click="openInEditorForRoute(row.route)"
       >
         <span class="i-[carbon--launch] h-3.5 w-3.5" aria-hidden="true" />
       </button>

@@ -1,11 +1,13 @@
 <script setup lang="ts">
-import type { PlaygroundRoute, RouteParamField } from '../types'
+import type { PlaygroundConfigFile, PlaygroundConfigImpactRoute, PlaygroundRoute, RouteParamField } from '../types'
 import { computed } from 'vue'
 import { useI18n } from 'vue-i18n'
+import ConfigDetail from './ConfigDetail.vue'
 import RouteDetail from './RouteDetail.vue'
 
 const props = defineProps<{
   selected: PlaygroundRoute | null
+  selectedConfig: PlaygroundConfigFile | null
   requestUrl: string
   workspaceRoot?: string
   routeParams: RouteParamField[]
@@ -19,6 +21,8 @@ const props = defineProps<{
   isSwRegistering: boolean
   routeMode: 'active' | 'disabled' | 'ignored'
   enabledMode: 'api' | 'config'
+  configImpactRoutes: PlaygroundConfigImpactRoute[]
+  configStatusMap: Map<string, 'enabled' | 'disabled'>
 }>()
 
 const emit = defineEmits<{
@@ -32,6 +36,13 @@ const emit = defineEmits<{
 const { t } = useI18n()
 
 const isActiveMode = computed(() => props.routeMode === 'active' && props.enabledMode === 'api')
+const isConfigMode = computed(() => !!props.selectedConfig)
+const selectedConfigStatus = computed(() => {
+  if (!props.selectedConfig) {
+    return 'enabled'
+  }
+  return props.configStatusMap.get(props.selectedConfig.file) ?? 'enabled'
+})
 const modeTitle = computed(() => {
   if (props.routeMode === 'disabled') {
     return t('states.disabledTitle')
@@ -89,8 +100,16 @@ function handleRun() {
     :is-sw-registering="props.isSwRegistering"
     :route-params="props.routeParams"
     :param-values="props.paramValues"
+    :config-status-map="props.configStatusMap"
     @update:param-value="handleParamUpdate"
     @run="handleRun"
+  />
+  <ConfigDetail
+    v-else-if="props.selectedConfig && isConfigMode"
+    :selected="props.selectedConfig"
+    :impacted="props.configImpactRoutes"
+    :is-disabled="selectedConfigStatus === 'disabled'"
+    :workspace-root="props.workspaceRoot"
   />
   <div
     v-else

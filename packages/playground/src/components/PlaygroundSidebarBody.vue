@@ -8,7 +8,7 @@ import type {
 } from '../types'
 import { computed } from 'vue'
 import { useI18n } from 'vue-i18n'
-import { toPosixPath } from '../utils/path'
+import { openInEditor, resolveEditorUrl } from '../utils/editor'
 import RouteTree from './RouteTree.vue'
 import UiPill from './ui/UiPill.vue'
 
@@ -16,6 +16,7 @@ const props = defineProps<{
   routeMode: 'active' | 'disabled' | 'ignored'
   enabledMode: 'api' | 'config'
   disabledMode: 'api' | 'config'
+  selectedConfig?: PlaygroundConfigFile | null
   error?: string
   loading: boolean
   filtered: PlaygroundRoute[]
@@ -31,6 +32,7 @@ const props = defineProps<{
 const emit = defineEmits<{
   (event: 'toggle', id: string): void
   (event: 'select-route', route: PlaygroundRoute): void
+  (event: 'select-config', entry: PlaygroundConfigFile): void
 }>()
 
 const { t } = useI18n()
@@ -66,46 +68,22 @@ function formatRoutePath(value?: string) {
   return value ? value.toLowerCase() : ''
 }
 
-function hasWorkspaceRoot() {
-  return (props.workspaceRoot ?? '').trim().length > 0
+function resolveEditorUrlForFile(file: string) {
+  return resolveEditorUrl(file, props.workspaceRoot)
 }
 
-function isAbsolutePath(value: string) {
-  return value.startsWith('/') || /^[a-z]:\//i.test(value)
-}
-
-function resolveEditorPath(file: string) {
-  if (!hasWorkspaceRoot()) {
-    return null
-  }
-  const normalizedFile = toPosixPath(file || '').trim()
-  if (!normalizedFile) {
-    return null
-  }
-  if (isAbsolutePath(normalizedFile)) {
-    return normalizedFile
-  }
-  const normalizedRoot = toPosixPath((props.workspaceRoot ?? '').trim()).replace(/\/$/, '')
-  if (!normalizedRoot) {
-    return null
-  }
-  const relative = normalizedFile.replace(/^\/+/, '')
-  return `${normalizedRoot}/${relative}`
-}
-
-function openInEditor(file: string) {
-  const filePath = resolveEditorPath(file)
-  if (!filePath) {
-    return
-  }
-  const target = `vscode://file/${encodeURI(filePath)}`
-  window.location.href = target
+function openInEditorForFile(file: string) {
+  openInEditor(file, props.workspaceRoot)
 }
 
 function handleSelectRow(row: TreeRow) {
   if (row.route) {
     emit('select-route', row.route)
   }
+}
+
+function isSelectedConfig(entry: PlaygroundConfigFile) {
+  return props.selectedConfig?.file === entry.file
 }
 </script>
 
@@ -169,12 +147,12 @@ function handleSelectRow(row: TreeRow) {
                 {{ reasonLabel(route.reason) }}
               </UiPill>
               <button
-                v-if="resolveEditorPath(route.file)"
+                v-if="resolveEditorUrlForFile(route.file)"
                 class="flex h-7 w-7 items-center justify-center rounded-md transition text-pg-text-muted hover:bg-pg-hover-strong hover:text-pg-text-soft"
                 type="button"
                 :aria-label="`Open ${route.file} in VS Code`"
                 :title="t('detail.openInVscode')"
-                @click="openInEditor(route.file)"
+                @click="openInEditorForFile(route.file)"
               >
                 <span class="i-[carbon--launch] h-3.5 w-3.5" aria-hidden="true" />
               </button>
@@ -189,10 +167,13 @@ function handleSelectRow(row: TreeRow) {
         {{ t('states.emptyDisabledConfigFiles') }}
       </div>
       <div v-else-if="props.routeMode === 'disabled' && props.disabledMode === 'config'" class="flex flex-col gap-2">
-        <div
+        <button
           v-for="entry in props.disabledConfigFiltered"
           :key="entry.file"
-          class="rounded-2xl border px-4 py-3 text-xs border-pg-border bg-pg-surface-soft text-pg-text-soft"
+          class="rounded-2xl border px-4 py-3 text-left text-xs transition border-pg-border bg-pg-surface-soft text-pg-text-soft hover:bg-pg-hover-strong"
+          :class="isSelectedConfig(entry) ? 'border-pg-accent bg-pg-accent/10 text-pg-text' : ''"
+          type="button"
+          @click="emit('select-config', entry)"
         >
           <div class="flex flex-wrap items-center justify-between gap-2">
             <div class="flex flex-col gap-1">
@@ -205,18 +186,18 @@ function handleSelectRow(row: TreeRow) {
                 {{ t('enabled.configLabel') }}
               </UiPill>
               <button
-                v-if="resolveEditorPath(entry.file)"
+                v-if="resolveEditorUrlForFile(entry.file)"
                 class="flex h-7 w-7 items-center justify-center rounded-md transition text-pg-text-muted hover:bg-pg-hover-strong hover:text-pg-text-soft"
                 type="button"
                 :aria-label="`Open ${entry.file} in VS Code`"
                 :title="t('detail.openInVscode')"
-                @click="openInEditor(entry.file)"
+                @click.stop="openInEditorForFile(entry.file)"
               >
                 <span class="i-[carbon--launch] h-3.5 w-3.5" aria-hidden="true" />
               </button>
             </div>
           </div>
-        </div>
+        </button>
       </div>
       <div v-else-if="props.routeMode === 'ignored'" class="flex flex-col gap-2">
         <div
@@ -235,12 +216,12 @@ function handleSelectRow(row: TreeRow) {
                 {{ ignoredReasonLabel(route.reason) }}
               </UiPill>
               <button
-                v-if="resolveEditorPath(route.file)"
+                v-if="resolveEditorUrlForFile(route.file)"
                 class="flex h-7 w-7 items-center justify-center rounded-md transition text-pg-text-muted hover:bg-pg-hover-strong hover:text-pg-text-soft"
                 type="button"
                 :aria-label="`Open ${route.file} in VS Code`"
                 :title="t('detail.openInVscode')"
-                @click="openInEditor(route.file)"
+                @click="openInEditorForFile(route.file)"
               >
                 <span class="i-[carbon--launch] h-3.5 w-3.5" aria-hidden="true" />
               </button>
@@ -249,14 +230,17 @@ function handleSelectRow(row: TreeRow) {
         </div>
       </div>
       <div v-else-if="props.routeMode === 'active' && props.enabledMode === 'config'" class="flex flex-col gap-2">
-        <div
+        <button
           v-for="entry in props.configFiltered"
           :key="entry.file"
-          class="rounded-2xl border px-4 py-3 text-xs border-pg-border bg-pg-surface-soft text-pg-text-soft"
+          class="rounded-2xl border px-4 py-3 text-left text-xs transition border-pg-border bg-pg-surface-soft text-pg-text-soft hover:bg-pg-hover-strong"
+          :class="isSelectedConfig(entry) ? 'border-pg-accent bg-pg-accent/10 text-pg-text' : ''"
+          type="button"
+          @click="emit('select-config', entry)"
         >
           <div class="flex flex-wrap items-center justify-between gap-2">
             <div class="flex flex-col gap-1">
-              <span class="text-[0.7rem] uppercase tracking-[0.18em] text-pg-text-muted">
+              <span class="text-[0.7rem] tracking-[0.18em] text-pg-text-muted">
                 {{ entry.file }}
               </span>
             </div>
@@ -265,18 +249,18 @@ function handleSelectRow(row: TreeRow) {
                 {{ t('enabled.configLabel') }}
               </UiPill>
               <button
-                v-if="resolveEditorPath(entry.file)"
+                v-if="resolveEditorUrlForFile(entry.file)"
                 class="flex h-7 w-7 items-center justify-center rounded-md transition text-pg-text-muted hover:bg-pg-hover-strong hover:text-pg-text-soft"
                 type="button"
                 :aria-label="`Open ${entry.file} in VS Code`"
                 :title="t('detail.openInVscode')"
-                @click="openInEditor(entry.file)"
+                @click.stop="openInEditorForFile(entry.file)"
               >
                 <span class="i-[carbon--launch] h-3.5 w-3.5" aria-hidden="true" />
               </button>
             </div>
           </div>
-        </div>
+        </button>
       </div>
       <RouteTree
         v-else

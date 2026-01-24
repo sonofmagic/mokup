@@ -1,5 +1,6 @@
 import type {
   PlaygroundConfigFile,
+  PlaygroundConfigImpactRoute,
   PlaygroundDisabledRoute,
   PlaygroundGroup,
   PlaygroundIgnoredRoute,
@@ -28,6 +29,7 @@ export function usePlaygroundRoutes() {
   const configFiltered = ref<PlaygroundConfigFile[]>([])
   const disabledConfigFiltered = ref<PlaygroundConfigFile[]>([])
   const selected = ref<PlaygroundRoute | null>(null)
+  const selectedConfig = ref<PlaygroundConfigFile | null>(null)
   const groups = ref<PlaygroundGroup[]>([])
   const activeGroup = ref('all')
   const loading = ref(false)
@@ -42,6 +44,16 @@ export function usePlaygroundRoutes() {
   const ignoredCount = computed(() => ignoredRoutes.value.length)
   const configCount = computed(() => configFiles.value.length)
   const disabledConfigCount = computed(() => disabledConfigFiles.value.length)
+  const configStatusMap = computed<Map<string, 'enabled' | 'disabled'>>(() => {
+    const map = new Map<string, 'enabled' | 'disabled'>()
+    for (const entry of configFiles.value) {
+      map.set(entry.file, 'enabled')
+    }
+    for (const entry of disabledConfigFiles.value) {
+      map.set(entry.file, 'disabled')
+    }
+    return map
+  })
   const routesEndpoint = computed(() => {
     const base = basePath.value || ''
     return `${base}/routes`
@@ -133,6 +145,10 @@ export function usePlaygroundRoutes() {
     selected.value = route
   }
 
+  function selectConfig(config: PlaygroundConfigFile | null) {
+    selectedConfig.value = config
+  }
+
   function setBasePath(pathname: string) {
     basePath.value = normalizeBasePath(pathname)
   }
@@ -142,6 +158,7 @@ export function usePlaygroundRoutes() {
     error.value = ''
     const previousKey = selected.value ? routeKey(selected.value) : ''
     const previousGroup = activeGroup.value
+    const previousConfig = selectedConfig.value?.file ?? ''
     try {
       const response = await fetch(routesEndpoint.value)
       if (!response.ok) {
@@ -171,6 +188,12 @@ export function usePlaygroundRoutes() {
       else {
         selected.value = filtered.value[0] ?? null
       }
+      if (previousConfig) {
+        const configMatch = configFiles.value.find(entry => entry.file === previousConfig)
+          ?? disabledConfigFiles.value.find(entry => entry.file === previousConfig)
+          ?? null
+        selectedConfig.value = configMatch
+      }
     }
     catch (err) {
       error.value = err instanceof Error ? err.message : String(err)
@@ -186,6 +209,54 @@ export function usePlaygroundRoutes() {
     applyDisabledConfigFilter()
   })
 
+  const configImpactRoutes = computed<PlaygroundConfigImpactRoute[]>(() => {
+    const selectedFile = selectedConfig.value?.file
+    if (!selectedFile) {
+      return []
+    }
+    const matches = (chain?: string[]) => Boolean(chain?.includes(selectedFile))
+    const results: PlaygroundConfigImpactRoute[] = []
+    for (const route of routes.value) {
+      if (matches(route.configChain)) {
+        const entry: PlaygroundConfigImpactRoute = {
+          kind: 'active',
+          file: route.file,
+        }
+        if (route.method) {
+          entry.method = route.method
+        }
+        if (route.url) {
+          entry.url = route.url
+        }
+        results.push(entry)
+      }
+    }
+    for (const route of disabledRoutes.value) {
+      if (matches(route.configChain)) {
+        const entry: PlaygroundConfigImpactRoute = {
+          kind: 'disabled',
+          file: route.file,
+        }
+        if (route.method) {
+          entry.method = route.method
+        }
+        if (route.url) {
+          entry.url = route.url
+        }
+        results.push(entry)
+      }
+    }
+    for (const route of ignoredRoutes.value) {
+      if (matches(route.configChain)) {
+        results.push({
+          kind: 'ignored',
+          file: route.file,
+        })
+      }
+    }
+    return results
+  })
+
   return {
     routes,
     disabledRoutes,
@@ -198,6 +269,7 @@ export function usePlaygroundRoutes() {
     disabledConfigFiltered,
     filtered,
     selected,
+    selectedConfig,
     groups,
     activeGroup,
     loading,
@@ -211,10 +283,13 @@ export function usePlaygroundRoutes() {
     ignoredCount,
     configCount,
     disabledConfigCount,
+    configStatusMap,
     routeKey,
     loadRoutes,
     setActiveGroup,
     selectRoute,
+    selectConfig,
     setBasePath,
+    configImpactRoutes,
   }
 }

@@ -18,6 +18,7 @@ const props = defineProps<{
   responseStatus: string
   responseTime: string
   isSwRegistering: boolean
+  configStatusMap: Map<string, 'enabled' | 'disabled'>
 }>()
 
 const emit = defineEmits<{
@@ -54,6 +55,7 @@ const { t } = useI18n()
         :body-text="props.bodyText"
         :body-type="props.bodyType"
         :is-sw-registering="props.isSwRegistering"
+        :config-status-map="props.configStatusMap"
         @update:queryText="emit('update:queryText', $event)"
         @update:headersText="emit('update:headersText', $event)"
         @update:bodyText="emit('update:bodyText', $event)"

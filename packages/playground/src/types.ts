@@ -28,6 +28,7 @@ export interface PlaygroundRoute {
   preMiddlewares?: string[]
   normalMiddlewares?: string[]
   postMiddlewares?: string[]
+  configChain?: string[]
 }
 
 /**
@@ -64,6 +65,7 @@ export interface PlaygroundDisabledRoute {
   url?: string
   group?: string
   groupKey?: string
+  configChain?: string[]
 }
 
 /**
@@ -106,6 +108,27 @@ export interface PlaygroundIgnoredRoute {
   reason: PlaygroundIgnoredReason
   group?: string
   groupKey?: string
+  configChain?: string[]
+}
+
+/**
+ * Route entry impacted by a config file.
+ *
+ * @example
+ * import type { PlaygroundConfigImpactRoute } from '@mokup/playground'
+ *
+ * const item: PlaygroundConfigImpactRoute = {
+ *   kind: 'active',
+ *   file: 'mock/users.get.ts',
+ *   method: 'GET',
+ *   url: '/users',
+ * }
+ */
+export interface PlaygroundConfigImpactRoute {
+  kind: 'active' | 'disabled' | 'ignored'
+  file: string
+  method?: string
+  url?: string
 }
 
 /**

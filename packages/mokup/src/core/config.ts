@@ -203,6 +203,7 @@ export async function resolveDirectoryConfig(params: {
   include?: RegExp | RegExp[]
   exclude?: RegExp | RegExp[]
   middlewares: ResolvedMiddleware[]
+  configChain: string[]
 }> {
   const { file, rootDir, server, logger, configCache, fileCache } = params
   const resolvedRoot = normalize(rootDir)
@@ -234,6 +235,7 @@ export async function resolveDirectoryConfig(params: {
   const preMiddlewares: ResolvedMiddleware[] = []
   const normalMiddlewares: ResolvedMiddleware[] = []
   const postMiddlewares: ResolvedMiddleware[] = []
+  const configChain: string[] = []
 
   for (const dir of chain) {
     const configPath = await findConfigFile(dir, fileCache)
@@ -249,6 +251,7 @@ export async function resolveDirectoryConfig(params: {
       logger.warn(`Invalid config in ${configPath}`)
       continue
     }
+    configChain.push(configPath)
     if (config.headers) {
       merged.headers = { ...(merged.headers ?? {}), ...config.headers }
     }
@@ -312,5 +315,6 @@ export async function resolveDirectoryConfig(params: {
   return {
     ...merged,
     middlewares: [...preMiddlewares, ...normalMiddlewares, ...postMiddlewares],
+    configChain,
   }
 }

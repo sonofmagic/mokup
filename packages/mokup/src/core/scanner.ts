@@ -73,6 +73,8 @@ export interface RouteSkipInfo {
   method?: HttpMethod
   /** Derived URL template (when available). */
   url?: string
+  /** Ordered config file chain (root to leaf). */
+  configChain?: string[]
 }
 
 /**
@@ -88,6 +90,8 @@ export interface RouteIgnoreInfo {
   file: string
   /** Ignore reason. */
   reason: RouteIgnoreReason
+  /** Ordered config file chain (root to leaf). */
+  configChain?: string[]
 }
 
 const silentLogger: Logger = {
@@ -130,11 +134,15 @@ function buildSkipInfo(
   file: string,
   reason: RouteSkipReason,
   resolved?: ResolvedSkipRoute,
+  configChain?: string[],
 ): RouteSkipInfo {
   const info: RouteSkipInfo = { file, reason }
   if (resolved) {
     info.method = resolved.method
     info.url = resolved.url
+  }
+  if (configChain && configChain.length > 0) {
+    info.configChain = configChain
   }
   return info
 }
@@ -204,6 +212,7 @@ export async function scanRoutes(params: {
       configParams.server = params.server
     }
     const config = await resolveDirectoryConfig(configParams)
+    const configChain = config.configChain ?? []
     if (config.enabled === false) {
       if (shouldCollectSkip && isSupportedFile(fileInfo.file)) {
         const resolved = resolveSkipRoute({
@@ -211,7 +220,7 @@ export async function scanRoutes(params: {
           rootDir: fileInfo.rootDir,
           prefix: params.prefix,
         })
-        params.onSkip?.(buildSkipInfo(fileInfo.file, 'disabled-dir', resolved))
+        params.onSkip?.(buildSkipInfo(fileInfo.file, 'disabled-dir', resolved, configChain))
       }
       continue
     }
@@ -225,13 +234,13 @@ export async function scanRoutes(params: {
           rootDir: fileInfo.rootDir,
           prefix: params.prefix,
         })
-        params.onSkip?.(buildSkipInfo(fileInfo.file, 'ignore-prefix', resolved))
+        params.onSkip?.(buildSkipInfo(fileInfo.file, 'ignore-prefix', resolved, configChain))
       }
       continue
     }
     if (!isSupportedFile(fileInfo.file)) {
       if (shouldCollectIgnore) {
-        params.onIgnore?.({ file: fileInfo.file, reason: 'unsupported' })
+        params.onIgnore?.({ file: fileInfo.file, reason: 'unsupported', configChain })
       }
       continue
     }
@@ -251,14 +260,14 @@ export async function scanRoutes(params: {
         const reason = effectiveExclude && matchesFilter(fileInfo.file, undefined, effectiveExclude)
           ? 'exclude'
           : 'include'
-        params.onSkip?.(buildSkipInfo(fileInfo.file, reason, resolved))
+        params.onSkip?.(buildSkipInfo(fileInfo.file, reason, resolved, configChain))
       }
       continue
     }
     const derived = deriveRouteFromFile(fileInfo.file, fileInfo.rootDir, params.logger)
     if (!derived) {
       if (shouldCollectIgnore) {
-        params.onIgnore?.({ file: fileInfo.file, reason: 'invalid-route' })
+        params.onIgnore?.({ file: fileInfo.file, reason: 'invalid-route', configChain })
       }
       continue
     }
@@ -275,7 +284,7 @@ export async function scanRoutes(params: {
             prefix: params.prefix,
             derived,
           })
-          params.onSkip?.(buildSkipInfo(fileInfo.file, 'disabled', resolved))
+          params.onSkip?.(buildSkipInfo(fileInfo.file, 'disabled', resolved, configChain))
         }
         continue
       }
@@ -305,6 +314,9 @@ export async function scanRoutes(params: {
         continue
       }
       resolved.ruleIndex = index
+      if (configChain.length > 0) {
+        resolved.configChain = configChain
+      }
       if (config.headers) {
         resolved.headers = { ...config.headers, ...(resolved.headers ?? {}) }
       }

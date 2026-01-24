@@ -15,6 +15,7 @@ interface PlaygroundDisabledRouteInput {
   reason?: string
   method?: string
   url?: string
+  configChain?: string[]
 }
 
 interface PlaygroundDisabledRoute {
@@ -24,6 +25,7 @@ interface PlaygroundDisabledRoute {
   url?: string
   group?: string
   groupKey?: string
+  configChain?: string[]
 }
 
 type PlaygroundIgnoredReason = 'unsupported' | 'invalid-route' | 'unknown'
@@ -31,6 +33,7 @@ type PlaygroundIgnoredReason = 'unsupported' | 'invalid-route' | 'unknown'
 interface PlaygroundIgnoredRouteInput {
   file: string
   reason?: string
+  configChain?: string[]
 }
 
 interface PlaygroundIgnoredRoute {
@@ -38,6 +41,7 @@ interface PlaygroundIgnoredRoute {
   reason: PlaygroundIgnoredReason
   group?: string
   groupKey?: string
+  configChain?: string[]
 }
 
 interface PlaygroundConfigFileInput {
@@ -99,6 +103,7 @@ function toPlaygroundRoute(
     ...normalSources,
     ...postSources,
   ]
+  const configChain = route.configChain?.map(entry => formatRouteFile(entry, root)) ?? []
   return {
     method: route.method,
     url: route.template,
@@ -114,6 +119,7 @@ function toPlaygroundRoute(
     preMiddlewares: preSources,
     normalMiddlewares: normalSources,
     postMiddlewares: postSources,
+    configChain: configChain.length > 0 ? configChain : undefined,
     groupKey: matchedGroup?.key,
     group: matchedGroup?.label,
   }
@@ -135,6 +141,9 @@ function toPlaygroundDisabledRoute(
   if (typeof route.url !== 'undefined') {
     disabled.url = route.url
   }
+  if (route.configChain && route.configChain.length > 0) {
+    disabled.configChain = route.configChain.map(entry => formatRouteFile(entry, root))
+  }
   if (matchedGroup) {
     disabled.groupKey = matchedGroup.key
     disabled.group = matchedGroup.label
@@ -155,6 +164,9 @@ function toPlaygroundIgnoredRoute(
   if (matchedGroup) {
     ignored.groupKey = matchedGroup.key
     ignored.group = matchedGroup.label
+  }
+  if (route.configChain && route.configChain.length > 0) {
+    ignored.configChain = route.configChain.map(entry => formatRouteFile(entry, root))
   }
   return ignored
 }

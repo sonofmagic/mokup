@@ -378,6 +378,12 @@ export interface ResolvedRoute {
   score: number[]
   handler: RouteResponse
   middlewares?: ResolvedMiddleware[]
+  /**
+   * Ordered config file chain applied to this route (root to leaf).
+   *
+   * @default []
+   */
+  configChain?: string[]
   status?: number
   headers?: Record<string, string>
   delay?: number

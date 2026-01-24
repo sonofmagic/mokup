@@ -20,6 +20,7 @@ const props = defineProps<{
   routeMode: 'active' | 'disabled' | 'ignored'
   enabledMode: 'api' | 'config'
   disabledMode: 'api' | 'config'
+  selectedConfig?: PlaygroundConfigFile | null
   activeTotal: number
   apiTotal: number
   disabledTotal: number
@@ -48,6 +49,7 @@ const emit = defineEmits<{
   (event: 'update:treeMode', mode: TreeMode): void
   (event: 'toggle', id: string): void
   (event: 'select-route', route: PlaygroundRoute): void
+  (event: 'select-config', entry: PlaygroundConfigFile): void
 }>()
 </script>
 
@@ -80,6 +82,7 @@ const emit = defineEmits<{
       :route-mode="props.routeMode"
       :enabled-mode="props.enabledMode"
       :disabled-mode="props.disabledMode"
+      :selected-config="props.selectedConfig"
       :error="props.error"
       :loading="props.loading"
       :filtered="props.filtered"
@@ -92,6 +95,7 @@ const emit = defineEmits<{
       :get-route-count="props.getRouteCount"
       @toggle="emit('toggle', $event)"
       @select-route="emit('select-route', $event)"
+      @select-config="emit('select-config', $event)"
     />
   </aside>
 </template>
