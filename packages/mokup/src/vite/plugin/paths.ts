@@ -52,11 +52,17 @@ function resolveSwRuntimeImportPath(base: string) {
   return `${normalizedBase}@id/mokup/runtime`
 }
 
+function resolveSwLoggerImportPath(base: string) {
+  const normalizedBase = normalizeBase(base)
+  return `${normalizedBase}@id/@mokup/shared/logger`
+}
+
 export {
   formatPlaygroundUrl,
   normalizeBase,
   resolveRegisterPath,
   resolveRegisterScope,
   resolveSwImportPath,
+  resolveSwLoggerImportPath,
   resolveSwRuntimeImportPath,
 }

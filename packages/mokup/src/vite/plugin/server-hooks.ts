@@ -9,6 +9,7 @@ import { buildSwScript } from '../../core/sw'
 import { addMiddlewareFirst } from './middleware'
 import {
   resolveRegisterPath,
+  resolveSwLoggerImportPath,
   resolveSwRuntimeImportPath,
 } from './paths'
 import { patchPlaygroundPrintUrls } from './playground'
@@ -64,6 +65,7 @@ async function configureDevServer(params: {
           routes: state.swRoutes,
           root,
           runtimeImportPath: resolveSwRuntimeImportPath(base),
+          loggerImportPath: resolveSwLoggerImportPath(base),
           basePaths: swConfig?.basePaths ?? [],
         })
         res.statusCode = 200

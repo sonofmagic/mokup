@@ -213,11 +213,13 @@ export function buildSwScript(params: {
   routes: RouteTable
   root: string
   runtimeImportPath?: string
+  loggerImportPath?: string
   basePaths?: string[]
   resolveModulePath?: (file: string, root: string) => string
 }) {
   const { routes, root } = params
   const runtimeImportPath = params.runtimeImportPath ?? 'mokup/runtime'
+  const loggerImportPath = params.loggerImportPath ?? '@mokup/shared/logger'
   const basePaths = params.basePaths ?? []
   const resolveModulePath = params.resolveModulePath ?? toViteImportPath
   const { manifest, modules } = buildManifestData({
@@ -227,7 +229,7 @@ export function buildSwScript(params: {
   })
 
   const imports: string[] = [
-    'import { createLogger } from \'@mokup/shared/logger\'',
+    `import { createLogger } from ${JSON.stringify(loggerImportPath)}`,
     `import { createRuntimeApp, handle } from ${JSON.stringify(runtimeImportPath)}`,
   ]
   const moduleEntries: Array<{ id: string, name: string, kind: 'rule' | 'middleware' }> = []
