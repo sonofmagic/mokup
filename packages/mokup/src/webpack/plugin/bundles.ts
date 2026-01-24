@@ -1,7 +1,7 @@
-import type { resolveSwConfig, resolveSwUnregisterConfig } from '../../vite/sw'
-import type { Logger } from '../../vite/types'
+import type { resolveSwConfig, resolveSwUnregisterConfig } from '../../core/sw'
+import type { Logger } from '../../shared/types'
 import type { PluginState } from './state'
-import { buildSwScript } from '../../vite/sw'
+import { buildSwScript } from '../../core/sw'
 import { bundleScript } from './bundle'
 import { buildSwLifecycleScript } from './sw'
 

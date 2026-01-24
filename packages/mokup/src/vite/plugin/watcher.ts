@@ -1,7 +1,7 @@
 import type { PreviewServer, ViteDevServer } from 'vite'
 import { isAbsolute, resolve } from 'node:path'
 import chokidar from '@mokup/shared/chokidar'
-import { createDebouncer, isInDirs } from '../utils'
+import { createDebouncer, isInDirs } from '../../shared/utils'
 
 function normalizeWatcherFile(file: string, rootDir: string) {
   if (!file) {

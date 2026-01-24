@@ -1,4 +1,4 @@
-import type { resolveSwConfig, resolveSwUnregisterConfig } from '../sw'
+import type { resolveSwConfig, resolveSwUnregisterConfig } from '../../core/sw'
 import { existsSync } from 'node:fs'
 import { fileURLToPath } from 'node:url'
 

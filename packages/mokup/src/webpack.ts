@@ -1,4 +1,5 @@
-export { defineConfig } from './vite/define-config'
+export { defineConfig } from './define/config'
+export { defineHandler } from './define/handler'
 
 export type {
   Context,
@@ -16,7 +17,7 @@ export type {
   ServiceWorkerOptions,
   VitePluginOptions,
   VitePluginOptionsInput,
-} from './vite/types'
+} from './shared/types'
 
 /**
  * Create the mokup webpack plugin.

@@ -1,5 +1,5 @@
-import type { VitePluginOptions } from '../types'
-import { resolveDirs } from '../utils'
+import type { VitePluginOptions } from '../../shared/types'
+import { resolveDirs } from '../../shared/utils'
 import { normalizeBase, resolveRegisterPath, resolveRegisterScope } from './paths'
 
 function createDirResolver(optionList: VitePluginOptions[], root: () => string) {

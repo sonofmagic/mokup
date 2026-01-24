@@ -1,3 +1,6 @@
+export { defineConfig } from './define/config'
+
+export { defineHandler } from './define/handler'
 export type {
   Context,
   HttpMethod,
@@ -14,6 +17,4 @@ export type {
   ServiceWorkerOptions,
   VitePluginOptions,
   VitePluginOptionsInput,
-} from './vite'
-
-export { defineConfig } from './vite/define-config'
+} from './shared/types'

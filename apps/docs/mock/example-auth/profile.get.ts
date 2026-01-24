@@ -1,6 +1,6 @@
-import type { RequestHandler } from 'mokup'
+import { defineHandler } from 'mokup'
 
-const handler: RequestHandler = () => {
+export default defineHandler(() => {
   return {
     ok: true,
     user: {
@@ -9,6 +9,4 @@ const handler: RequestHandler = () => {
       role: 'member',
     },
   }
-}
-
-export default handler
+})

@@ -1,4 +1,4 @@
-import type { RouteTable } from '../types'
+import type { RouteTable } from '../../shared/types'
 import type { PlaygroundGroup } from './grouping'
 import { formatRouteFile, resolveRouteGroup } from './grouping'
 

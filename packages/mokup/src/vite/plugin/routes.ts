@@ -1,5 +1,5 @@
-import type { RouteConfigInfo, RouteIgnoreInfo, RouteSkipInfo } from '../scanner'
-import type { RouteTable } from '../types'
+import type { RouteConfigInfo, RouteIgnoreInfo, RouteSkipInfo } from '../../core/scanner'
+import type { RouteTable } from '../../shared/types'
 
 function buildRouteSignature(
   routes: RouteTable,

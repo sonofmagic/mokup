@@ -5,4 +5,4 @@
 "@mokup/playground": patch
 ---
 
-refactor: replace before/after middleware positions with pre/normal/post and add defineConfig exports; update playground middleware display to match.
+refactor: replace before/after middleware positions with pre/normal/post, add defineConfig exports, and introduce defineHandler for route file type hints; update playground middleware display to match.

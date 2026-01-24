@@ -1,14 +1,39 @@
 import type { PreviewServer, ViteDevServer } from 'vite'
-import type { Logger, RouteRule } from './types'
+import type { Logger, RouteRule } from '../shared/types'
 import { Buffer } from 'node:buffer'
-import { promises as fs } from 'node:fs'
+import { existsSync, promises as fs } from 'node:fs'
 
 import { createRequire } from 'node:module'
-import { pathToFileURL } from 'node:url'
+import { fileURLToPath, pathToFileURL } from 'node:url'
 import { build as esbuild } from '@mokup/shared/esbuild'
 import { parse as parseJsonc } from '@mokup/shared/jsonc-parser'
 
-import { extname } from '@mokup/shared/pathe'
+import { dirname, extname, resolve } from '@mokup/shared/pathe'
+
+const sourceRoot = dirname(fileURLToPath(import.meta.url))
+const mokupSourceEntry = resolve(sourceRoot, '../index.ts')
+const mokupViteSourceEntry = resolve(sourceRoot, '../vite.ts')
+const hasMokupSourceEntry = existsSync(mokupSourceEntry)
+const hasMokupViteSourceEntry = existsSync(mokupViteSourceEntry)
+
+function resolveWorkspaceMokup() {
+  if (!hasMokupSourceEntry && !hasMokupViteSourceEntry) {
+    return null
+  }
+  return {
+    name: 'mokup:resolve-workspace',
+    setup(build: { onResolve: (options: { filter: RegExp }, cb: () => { path: string }) => void }) {
+      if (hasMokupSourceEntry) {
+        build.onResolve({ filter: /^mokup$/ }, () => ({ path: mokupSourceEntry }))
+      }
+      if (hasMokupViteSourceEntry) {
+        build.onResolve({ filter: /^mokup\/vite$/ }, () => ({ path: mokupViteSourceEntry }))
+      }
+    },
+  }
+}
+
+const workspaceResolvePlugin = resolveWorkspaceMokup()
 
 async function loadModule(file: string) {
   const ext = extname(file).toLowerCase()
@@ -29,6 +54,7 @@ async function loadModule(file: string) {
       sourcemap: 'inline',
       target: 'es2020',
       write: false,
+      ...(workspaceResolvePlugin ? { plugins: [workspaceResolvePlugin] } : {}),
     })
     const output = result.outputFiles[0]
     const code = output?.text ?? ''

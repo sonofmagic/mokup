@@ -1,9 +1,9 @@
-import type { HttpMethod, ResolvedRoute, RouteRule } from './types'
+import type { HttpMethod, ResolvedRoute, RouteRule } from '../shared/types'
 
 import { compareRouteScore, parseRouteTemplate } from '@mokup/runtime'
 import { basename, dirname, extname, join, relative } from '@mokup/shared/pathe'
-import { methodSuffixSet } from './constants'
-import { normalizePrefix, toPosix } from './utils'
+import { methodSuffixSet } from '../shared/constants'
+import { normalizePrefix, toPosix } from '../shared/utils'
 
 const jsonExtensions = new Set(['.json', '.jsonc'])
 

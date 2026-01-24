@@ -1,4 +1,4 @@
-import type { MiddlewareHandler, MiddlewareRegistry, RouteDirectoryConfig } from './types'
+import type { MiddlewareHandler, MiddlewareRegistry, RouteDirectoryConfig } from '../shared/types'
 
 const middlewareSymbol = Symbol.for('mokup.config.middlewares')
 

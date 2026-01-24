@@ -1,4 +1,4 @@
-import type { resolveSwConfig, resolveSwUnregisterConfig } from '../../vite/sw'
+import type { resolveSwConfig, resolveSwUnregisterConfig } from '../../core/sw'
 
 function buildSwLifecycleScript(params: {
   importPath: string

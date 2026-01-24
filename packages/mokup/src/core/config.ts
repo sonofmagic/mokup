@@ -5,7 +5,7 @@ import type {
   MiddlewarePosition,
   ResolvedMiddleware,
   RouteDirectoryConfig,
-} from './types'
+} from '../shared/types'
 
 import { Buffer } from 'node:buffer'
 import { existsSync, promises as fs } from 'node:fs'
@@ -14,7 +14,7 @@ import { fileURLToPath, pathToFileURL } from 'node:url'
 
 import { build as esbuild } from '@mokup/shared/esbuild'
 import { dirname, join, normalize, resolve } from '@mokup/shared/pathe'
-import { configExtensions } from './constants'
+import { configExtensions } from '../shared/constants'
 
 const middlewareSymbol = Symbol.for('mokup.config.middlewares')
 const sourceRoot = dirname(fileURLToPath(import.meta.url))

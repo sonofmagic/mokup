@@ -1,18 +1,18 @@
 import type { Plugin, PreviewServer, ViteDevServer } from 'vite'
-import type { PluginState } from './plugin/state'
+import type { MokupPluginOptions } from '../shared/types'
 
-import type { MokupPluginOptions } from './types'
+import type { PluginState } from './plugin/state'
 import { cwd } from 'node:process'
-import { buildBundleModule } from './bundle'
-import { createLogger } from './logger'
-import { createPlaygroundMiddleware, resolvePlaygroundOptions } from './playground'
+import { buildBundleModule } from '../core/bundle'
+import { createPlaygroundMiddleware, resolvePlaygroundOptions } from '../core/playground'
+import { buildSwScript, resolveSwConfig, resolveSwUnregisterConfig } from '../core/sw'
+import { createLogger } from '../shared/logger'
 import { normalizeMokupOptions, normalizeOptions } from './plugin/options'
 import { resolveSwImportPath } from './plugin/paths'
 import { createRouteRefresher } from './plugin/refresh'
 import { createDirResolver, createHtmlAssetResolver, createSwPathResolver } from './plugin/resolvers'
 import { configureDevServer, configurePreviewServer } from './plugin/server-hooks'
 import { buildSwLifecycleScript, resolveSwModuleImport } from './plugin/sw'
-import { buildSwScript, resolveSwConfig, resolveSwUnregisterConfig } from './sw'
 
 /**
  * Create the mokup Vite plugin.

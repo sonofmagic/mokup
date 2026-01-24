@@ -36,6 +36,29 @@ export default defineConfig(({ pre, normal, post }) => {
 })
 ```
 
+## defineHandler 用于路由文件
+
+`defineHandler` 可以在 JS/TS 中提供类型提示，无需额外 JSDoc。
+
+```ts
+import { defineHandler } from 'mokup'
+
+export default defineHandler((c) => {
+  return { ok: true, method: c.req.method }
+})
+```
+
+```ts
+import { defineHandler } from 'mokup'
+
+export default defineHandler({
+  enabled: false,
+  handler: async (c) => {
+    return { ok: false, reason: 'disabled-rule', method: c.req.method }
+  },
+})
+```
+
 ## 顺序规则
 
 - 目录链条按从根目录到子目录依次生效。

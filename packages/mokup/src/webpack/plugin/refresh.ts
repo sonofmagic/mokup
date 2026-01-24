@@ -1,9 +1,9 @@
-import type { VitePluginOptions } from '../../vite/types'
+import type { VitePluginOptions } from '../../shared/types'
 import type { PluginState } from './state'
-import { createHonoApp } from '../../vite/middleware'
-import { sortRoutes } from '../../vite/routes'
-import { scanRoutes } from '../../vite/scanner'
-import { resolveDirs } from '../../vite/utils'
+import { createHonoApp } from '../../core/middleware'
+import { sortRoutes } from '../../core/routes'
+import { scanRoutes } from '../../core/scanner'
+import { resolveDirs } from '../../shared/utils'
 
 function createRouteRefresher(params: {
   state: PluginState

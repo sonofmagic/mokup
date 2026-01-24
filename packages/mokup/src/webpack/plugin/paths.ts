@@ -1,5 +1,5 @@
 import { isAbsolute, resolve } from '@mokup/shared/pathe'
-import { toPosix } from '../../vite/utils'
+import { toPosix } from '../../shared/utils'
 
 function normalizeBase(base: string) {
   if (!base) {

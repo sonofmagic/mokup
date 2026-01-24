@@ -1,4 +1,4 @@
-import type { PlaygroundOptionsInput } from '../types'
+import type { PlaygroundOptionsInput } from '../../shared/types'
 
 interface PlaygroundConfig {
   enabled: boolean

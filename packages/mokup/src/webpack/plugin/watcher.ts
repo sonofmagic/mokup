@@ -1,5 +1,5 @@
 import chokidar from '@mokup/shared/chokidar'
-import { createDebouncer, isInDirs } from '../../vite/utils'
+import { createDebouncer, isInDirs } from '../../shared/utils'
 
 function createWebpackWatcher(params: {
   enabled: boolean

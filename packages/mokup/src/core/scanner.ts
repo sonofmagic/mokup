@@ -1,11 +1,11 @@
 import type { PreviewServer, ViteDevServer } from 'vite'
 
-import type { HttpMethod, Logger, RouteDirectoryConfig, RouteRule, RouteTable } from './types'
+import type { HttpMethod, Logger, RouteDirectoryConfig, RouteRule, RouteTable } from '../shared/types'
+import { collectFiles, isConfigFile, isSupportedFile } from '../shared/files'
+import { hasIgnoredPrefix, matchesFilter, normalizeIgnorePrefix } from '../shared/utils'
 import { resolveDirectoryConfig } from './config'
-import { collectFiles, isConfigFile, isSupportedFile } from './files'
 import { loadRules } from './loader'
 import { deriveRouteFromFile, resolveRule, sortRoutes } from './routes'
-import { hasIgnoredPrefix, matchesFilter, normalizeIgnorePrefix } from './utils'
 
 /**
  * Reasons a route file was skipped during scanning.

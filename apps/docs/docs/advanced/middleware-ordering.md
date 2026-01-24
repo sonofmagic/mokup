@@ -36,6 +36,29 @@ export default defineConfig(({ pre, normal, post }) => {
 })
 ```
 
+## defineHandler for route files
+
+`defineHandler` provides type hints in JS/TS without extra JSDoc.
+
+```ts
+import { defineHandler } from 'mokup'
+
+export default defineHandler((c) => {
+  return { ok: true, method: c.req.method }
+})
+```
+
+```ts
+import { defineHandler } from 'mokup'
+
+export default defineHandler({
+  enabled: false,
+  handler: async (c) => {
+    return { ok: false, reason: 'disabled-rule', method: c.req.method }
+  },
+})
+```
+
 ## Ordering rules
 
 - Directory chain runs from root to nested directories.

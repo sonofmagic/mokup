@@ -1,6 +1,6 @@
 import type { IncomingMessage, ServerResponse } from 'node:http'
 import type { PreviewServer, ViteDevServer } from 'vite'
-import type { Logger, RouteTable } from '../types'
+import type { Logger, RouteTable } from '../../shared/types'
 import type { PlaygroundConfig } from './config'
 import { promises as fs } from 'node:fs'
 import { extname, join, normalize } from '@mokup/shared/pathe'

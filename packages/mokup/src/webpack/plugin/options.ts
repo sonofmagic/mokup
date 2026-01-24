@@ -1,4 +1,4 @@
-import type { MokupPluginOptions, VitePluginOptions } from '../../vite/types'
+import type { MokupPluginOptions, VitePluginOptions } from '../../shared/types'
 
 const legacyEntryKeys = [
   'dir',

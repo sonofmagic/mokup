@@ -1,8 +1,8 @@
 import type { Manifest, ManifestResponse } from '@mokup/runtime'
-import type { ResolvedRoute, RouteTable } from './types'
+import type { ResolvedRoute, RouteTable } from '../shared/types'
 
 import { isAbsolute, relative, resolve } from '@mokup/shared/pathe'
-import { toPosix } from './utils'
+import { toPosix } from '../shared/utils'
 
 /**
  * Module kind emitted by the manifest builder.
