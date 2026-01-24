@@ -244,12 +244,15 @@ export function usePlaygroundRoutes() {
   })
 
   const configImpactRoutes = computed<PlaygroundConfigImpactRoute[]>(() => {
-    return buildConfigImpactRoutes({
-      selectedFile: selectedConfig.value?.file,
+    const selectedFile = selectedConfig.value?.file
+    const params = {
       routes: routes.value,
       disabledRoutes: disabledRoutes.value,
       ignoredRoutes: ignoredRoutes.value,
-    })
+    }
+    return selectedFile
+      ? buildConfigImpactRoutes({ ...params, selectedFile })
+      : buildConfigImpactRoutes(params)
   })
 
   return {

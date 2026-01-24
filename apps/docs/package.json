@@ -6,6 +6,7 @@
   "homepage": "https://mokup.icebreaker.top",
   "scripts": {
     "dev": "vitepress dev docs --host",
+    "prebuild:docs": "pnpm --filter mokup build",
     "build:docs": "vitepress build docs",
     "build:playground": "pnpm --filter @mokup/playground build && node scripts/copy-playground.mjs",
     "build:routes": "node scripts/build-playground-routes.mjs",

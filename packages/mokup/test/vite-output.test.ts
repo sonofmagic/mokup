@@ -46,12 +46,14 @@ describe('mokup vite output', () => {
 
     server.printUrls()
 
-    const expectedPlayground = `  ➜  Mokup Playground: ${pc.magenta('http://localhost:5173/__mokup')}`
+    const greenArrow = pc.green('➜')
+    const boldPort = (port: string) => pc.bold(port)
+    const expectedPlayground = `  ${greenArrow}  ${pc.bold('Mokup Playground')}: ${pc.magenta(`http://localhost:${boldPort('5173')}/__mokup`)}`
     expect(output).toEqual([
-      '  ➜  Local:   http://localhost:5173/',
-      '  ➜  Network: http://10.10.17.213:5173/',
+      `  ${greenArrow}  Local:   http://localhost:${boldPort('5173')}/`,
+      `  ${greenArrow}  Network: http://10.10.17.213:${boldPort('5173')}/`,
       expectedPlayground,
-      '  ➜  Debug:   http://localhost:5173/__debug',
+      `  ${greenArrow}  Debug:   http://localhost:${boldPort('5173')}/__debug`,
     ])
   })
 })

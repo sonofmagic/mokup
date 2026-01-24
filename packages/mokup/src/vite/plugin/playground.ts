@@ -1,6 +1,18 @@
 import type { ViteDevServer } from 'vite'
 import pc from 'picocolors'
+import { formatOutputLine, stripAnsi } from '../../shared/terminal'
 import { formatPlaygroundUrl } from './paths'
+
+const arrowToken = '➜'
+const playgroundLabel = 'Mokup Playground'
+const coloredArrow = pc.green(arrowToken)
+const formatOptions = {
+  arrowToken,
+  formattedArrow: coloredArrow,
+  labels: [playgroundLabel],
+  formatLabel: pc.bold,
+  formatPort: pc.bold,
+}
 
 function patchPlaygroundPrintUrls(server: ViteDevServer, playgroundPath: string) {
   const originalPrintUrls = server.printUrls.bind(server)
@@ -27,14 +39,12 @@ function patchPlaygroundPrintUrls(server: ViteDevServer, playgroundPath: string)
     const localUrl = server.resolvedUrls?.local?.[0]
     const outputUrl = formatPlaygroundUrl(localUrl, playgroundPath)
     const coloredUrl = pc.magenta(outputUrl)
-    const playgroundLine = `  ➜  Mokup Playground: ${coloredUrl}`
-    const ansiEscape = '\u001B'
-    const ansiPattern = new RegExp(`${ansiEscape}\\[[0-9;]*m`, 'g')
-    const stripAnsi = (value: string) => value.replace(ansiPattern, '')
+    const playgroundLine = `  ${arrowToken}  ${playgroundLabel}: ${coloredUrl}`
+    const arrowPrefix = `  ${arrowToken}  `
     const findIndex = (needle: string) =>
       lines.findIndex(args => stripAnsi(args[0]).includes(needle))
-    const networkIndex = findIndex('  ➜  Network:')
-    const localIndex = findIndex('  ➜  Local:')
+    const networkIndex = findIndex(`${arrowPrefix}Network:`)
+    const localIndex = findIndex(`${arrowPrefix}Local:`)
     const insertIndex = networkIndex >= 0
       ? networkIndex + 1
       : localIndex >= 0
@@ -43,7 +53,14 @@ function patchPlaygroundPrintUrls(server: ViteDevServer, playgroundPath: string)
     const outputLines = lines.slice()
     outputLines.splice(insertIndex, 0, [playgroundLine])
     for (const args of outputLines) {
-      originalInfo(...args)
+      if (typeof args[0] === 'string') {
+        const nextArgs = args.slice() as typeof args
+        nextArgs[0] = formatOutputLine(nextArgs[0], formatOptions)
+        originalInfo(...nextArgs)
+      }
+      else {
+        originalInfo(...args)
+      }
     }
   }
   Object.defineProperty(server, 'printUrls', {
