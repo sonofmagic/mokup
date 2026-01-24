@@ -1,5 +1,12 @@
 # @mokup/runtime
 
+## 1.0.3
+
+### Patch Changes
+
+- 📦 **Dependencies** [`9701b83`](https://github.com/sonofmagic/mokup/commit/9701b838e19e50d46142bcae5ba6fe2aef39bc8b)
+  → `@mokup/shared@1.0.2`
+
 ## 1.0.2
 
 ### Patch Changes

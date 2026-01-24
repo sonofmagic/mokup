@@ -1,5 +1,12 @@
 # webpack-demo
 
+## 0.0.6
+
+### Patch Changes
+
+- 📦 **Dependencies** [`69e852c`](https://github.com/sonofmagic/mokup/commit/69e852c2571d35a4def30b5b7b096c4a07adebc2)
+  → `mokup@2.1.0`
+
 ## 0.0.5
 
 ### Patch Changes

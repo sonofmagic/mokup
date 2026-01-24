@@ -1,5 +1,11 @@
 # @mokup/playground
 
+## 0.0.11
+
+### Patch Changes
+
+- 🐛 **refactor: replace before/after middleware positions with pre/normal/post, add defineConfig exports, and introduce defineHandler for route file type hints; update playground middleware display to match.** [`74d29de`](https://github.com/sonofmagic/mokup/commit/74d29de5729b62d96d49ef7bac1dc89b64655f50) by @sonofmagic
+
 ## 0.0.10
 
 ### Patch Changes
