@@ -66,6 +66,8 @@ export interface PlaygroundDisabledRoute {
   group?: string
   groupKey?: string
   configChain?: string[]
+  decisionChain?: PlaygroundDecisionStep[]
+  effectiveConfig?: PlaygroundEffectiveConfig
 }
 
 /**
@@ -109,6 +111,46 @@ export interface PlaygroundIgnoredRoute {
   group?: string
   groupKey?: string
   configChain?: string[]
+  decisionChain?: PlaygroundDecisionStep[]
+  effectiveConfig?: PlaygroundEffectiveConfig
+}
+
+/**
+ * Decision chain entry for explaining disabled/ignored routes.
+ *
+ * @example
+ * import type { PlaygroundDecisionStep } from '@mokup/playground'
+ *
+ * const step: PlaygroundDecisionStep = {
+ *   step: 'config.enabled',
+ *   source: 'mock/index.config.ts',
+ *   result: 'pass',
+ *   detail: 'enabled=true',
+ * }
+ */
+export interface PlaygroundDecisionStep {
+  step: string
+  result: 'pass' | 'fail'
+  source?: string
+  detail?: string
+}
+
+/**
+ * Effective config snapshot for a route.
+ *
+ * @example
+ * import type { PlaygroundEffectiveConfig } from '@mokup/playground'
+ *
+ * const config: PlaygroundEffectiveConfig = { status: 404 }
+ */
+export interface PlaygroundEffectiveConfig {
+  headers?: Record<string, string>
+  status?: number
+  delay?: number
+  enabled?: boolean
+  ignorePrefix?: string | string[]
+  include?: string | string[]
+  exclude?: string | string[]
 }
 
 /**

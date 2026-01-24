@@ -1,12 +1,22 @@
 <script setup lang="ts">
-import type { PlaygroundConfigFile, PlaygroundConfigImpactRoute, PlaygroundRoute, RouteParamField } from '../types'
+import type {
+  PlaygroundConfigFile,
+  PlaygroundConfigImpactRoute,
+  PlaygroundDisabledRoute,
+  PlaygroundIgnoredRoute,
+  PlaygroundRoute,
+  RouteParamField,
+} from '../types'
 import { computed } from 'vue'
 import { useI18n } from 'vue-i18n'
 import ConfigDetail from './ConfigDetail.vue'
 import RouteDetail from './RouteDetail.vue'
+import RouteDetailInactive from './RouteDetailInactive.vue'
 
 const props = defineProps<{
   selected: PlaygroundRoute | null
+  selectedDisabled: PlaygroundDisabledRoute | null
+  selectedIgnored: PlaygroundIgnoredRoute | null
   selectedConfig: PlaygroundConfigFile | null
   requestUrl: string
   workspaceRoot?: string
@@ -21,6 +31,7 @@ const props = defineProps<{
   isSwRegistering: boolean
   routeMode: 'active' | 'disabled' | 'ignored'
   enabledMode: 'api' | 'config'
+  disabledMode: 'api' | 'config'
   configImpactRoutes: PlaygroundConfigImpactRoute[]
   configStatusMap: Map<string, 'enabled' | 'disabled'>
 }>()
@@ -37,6 +48,8 @@ const { t } = useI18n()
 
 const isActiveMode = computed(() => props.routeMode === 'active' && props.enabledMode === 'api')
 const isConfigMode = computed(() => !!props.selectedConfig)
+const isDisabledApiMode = computed(() => props.routeMode === 'disabled' && props.disabledMode === 'api')
+const isIgnoredMode = computed(() => props.routeMode === 'ignored')
 const selectedConfigStatus = computed(() => {
   if (!props.selectedConfig) {
     return 'enabled'
@@ -103,6 +116,20 @@ function handleRun() {
     :config-status-map="props.configStatusMap"
     @update:param-value="handleParamUpdate"
     @run="handleRun"
+  />
+  <RouteDetailInactive
+    v-else-if="isDisabledApiMode && props.selectedDisabled"
+    mode="disabled"
+    :selected="props.selectedDisabled"
+    :workspace-root="props.workspaceRoot"
+    :config-status-map="props.configStatusMap"
+  />
+  <RouteDetailInactive
+    v-else-if="isIgnoredMode && props.selectedIgnored"
+    mode="ignored"
+    :selected="props.selectedIgnored"
+    :workspace-root="props.workspaceRoot"
+    :config-status-map="props.configStatusMap"
   />
   <ConfigDetail
     v-else-if="props.selectedConfig && isConfigMode"

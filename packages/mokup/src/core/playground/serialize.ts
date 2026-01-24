@@ -1,5 +1,7 @@
 import type { RouteTable } from '../../shared/types'
+import type { RouteDecisionStep, RouteEffectiveConfig } from '../scanner'
 import type { PlaygroundGroup } from './grouping'
+import { isAbsolute } from '@mokup/shared/pathe'
 import { formatRouteFile, resolveRouteGroup } from './grouping'
 
 type PlaygroundDisabledReason
@@ -16,6 +18,8 @@ interface PlaygroundDisabledRouteInput {
   method?: string
   url?: string
   configChain?: string[]
+  decisionChain?: RouteDecisionStep[]
+  effectiveConfig?: RouteEffectiveConfig
 }
 
 interface PlaygroundDisabledRoute {
@@ -26,6 +30,8 @@ interface PlaygroundDisabledRoute {
   group?: string
   groupKey?: string
   configChain?: string[]
+  decisionChain?: RouteDecisionStep[]
+  effectiveConfig?: RouteEffectiveConfig
 }
 
 type PlaygroundIgnoredReason = 'unsupported' | 'invalid-route' | 'unknown'
@@ -34,6 +40,8 @@ interface PlaygroundIgnoredRouteInput {
   file: string
   reason?: string
   configChain?: string[]
+  decisionChain?: RouteDecisionStep[]
+  effectiveConfig?: RouteEffectiveConfig
 }
 
 interface PlaygroundIgnoredRoute {
@@ -42,6 +50,8 @@ interface PlaygroundIgnoredRoute {
   group?: string
   groupKey?: string
   configChain?: string[]
+  decisionChain?: RouteDecisionStep[]
+  effectiveConfig?: RouteEffectiveConfig
 }
 
 interface PlaygroundConfigFileInput {
@@ -144,6 +154,17 @@ function toPlaygroundDisabledRoute(
   if (route.configChain && route.configChain.length > 0) {
     disabled.configChain = route.configChain.map(entry => formatRouteFile(entry, root))
   }
+  if (route.decisionChain && route.decisionChain.length > 0) {
+    disabled.decisionChain = route.decisionChain.map(entry => ({
+      ...entry,
+      source: entry.source && isAbsolute(entry.source)
+        ? formatRouteFile(entry.source, root)
+        : entry.source,
+    }))
+  }
+  if (route.effectiveConfig && Object.keys(route.effectiveConfig).length > 0) {
+    disabled.effectiveConfig = route.effectiveConfig
+  }
   if (matchedGroup) {
     disabled.groupKey = matchedGroup.key
     disabled.group = matchedGroup.label
@@ -167,6 +188,17 @@ function toPlaygroundIgnoredRoute(
   }
   if (route.configChain && route.configChain.length > 0) {
     ignored.configChain = route.configChain.map(entry => formatRouteFile(entry, root))
+  }
+  if (route.decisionChain && route.decisionChain.length > 0) {
+    ignored.decisionChain = route.decisionChain.map(entry => ({
+      ...entry,
+      source: entry.source && isAbsolute(entry.source)
+        ? formatRouteFile(entry.source, root)
+        : entry.source,
+    }))
+  }
+  if (route.effectiveConfig && Object.keys(route.effectiveConfig).length > 0) {
+    ignored.effectiveConfig = route.effectiveConfig
   }
   return ignored
 }

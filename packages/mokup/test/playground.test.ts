@@ -94,12 +94,38 @@ describe('playground routes endpoint', () => {
           reason: 'ignore-prefix',
           method: 'GET',
           url: '/hidden',
+          decisionChain: [
+            {
+              step: 'config.enabled',
+              result: 'pass',
+              source: path.join(mockDir, 'index.config.ts'),
+              detail: 'enabled=true',
+            },
+            {
+              step: 'ignore-prefix',
+              result: 'fail',
+              detail: 'prefixes: .',
+            },
+          ],
+          effectiveConfig: {
+            ignorePrefix: ['.'],
+          },
         },
       ],
       getIgnoredRoutes: () => [
         {
           file: path.join(mockDir, 'assets', 'logo.png'),
           reason: 'unsupported',
+          decisionChain: [
+            {
+              step: 'file.supported',
+              result: 'fail',
+              detail: 'unsupported file type',
+            },
+          ],
+          effectiveConfig: {
+            include: '/\\.ts$/',
+          },
         },
       ],
       getConfigFiles: () => [
@@ -131,8 +157,23 @@ describe('playground routes endpoint', () => {
     const payload = JSON.parse(state.body) as {
       groups: { key: string, label: string }[]
       routes: { group?: string, groupKey?: string, file: string, url: string }[]
-      disabled: { group?: string, groupKey?: string, file: string, url?: string, reason: string }[]
-      ignored: { group?: string, groupKey?: string, file: string, reason: string }[]
+      disabled: {
+        group?: string
+        groupKey?: string
+        file: string
+        url?: string
+        reason: string
+        decisionChain?: { step: string, result: string, source?: string, detail?: string }[]
+        effectiveConfig?: { ignorePrefix?: string[] }
+      }[]
+      ignored: {
+        group?: string
+        groupKey?: string
+        file: string
+        reason: string
+        decisionChain?: { step: string, result: string, source?: string, detail?: string }[]
+        effectiveConfig?: { include?: string }
+      }[]
       configs: { group?: string, groupKey?: string, file: string }[]
       disabledConfigs: { group?: string, groupKey?: string, file: string }[]
     }
@@ -165,6 +206,14 @@ describe('playground routes endpoint', () => {
       file: 'mock/.draft/hidden.get.ts',
       reason: 'ignore-prefix',
     })
+    expect(disabledRoute?.decisionChain?.[0]).toMatchObject({
+      step: 'config.enabled',
+      result: 'pass',
+      source: 'mock/index.config.ts',
+    })
+    expect(disabledRoute?.effectiveConfig).toMatchObject({
+      ignorePrefix: ['.'],
+    })
 
     const ignoredRoute = payload.ignored.find(route => route.file === 'mock/assets/logo.png')
     expect(ignoredRoute).toMatchObject({
@@ -172,6 +221,13 @@ describe('playground routes endpoint', () => {
       groupKey: expectedGroups[0].key,
       file: 'mock/assets/logo.png',
       reason: 'unsupported',
+    })
+    expect(ignoredRoute?.decisionChain?.[0]).toMatchObject({
+      step: 'file.supported',
+      result: 'fail',
+    })
+    expect(ignoredRoute?.effectiveConfig).toMatchObject({
+      include: '/\\.ts$/',
     })
 
     const configFile = payload.configs.find(entry => entry.file === 'mock/index.config.ts')

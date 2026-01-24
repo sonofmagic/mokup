@@ -26,6 +26,8 @@ function buildRouteSignature(
           route.file,
           route.method ?? '',
           route.url ?? '',
+          JSON.stringify(route.decisionChain ?? []),
+          JSON.stringify(route.effectiveConfig ?? {}),
         ].join('|'),
       ),
     )
@@ -34,6 +36,8 @@ function buildRouteSignature(
         [
           route.reason,
           route.file,
+          JSON.stringify(route.decisionChain ?? []),
+          JSON.stringify(route.effectiveConfig ?? {}),
         ].join('|'),
       ),
     )

@@ -2,7 +2,7 @@ import type { PreviewServer, ViteDevServer } from 'vite'
 
 import type { HttpMethod, Logger, RouteDirectoryConfig, RouteRule, RouteTable } from '../shared/types'
 import { collectFiles, isConfigFile, isSupportedFile } from '../shared/files'
-import { hasIgnoredPrefix, matchesFilter, normalizeIgnorePrefix } from '../shared/utils'
+import { hasIgnoredPrefix, normalizeIgnorePrefix, toPosix } from '../shared/utils'
 import { resolveDirectoryConfig } from './config'
 import { loadRules } from './loader'
 import { deriveRouteFromFile, resolveRule, sortRoutes } from './routes'
@@ -54,6 +54,43 @@ export interface RouteConfigInfo {
 }
 
 /**
+ * Decision chain entry for explaining disabled/ignored routes.
+ *
+ * @example
+ * import type { RouteDecisionStep } from 'mokup/vite'
+ *
+ * const step: RouteDecisionStep = { step: 'config.enabled', result: 'pass' }
+ */
+export interface RouteDecisionStep {
+  /** Decision step identifier. */
+  step: string
+  /** Pass or fail outcome for the step. */
+  result: 'pass' | 'fail'
+  /** Optional source file for the decision (e.g. config path). */
+  source?: string
+  /** Optional detail about the step. */
+  detail?: string
+}
+
+/**
+ * Effective configuration snapshot for a route.
+ *
+ * @example
+ * import type { RouteEffectiveConfig } from 'mokup/vite'
+ *
+ * const config: RouteEffectiveConfig = { status: 404 }
+ */
+export interface RouteEffectiveConfig {
+  headers?: Record<string, string>
+  status?: number
+  delay?: number
+  enabled?: boolean
+  ignorePrefix?: string | string[]
+  include?: string | string[]
+  exclude?: string | string[]
+}
+
+/**
  * Metadata for a skipped route.
  *
  * @example
@@ -75,6 +112,10 @@ export interface RouteSkipInfo {
   url?: string
   /** Ordered config file chain (root to leaf). */
   configChain?: string[]
+  /** Decision chain for why the route was skipped. */
+  decisionChain?: RouteDecisionStep[]
+  /** Effective config snapshot for the route. */
+  effectiveConfig?: RouteEffectiveConfig
 }
 
 /**
@@ -92,6 +133,10 @@ export interface RouteIgnoreInfo {
   reason: RouteIgnoreReason
   /** Ordered config file chain (root to leaf). */
   configChain?: string[]
+  /** Decision chain for why the file was ignored. */
+  decisionChain?: RouteDecisionStep[]
+  /** Effective config snapshot for the file. */
+  effectiveConfig?: RouteEffectiveConfig
 }
 
 const silentLogger: Logger = {
@@ -135,6 +180,8 @@ function buildSkipInfo(
   reason: RouteSkipReason,
   resolved?: ResolvedSkipRoute,
   configChain?: string[],
+  decisionChain?: RouteDecisionStep[],
+  effectiveConfig?: RouteEffectiveConfig,
 ): RouteSkipInfo {
   const info: RouteSkipInfo = { file, reason }
   if (resolved) {
@@ -144,7 +191,73 @@ function buildSkipInfo(
   if (configChain && configChain.length > 0) {
     info.configChain = configChain
   }
+  if (decisionChain && decisionChain.length > 0) {
+    info.decisionChain = decisionChain
+  }
+  if (effectiveConfig && Object.keys(effectiveConfig).length > 0) {
+    info.effectiveConfig = effectiveConfig
+  }
   return info
+}
+
+function toFilterStrings(value?: RegExp | RegExp[]) {
+  if (!value) {
+    return []
+  }
+  const list = Array.isArray(value) ? value : [value]
+  return list
+    .filter((entry): entry is RegExp => entry instanceof RegExp)
+    .map(entry => entry.toString())
+}
+
+function toStringList(value: string[]) {
+  if (value.length === 0) {
+    return undefined
+  }
+  return value.length === 1 ? value[0] : [...value]
+}
+
+function formatList(value: string[]) {
+  return value.join(', ')
+}
+
+function testPatterns(patterns: RegExp | RegExp[], value: string) {
+  const list = Array.isArray(patterns) ? patterns : [patterns]
+  return list.some(pattern => pattern.test(value))
+}
+
+function buildEffectiveConfig(params: {
+  config: Awaited<ReturnType<typeof resolveDirectoryConfig>>
+  effectiveInclude?: RegExp | RegExp[]
+  effectiveExclude?: RegExp | RegExp[]
+  effectiveIgnorePrefix: string[]
+}) {
+  const { config, effectiveInclude, effectiveExclude, effectiveIgnorePrefix } = params
+  const includeList = toFilterStrings(effectiveInclude)
+  const excludeList = toFilterStrings(effectiveExclude)
+  const effectiveConfig: RouteEffectiveConfig = {}
+  if (config.headers && Object.keys(config.headers).length > 0) {
+    effectiveConfig.headers = config.headers
+  }
+  if (typeof config.status === 'number') {
+    effectiveConfig.status = config.status
+  }
+  if (typeof config.delay === 'number') {
+    effectiveConfig.delay = config.delay
+  }
+  if (typeof config.enabled !== 'undefined') {
+    effectiveConfig.enabled = config.enabled
+  }
+  if (effectiveIgnorePrefix.length > 0) {
+    effectiveConfig.ignorePrefix = toStringList(effectiveIgnorePrefix)
+  }
+  if (includeList.length > 0) {
+    effectiveConfig.include = toStringList(includeList)
+  }
+  if (excludeList.length > 0) {
+    effectiveConfig.exclude = toStringList(excludeList)
+  }
+  return effectiveConfig
 }
 
 /**
@@ -213,64 +326,185 @@ export async function scanRoutes(params: {
     }
     const config = await resolveDirectoryConfig(configParams)
     const configChain = config.configChain ?? []
-    if (config.enabled === false) {
-      if (shouldCollectSkip && isSupportedFile(fileInfo.file)) {
-        const resolved = resolveSkipRoute({
-          file: fileInfo.file,
-          rootDir: fileInfo.rootDir,
-          prefix: params.prefix,
-        })
-        params.onSkip?.(buildSkipInfo(fileInfo.file, 'disabled-dir', resolved, configChain))
-      }
-      continue
-    }
+    const configSources = config.configSources ?? {}
+    const decisionChain: RouteDecisionStep[] = []
+    const isConfigEnabled = config.enabled !== false
+    decisionChain.push({
+      step: 'config.enabled',
+      result: isConfigEnabled ? 'pass' : 'fail',
+      source: configSources.enabled,
+      detail: config.enabled === false
+        ? 'enabled=false'
+        : typeof config.enabled === 'boolean'
+          ? 'enabled=true'
+          : 'enabled=true (default)',
+    })
     const effectiveIgnorePrefix = typeof config.ignorePrefix !== 'undefined'
       ? normalizeIgnorePrefix(config.ignorePrefix, [])
       : globalIgnorePrefix
-    if (hasIgnoredPrefix(fileInfo.file, fileInfo.rootDir, effectiveIgnorePrefix)) {
-      if (shouldCollectSkip && isSupportedFile(fileInfo.file)) {
-        const resolved = resolveSkipRoute({
-          file: fileInfo.file,
-          rootDir: fileInfo.rootDir,
-          prefix: params.prefix,
-        })
-        params.onSkip?.(buildSkipInfo(fileInfo.file, 'ignore-prefix', resolved, configChain))
-      }
-      continue
-    }
-    if (!isSupportedFile(fileInfo.file)) {
-      if (shouldCollectIgnore) {
-        params.onIgnore?.({ file: fileInfo.file, reason: 'unsupported', configChain })
-      }
-      continue
-    }
     const effectiveInclude = typeof config.include !== 'undefined'
       ? config.include
       : params.include
     const effectiveExclude = typeof config.exclude !== 'undefined'
       ? config.exclude
       : params.exclude
-    if (!matchesFilter(fileInfo.file, effectiveInclude, effectiveExclude)) {
-      if (shouldCollectSkip) {
+    const effectiveConfig = buildEffectiveConfig({
+      config,
+      effectiveInclude,
+      effectiveExclude,
+      effectiveIgnorePrefix,
+    })
+    const effectiveConfigValue = Object.keys(effectiveConfig).length > 0
+      ? effectiveConfig
+      : undefined
+    if (!isConfigEnabled) {
+      if (shouldCollectSkip && isSupportedFile(fileInfo.file)) {
         const resolved = resolveSkipRoute({
           file: fileInfo.file,
           rootDir: fileInfo.rootDir,
           prefix: params.prefix,
         })
-        const reason = effectiveExclude && matchesFilter(fileInfo.file, undefined, effectiveExclude)
-          ? 'exclude'
-          : 'include'
-        params.onSkip?.(buildSkipInfo(fileInfo.file, reason, resolved, configChain))
+        params.onSkip?.(buildSkipInfo(
+          fileInfo.file,
+          'disabled-dir',
+          resolved,
+          configChain,
+          decisionChain,
+          effectiveConfigValue,
+        ))
       }
       continue
+    }
+    if (effectiveIgnorePrefix.length > 0) {
+      const ignoredByPrefix = hasIgnoredPrefix(fileInfo.file, fileInfo.rootDir, effectiveIgnorePrefix)
+      decisionChain.push({
+        step: 'ignore-prefix',
+        result: ignoredByPrefix ? 'fail' : 'pass',
+        source: configSources.ignorePrefix,
+        detail: `prefixes: ${formatList(effectiveIgnorePrefix)}`,
+      })
+      if (ignoredByPrefix) {
+        if (shouldCollectSkip && isSupportedFile(fileInfo.file)) {
+          const resolved = resolveSkipRoute({
+            file: fileInfo.file,
+            rootDir: fileInfo.rootDir,
+            prefix: params.prefix,
+          })
+          params.onSkip?.(buildSkipInfo(
+            fileInfo.file,
+            'ignore-prefix',
+            resolved,
+            configChain,
+            decisionChain,
+            effectiveConfigValue,
+          ))
+        }
+        continue
+      }
+    }
+    const supportedFile = isSupportedFile(fileInfo.file)
+    decisionChain.push({
+      step: 'file.supported',
+      result: supportedFile ? 'pass' : 'fail',
+      detail: supportedFile ? undefined : 'unsupported file type',
+    })
+    if (!supportedFile) {
+      if (shouldCollectIgnore) {
+        params.onIgnore?.({
+          file: fileInfo.file,
+          reason: 'unsupported',
+          configChain,
+          decisionChain,
+          effectiveConfig: effectiveConfigValue,
+        })
+      }
+      continue
+    }
+    const normalizedFile = toPosix(fileInfo.file)
+    if (typeof effectiveExclude !== 'undefined') {
+      const excluded = testPatterns(effectiveExclude, normalizedFile)
+      const patterns = toFilterStrings(effectiveExclude)
+      decisionChain.push({
+        step: 'filter.exclude',
+        result: excluded ? 'fail' : 'pass',
+        source: configSources.exclude,
+        detail: patterns.length > 0
+          ? `${excluded ? 'matched' : 'no match'}: ${patterns.join(', ')}`
+          : undefined,
+      })
+      if (excluded) {
+        if (shouldCollectSkip) {
+          const resolved = resolveSkipRoute({
+            file: fileInfo.file,
+            rootDir: fileInfo.rootDir,
+            prefix: params.prefix,
+          })
+          params.onSkip?.(buildSkipInfo(
+            fileInfo.file,
+            'exclude',
+            resolved,
+            configChain,
+            decisionChain,
+            effectiveConfigValue,
+          ))
+        }
+        continue
+      }
+    }
+    if (typeof effectiveInclude !== 'undefined') {
+      const included = testPatterns(effectiveInclude, normalizedFile)
+      const patterns = toFilterStrings(effectiveInclude)
+      decisionChain.push({
+        step: 'filter.include',
+        result: included ? 'pass' : 'fail',
+        source: configSources.include,
+        detail: patterns.length > 0
+          ? `${included ? 'matched' : 'no match'}: ${patterns.join(', ')}`
+          : undefined,
+      })
+      if (!included) {
+        if (shouldCollectSkip) {
+          const resolved = resolveSkipRoute({
+            file: fileInfo.file,
+            rootDir: fileInfo.rootDir,
+            prefix: params.prefix,
+          })
+          params.onSkip?.(buildSkipInfo(
+            fileInfo.file,
+            'include',
+            resolved,
+            configChain,
+            decisionChain,
+            effectiveConfigValue,
+          ))
+        }
+        continue
+      }
     }
     const derived = deriveRouteFromFile(fileInfo.file, fileInfo.rootDir, params.logger)
     if (!derived) {
       if (shouldCollectIgnore) {
-        params.onIgnore?.({ file: fileInfo.file, reason: 'invalid-route', configChain })
+        decisionChain.push({
+          step: 'route.derived',
+          result: 'fail',
+          source: fileInfo.file,
+          detail: 'invalid route name',
+        })
+        params.onIgnore?.({
+          file: fileInfo.file,
+          reason: 'invalid-route',
+          configChain,
+          decisionChain,
+          effectiveConfig: effectiveConfigValue,
+        })
       }
       continue
     }
+    decisionChain.push({
+      step: 'route.derived',
+      result: 'pass',
+      source: fileInfo.file,
+    })
     const rules = await loadRules(fileInfo.file, params.server, params.logger)
     for (const [index, rule] of rules.entries()) {
       if (!rule || typeof rule !== 'object') {
@@ -284,7 +518,21 @@ export async function scanRoutes(params: {
             prefix: params.prefix,
             derived,
           })
-          params.onSkip?.(buildSkipInfo(fileInfo.file, 'disabled', resolved, configChain))
+          const ruleDecisionStep: RouteDecisionStep = {
+            step: 'rule.enabled',
+            result: 'fail',
+            source: fileInfo.file,
+            detail: 'enabled=false',
+          }
+          const ruleDecisionChain = [...decisionChain, ruleDecisionStep]
+          params.onSkip?.(buildSkipInfo(
+            fileInfo.file,
+            'disabled',
+            resolved,
+            configChain,
+            ruleDecisionChain,
+            effectiveConfigValue,
+          ))
         }
         continue
       }

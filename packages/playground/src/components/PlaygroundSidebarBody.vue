@@ -17,6 +17,8 @@ const props = defineProps<{
   enabledMode: 'api' | 'config'
   disabledMode: 'api' | 'config'
   selectedConfig?: PlaygroundConfigFile | null
+  selectedDisabled?: PlaygroundDisabledRoute | null
+  selectedIgnored?: PlaygroundIgnoredRoute | null
   error?: string
   loading: boolean
   filtered: PlaygroundRoute[]
@@ -32,6 +34,8 @@ const props = defineProps<{
 const emit = defineEmits<{
   (event: 'toggle', id: string): void
   (event: 'select-route', route: PlaygroundRoute): void
+  (event: 'select-disabled-route', route: PlaygroundDisabledRoute): void
+  (event: 'select-ignored-route', route: PlaygroundIgnoredRoute): void
   (event: 'select-config', entry: PlaygroundConfigFile): void
 }>()
 
@@ -68,6 +72,10 @@ function formatRoutePath(value?: string) {
   return value ? value.toLowerCase() : ''
 }
 
+function formatConfigLabel(value: string) {
+  return value.toLowerCase()
+}
+
 function resolveEditorUrlForFile(file: string) {
   return resolveEditorUrl(file, props.workspaceRoot)
 }
@@ -84,6 +92,18 @@ function handleSelectRow(row: TreeRow) {
 
 function isSelectedConfig(entry: PlaygroundConfigFile) {
   return props.selectedConfig?.file === entry.file
+}
+
+function isSelectedDisabled(route: PlaygroundDisabledRoute) {
+  return props.selectedDisabled?.file === route.file
+    && props.selectedDisabled?.reason === route.reason
+    && props.selectedDisabled?.method === route.method
+    && props.selectedDisabled?.url === route.url
+}
+
+function isSelectedIgnored(route: PlaygroundIgnoredRoute) {
+  return props.selectedIgnored?.file === route.file
+    && props.selectedIgnored?.reason === route.reason
 }
 </script>
 
@@ -121,10 +141,13 @@ function isSelectedConfig(entry: PlaygroundConfigFile) {
         {{ t('states.emptyConfigFiles') }}
       </div>
       <div v-else-if="props.routeMode === 'disabled' && props.disabledMode === 'api'" class="flex flex-col gap-2">
-        <div
+        <button
           v-for="route in props.disabledFiltered"
           :key="`${route.file}-${route.reason}-${route.method ?? ''}-${route.url ?? ''}`"
-          class="rounded-2xl border px-4 py-3 text-xs border-pg-border bg-pg-surface-soft text-pg-text-soft"
+          class="rounded-2xl border px-4 py-3 text-left text-xs transition border-pg-border bg-pg-surface-soft text-pg-text-soft hover:bg-pg-hover-strong"
+          :class="isSelectedDisabled(route) ? 'border-pg-accent bg-pg-accent/10 text-pg-text' : ''"
+          type="button"
+          @click="emit('select-disabled-route', route)"
         >
           <div class="flex flex-wrap items-center justify-between gap-2">
             <div class="flex flex-col gap-1">
@@ -152,13 +175,13 @@ function isSelectedConfig(entry: PlaygroundConfigFile) {
                 type="button"
                 :aria-label="`Open ${route.file} in VS Code`"
                 :title="t('detail.openInVscode')"
-                @click="openInEditorForFile(route.file)"
+                @click.stop="openInEditorForFile(route.file)"
               >
                 <span class="i-[carbon--launch] h-3.5 w-3.5" aria-hidden="true" />
               </button>
             </div>
           </div>
-        </div>
+        </button>
       </div>
       <div
         v-else-if="props.routeMode === 'disabled' && props.disabledMode === 'config' && !props.disabledConfigFiltered.length"
@@ -178,7 +201,7 @@ function isSelectedConfig(entry: PlaygroundConfigFile) {
           <div class="flex flex-wrap items-center justify-between gap-2">
             <div class="flex flex-col gap-1">
               <span class="text-[0.7rem] uppercase tracking-[0.18em] text-pg-text-muted">
-                {{ entry.file }}
+                {{ formatConfigLabel(entry.file) }}
               </span>
             </div>
             <div class="flex items-center gap-2">
@@ -200,10 +223,13 @@ function isSelectedConfig(entry: PlaygroundConfigFile) {
         </button>
       </div>
       <div v-else-if="props.routeMode === 'ignored'" class="flex flex-col gap-2">
-        <div
+        <button
           v-for="route in props.ignoredFiltered"
           :key="`${route.file}-${route.reason}`"
-          class="rounded-2xl border px-4 py-3 text-xs border-pg-border bg-pg-surface-soft text-pg-text-soft"
+          class="rounded-2xl border px-4 py-3 text-left text-xs transition border-pg-border bg-pg-surface-soft text-pg-text-soft hover:bg-pg-hover-strong"
+          :class="isSelectedIgnored(route) ? 'border-pg-accent bg-pg-accent/10 text-pg-text' : ''"
+          type="button"
+          @click="emit('select-ignored-route', route)"
         >
           <div class="flex flex-wrap items-center justify-between gap-2">
             <div class="flex flex-col gap-1">
@@ -221,13 +247,13 @@ function isSelectedConfig(entry: PlaygroundConfigFile) {
                 type="button"
                 :aria-label="`Open ${route.file} in VS Code`"
                 :title="t('detail.openInVscode')"
-                @click="openInEditorForFile(route.file)"
+                @click.stop="openInEditorForFile(route.file)"
               >
                 <span class="i-[carbon--launch] h-3.5 w-3.5" aria-hidden="true" />
               </button>
             </div>
           </div>
-        </div>
+        </button>
       </div>
       <div v-else-if="props.routeMode === 'active' && props.enabledMode === 'config'" class="flex flex-col gap-2">
         <button
@@ -241,7 +267,7 @@ function isSelectedConfig(entry: PlaygroundConfigFile) {
           <div class="flex flex-wrap items-center justify-between gap-2">
             <div class="flex flex-col gap-1">
               <span class="text-[0.7rem] tracking-[0.18em] text-pg-text-muted">
-                {{ entry.file }}
+                {{ formatConfigLabel(entry.file) }}
               </span>
             </div>
             <div class="flex items-center gap-2">

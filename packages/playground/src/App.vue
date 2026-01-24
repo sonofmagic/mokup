@@ -23,6 +23,8 @@ const {
   configFiltered,
   disabledConfigFiltered,
   selected,
+  selectedDisabled,
+  selectedIgnored,
   selectedConfig,
   groups,
   activeGroup,
@@ -42,6 +44,8 @@ const {
   loadRoutes,
   setActiveGroup,
   selectRoute,
+  selectDisabledRoute,
+  selectIgnoredRoute,
   selectConfig,
   setBasePath,
   configImpactRoutes,
@@ -116,8 +120,18 @@ function setRouteMode(mode: 'active' | 'disabled' | 'ignored') {
   if (mode !== 'active') {
     selectRoute(null)
     selectConfig(null)
+    if (mode === 'disabled' && disabledMode.value === 'api') {
+      selectDisabledRoute(disabledFiltered.value[0] ?? null)
+      selectIgnoredRoute(null)
+    }
+    if (mode === 'ignored') {
+      selectIgnoredRoute(ignoredFiltered.value[0] ?? null)
+      selectDisabledRoute(null)
+    }
     return
   }
+  selectDisabledRoute(null)
+  selectIgnoredRoute(null)
   if (enabledMode.value === 'api' && !selected.value) {
     selectRoute(filtered.value[0] ?? null)
   }
@@ -133,6 +147,8 @@ function setEnabledMode(mode: 'api' | 'config') {
     return
   }
   selectConfig(null)
+  selectDisabledRoute(null)
+  selectIgnoredRoute(null)
   if (!selected.value) {
     selectRoute(filtered.value[0] ?? null)
   }
@@ -140,8 +156,13 @@ function setEnabledMode(mode: 'api' | 'config') {
 
 function setDisabledMode(mode: 'api' | 'config') {
   disabledMode.value = mode
-  if (mode !== 'config') {
-    selectConfig(null)
+  if (mode === 'config') {
+    selectDisabledRoute(null)
+    return
+  }
+  selectConfig(null)
+  if (!selectedDisabled.value) {
+    selectDisabledRoute(disabledFiltered.value[0] ?? null)
   }
 }
 
@@ -185,12 +206,30 @@ function handleRefresh() {
 
 function handleSelectRoute(route: (typeof selected.value)) {
   selectConfig(null)
+  selectDisabledRoute(null)
+  selectIgnoredRoute(null)
   selectRoute(route)
 }
 
 function handleSelectConfig(config: (typeof selectedConfig.value)) {
   selectRoute(null)
+  selectDisabledRoute(null)
+  selectIgnoredRoute(null)
   selectConfig(config)
+}
+
+function handleSelectDisabled(route: (typeof selectedDisabled.value)) {
+  selectRoute(null)
+  selectConfig(null)
+  selectIgnoredRoute(null)
+  selectDisabledRoute(route)
+}
+
+function handleSelectIgnored(route: (typeof selectedIgnored.value)) {
+  selectRoute(null)
+  selectConfig(null)
+  selectDisabledRoute(null)
+  selectIgnoredRoute(route)
 }
 
 onMounted(() => {
@@ -230,6 +269,8 @@ onBeforeUnmount(() => {
               :enabled-mode="enabledMode"
               :disabled-mode="disabledMode"
               :selected-config="selectedConfig"
+              :selected-disabled="selectedDisabled"
+              :selected-ignored="selectedIgnored"
               :active-total="activeTotal"
               :api-total="apiTotal"
               :disabled-total="disabledTotal"
@@ -253,6 +294,8 @@ onBeforeUnmount(() => {
               @set-disabled-mode="setDisabledMode"
               @toggle="toggleExpanded"
               @select-route="handleSelectRoute"
+              @select-disabled-route="handleSelectDisabled"
+              @select-ignored-route="handleSelectIgnored"
               @select-config="handleSelectConfig"
               @update:treeMode="setTreeMode"
             />
@@ -283,6 +326,8 @@ onBeforeUnmount(() => {
                   v-model:bodyText="bodyText"
                   v-model:bodyType="bodyType"
                   :selected="selected"
+                  :selected-disabled="selectedDisabled"
+                  :selected-ignored="selectedIgnored"
                   :selected-config="selectedConfig"
                   :request-url="requestUrl"
                   :workspace-root="workspaceRoot"
@@ -294,6 +339,7 @@ onBeforeUnmount(() => {
                   :param-values="paramValues"
                   :route-mode="routeMode"
                   :enabled-mode="enabledMode"
+                  :disabled-mode="disabledMode"
                   :config-impact-routes="configImpactRoutes"
                   :config-status-map="configStatusMap"
                   @update:param-value="setParamValue"

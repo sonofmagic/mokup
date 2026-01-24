@@ -29,6 +29,8 @@ export function usePlaygroundRoutes() {
   const configFiltered = ref<PlaygroundConfigFile[]>([])
   const disabledConfigFiltered = ref<PlaygroundConfigFile[]>([])
   const selected = ref<PlaygroundRoute | null>(null)
+  const selectedDisabled = ref<PlaygroundDisabledRoute | null>(null)
+  const selectedIgnored = ref<PlaygroundIgnoredRoute | null>(null)
   const selectedConfig = ref<PlaygroundConfigFile | null>(null)
   const groups = ref<PlaygroundGroup[]>([])
   const activeGroup = ref('all')
@@ -60,6 +62,9 @@ export function usePlaygroundRoutes() {
   })
 
   const routeKey = (route: PlaygroundRoute) => `${route.method} ${route.url}`
+  const disabledKey = (route: PlaygroundDisabledRoute) =>
+    `${route.file}|${route.reason}|${route.method ?? ''}|${route.url ?? ''}`
+  const ignoredKey = (route: PlaygroundIgnoredRoute) => `${route.file}|${route.reason}`
 
   function getGroupRoutes() {
     return activeGroup.value === 'all'
@@ -145,6 +150,14 @@ export function usePlaygroundRoutes() {
     selected.value = route
   }
 
+  function selectDisabledRoute(route: PlaygroundDisabledRoute | null) {
+    selectedDisabled.value = route
+  }
+
+  function selectIgnoredRoute(route: PlaygroundIgnoredRoute | null) {
+    selectedIgnored.value = route
+  }
+
   function selectConfig(config: PlaygroundConfigFile | null) {
     selectedConfig.value = config
   }
@@ -157,6 +170,12 @@ export function usePlaygroundRoutes() {
     loading.value = true
     error.value = ''
     const previousKey = selected.value ? routeKey(selected.value) : ''
+    const previousDisabledKey = selectedDisabled.value
+      ? disabledKey(selectedDisabled.value)
+      : ''
+    const previousIgnoredKey = selectedIgnored.value
+      ? ignoredKey(selectedIgnored.value)
+      : ''
     const previousGroup = activeGroup.value
     const previousConfig = selectedConfig.value?.file ?? ''
     try {
@@ -187,6 +206,20 @@ export function usePlaygroundRoutes() {
       }
       else {
         selected.value = filtered.value[0] ?? null
+      }
+      if (previousDisabledKey) {
+        const match = disabledRoutes.value.find(route => disabledKey(route) === previousDisabledKey)
+        selectedDisabled.value = match ?? disabledRoutes.value[0] ?? null
+      }
+      else {
+        selectedDisabled.value = disabledRoutes.value[0] ?? null
+      }
+      if (previousIgnoredKey) {
+        const match = ignoredRoutes.value.find(route => ignoredKey(route) === previousIgnoredKey)
+        selectedIgnored.value = match ?? ignoredRoutes.value[0] ?? null
+      }
+      else {
+        selectedIgnored.value = ignoredRoutes.value[0] ?? null
       }
       if (previousConfig) {
         const configMatch = configFiles.value.find(entry => entry.file === previousConfig)
@@ -270,6 +303,8 @@ export function usePlaygroundRoutes() {
     filtered,
     selected,
     selectedConfig,
+    selectedDisabled,
+    selectedIgnored,
     groups,
     activeGroup,
     loading,
@@ -288,6 +323,8 @@ export function usePlaygroundRoutes() {
     loadRoutes,
     setActiveGroup,
     selectRoute,
+    selectDisabledRoute,
+    selectIgnoredRoute,
     selectConfig,
     setBasePath,
     configImpactRoutes,

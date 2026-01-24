@@ -47,6 +47,16 @@ interface MiddlewareMeta {
   post?: unknown[]
 }
 
+interface ConfigSourceMap {
+  headers?: string
+  status?: string
+  delay?: string
+  enabled?: string
+  ignorePrefix?: string
+  include?: string
+  exclude?: string
+}
+
 async function loadModule(file: string) {
   const ext = configExtensions.find(extension => file.endsWith(extension))
   if (ext === '.cjs') {
@@ -204,6 +214,7 @@ export async function resolveDirectoryConfig(params: {
   exclude?: RegExp | RegExp[]
   middlewares: ResolvedMiddleware[]
   configChain: string[]
+  configSources: ConfigSourceMap
 }> {
   const { file, rootDir, server, logger, configCache, fileCache } = params
   const resolvedRoot = normalize(rootDir)
@@ -236,6 +247,7 @@ export async function resolveDirectoryConfig(params: {
   const normalMiddlewares: ResolvedMiddleware[] = []
   const postMiddlewares: ResolvedMiddleware[] = []
   const configChain: string[] = []
+  const configSources: ConfigSourceMap = {}
 
   for (const dir of chain) {
     const configPath = await findConfigFile(dir, fileCache)
@@ -254,24 +266,31 @@ export async function resolveDirectoryConfig(params: {
     configChain.push(configPath)
     if (config.headers) {
       merged.headers = { ...(merged.headers ?? {}), ...config.headers }
+      configSources.headers = configPath
     }
     if (typeof config.status === 'number') {
       merged.status = config.status
+      configSources.status = configPath
     }
     if (typeof config.delay === 'number') {
       merged.delay = config.delay
+      configSources.delay = configPath
     }
     if (typeof config.enabled === 'boolean') {
       merged.enabled = config.enabled
+      configSources.enabled = configPath
     }
     if (typeof config.ignorePrefix !== 'undefined') {
       merged.ignorePrefix = config.ignorePrefix
+      configSources.ignorePrefix = configPath
     }
     if (typeof config.include !== 'undefined') {
       merged.include = config.include
+      configSources.include = configPath
     }
     if (typeof config.exclude !== 'undefined') {
       merged.exclude = config.exclude
+      configSources.exclude = configPath
     }
     const meta = readMiddlewareMeta(config)
     const normalizedPre = normalizeMiddlewares(
@@ -316,5 +335,6 @@ export async function resolveDirectoryConfig(params: {
     ...merged,
     middlewares: [...preMiddlewares, ...normalMiddlewares, ...postMiddlewares],
     configChain,
+    configSources,
   }
 }
