@@ -17,7 +17,7 @@
   },
   "dependencies": {
     "@faker-js/faker": "catalog:",
-    "axios": "^1.13.2",
+    "axios": "^1.13.3",
     "mokup": "workspace:*",
     "vue": "catalog:",
     "vue-router": "^4.6.0"
