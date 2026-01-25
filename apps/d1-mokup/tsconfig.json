@@ -1,0 +1,18 @@
+{
+  "extends": "../../tsconfig.json",
+  "compilerOptions": {
+    "types": [
+      "vite/client",
+      "@cloudflare/workers-types",
+      "node"
+    ]
+  },
+  "include": [
+    "src",
+    "worker",
+    "mock",
+    "db",
+    "env.d.ts",
+    "drizzle.config.ts"
+  ]
+}

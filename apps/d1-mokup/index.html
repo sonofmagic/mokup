@@ -1,0 +1,73 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,600;9..144,700&family=Space+Grotesk:wght@400;500;600&display=swap"
+      rel="stylesheet"
+    />
+    <title>D1 Mokup Auth Lab</title>
+  </head>
+  <body>
+    <div id="app">
+      <header class="hero">
+        <p class="hero__tag">Workers + D1 + Mokup</p>
+        <h1>D1 auth playground with real mocks.</h1>
+        <p class="hero__lead">
+          Drizzle-backed users, Better Auth sessions, and GitHub OAuth sitting behind mokup rules.
+        </p>
+        <div class="hero__actions">
+          <button id="github-login" class="btn btn--accent" type="button">Sign in with GitHub</button>
+          <button id="signout" class="btn btn--ghost" type="button">Sign out</button>
+        </div>
+      </header>
+
+      <main class="grid">
+        <section class="card">
+          <h2>Email login</h2>
+          <form id="email-form" class="form">
+            <label>
+              Name
+              <input id="name" name="name" type="text" placeholder="Ada Lovelace" />
+            </label>
+            <label>
+              Email
+              <input id="email" name="email" type="email" placeholder="ada@mokup.dev" required />
+            </label>
+            <label>
+              Password
+              <input id="password" name="password" type="password" minlength="8" required />
+            </label>
+            <div class="form__actions">
+              <button class="btn" data-action="signup" type="submit">Sign up</button>
+              <button class="btn btn--ghost" data-action="signin" type="submit">Sign in</button>
+            </div>
+          </form>
+        </section>
+
+        <section class="card">
+          <div class="card__header">
+            <h2>Users</h2>
+            <button id="refresh-users" class="btn btn--ghost" type="button">Refresh</button>
+          </div>
+          <ul id="users" class="list"></ul>
+          <form id="user-form" class="form form--inline">
+            <input id="user-name" type="text" placeholder="Name" required />
+            <input id="user-email" type="email" placeholder="Email" required />
+            <button class="btn" type="submit">Create user</button>
+          </form>
+        </section>
+
+        <section class="card card--status">
+          <h2>Status</h2>
+          <p id="status" class="status">Waiting for input.</p>
+          <p class="meta">API base: <span id="api-base">/api</span></p>
+        </section>
+      </main>
+    </div>
+    <script type="module" src="/src/main.ts"></script>
+  </body>
+</html>

@@ -1,0 +1,20 @@
+{
+  "name": "d1-mokup-worker",
+  "main": "worker/src/index.ts",
+  "compatibility_date": "2025-01-15",
+  "compatibility_flags": ["nodejs_compat"],
+  "d1_databases": [
+    {
+      "binding": "DB",
+      "database_name": "d1-mokup",
+      "database_id": "REPLACE_WITH_YOUR_DATABASE_ID",
+      "migrations_dir": "db/migrations"
+    }
+  ],
+  "vars": {
+    "BETTER_AUTH_URL": "http://localhost:5173",
+    "BETTER_AUTH_SECRET": "replace-me",
+    "GITHUB_CLIENT_ID": "",
+    "GITHUB_CLIENT_SECRET": ""
+  }
+}
