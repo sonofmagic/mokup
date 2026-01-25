@@ -1,5 +1,10 @@
-import process from 'node:process'
+import { env } from 'node:process'
 import { defineConfig } from 'drizzle-kit'
+
+const envVars = env as Record<
+  'CLOUDFLARE_ACCOUNT_ID' | 'CLOUDFLARE_DATABASE_ID' | 'CLOUDFLARE_D1_TOKEN',
+  string | undefined
+>
 
 export default defineConfig({
   schema: './db/schema.ts',
@@ -7,8 +12,8 @@ export default defineConfig({
   dialect: 'sqlite',
   driver: 'd1-http',
   dbCredentials: {
-    accountId: process.env.CLOUDFLARE_ACCOUNT_ID ?? '',
-    databaseId: process.env.CLOUDFLARE_DATABASE_ID ?? '',
-    token: process.env.CLOUDFLARE_D1_TOKEN ?? '',
+    accountId: envVars.CLOUDFLARE_ACCOUNT_ID ?? '',
+    databaseId: envVars.CLOUDFLARE_DATABASE_ID ?? '',
+    token: envVars.CLOUDFLARE_D1_TOKEN ?? '',
   },
 })
