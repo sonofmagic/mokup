@@ -1,5 +1,11 @@
 # @mokup/playground
 
+## 0.0.13
+
+### Patch Changes
+
+- 🐛 **Improve the playground request panel with collapsible config/middleware sections, clearer missing-param guidance, and stronger selection cues in the sidebar.** [`ee04bdf`](https://github.com/sonofmagic/mokup/commit/ee04bdfe4ebeaa01321dd7bb1eb29859431ec27f) by @sonofmagic
+
 ## 0.0.12
 
 ### Patch Changes

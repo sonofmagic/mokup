@@ -1,5 +1,12 @@
 # mock-sw
 
+## 0.0.16
+
+### Patch Changes
+
+- 📦 **Dependencies** [`bb0a019`](https://github.com/sonofmagic/mokup/commit/bb0a019d1e9b09ebbde754b2cbf914cca9364f13)
+  → `mokup@2.2.0`
+
 ## 0.0.15
 
 ### Patch Changes
