@@ -1,5 +1,6 @@
 import type { resolveSwConfig, resolveSwUnregisterConfig } from '../../core/sw'
 import { existsSync } from 'node:fs'
+import { dirname, resolve } from 'node:path'
 import { fileURLToPath } from 'node:url'
 
 interface SwResolveContext {
@@ -7,18 +8,37 @@ interface SwResolveContext {
 }
 
 const swModuleCandidates = [
-  new URL('../../sw.ts', import.meta.url),
-  new URL('../../sw.js', import.meta.url),
+  'dist/sw.mjs',
+  'dist/sw.js',
+  'src/sw.ts',
+  'src/sw.js',
 ]
 
+function resolvePackageRoot() {
+  const moduleDir = dirname(fileURLToPath(import.meta.url))
+  let current = moduleDir
+  for (let index = 0; index < 6; index += 1) {
+    if (existsSync(resolve(current, 'package.json'))) {
+      return current
+    }
+    const parent = dirname(current)
+    if (parent === current) {
+      break
+    }
+    current = parent
+  }
+  return moduleDir
+}
+
 const localSwModulePath = (() => {
+  const packageRoot = resolvePackageRoot()
   for (const candidate of swModuleCandidates) {
-    const filePath = fileURLToPath(candidate)
+    const filePath = resolve(packageRoot, candidate)
     if (existsSync(filePath)) {
       return filePath
     }
   }
-  return fileURLToPath(swModuleCandidates[0] ?? new URL('../../sw.ts', import.meta.url))
+  return resolve(packageRoot, 'src/sw.ts')
 })()
 
 async function resolveSwModuleImport(context: SwResolveContext) {
