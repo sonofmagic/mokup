@@ -84,6 +84,12 @@ export type PlaygroundOptionsInput = boolean | {
    */
   path?: string
   /**
+   * Emit playground assets during production builds.
+   *
+   * @default false
+   */
+  build?: boolean
+  /**
    * Enable or disable the playground routes.
    *
    * @default true

@@ -9,9 +9,9 @@
  */
 export { default } from 'chokidar'
 /**
- * Re-export chokidar types and helpers.
+ * Re-export chokidar types.
  *
  * @example
  * import type { FSWatcher } from '@mokup/shared/chokidar'
  */
-export * from 'chokidar'
+export type * from 'chokidar'

@@ -8,9 +8,8 @@
     "dev": "vitepress dev docs --host",
     "prebuild:docs": "pnpm --filter mokup build",
     "build:docs": "vitepress build docs",
-    "build:playground": "MOKUP_PLAYGROUND_SW=1 MOKUP_PLAYGROUND_OUT_DIR=dist-docs pnpm --filter @mokup/playground build && MOKUP_PLAYGROUND_OUT_DIR=dist-docs node scripts/copy-playground.mjs",
-    "build:routes": "node scripts/build-playground-routes.mjs",
-    "build": "pnpm build:docs && pnpm build:playground && pnpm build:routes",
+    "build:playground": "pnpm --filter @mokup/playground build",
+    "build": "pnpm build:playground && pnpm build:docs",
     "preview": "vitepress preview docs",
     "worker:dev": "pnpm build && wrangler dev",
     "worker:deploy": "pnpm build && wrangler deploy"

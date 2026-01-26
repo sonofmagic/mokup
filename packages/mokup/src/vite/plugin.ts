@@ -4,7 +4,7 @@ import type { MokupPluginOptions } from '../shared/types'
 import type { PluginState } from './plugin/state'
 import { cwd } from 'node:process'
 import { buildBundleModule } from '../core/bundle'
-import { createPlaygroundMiddleware, resolvePlaygroundOptions } from '../core/playground'
+import { createPlaygroundMiddleware, resolvePlaygroundOptions, writePlaygroundBuild } from '../core/playground'
 import { buildSwScript, resolveSwConfig, resolveSwUnregisterConfig } from '../core/sw'
 import { createLogger } from '../shared/logger'
 import { normalizeMokupOptions, normalizeOptions } from './plugin/options'
@@ -12,7 +12,7 @@ import { resolveSwImportPath } from './plugin/paths'
 import { createRouteRefresher } from './plugin/refresh'
 import { createDirResolver, createHtmlAssetResolver, createSwPathResolver } from './plugin/resolvers'
 import { configureDevServer, configurePreviewServer } from './plugin/server-hooks'
-import { buildSwLifecycleScript, resolveSwModuleImport } from './plugin/sw'
+import { buildSwLifecycleInlineScript, buildSwLifecycleScript, resolveSwModuleImport } from './plugin/sw'
 
 /**
  * Create the mokup Vite plugin.
@@ -37,6 +37,8 @@ export function createMokupPlugin(options: MokupPluginOptions = {}): Plugin {
   let base = '/'
   let command: 'serve' | 'build' = 'serve'
   let assetsDir = 'assets'
+  let outDir = 'dist'
+  let isSsrBuild = false
   const state: PluginState = {
     routes: [],
     serverRoutes: [],
@@ -265,6 +267,8 @@ export function createMokupPlugin(options: MokupPluginOptions = {}): Plugin {
       base = config.base ?? '/'
       command = config.command
       assetsDir = config.build.assetsDir ?? 'assets'
+      outDir = config.build.outDir ?? 'dist'
+      isSsrBuild = !!config.build.ssr
     },
     async configureServer(server) {
       currentServer = server
@@ -305,9 +309,35 @@ export function createMokupPlugin(options: MokupPluginOptions = {}): Plugin {
         previewWatcher = null
       })
     },
-    closeBundle() {
+    async closeBundle() {
       previewWatcher?.close()
       previewWatcher = null
+      if (command !== 'build' || isSsrBuild || !playgroundConfig.enabled || playgroundConfig.build !== true) {
+        return
+      }
+      await refreshRoutes()
+      const swScript = buildSwLifecycleInlineScript({
+        swConfig,
+        unregisterConfig,
+        hasSwEntries,
+        hasSwRoutes: hasSwRoutes(),
+        resolveRequestPath: resolveSwRequestPath,
+        resolveRegisterScope: resolveSwRegisterScope,
+      })
+      await writePlaygroundBuild({
+        outDir,
+        base,
+        playgroundPath: playgroundConfig.path,
+        root,
+        routes: state.routes,
+        disabledRoutes: state.disabledRoutes,
+        ignoredRoutes: state.ignoredRoutes,
+        configFiles: state.configFiles,
+        disabledConfigFiles: state.disabledConfigFiles,
+        dirs: resolveAllDirs(),
+        swScript,
+        logger,
+      })
     },
   }
 }

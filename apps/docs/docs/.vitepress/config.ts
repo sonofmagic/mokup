@@ -35,7 +35,7 @@ const vitePlugins = [
       },
     },
     playground: {
-
+      build: true,
     },
   }),
   groupIconVitePlugin(),

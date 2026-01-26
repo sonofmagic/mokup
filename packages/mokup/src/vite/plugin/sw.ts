@@ -103,5 +103,101 @@ function buildSwLifecycleScript(params: {
   ].join('\n')
 }
 
+function buildSwLifecycleInlineScript(params: {
+  swConfig: ReturnType<typeof resolveSwConfig>
+  unregisterConfig: ReturnType<typeof resolveSwUnregisterConfig>
+  hasSwEntries: boolean
+  hasSwRoutes: boolean
+  resolveRequestPath: (path: string) => string
+  resolveRegisterScope: (scope: string) => string
+}) {
+  const {
+    swConfig,
+    unregisterConfig,
+    hasSwEntries,
+    hasSwRoutes,
+    resolveRequestPath,
+    resolveRegisterScope,
+  } = params
+  const shouldUnregister = unregisterConfig.unregister === true || !hasSwEntries
+  if (shouldUnregister) {
+    const path = resolveRequestPath(unregisterConfig.path)
+    const scope = resolveRegisterScope(unregisterConfig.scope)
+    return [
+      '(async () => {',
+      '  if (typeof window === \'undefined\' || !(\'serviceWorker\' in navigator)) {',
+      '    return',
+      '  }',
+      `  const path = ${JSON.stringify(path)}`,
+      `  const scope = ${JSON.stringify(scope)}`,
+      '  const origin = window.location.origin',
+      '  const normalizeScope = (value) => {',
+      '    const url = new URL(value, origin)',
+      '    if (!url.pathname.endsWith(\'/\')) {',
+      '      url.pathname = url.pathname + \'/\'',
+      '    }',
+      '    return url.href',
+      '  }',
+      '  const pathUrl = new URL(path, origin)',
+      '  const scopeUrl = normalizeScope(scope)',
+      '  const matchesScript = (scriptUrl) => {',
+      '    if (!scriptUrl) {',
+      '      return false',
+      '    }',
+      '    try {',
+      '      const parsed = new URL(scriptUrl)',
+      '      return parsed.origin === origin && parsed.pathname === pathUrl.pathname',
+      '    }',
+      '    catch {',
+      '      return false',
+      '    }',
+      '  }',
+      '  try {',
+      '    const registrations = await navigator.serviceWorker.getRegistrations()',
+      '    for (const registration of registrations) {',
+      '      if (registration.scope !== scopeUrl) {',
+      '        continue',
+      '      }',
+      '      const scriptUrls = [',
+      '        registration.active?.scriptURL,',
+      '        registration.waiting?.scriptURL,',
+      '        registration.installing?.scriptURL,',
+      '      ]',
+      '      if (scriptUrls.some(matchesScript)) {',
+      '        await registration.unregister()',
+      '      }',
+      '    }',
+      '  }',
+      '  catch (error) {',
+      '    console.warn(\'Failed to unregister service worker:\', error)',
+      '  }',
+      '})()',
+    ].join('\n')
+  }
+  if (!swConfig || swConfig.register === false) {
+    return null
+  }
+  if (!hasSwRoutes) {
+    return null
+  }
+  const path = resolveRequestPath(swConfig.path)
+  const scope = resolveRegisterScope(swConfig.scope)
+  return [
+    '(async () => {',
+    '  if (typeof window === \'undefined\' || !(\'serviceWorker\' in navigator)) {',
+    '    return',
+    '  }',
+    `  const path = ${JSON.stringify(path)}`,
+    `  const scope = ${JSON.stringify(scope)}`,
+    '  try {',
+    '    await navigator.serviceWorker.register(path, { type: \'module\', scope })',
+    '  }',
+    '  catch (error) {',
+    '    console.warn(\'Failed to register service worker:\', error)',
+    '  }',
+    '})()',
+  ].join('\n')
+}
+
 export type { SwResolveContext }
-export { buildSwLifecycleScript, resolveSwModuleImport }
+export { buildSwLifecycleInlineScript, buildSwLifecycleScript, resolveSwModuleImport }

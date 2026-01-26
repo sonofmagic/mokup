@@ -3,6 +3,7 @@ import type { PlaygroundOptionsInput } from '../../shared/types'
 interface PlaygroundConfig {
   enabled: boolean
   path: string
+  build: boolean
 }
 
 function normalizePlaygroundPath(value?: string) {
@@ -49,15 +50,16 @@ export function resolvePlaygroundOptions(
   playground: PlaygroundOptionsInput,
 ): PlaygroundConfig {
   if (playground === false) {
-    return { enabled: false, path: '/__mokup' }
+    return { enabled: false, path: '/__mokup', build: false }
   }
   if (playground && typeof playground === 'object') {
     return {
       enabled: playground.enabled !== false,
       path: normalizePlaygroundPath(playground.path),
+      build: playground.build === true,
     }
   }
-  return { enabled: true, path: '/__mokup' }
+  return { enabled: true, path: '/__mokup', build: false }
 }
 
 export type { PlaygroundConfig }
