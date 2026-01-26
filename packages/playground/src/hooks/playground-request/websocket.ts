@@ -10,7 +10,28 @@ interface PlaygroundWsIncrement {
   total: number
 }
 
+function isPlaygroundWsEnabled() {
+  if (import.meta.env.DEV) {
+    return true
+  }
+  const raw = import.meta.env.VITE_MOKUP_PLAYGROUND_WS
+  if (!raw) {
+    return false
+  }
+  const normalized = raw.trim().toLowerCase()
+  if (['1', 'true', 'yes', 'on'].includes(normalized)) {
+    return true
+  }
+  if (['0', 'false', 'no', 'off'].includes(normalized)) {
+    return false
+  }
+  return false
+}
+
 function resolvePlaygroundWsUrl(basePath: string) {
+  if (!isPlaygroundWsEnabled()) {
+    return ''
+  }
   const trimmed = basePath.trim()
   if (!trimmed) {
     return ''
