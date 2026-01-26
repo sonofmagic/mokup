@@ -41,6 +41,8 @@ const emit = defineEmits<{
 
 const { t } = useI18n()
 
+const selectedRowClass = 'relative bg-pg-accent/12 text-pg-text-strong font-semibold shadow-[inset_4px_0_0_0_var(--color-pg-accent)]'
+
 const routeTreeProps = computed(() => {
   const base: {
     rows: TreeRow[]
@@ -94,11 +96,21 @@ function isSelectedConfig(entry: PlaygroundConfigFile) {
   return props.selectedConfig?.file === entry.file
 }
 
+function resolveDisabledKey(route: PlaygroundDisabledRoute | null | undefined) {
+  if (!route) {
+    return ''
+  }
+  const method = (route.method ?? '').toUpperCase()
+  const url = route.url ?? ''
+  return `${route.file}|${route.reason}|${method}|${url}`
+}
+
 function isSelectedDisabled(route: PlaygroundDisabledRoute) {
-  return props.selectedDisabled?.file === route.file
-    && props.selectedDisabled?.reason === route.reason
-    && props.selectedDisabled?.method === route.method
-    && props.selectedDisabled?.url === route.url
+  const selectedKey = resolveDisabledKey(props.selectedDisabled)
+  if (!selectedKey) {
+    return false
+  }
+  return resolveDisabledKey(route) === selectedKey
 }
 
 function isSelectedIgnored(route: PlaygroundIgnoredRoute) {
@@ -145,7 +157,7 @@ function isSelectedIgnored(route: PlaygroundIgnoredRoute) {
           v-for="route in props.disabledFiltered"
           :key="`${route.file}-${route.reason}-${route.method ?? ''}-${route.url ?? ''}`"
           class="rounded-2xl border px-4 py-3 text-left text-xs transition border-pg-border bg-pg-surface-soft text-pg-text-soft hover:bg-pg-hover-strong"
-          :class="isSelectedDisabled(route) ? 'border-pg-accent bg-pg-accent/10 text-pg-text' : ''"
+          :class="isSelectedDisabled(route) ? selectedRowClass : ''"
           type="button"
           @click="emit('select-disabled-route', route)"
         >
@@ -166,6 +178,13 @@ function isSelectedIgnored(route: PlaygroundIgnoredRoute) {
               </span>
             </div>
             <div class="flex items-center gap-2">
+              <span
+                v-if="isSelectedDisabled(route)"
+                class="flex h-6 w-6 items-center justify-center rounded-full border border-pg-accent/40 bg-pg-accent/10 text-pg-accent"
+                aria-hidden="true"
+              >
+                <span class="i-[carbon--checkmark] h-3.5 w-3.5" />
+              </span>
               <UiPill tone="strong" size="sm" tracking="tight">
                 {{ reasonLabel(route.reason) }}
               </UiPill>
@@ -194,7 +213,7 @@ function isSelectedIgnored(route: PlaygroundIgnoredRoute) {
           v-for="entry in props.disabledConfigFiltered"
           :key="entry.file"
           class="rounded-2xl border px-4 py-3 text-left text-xs transition border-pg-border bg-pg-surface-soft text-pg-text-soft hover:bg-pg-hover-strong"
-          :class="isSelectedConfig(entry) ? 'border-pg-accent bg-pg-accent/10 text-pg-text' : ''"
+          :class="isSelectedConfig(entry) ? selectedRowClass : ''"
           type="button"
           @click="emit('select-config', entry)"
         >
@@ -205,6 +224,13 @@ function isSelectedIgnored(route: PlaygroundIgnoredRoute) {
               </span>
             </div>
             <div class="flex items-center gap-2">
+              <span
+                v-if="isSelectedConfig(entry)"
+                class="flex h-6 w-6 items-center justify-center rounded-full border border-pg-accent/40 bg-pg-accent/10 text-pg-accent"
+                aria-hidden="true"
+              >
+                <span class="i-[carbon--checkmark] h-3.5 w-3.5" />
+              </span>
               <UiPill tone="strong" size="sm" tracking="tight">
                 {{ t('enabled.configLabel') }}
               </UiPill>
@@ -227,7 +253,7 @@ function isSelectedIgnored(route: PlaygroundIgnoredRoute) {
           v-for="route in props.ignoredFiltered"
           :key="`${route.file}-${route.reason}`"
           class="rounded-2xl border px-4 py-3 text-left text-xs transition border-pg-border bg-pg-surface-soft text-pg-text-soft hover:bg-pg-hover-strong"
-          :class="isSelectedIgnored(route) ? 'border-pg-accent bg-pg-accent/10 text-pg-text' : ''"
+          :class="isSelectedIgnored(route) ? selectedRowClass : ''"
           type="button"
           @click="emit('select-ignored-route', route)"
         >
@@ -238,6 +264,13 @@ function isSelectedIgnored(route: PlaygroundIgnoredRoute) {
               </span>
             </div>
             <div class="flex items-center gap-2">
+              <span
+                v-if="isSelectedIgnored(route)"
+                class="flex h-6 w-6 items-center justify-center rounded-full border border-pg-accent/40 bg-pg-accent/10 text-pg-accent"
+                aria-hidden="true"
+              >
+                <span class="i-[carbon--checkmark] h-3.5 w-3.5" />
+              </span>
               <UiPill tone="strong" size="sm" tracking="tight">
                 {{ ignoredReasonLabel(route.reason) }}
               </UiPill>
@@ -260,7 +293,7 @@ function isSelectedIgnored(route: PlaygroundIgnoredRoute) {
           v-for="entry in props.configFiltered"
           :key="entry.file"
           class="rounded-2xl border px-4 py-3 text-left text-xs transition border-pg-border bg-pg-surface-soft text-pg-text-soft hover:bg-pg-hover-strong"
-          :class="isSelectedConfig(entry) ? 'border-pg-accent bg-pg-accent/10 text-pg-text' : ''"
+          :class="isSelectedConfig(entry) ? selectedRowClass : ''"
           type="button"
           @click="emit('select-config', entry)"
         >
@@ -271,6 +304,13 @@ function isSelectedIgnored(route: PlaygroundIgnoredRoute) {
               </span>
             </div>
             <div class="flex items-center gap-2">
+              <span
+                v-if="isSelectedConfig(entry)"
+                class="flex h-6 w-6 items-center justify-center rounded-full border border-pg-accent/40 bg-pg-accent/10 text-pg-accent"
+                aria-hidden="true"
+              >
+                <span class="i-[carbon--checkmark] h-3.5 w-3.5" />
+              </span>
               <UiPill tone="strong" size="sm" tracking="tight">
                 {{ t('enabled.configLabel') }}
               </UiPill>

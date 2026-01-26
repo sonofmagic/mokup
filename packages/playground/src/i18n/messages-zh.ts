@@ -74,6 +74,8 @@ const zhMessages = {
     responseLabel: '响应',
     run: '发送',
     params: '路径参数',
+    badgeRequired: '必填',
+    badgeJson: 'JSON',
     emptyParams: '该接口没有路径参数。',
     query: '查询参数 (JSON)',
     headers: '请求头 (JSON)',

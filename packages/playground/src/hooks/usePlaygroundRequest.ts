@@ -50,6 +50,8 @@ export function usePlaygroundRequest(
   const routeTokens = ref<RouteToken[]>([])
   const routeParams = ref<RouteParamField[]>([])
   const paramValues = ref<Record<string, string>>({})
+  const missingParams = ref<string[]>([])
+  const missingPulse = ref(0)
   const requestUrl = computed(() => {
     if (!selected.value) {
       return ''
@@ -135,9 +137,18 @@ export function usePlaygroundRequest(
       ...paramValues.value,
       [name]: value,
     }
+    if (!value.trim()) {
+      return
+    }
+    if (!missingParams.value.includes(name)) {
+      return
+    }
+    missingParams.value = missingParams.value.filter(param => param !== name)
   }
 
   function syncRouteParams(route: PlaygroundRoute | null) {
+    missingParams.value = []
+    missingPulse.value = 0
     if (!route) {
       routeTokens.value = []
       routeParams.value = []
@@ -226,6 +237,10 @@ export function usePlaygroundRequest(
     isServerCounts,
     ensureSwReady,
     getRouteKey,
+    onMissingParams: (missing) => {
+      missingParams.value = [...missing]
+      missingPulse.value += 1
+    },
   })
 
   watch(selected, () => {
@@ -246,6 +261,8 @@ export function usePlaygroundRequest(
     isSwRegistering,
     routeParams,
     paramValues,
+    missingParams,
+    missingPulse,
     setParamValue,
     requestUrl,
     routeCounts,

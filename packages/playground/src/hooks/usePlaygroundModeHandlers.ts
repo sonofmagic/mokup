@@ -17,11 +17,21 @@ export function usePlaygroundModeHandlers(params: {
   filtered: Ref<PlaygroundRoute[]>
   disabledFiltered: Ref<PlaygroundDisabledRoute[]>
   ignoredFiltered: Ref<PlaygroundIgnoredRoute[]>
+  lastSelectedKey: Ref<string>
+  getRouteKey: (route: PlaygroundRoute) => string
   selectRoute: (route: PlaygroundRoute | null) => void
   selectDisabledRoute: (route: PlaygroundDisabledRoute | null) => void
   selectIgnoredRoute: (route: PlaygroundIgnoredRoute | null) => void
   selectConfig: (config: PlaygroundConfigFile | null) => void
 }) {
+  function resolveLastSelectedRoute() {
+    const key = params.lastSelectedKey.value
+    if (!key) {
+      return null
+    }
+    return params.filtered.value.find(route => params.getRouteKey(route) === key) ?? null
+  }
+
   function setRouteMode(mode: 'active' | 'disabled' | 'ignored') {
     params.routeMode.value = mode
     if (mode !== 'active') {
@@ -40,7 +50,10 @@ export function usePlaygroundModeHandlers(params: {
     params.selectDisabledRoute(null)
     params.selectIgnoredRoute(null)
     if (params.enabledMode.value === 'api' && !params.selected.value) {
-      params.selectRoute(params.filtered.value[0] ?? null)
+      const lastSelected = resolveLastSelectedRoute()
+      if (lastSelected) {
+        params.selectRoute(lastSelected)
+      }
     }
     if (params.enabledMode.value !== 'config') {
       params.selectConfig(null)
@@ -57,7 +70,10 @@ export function usePlaygroundModeHandlers(params: {
     params.selectDisabledRoute(null)
     params.selectIgnoredRoute(null)
     if (!params.selected.value) {
-      params.selectRoute(params.filtered.value[0] ?? null)
+      const lastSelected = resolveLastSelectedRoute()
+      if (lastSelected) {
+        params.selectRoute(lastSelected)
+      }
     }
   }
 

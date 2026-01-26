@@ -24,6 +24,7 @@ function createRequestRunner(params: {
   isServerCounts: Ref<boolean>
   ensureSwReady: () => Promise<boolean>
   getRouteKey: (route: PlaygroundRoute) => string
+  onMissingParams?: (missing: string[]) => void
 }) {
   const resetResponse = () => {
     params.responseText.value = params.t('response.empty')
@@ -40,6 +41,7 @@ function createRequestRunner(params: {
       : parseRouteTemplate(params.selected.value.url).tokens
     const resolved = buildResolvedPath(tokens, params.paramValues.value)
     if (resolved.missing.length > 0) {
+      params.onMissingParams?.(resolved.missing)
       params.responseText.value = params.t('errors.routeParams', { params: resolved.missing.join(', ') })
       return
     }

@@ -75,6 +75,8 @@ const enMessages = {
     responseLabel: 'Response',
     run: 'Run',
     params: 'Params',
+    badgeRequired: 'Required',
+    badgeJson: 'JSON',
     emptyParams: 'No params for this route.',
     query: 'Query (JSON)',
     headers: 'Headers (JSON)',

@@ -44,6 +44,7 @@ const {
   disabledConfigCount,
   configStatusMap,
   routeKey,
+  lastSelectedKey,
   loadRoutes,
   setActiveGroup,
   selectRoute,
@@ -66,6 +67,8 @@ const {
   isSwRegistering,
   routeParams,
   paramValues,
+  missingParams,
+  missingPulse,
   setParamValue,
   requestUrl,
   totalCount,
@@ -120,6 +123,8 @@ const {
   filtered,
   disabledFiltered,
   ignoredFiltered,
+  lastSelectedKey,
+  getRouteKey: routeKey,
   selectRoute,
   selectDisabledRoute,
   selectIgnoredRoute,
@@ -250,6 +255,8 @@ onBeforeUnmount(() => {
                   :is-sw-registering="isSwRegistering"
                   :route-params="routeParams"
                   :param-values="paramValues"
+                  :missing-params="missingParams"
+                  :missing-pulse="missingPulse"
                   :route-mode="routeMode"
                   :enabled-mode="enabledMode"
                   :disabled-mode="disabledMode"

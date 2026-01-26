@@ -66,6 +66,7 @@ export function usePlaygroundRoutes() {
   const disabledKey = (route: PlaygroundDisabledRoute) =>
     `${route.file}|${route.reason}|${route.method ?? ''}|${route.url ?? ''}`
   const ignoredKey = (route: PlaygroundIgnoredRoute) => `${route.file}|${route.reason}`
+  const lastSelectedKey = ref('')
 
   function getGroupRoutes() {
     return activeGroup.value === 'all'
@@ -170,7 +171,7 @@ export function usePlaygroundRoutes() {
   async function loadRoutes() {
     loading.value = true
     error.value = ''
-    const previousKey = selected.value ? routeKey(selected.value) : ''
+    const previousKey = lastSelectedKey.value
     const previousDisabledKey = selectedDisabled.value
       ? disabledKey(selectedDisabled.value)
       : ''
@@ -203,7 +204,7 @@ export function usePlaygroundRoutes() {
       applyDisabledConfigFilter()
       if (previousKey) {
         const match = filtered.value.find(route => routeKey(route) === previousKey)
-        selected.value = match ?? filtered.value[0] ?? null
+        selected.value = match ?? null
       }
       else {
         selected.value = filtered.value[0] ?? null
@@ -241,6 +242,12 @@ export function usePlaygroundRoutes() {
     applyFilter()
     applyConfigFilter()
     applyDisabledConfigFilter()
+  })
+
+  watch(selected, (value) => {
+    if (value) {
+      lastSelectedKey.value = routeKey(value)
+    }
   })
 
   const configImpactRoutes = computed<PlaygroundConfigImpactRoute[]>(() => {
@@ -285,6 +292,7 @@ export function usePlaygroundRoutes() {
     disabledConfigCount,
     configStatusMap,
     routeKey,
+    lastSelectedKey,
     loadRoutes,
     setActiveGroup,
     selectRoute,

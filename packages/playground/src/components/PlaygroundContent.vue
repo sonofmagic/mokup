@@ -22,6 +22,8 @@ const props = defineProps<{
   workspaceRoot?: string
   routeParams: RouteParamField[]
   paramValues: Record<string, string>
+  missingParams: string[]
+  missingPulse: number
   queryText: string
   headersText: string
   bodyText: string
@@ -113,6 +115,8 @@ function handleRun() {
     :is-sw-registering="props.isSwRegistering"
     :route-params="props.routeParams"
     :param-values="props.paramValues"
+    :missing-params="props.missingParams"
+    :missing-pulse="props.missingPulse"
     :config-status-map="props.configStatusMap"
     @update:param-value="handleParamUpdate"
     @run="handleRun"

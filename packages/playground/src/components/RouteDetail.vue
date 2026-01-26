@@ -10,6 +10,8 @@ const props = defineProps<{
   workspaceRoot: string
   routeParams: RouteParamField[]
   paramValues: Record<string, string>
+  missingParams: string[]
+  missingPulse: number
   queryText: string
   headersText: string
   bodyText: string
@@ -50,6 +52,8 @@ const { t } = useI18n()
         :workspace-root="props.workspaceRoot"
         :route-params="props.routeParams"
         :param-values="props.paramValues"
+        :missing-params="props.missingParams"
+        :missing-pulse="props.missingPulse"
         :query-text="props.queryText"
         :headers-text="props.headersText"
         :body-text="props.bodyText"

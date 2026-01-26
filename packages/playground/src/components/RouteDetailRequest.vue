@@ -1,12 +1,13 @@
 <script setup lang="ts">
 import type { BodyType, PlaygroundRoute, RouteParamField } from '../types'
-import { computed, ref, toRefs, watch } from 'vue'
+import { computed, nextTick, onBeforeUnmount, ref, toRefs, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 import RouteDetailConfigChain from './RouteDetailConfigChain.vue'
 import RouteDetailMiddlewares from './RouteDetailMiddlewares.vue'
 import RouteDetailRequestHeader from './RouteDetailRequestHeader.vue'
 import UiChipButton from './ui/UiChipButton.vue'
 import UiField from './ui/UiField.vue'
+import UiPill from './ui/UiPill.vue'
 import UiTextarea from './ui/UiTextarea.vue'
 import UiTextInput from './ui/UiTextInput.vue'
 
@@ -17,6 +18,8 @@ const props = defineProps<{
   workspaceRoot: string
   routeParams: RouteParamField[]
   paramValues: Record<string, string>
+  missingParams: string[]
+  missingPulse: number
   queryText: string
   headersText: string
   bodyText: string
@@ -40,6 +43,68 @@ function paramPlaceholder(param: RouteParamField) {
     : t('detail.paramPlaceholderCatchall')
 }
 const activeTab = ref<RequestTab>('query')
+const missingPulseActive = ref(false)
+const missingParamRefs = new Map<string, HTMLElement>()
+let missingPulseTimeout: ReturnType<typeof setTimeout> | null = null
+
+const missingParamsSet = computed(() => new Set(props.missingParams))
+const hasMissingParams = computed(() => props.missingParams.length > 0)
+const hasRequiredParams = computed(() => props.routeParams.some(param => param.required))
+const bodyTypeLabel = computed(() => {
+  switch (bodyType.value) {
+    case 'text':
+      return t('detail.bodyTypeText')
+    case 'form':
+      return t('detail.bodyTypeForm')
+    case 'multipart':
+      return t('detail.bodyTypeMultipart')
+    case 'base64':
+      return t('detail.bodyTypeBase64')
+    default:
+      return t('detail.bodyTypeJson')
+  }
+})
+
+function registerMissingParamRef(name: string, el: HTMLElement | null) {
+  if (!el) {
+    missingParamRefs.delete(name)
+    return
+  }
+  missingParamRefs.set(name, el)
+}
+
+function triggerMissingPulse() {
+  if (missingPulseTimeout) {
+    clearTimeout(missingPulseTimeout)
+    missingPulseTimeout = null
+  }
+  missingPulseActive.value = false
+  if (typeof window === 'undefined') {
+    return
+  }
+  window.requestAnimationFrame(() => {
+    missingPulseActive.value = true
+    missingPulseTimeout = window.setTimeout(() => {
+      missingPulseActive.value = false
+      missingPulseTimeout = null
+    }, 1400)
+  })
+}
+
+function focusFirstMissingParam() {
+  const [firstMissing] = props.missingParams
+  if (!firstMissing) {
+    return
+  }
+  const target = missingParamRefs.get(firstMissing)
+  if (!target) {
+    return
+  }
+  target.scrollIntoView({ behavior: 'smooth', block: 'center' })
+  const input = target.querySelector('input')
+  input?.focus()
+}
+
 function resolveDefaultTab() {
   return props.routeParams.length > 0 ? 'params' : 'query'
 }
@@ -65,6 +130,33 @@ watch(
     }
   },
 )
+watch(
+  () => props.missingPulse,
+  async (value, previous) => {
+    if (value === previous || !hasMissingParams.value) {
+      return
+    }
+    activeTab.value = 'params'
+    await nextTick()
+    focusFirstMissingParam()
+    triggerMissingPulse()
+  },
+)
+watch(
+  () => props.missingParams.length,
+  (length) => {
+    if (length === 0) {
+      missingPulseActive.value = false
+    }
+  },
+)
+
+onBeforeUnmount(() => {
+  if (missingPulseTimeout) {
+    clearTimeout(missingPulseTimeout)
+    missingPulseTimeout = null
+  }
+})
 const queryExample = '{ "q": "alpha", "page": 1 }'
 const headersExample = '{ "x-mokup": "playground" }'
 const bodyExample = '{ "name": "Ada" }'
@@ -111,30 +203,52 @@ const configChain = computed(() => props.selected.configChain ?? [])
         <UiChipButton
           size="md"
           :active="activeTab === 'params'"
+          :class="[
+            hasMissingParams ? 'pg-tab-missing' : '',
+            missingPulseActive && hasMissingParams ? 'pg-pulse' : '',
+          ]"
           @click="activeTab = 'params'"
         >
-          {{ t('detail.params') }}
+          <span>{{ t('detail.params') }}</span>
+          <UiPill
+            v-if="hasRequiredParams"
+            size="xxs"
+            tone="chip"
+            :caps="false"
+            class="pg-tab-badge"
+          >
+            {{ t('detail.badgeRequired') }}
+          </UiPill>
         </UiChipButton>
         <UiChipButton
           size="md"
           :active="activeTab === 'query'"
           @click="activeTab = 'query'"
         >
-          {{ t('detail.query') }}
+          <span>{{ t('detail.query') }}</span>
+          <UiPill size="xxs" tone="chip" :caps="false" class="pg-tab-badge">
+            {{ t('detail.badgeJson') }}
+          </UiPill>
         </UiChipButton>
         <UiChipButton
           size="md"
           :active="activeTab === 'headers'"
           @click="activeTab = 'headers'"
         >
-          {{ t('detail.headers') }}
+          <span>{{ t('detail.headers') }}</span>
+          <UiPill size="xxs" tone="chip" :caps="false" class="pg-tab-badge">
+            {{ t('detail.badgeJson') }}
+          </UiPill>
         </UiChipButton>
         <UiChipButton
           size="md"
           :active="activeTab === 'body'"
           @click="activeTab = 'body'"
         >
-          {{ t('detail.body') }}
+          <span>{{ t('detail.body') }}</span>
+          <UiPill size="xxs" tone="chip" :caps="false" class="pg-tab-badge">
+            {{ bodyTypeLabel }}
+          </UiPill>
         </UiChipButton>
       </div>
       <div class="mt-4">
@@ -149,6 +263,7 @@ const configChain = computed(() => props.selected.configChain ?? [])
             <label
               v-for="param in props.routeParams"
               :key="param.id"
+              :ref="(el) => registerMissingParamRef(param.name, el as HTMLElement | null)"
               class="flex flex-col gap-1.5 text-[0.65rem] uppercase tracking-[0.2em] text-pg-text-muted"
             >
               <span class="flex items-center gap-2 text-[0.55rem] uppercase tracking-[0.2em] text-pg-text-muted">
@@ -160,6 +275,10 @@ const configChain = computed(() => props.selected.configChain ?? [])
               <UiTextInput
                 :value="props.paramValues[param.name] ?? ''"
                 :placeholder="paramPlaceholder(param)"
+                :class="[
+                  missingParamsSet.has(param.name) ? 'pg-input-missing' : '',
+                  missingPulseActive && missingParamsSet.has(param.name) ? 'pg-pulse' : '',
+                ]"
                 @input="emit('update:param-value', param.name, ($event.target as HTMLInputElement | null)?.value ?? '')"
               />
             </label>

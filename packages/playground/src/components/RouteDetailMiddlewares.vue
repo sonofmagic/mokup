@@ -2,6 +2,7 @@
 import type { PlaygroundRoute } from '../types'
 import { computed } from 'vue'
 import { useI18n } from 'vue-i18n'
+import { useDetailPanel } from '../hooks/useDetailPanel'
 import { resolveEditorUrl } from '../utils/editor'
 import UiPill from './ui/UiPill.vue'
 
@@ -11,6 +12,9 @@ const props = defineProps<{
 }>()
 
 const { t } = useI18n()
+const { isOpen, toggle } = useDetailPanel('middlewares')
+
+const contentId = 'pg-middlewares-panel'
 
 function resolveMiddlewareLink(source: string) {
   const trimmed = source.trim()
@@ -59,14 +63,28 @@ const totalCount = computed(() => {
 
 <template>
   <div>
-    <div class="flex flex-wrap items-center gap-2 border-t px-4 py-3 text-[0.6rem] uppercase tracking-[0.2em] border-pg-border text-pg-text-muted">
-      <span>{{ t('detail.middlewares') }}</span>
-      <UiPill tone="chip" size="xxs" :caps="false">
-        {{ totalCount }}
-      </UiPill>
-    </div>
+    <button
+      type="button"
+      class="group flex w-full items-center justify-between border-t px-4 py-3 text-[0.6rem] uppercase tracking-[0.2em] transition border-pg-border text-pg-text-muted hover:text-pg-text-soft"
+      :aria-expanded="isOpen"
+      :aria-controls="contentId"
+      @click="toggle"
+    >
+      <span class="flex flex-wrap items-center gap-2">
+        <span>{{ t('detail.middlewares') }}</span>
+        <UiPill tone="chip" size="xxs" :caps="false">
+          {{ totalCount }}
+        </UiPill>
+      </span>
+      <span
+        class="i-[carbon--chevron-down] h-4 w-4 transition"
+        :class="isOpen ? 'rotate-0' : '-rotate-90'"
+        aria-hidden="true"
+      />
+    </button>
     <div
-      v-if="preMiddlewares.length > 0 || normalMiddlewares.length > 0 || postMiddlewares.length > 0"
+      v-if="isOpen && (preMiddlewares.length > 0 || normalMiddlewares.length > 0 || postMiddlewares.length > 0)"
+      :id="contentId"
       class="flex flex-col gap-3 border-t px-4 py-3 text-xs border-pg-border text-pg-text-soft"
     >
       <div v-if="preMiddlewares.length > 0" class="flex flex-col gap-2">
