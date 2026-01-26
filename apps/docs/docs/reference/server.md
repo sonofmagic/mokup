@@ -1,13 +1,12 @@
 # Server Adapters
 
-`mokup/server` bundles the Node adapters and dev server helpers. Use
+`mokup/server/node` bundles the Node adapters and dev server helpers. Use
 `mokup/server/worker` for Workers or `mokup/server/fetch` for runtime-agnostic fetch handlers.
 
 ## Fetch server (Node)
 
 ```ts
-import { createFetchServer } from 'mokup/server'
-import { serve } from 'mokup/server/node'
+import { createFetchServer, serve } from 'mokup/server/node'
 
 const app = await createFetchServer({
   entries: { dir: 'mock' },
@@ -76,7 +75,7 @@ Pass `options` to any adapter below. For brevity, the examples use `manifest` di
 ## Express
 
 ```ts
-import { createExpressMiddleware } from 'mokup/server'
+import { createExpressMiddleware } from 'mokup/server/node'
 
 app.use(createExpressMiddleware({ manifest }))
 ```
@@ -84,7 +83,7 @@ app.use(createExpressMiddleware({ manifest }))
 ## Connect
 
 ```ts
-import { createConnectMiddleware } from 'mokup/server'
+import { createConnectMiddleware } from 'mokup/server/node'
 
 app.use(createConnectMiddleware({ manifest }))
 ```
@@ -92,7 +91,7 @@ app.use(createConnectMiddleware({ manifest }))
 ## Koa
 
 ```ts
-import { createKoaMiddleware } from 'mokup/server'
+import { createKoaMiddleware } from 'mokup/server/node'
 
 app.use(createKoaMiddleware({ manifest }))
 ```
@@ -100,7 +99,7 @@ app.use(createKoaMiddleware({ manifest }))
 ## Hono
 
 ```ts
-import { createHonoMiddleware } from 'mokup/server'
+import { createHonoMiddleware } from 'mokup/server/node'
 
 app.use(createHonoMiddleware({ manifest }))
 ```
@@ -108,7 +107,7 @@ app.use(createHonoMiddleware({ manifest }))
 ## Fastify
 
 ```ts
-import { createFastifyPlugin } from 'mokup/server'
+import { createFastifyPlugin } from 'mokup/server/node'
 
 await app.register(createFastifyPlugin({ manifest }))
 ```

@@ -31,6 +31,9 @@ export default {
 
 当 `playground: false` 时将禁用。
 
+需要静态部署时，可设置 `playground.build: true`，在 `vite build` 中输出
+Playground 资源与 `/__mokup/routes` JSON 到对应路径。
+
 ## 功能
 
 - 按目录/分组展示路由

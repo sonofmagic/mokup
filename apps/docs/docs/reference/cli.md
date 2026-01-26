@@ -33,8 +33,8 @@ bunx mokup build --dir mock --out .mokup
 | `--dir, -d`       | Mock directory (repeatable)               |
 | `--out, -o`       | Output directory (default: `.mokup`)      |
 | `--prefix`        | URL prefix                                |
-| `--include`       | Include regex                             |
-| `--exclude`       | Exclude regex                             |
+| `--include`       | Include regex (repeatable)                |
+| `--exclude`       | Exclude regex (repeatable)                |
 | `--ignore-prefix` | Ignore path segment prefixes (repeatable) |
 | `--no-handlers`   | Skip handler output                       |
 
@@ -68,8 +68,8 @@ bunx mokup serve --dir mock --prefix /api --port 3000
 | ----------------- | ----------------------------------------- |
 | `--dir, -d`       | Mock directory (repeatable)               |
 | `--prefix`        | URL prefix                                |
-| `--include`       | Include regex                             |
-| `--exclude`       | Exclude regex                             |
+| `--include`       | Include regex (repeatable)                |
+| `--exclude`       | Exclude regex (repeatable)                |
 | `--ignore-prefix` | Ignore path segment prefixes (repeatable) |
 | `--host`          | Hostname (default: `localhost`)           |
 | `--port`          | Port (default: `8080`)                    |

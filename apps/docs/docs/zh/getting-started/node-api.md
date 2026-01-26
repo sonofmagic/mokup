@@ -5,8 +5,7 @@
 ## Dev 模式（推荐）
 
 ```ts
-import { createFetchServer } from 'mokup/server'
-import { serve } from 'mokup/server/node'
+import { createFetchServer, serve } from 'mokup/server/node'
 
 const app = await createFetchServer({ entries: { dir: 'mock' } })
 serve({ fetch: app.fetch, port: 3000 })

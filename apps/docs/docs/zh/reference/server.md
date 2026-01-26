@@ -1,12 +1,11 @@
 # Server 适配器
 
-`mokup/server` 提供 Node 适配器与开发服务器。Worker 请使用 `mokup/server/worker`，运行时无关的 fetch 入口请使用 `mokup/server/fetch`。
+`mokup/server/node` 提供 Node 适配器与开发服务器。Worker 请使用 `mokup/server/worker`，运行时无关的 fetch 入口请使用 `mokup/server/fetch`。
 
 ## Fetch 入口（Node）
 
 ```ts
-import { createFetchServer } from 'mokup/server'
-import { serve } from 'mokup/server/node'
+import { createFetchServer, serve } from 'mokup/server/node'
 
 const app = await createFetchServer({
   entries: { dir: 'mock' },
@@ -75,7 +74,7 @@ const options = {
 ## Express
 
 ```ts
-import { createExpressMiddleware } from 'mokup/server'
+import { createExpressMiddleware } from 'mokup/server/node'
 
 app.use(createExpressMiddleware({ manifest }))
 ```
@@ -83,7 +82,7 @@ app.use(createExpressMiddleware({ manifest }))
 ## Connect
 
 ```ts
-import { createConnectMiddleware } from 'mokup/server'
+import { createConnectMiddleware } from 'mokup/server/node'
 
 app.use(createConnectMiddleware({ manifest }))
 ```
@@ -91,7 +90,7 @@ app.use(createConnectMiddleware({ manifest }))
 ## Koa
 
 ```ts
-import { createKoaMiddleware } from 'mokup/server'
+import { createKoaMiddleware } from 'mokup/server/node'
 
 app.use(createKoaMiddleware({ manifest }))
 ```
@@ -99,7 +98,7 @@ app.use(createKoaMiddleware({ manifest }))
 ## Hono
 
 ```ts
-import { createHonoMiddleware } from 'mokup/server'
+import { createHonoMiddleware } from 'mokup/server/node'
 
 app.use(createHonoMiddleware({ manifest }))
 ```
@@ -107,7 +106,7 @@ app.use(createHonoMiddleware({ manifest }))
 ## Fastify
 
 ```ts
-import { createFastifyPlugin } from 'mokup/server'
+import { createFastifyPlugin } from 'mokup/server/node'
 
 await app.register(createFastifyPlugin({ manifest }))
 ```

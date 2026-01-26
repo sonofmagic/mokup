@@ -31,6 +31,9 @@ export default {
 
 Set `playground: false` to disable it.
 
+For static builds, set `playground.build: true` so `vite build` emits the
+Playground assets and `/__mokup/routes` JSON under the configured path.
+
 ## Features
 
 - Grouped route listing

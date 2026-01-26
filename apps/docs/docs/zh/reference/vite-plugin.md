@@ -45,11 +45,11 @@ export default {
 
 ### 插件选项
 
-| 选项         | 类型                                             | 说明                        |
-| ------------ | ------------------------------------------------ | --------------------------- |
-| `entries`    | `VitePluginOptions / VitePluginOptions[]`        | mock 目录配置               |
-| `playground` | `boolean / { path?: string; enabled?: boolean }` | Playground 配置             |
-| `runtime`    | `'vite' / 'worker'`                              | 开发运行目标（默认 `vite`） |
+| 选项         | 类型                                                              | 说明                        |
+| ------------ | ----------------------------------------------------------------- | --------------------------- |
+| `entries`    | `VitePluginOptions / VitePluginOptions[]`                         | mock 目录配置               |
+| `playground` | `boolean / { path?: string; enabled?: boolean; build?: boolean }` | Playground 配置             |
+| `runtime`    | `'vite' / 'worker'`                                               | 开发运行目标（默认 `vite`） |
 
 ### Entry 选项
 

@@ -45,11 +45,11 @@ export default {
 
 ### Plugin options
 
-| Option       | Type                                             | Description                         |
-| ------------ | ------------------------------------------------ | ----------------------------------- |
-| `entries`    | `VitePluginOptions / VitePluginOptions[]`        | Mock entry configs                  |
-| `playground` | `boolean / { path?: string; enabled?: boolean }` | Playground config                   |
-| `runtime`    | `'vite' / 'worker'`                              | Dev runtime target (default `vite`) |
+| Option       | Type                                                              | Description                         |
+| ------------ | ----------------------------------------------------------------- | ----------------------------------- |
+| `entries`    | `VitePluginOptions / VitePluginOptions[]`                         | Mock entry configs                  |
+| `playground` | `boolean / { path?: string; enabled?: boolean; build?: boolean }` | Playground config                   |
+| `runtime`    | `'vite' / 'worker'`                                               | Dev runtime target (default `vite`) |
 
 ### Entry options
 

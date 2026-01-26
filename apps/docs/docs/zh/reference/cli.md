@@ -28,15 +28,15 @@ bunx mokup build --dir mock --out .mokup
 
 ### Build 选项
 
-| 参数              | 说明                      |
-| ----------------- | ------------------------- |
-| `--dir, -d`       | mock 目录（可重复）       |
-| `--out, -o`       | 输出目录（默认 `.mokup`） |
-| `--prefix`        | 路由前缀                  |
-| `--include`       | 仅包含匹配的正则          |
-| `--exclude`       | 排除匹配的正则            |
-| `--ignore-prefix` | 忽略路径段前缀（可重复）  |
-| `--no-handlers`   | 不生成函数处理器          |
+| 参数              | 说明                       |
+| ----------------- | -------------------------- |
+| `--dir, -d`       | mock 目录（可重复）        |
+| `--out, -o`       | 输出目录（默认 `.mokup`）  |
+| `--prefix`        | 路由前缀                   |
+| `--include`       | 仅包含匹配的正则（可重复） |
+| `--exclude`       | 排除匹配的正则（可重复）   |
+| `--ignore-prefix` | 忽略路径段前缀（可重复）   |
+| `--no-handlers`   | 不生成函数处理器           |
 
 ## Serve
 
@@ -68,8 +68,8 @@ bunx mokup serve --dir mock --prefix /api --port 3000
 | ----------------- | -------------------------- |
 | `--dir, -d`       | mock 目录（可重复）        |
 | `--prefix`        | 路由前缀                   |
-| `--include`       | 仅包含匹配的正则           |
-| `--exclude`       | 排除匹配的正则             |
+| `--include`       | 仅包含匹配的正则（可重复） |
+| `--exclude`       | 排除匹配的正则（可重复）   |
 | `--ignore-prefix` | 忽略路径段前缀（可重复）   |
 | `--host`          | 主机名（默认 `localhost`） |
 | `--port`          | 端口（默认 `8080`）        |

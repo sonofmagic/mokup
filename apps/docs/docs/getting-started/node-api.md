@@ -5,8 +5,7 @@ Use the Node dev server during development, and fall back to the runtime API for
 ## Dev mode (recommended)
 
 ```ts
-import { createFetchServer } from 'mokup/server'
-import { serve } from 'mokup/server/node'
+import { createFetchServer, serve } from 'mokup/server/node'
 
 const app = await createFetchServer({ entries: { dir: 'mock' } })
 serve({ fetch: app.fetch, port: 3000 })

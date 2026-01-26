@@ -61,7 +61,7 @@ export default {
 }
 ```
 
-This is ideal for static hosting because mock requests are handled in the browser. If you also ship the playground, make sure `/__mokup/routes` is available as a static JSON file (generate it during build with `mokup build` or a small script).
+This is ideal for static hosting because mock requests are handled in the browser. If you also ship the playground, set `playground: { build: true }` so `vite build` emits the Playground assets and `/__mokup/routes`. As an alternative, you can generate `/__mokup/routes` with `mokup build` or a small script and publish it alongside the site.
 
 Notes:
 
