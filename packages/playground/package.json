@@ -22,7 +22,7 @@
     "preview": "vite preview"
   },
   "devDependencies": {
-    "@iconify/json": "^2.2.431",
+    "@iconify/json": "^2.2.432",
     "@iconify/tailwind": "^1.2.0",
     "@mokup/runtime": "workspace:*",
     "@tailwindcss/vite": "catalog:",
