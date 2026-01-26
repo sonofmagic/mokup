@@ -24,6 +24,30 @@ function resolveDocsSwRegister(command: string) {
   return command === 'build'
 }
 
+function resolvePlaygroundMode(command: string) {
+  const env = process.env as NodeJS.ProcessEnv & { MOKUP_PLAYGROUND_SW?: string }
+  const raw = env.MOKUP_PLAYGROUND_SW
+  if (typeof raw === 'string' && raw.trim() !== '') {
+    const normalized = raw.trim().toLowerCase()
+    if (['1', 'true', 'yes', 'on', 'sw'].includes(normalized)) {
+      return 'sw'
+    }
+    if (['0', 'false', 'no', 'off', 'server'].includes(normalized)) {
+      return 'server'
+    }
+  }
+  return command === 'build' ? 'server' : 'sw'
+}
+
+function resolvePlaygroundOutDir() {
+  const env = process.env as NodeJS.ProcessEnv & { MOKUP_PLAYGROUND_OUT_DIR?: string }
+  const raw = env.MOKUP_PLAYGROUND_OUT_DIR
+  if (typeof raw === 'string' && raw.trim() !== '') {
+    return raw.trim()
+  }
+  return 'dist'
+}
+
 function routesAliasPlugin() {
   return {
     name: 'playground:routes-alias',
@@ -65,7 +89,7 @@ export default defineConfig(({ command }) => ({
       entries: {
         dir: mockDir,
         prefix: '/api',
-        mode: command === 'build' ? 'server' : 'sw',
+        mode: resolvePlaygroundMode(command),
         sw: {
           register: resolveDocsSwRegister(command),
         },
@@ -77,7 +101,7 @@ export default defineConfig(({ command }) => ({
     strictPort: false,
   },
   build: {
-    outDir: 'dist',
+    outDir: resolvePlaygroundOutDir(),
     emptyOutDir: true,
     rollupOptions: {
       output: {
