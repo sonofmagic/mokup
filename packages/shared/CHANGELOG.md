@@ -1,5 +1,11 @@
 # @mokup/shared
 
+## 1.1.0
+
+### Minor Changes
+
+- ✨ **Add build-time playground output to the mokup Vite plugin and expose a playground build flag.** [`bb0a019`](https://github.com/sonofmagic/mokup/commit/bb0a019d1e9b09ebbde754b2cbf914cca9364f13) by @sonofmagic
+
 ## 1.0.2
 
 ### Patch Changes
