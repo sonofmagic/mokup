@@ -1,7 +1,11 @@
 import { createFetchHandler } from 'mokup/server/fetch'
 import mokupBundle from 'virtual:mokup-bundle'
 
-const handler = createFetchHandler(mokupBundle)
+const handler = createFetchHandler({
+  manifest: mokupBundle.manifest,
+  moduleMap: mokupBundle.moduleMap,
+  moduleBase: mokupBundle.moduleBase,
+})
 
 export default {
   fetch: async (request: Request) => {

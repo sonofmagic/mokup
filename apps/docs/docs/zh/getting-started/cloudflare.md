@@ -44,15 +44,24 @@ wrangler deploy
 import { createFetchHandler } from 'mokup/server/fetch'
 import mokupBundle from 'virtual:mokup-bundle'
 
+const handler = createFetchHandler(mokupBundle)
+
+export const onRequest: PagesFunction = async ({ request }) => {
+  return (await handler(request)) ?? new Response('Not Found', { status: 404 })
+}
+```
+
+也可以显式传入字段：
+
+```ts
+import { createFetchHandler } from 'mokup/server/fetch'
+import mokupBundle from 'virtual:mokup-bundle'
+
 const handler = createFetchHandler({
   manifest: mokupBundle.manifest,
   moduleMap: mokupBundle.moduleMap,
   moduleBase: mokupBundle.moduleBase,
 })
-
-export const onRequest: PagesFunction = async ({ request }) => {
-  return (await handler(request)) ?? new Response('Not Found', { status: 404 })
-}
 ```
 
 构建站点并部署到 Pages：

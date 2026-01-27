@@ -42,11 +42,7 @@ Here is a plain fetch example without any framework:
 import { createFetchHandler } from 'mokup/server/fetch'
 import mokupBundle from 'virtual:mokup-bundle'
 
-const handler = createFetchHandler({
-  manifest: mokupBundle.manifest,
-  moduleMap: mokupBundle.moduleMap,
-  moduleBase: mokupBundle.moduleBase,
-})
+const handler = createFetchHandler(mokupBundle)
 
 export default {
   fetch: async (request: Request) => {
@@ -59,10 +55,9 @@ export default {
 }
 ```
 
-You can also combine Mokup with Hono routes (install `hono` if needed):
+Also valid (explicit fields):
 
 ```ts
-import { Hono } from 'hono'
 import { createFetchHandler } from 'mokup/server/fetch'
 import mokupBundle from 'virtual:mokup-bundle'
 
@@ -71,6 +66,16 @@ const handler = createFetchHandler({
   moduleMap: mokupBundle.moduleMap,
   moduleBase: mokupBundle.moduleBase,
 })
+```
+
+You can also combine Mokup with Hono routes (install `hono` if needed):
+
+```ts
+import { Hono } from 'hono'
+import { createFetchHandler } from 'mokup/server/fetch'
+import mokupBundle from 'virtual:mokup-bundle'
+
+const handler = createFetchHandler(mokupBundle)
 
 const app = new Hono()
 

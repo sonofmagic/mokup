@@ -44,11 +44,7 @@ wrangler deploy
 import { createFetchHandler } from 'mokup/server/fetch'
 import mokupBundle from 'virtual:mokup-bundle'
 
-const handler = createFetchHandler({
-  manifest: mokupBundle.manifest,
-  moduleMap: mokupBundle.moduleMap,
-  moduleBase: mokupBundle.moduleBase,
-})
+const handler = createFetchHandler(mokupBundle)
 
 export default {
   fetch: async (request: Request) => {
@@ -61,10 +57,9 @@ export default {
 }
 ```
 
-也可以与 Hono 路由结合（未安装请先添加 `hono`）：
+也可以显式传入字段：
 
 ```ts
-import { Hono } from 'hono'
 import { createFetchHandler } from 'mokup/server/fetch'
 import mokupBundle from 'virtual:mokup-bundle'
 
@@ -73,6 +68,16 @@ const handler = createFetchHandler({
   moduleMap: mokupBundle.moduleMap,
   moduleBase: mokupBundle.moduleBase,
 })
+```
+
+也可以与 Hono 路由结合（未安装请先添加 `hono`）：
+
+```ts
+import { Hono } from 'hono'
+import { createFetchHandler } from 'mokup/server/fetch'
+import mokupBundle from 'virtual:mokup-bundle'
+
+const handler = createFetchHandler(mokupBundle)
 
 const app = new Hono()
 

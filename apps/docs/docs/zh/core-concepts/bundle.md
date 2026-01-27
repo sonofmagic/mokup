@@ -68,6 +68,17 @@ handler 模块输出在 `.mokup/mokup-handlers` 下。
 
 ## 最小使用示例
 
+推荐写法：
+
+```ts
+import { createFetchHandler } from 'mokup/server/fetch'
+import mokupBundle from './.mokup/mokup.bundle.mjs'
+
+const handler = createFetchHandler(mokupBundle)
+```
+
+也可以显式传入字段：
+
 ```ts
 import { createFetchHandler } from 'mokup/server/fetch'
 import mokupBundle from './.mokup/mokup.bundle.mjs'

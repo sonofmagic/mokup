@@ -77,6 +77,17 @@ If you are running in Node and can load files directly, you may omit
 
 ## Minimal usage
 
+Recommended:
+
+```ts
+import { createFetchHandler } from 'mokup/server/fetch'
+import mokupBundle from './.mokup/mokup.bundle.mjs'
+
+const handler = createFetchHandler(mokupBundle)
+```
+
+Also valid (explicit fields):
+
 ```ts
 import { createFetchHandler } from 'mokup/server/fetch'
 import mokupBundle from './.mokup/mokup.bundle.mjs'
