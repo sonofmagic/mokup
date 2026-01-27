@@ -45,6 +45,13 @@ export const zhSidebar: DefaultTheme.Sidebar = {
         { text: 'Cloudflare Worker', link: '/zh/deploy/cloudflare-worker' },
       ],
     },
+    {
+      text: '平台',
+      collapsed: false,
+      items: [
+        { text: '跨运行时 JavaScript', link: '/zh/platform/cross-runtime-js' },
+      ],
+    },
   ],
   '/zh/ai/': [
     {
@@ -118,6 +125,13 @@ export const enSidebar: DefaultTheme.Sidebar = {
       items: [
         { text: 'Vite Build Output', link: '/deploy/vite-build' },
         { text: 'Cloudflare Worker', link: '/deploy/cloudflare-worker' },
+      ],
+    },
+    {
+      text: 'Platform',
+      collapsed: false,
+      items: [
+        { text: 'Cross-Runtime JavaScript', link: '/platform/cross-runtime-js' },
       ],
     },
   ],
