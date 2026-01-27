@@ -50,6 +50,7 @@ function stripMethodSuffix(base: string) {
  * @param file - Route file path.
  * @param rootDir - Root directory for routing.
  * @param logger - Logger for warnings.
+ * @param logger.warn - Warning logger.
  * @returns Parsed route info or null when invalid.
  *
  * @example
@@ -105,6 +106,13 @@ export function deriveRouteFromFile(
  * Resolve a route rule into a normalized route entry.
  *
  * @param params - Rule and derived route inputs.
+ * @param params.rule - Rule definition.
+ * @param params.derivedTemplate - Derived route template.
+ * @param params.derivedMethod - Derived HTTP method.
+ * @param params.prefix - URL prefix to apply.
+ * @param params.file - Source file path.
+ * @param params.logger - Logger for warnings.
+ * @param params.logger.warn - Warning logger.
  * @returns A resolved route or null when invalid.
  *
  * @example

@@ -76,28 +76,6 @@ export async function collectFiles(dirs: string[]): Promise<FileInfo[]> {
 }
 
 /**
- * Check whether a file is a supported mock route source.
- *
- * @param file - File path to check.
- * @returns True when file is a supported route source.
- *
- * @example
- * import { isSupportedFile } from '@mokup/server'
- *
- * const ok = isSupportedFile('/project/mock/user.get.ts')
- */
-export function isSupportedFile(file: string) {
-  if (file.endsWith('.d.ts')) {
-    return false
-  }
-  if (isConfigFile(file)) {
-    return false
-  }
-  const ext = extname(file).toLowerCase()
-  return supportedExtensions.has(ext)
-}
-
-/**
  * Check whether a file is a directory config file.
  *
  * @param file - File path to check.
@@ -118,4 +96,26 @@ export function isConfigFile(file: string) {
   }
   const ext = extname(file).toLowerCase()
   return configExtensions.includes(ext as (typeof configExtensions)[number])
+}
+
+/**
+ * Check whether a file is a supported mock route source.
+ *
+ * @param file - File path to check.
+ * @returns True when file is a supported route source.
+ *
+ * @example
+ * import { isSupportedFile } from '@mokup/server'
+ *
+ * const ok = isSupportedFile('/project/mock/user.get.ts')
+ */
+export function isSupportedFile(file: string) {
+  if (file.endsWith('.d.ts')) {
+    return false
+  }
+  if (isConfigFile(file)) {
+    return false
+  }
+  const ext = extname(file).toLowerCase()
+  return supportedExtensions.has(ext)
 }

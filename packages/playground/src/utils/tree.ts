@@ -123,6 +123,7 @@ export function sortRouteTree(node: TreeNode) {
       sortRouteTree(child)
     }
   }
+  return node
 }
 
 function collectFolderIds(node: TreeNode, ids: string[]) {
@@ -190,6 +191,11 @@ function toRows(
  * Build flattened rows for the tree view.
  *
  * @param params - Tree builder inputs.
+ * @param params.root - Root tree node.
+ * @param params.mode - Tree display mode.
+ * @param params.isExpanded - Expansion checker.
+ * @param params.selectedKey - Selected route key.
+ * @param params.getRouteKey - Route key resolver.
  * @returns List of tree rows.
  *
  * @example

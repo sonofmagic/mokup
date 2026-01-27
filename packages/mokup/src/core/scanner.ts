@@ -29,6 +29,16 @@ export type {
  * Scan directories for mock routes and build the route table.
  *
  * @param params - Scanner configuration.
+ * @param params.dirs - Directories to scan.
+ * @param params.prefix - URL prefix to apply.
+ * @param params.include - Include filters for files.
+ * @param params.exclude - Exclude filters for files.
+ * @param params.ignorePrefix - Ignored file/folder prefixes.
+ * @param params.server - Optional dev/preview server.
+ * @param params.logger - Logger for warnings.
+ * @param params.onSkip - Optional skip callback.
+ * @param params.onIgnore - Optional ignore callback.
+ * @param params.onConfig - Optional config callback.
  * @returns The resolved route table.
  *
  * @example

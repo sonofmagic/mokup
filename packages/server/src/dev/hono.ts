@@ -163,6 +163,7 @@ function splitRouteMiddlewares(route: ResolvedRoute) {
  *
  * @param routes - Resolved route table.
  * @param options - Optional response hook.
+ * @param options.onResponse - Hook for response overrides.
  * @returns Hono app instance.
  *
  * @example

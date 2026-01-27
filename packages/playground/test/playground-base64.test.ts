@@ -15,7 +15,7 @@ describe('playground base64 decoding', () => {
       if (input === 'YWJj') {
         return 'abc'
       }
-      throw 'bad'
+      throw new Error('bad')
     })
 
     const decoded = decodeBase64('data:application/octet-stream;base64,YWJj')

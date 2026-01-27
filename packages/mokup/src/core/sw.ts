@@ -202,6 +202,12 @@ export function resolveSwUnregisterConfig(
  * Build the service worker script for mock routing.
  *
  * @param params - Script build inputs.
+ * @param params.routes - Resolved routes to serialize.
+ * @param params.root - Workspace root path.
+ * @param params.runtimeImportPath - Runtime import override.
+ * @param params.loggerImportPath - Logger import override.
+ * @param params.basePaths - Base paths for SW matching.
+ * @param params.resolveModulePath - Optional module resolver.
  * @returns JavaScript source string.
  *
  * @example

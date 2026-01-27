@@ -7,6 +7,10 @@ import { buildRouteTree, buildTreeRows, getAllFolderIds, sortRouteTree } from '.
  * Vue composable that builds and manages the route tree view.
  *
  * @param params - Tree inputs.
+ * @param params.routes - Route list reference.
+ * @param params.selectedKey - Selected route key reference.
+ * @param params.searchTerm - Search term reference.
+ * @param params.getRouteKey - Key resolver for routes.
  * @returns Reactive tree state and helpers.
  *
  * @example

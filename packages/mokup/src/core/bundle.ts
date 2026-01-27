@@ -6,6 +6,9 @@ import { buildManifestData } from './manifest'
  * Build the source for a virtual mokup bundle module.
  *
  * @param params - Bundle build parameters.
+ * @param params.routes - Resolved routes to serialize.
+ * @param params.root - Workspace root path.
+ * @param params.resolveModulePath - Optional module resolver.
  * @returns JavaScript source string.
  *
  * @example

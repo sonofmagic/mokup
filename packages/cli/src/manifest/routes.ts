@@ -153,6 +153,12 @@ export function deriveRouteFromFile(
  * Resolve a derived route and rule into a manifest entry stub.
  *
  * @param params - Resolution parameters.
+ * @param params.rule - Route rule data.
+ * @param params.derivedTemplate - Derived template path.
+ * @param params.derivedMethod - Derived HTTP method.
+ * @param params.prefix - URL prefix to apply.
+ * @param params.file - Source file path.
+ * @param params.log - Optional logger for warnings.
  * @returns Resolved data or null when invalid.
  *
  * @example

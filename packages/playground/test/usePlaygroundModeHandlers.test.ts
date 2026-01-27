@@ -2,12 +2,13 @@ import { describe, expect, it } from 'vitest'
 import { ref } from 'vue'
 import { usePlaygroundModeHandlers } from '../src/hooks/usePlaygroundModeHandlers'
 
+interface Config { file: string }
+
 describe('usePlaygroundModeHandlers', () => {
   it('switches modes and selections', () => {
     const route = { method: 'GET', url: '/a', file: 'a.ts', type: 'handler' }
     const disabledRoute = { file: 'b.ts', reason: 'disabled' }
     const ignoredRoute = { file: 'c.ts', reason: 'ignored' }
-    const config = { file: 'index.config.ts' }
 
     const routeMode = ref<'active' | 'disabled' | 'ignored'>('active')
     const enabledMode = ref<'api' | 'config'>('api')
@@ -15,7 +16,7 @@ describe('usePlaygroundModeHandlers', () => {
     const selected = ref(route)
     const selectedDisabled = ref<typeof disabledRoute | null>(null)
     const selectedIgnored = ref<typeof ignoredRoute | null>(null)
-    const selectedConfig = ref<typeof config | null>(null)
+    const selectedConfig = ref<Config | null>(null)
     const filtered = ref([route])
     const disabledFiltered = ref([disabledRoute])
     const ignoredFiltered = ref([ignoredRoute])
@@ -74,7 +75,7 @@ describe('usePlaygroundModeHandlers', () => {
     const route = { method: 'GET', url: '/a', file: 'a.ts', type: 'handler' }
     const disabledRoute = { file: 'b.ts', reason: 'disabled' }
     const ignoredRoute = { file: 'c.ts', reason: 'ignored' }
-    const config = { file: 'index.config.ts' }
+    const config: Config = { file: 'index.config.ts' }
 
     const routeMode = ref<'active' | 'disabled' | 'ignored'>('active')
     const enabledMode = ref<'api' | 'config'>('config')
@@ -82,7 +83,7 @@ describe('usePlaygroundModeHandlers', () => {
     const selected = ref<typeof route | null>(null)
     const selectedDisabled = ref<typeof disabledRoute | null>(null)
     const selectedIgnored = ref<typeof ignoredRoute | null>(null)
-    const selectedConfig = ref<typeof config | null>(config)
+    const selectedConfig = ref<Config | null>(config)
     const filtered = ref([route])
     const disabledFiltered = ref([disabledRoute])
     const ignoredFiltered = ref([ignoredRoute])

@@ -15,8 +15,8 @@ function decodeBase64(input: string) {
     }
     return { value: bytes }
   }
-  catch (err) {
-    return { error: err instanceof Error ? err.message : 'Invalid base64' }
+  catch {
+    return { error: 'Invalid base64' }
   }
 }
 

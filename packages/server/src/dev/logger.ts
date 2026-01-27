@@ -1,5 +1,7 @@
 import type { Logger, LoggerOptions } from '@mokup/shared/logger'
 
+/* eslint-disable no-console */
+
 const silentLogger: Logger = {
   info: () => {},
   warn: () => {},
@@ -67,3 +69,4 @@ export function createLogger(options: LoggerOptions | boolean = true): Logger {
  * import type { Logger } from '@mokup/server'
  */
 export type { Logger, LoggerOptions }
+/* eslint-enable no-console */

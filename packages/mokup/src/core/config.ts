@@ -115,6 +115,12 @@ function readMiddlewareMeta(config: RouteDirectoryConfig): MiddlewareMeta | null
  * Resolve and merge directory-level configuration files for a route file.
  *
  * @param params - Resolution parameters.
+ * @param params.file - Route file path.
+ * @param params.rootDir - Root directory for config lookup.
+ * @param params.server - Optional dev/preview server.
+ * @param params.logger - Logger for warnings.
+ * @param params.configCache - Cache for resolved configs.
+ * @param params.fileCache - Cache for config file contents.
  * @returns Resolved config and normalized middleware list.
  *
  * @example

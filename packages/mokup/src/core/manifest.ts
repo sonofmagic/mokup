@@ -185,6 +185,9 @@ function buildManifestResponse(
  * Build manifest data and module entries from resolved routes.
  *
  * @param params - Build inputs.
+ * @param params.routes - Resolved routes to serialize.
+ * @param params.root - Workspace root path.
+ * @param params.resolveModulePath - Optional module resolver.
  * @returns Manifest and module entries.
  *
  * @example

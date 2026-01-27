@@ -135,6 +135,28 @@ function toPlaygroundRoute(
   }
 }
 
+function formatDecisionChain(
+  chain: RouteDecisionStep[],
+  root: string | undefined,
+) {
+  return chain.map((entry) => {
+    const formatted: RouteDecisionStep = {
+      step: entry.step,
+      result: entry.result,
+    }
+    if (typeof entry.detail !== 'undefined') {
+      formatted.detail = entry.detail
+    }
+    if (typeof entry.source !== 'undefined') {
+      const source = entry.source
+      formatted.source = source && isAbsolute(source)
+        ? formatRouteFile(source, root)
+        : source
+    }
+    return formatted
+  })
+}
+
 function toPlaygroundDisabledRoute(
   route: PlaygroundDisabledRouteInput,
   root: string | undefined,
@@ -207,28 +229,6 @@ function toPlaygroundConfigFile(
     configFile.group = matchedGroup.label
   }
   return configFile
-}
-
-function formatDecisionChain(
-  chain: RouteDecisionStep[],
-  root: string | undefined,
-) {
-  return chain.map((entry) => {
-    const formatted: RouteDecisionStep = {
-      step: entry.step,
-      result: entry.result,
-    }
-    if (typeof entry.detail !== 'undefined') {
-      formatted.detail = entry.detail
-    }
-    if (typeof entry.source !== 'undefined') {
-      const source = entry.source
-      formatted.source = source && isAbsolute(source)
-        ? formatRouteFile(source, root)
-        : source
-    }
-    return formatted
-  })
 }
 
 export type {

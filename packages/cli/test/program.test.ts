@@ -173,7 +173,7 @@ describe('cli program', () => {
     })
 
     vi.spyOn(process, 'exit').mockImplementation((() => undefined) as never)
-    vi.spyOn(process, 'on').mockImplementation(((event: string, handler: () => Promise<void>) => {
+    vi.spyOn(process, 'on').mockImplementation(((_event: string, handler: () => Promise<void>) => {
       void handler
       return process
     }) as never)

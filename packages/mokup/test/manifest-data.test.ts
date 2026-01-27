@@ -1,3 +1,4 @@
+import { Buffer } from 'node:buffer'
 import { parseRouteTemplate } from '@mokup/runtime'
 import { afterEach, describe, expect, it, vi } from 'vitest'
 import { buildManifestData, toViteImportPath } from '../src/core/manifest'
@@ -69,7 +70,7 @@ describe('manifest helpers', () => {
   })
 
   it('falls back to btoa when Buffer is unavailable', () => {
-    const nodeBuffer = globalThis.Buffer
+    const nodeBuffer = Buffer
     vi.stubGlobal('Buffer', undefined)
     vi.stubGlobal('btoa', (input: string) => nodeBuffer.from(input, 'binary').toString('base64'))
 
@@ -86,7 +87,7 @@ describe('manifest helpers', () => {
   })
 
   it('falls back to manual base64 encoding without Buffer or btoa', () => {
-    const nodeBuffer = globalThis.Buffer
+    const nodeBuffer = Buffer
     vi.stubGlobal('Buffer', undefined)
     vi.stubGlobal('btoa', undefined)
 
@@ -106,7 +107,7 @@ describe('manifest helpers', () => {
   })
 
   it('pads base64 output for short buffers', () => {
-    const nodeBuffer = globalThis.Buffer
+    const nodeBuffer = Buffer
     vi.stubGlobal('Buffer', undefined)
     vi.stubGlobal('btoa', undefined)
 

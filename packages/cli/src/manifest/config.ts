@@ -123,6 +123,11 @@ function readMiddlewareMeta(config: RouteDirectoryConfig): MiddlewareMeta | null
  * Resolve and merge directory-level config files for the manifest build.
  *
  * @param params - Resolution parameters.
+ * @param params.file - Route file path.
+ * @param params.rootDir - Root directory for config lookup.
+ * @param params.log - Optional logger for warnings.
+ * @param params.configCache - Cache for resolved configs.
+ * @param params.fileCache - Cache for config file contents.
  * @returns Resolved config and middleware list.
  *
  * @example

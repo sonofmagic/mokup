@@ -51,6 +51,16 @@ const configItems = computed(() => {
   }))
 })
 
+function formatConfigValue(value: unknown) {
+  if (Array.isArray(value)) {
+    return value.join(', ')
+  }
+  if (value && typeof value === 'object') {
+    return JSON.stringify(value, null, 2)
+  }
+  return String(value)
+}
+
 const effectiveConfig = computed(() => props.selected.effectiveConfig ?? {})
 const configEntries = computed(() => {
   const entries: { key: string, label: string, value: string }[] = []
@@ -78,16 +88,6 @@ const configEntries = computed(() => {
   }
   return entries
 })
-
-function formatConfigValue(value: unknown) {
-  if (Array.isArray(value)) {
-    return value.join(', ')
-  }
-  if (value && typeof value === 'object') {
-    return JSON.stringify(value, null, 2)
-  }
-  return String(value)
-}
 
 function decisionLabel(step: PlaygroundDecisionStep) {
   const map: Record<string, string> = {

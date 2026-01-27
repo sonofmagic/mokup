@@ -3,7 +3,7 @@ import { describe, expect, it, vi } from 'vitest'
 import { createMokupPlugin } from '../src/vite/plugin'
 
 const mocks = vi.hoisted(() => {
-  const refresh = vi.fn(async () => {})
+  const _refresh = vi.fn(async () => {})
   return {
     buildBundleModule: vi.fn().mockReturnValue('bundle-code'),
     createPlaygroundMiddleware: vi.fn().mockReturnValue((_req: any, _res: any, next: () => void) => next()),
