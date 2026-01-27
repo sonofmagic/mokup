@@ -1,5 +1,11 @@
 # @mokup/playground
 
+## 0.0.14
+
+### Patch Changes
+
+- 🐛 **Persist the last selected API route in the playground, avoid auto-selecting a new route when it is missing, and handle CRLF query inputs.** [`6f79992`](https://github.com/sonofmagic/mokup/commit/6f79992b957d59c3cd0e46ec0274d09ca57bad34) by @sonofmagic
+
 ## 0.0.13
 
 ### Patch Changes

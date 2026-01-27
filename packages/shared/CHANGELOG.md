@@ -1,5 +1,13 @@
 # @mokup/shared
 
+## 1.1.1
+
+### Patch Changes
+
+- 🐛 **Add unit coverage for shared path, grouping, and timing helpers.** [`33ac588`](https://github.com/sonofmagic/mokup/commit/33ac5886d93789087ff53d3da8cf721ee1e2707b) by @sonofmagic
+
+- 🐛 **Improve Windows path normalization, module base URL handling, and add cross-platform tests.** [`0477112`](https://github.com/sonofmagic/mokup/commit/047711228c3b831a5418c14418087b5cf7e86c6b) by @sonofmagic
+
 ## 1.1.0
 
 ### Minor Changes
