@@ -57,17 +57,4 @@ export function mergeHeaders(
   }
 }
 
-/**
- * Delay for the given number of milliseconds.
- *
- * @param ms - Delay duration in milliseconds.
- * @returns A promise that resolves after the delay.
- *
- * @example
- * import { delay } from '@mokup/runtime'
- *
- * await delay(50)
- */
-export function delay(ms: number) {
-  return new Promise<void>(resolve => setTimeout(resolve, ms))
-}
+export { delay } from '@mokup/shared/timing'

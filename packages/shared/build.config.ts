@@ -11,6 +11,9 @@ export default defineBuildConfig({
     'src/logger',
     'src/logger.browser',
     'src/pathe',
+    'src/path-utils',
+    'src/playground-grouping',
+    'src/timing',
     'src/jsonc-parser',
   ],
   rollup: {

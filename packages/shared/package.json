@@ -43,6 +43,21 @@
       "import": "./dist/pathe.mjs",
       "require": "./dist/pathe.cjs"
     },
+    "./path-utils": {
+      "types": "./dist/path-utils.d.ts",
+      "import": "./dist/path-utils.mjs",
+      "require": "./dist/path-utils.cjs"
+    },
+    "./playground-grouping": {
+      "types": "./dist/playground-grouping.d.ts",
+      "import": "./dist/playground-grouping.mjs",
+      "require": "./dist/playground-grouping.cjs"
+    },
+    "./timing": {
+      "types": "./dist/timing.d.ts",
+      "import": "./dist/timing.mjs",
+      "require": "./dist/timing.cjs"
+    },
     "./jsonc-parser": {
       "types": "./dist/jsonc-parser.d.ts",
       "import": "./dist/jsonc-parser.mjs",

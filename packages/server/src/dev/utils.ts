@@ -1,13 +1,8 @@
 import type { DirInput } from '@mokup/shared'
 import type { HttpMethod } from './types'
 
-import { platform } from 'node:process'
-import { isAbsolute, normalize, relative, resolve } from '@mokup/shared/pathe'
+import { isAbsolute, resolve } from '@mokup/shared/pathe'
 import { methodSet } from './constants'
-
-function isWindowsPlatform() {
-  return platform === 'win32'
-}
 
 /**
  * Normalize a method string to a supported HttpMethod.
@@ -75,111 +70,6 @@ export function resolveDirs(
 }
 
 /**
- * Create a debounce wrapper for a function.
- *
- * @param delayMs - Delay in milliseconds.
- * @param fn - Callback to debounce.
- * @returns Debounced function.
- *
- * @example
- * import { createDebouncer } from '@mokup/server'
- *
- * const run = createDebouncer(100, () => console.log('tick'))
- */
-export function createDebouncer(delayMs: number, fn: () => void) {
-  let timer: NodeJS.Timeout | null = null
-  return () => {
-    if (timer) {
-      clearTimeout(timer)
-    }
-    timer = setTimeout(() => {
-      timer = null
-      fn()
-    }, delayMs)
-  }
-}
-
-/**
- * Convert a path to POSIX separators.
- *
- * @param value - Input path.
- * @returns POSIX path.
- *
- * @example
- * import { toPosix } from '@mokup/server'
- *
- * const path = toPosix('a\\\\b')
- */
-export function toPosix(value: string) {
-  return value.replace(/\\/g, '/')
-}
-
-function normalizePath(value: string) {
-  return normalize(toPosix(value))
-}
-
-function normalizePathForComparison(value: string) {
-  const normalized = normalizePath(value)
-  const isWindowsLike = isWindowsPlatform()
-    || /^[a-z]:\//i.test(normalized)
-    || normalized.startsWith('//')
-  return isWindowsLike ? normalized.toLowerCase() : normalized
-}
-
-/**
- * Check if a file path is within any of the provided directories.
- *
- * @param file - Absolute file path.
- * @param dirs - List of directories.
- * @returns True when file is inside any dir.
- *
- * @example
- * import { isInDirs } from '@mokup/server'
- *
- * const ok = isInDirs('/root/mock/a.ts', ['/root/mock'])
- */
-export function isInDirs(file: string, dirs: string[]) {
-  const normalized = normalizePathForComparison(file)
-  return dirs.some((dir) => {
-    const normalizedDir = normalizePathForComparison(dir).replace(/\/$/, '')
-    return normalized === normalizedDir || normalized.startsWith(`${normalizedDir}/`)
-  })
-}
-
-function testPatterns(patterns: RegExp | RegExp[], value: string) {
-  const list = Array.isArray(patterns) ? patterns : [patterns]
-  return list.some(pattern => pattern.test(value))
-}
-
-/**
- * Apply include/exclude filters to a file path.
- *
- * @param file - File path.
- * @param include - Include patterns.
- * @param exclude - Exclude patterns.
- * @returns True if file passes the filter.
- *
- * @example
- * import { matchesFilter } from '@mokup/server'
- *
- * const ok = matchesFilter('mock/user.get.ts', /\.get\.ts$/)
- */
-export function matchesFilter(
-  file: string,
-  include?: RegExp | RegExp[],
-  exclude?: RegExp | RegExp[],
-) {
-  const normalized = normalizePathForComparison(file)
-  if (exclude && testPatterns(exclude, normalized)) {
-    return false
-  }
-  if (include) {
-    return testPatterns(include, normalized)
-  }
-  return true
-}
-
-/**
  * Normalize ignore-prefix values into a list.
  *
  * @param value - Prefix input.
@@ -203,47 +93,11 @@ export function normalizeIgnorePrefix(
   return list.filter((entry): entry is string => typeof entry === 'string' && entry.length > 0)
 }
 
-/**
- * Check whether a file path contains ignored prefixes.
- *
- * @param file - Absolute file path.
- * @param rootDir - Root directory.
- * @param prefixes - Ignored prefixes.
- * @returns True if the path includes ignored segments.
- *
- * @example
- * import { hasIgnoredPrefix } from '@mokup/server'
- *
- * const ignored = hasIgnoredPrefix('/root/mock/.tmp/a.ts', '/root/mock', ['.'])
- */
-export function hasIgnoredPrefix(
-  file: string,
-  rootDir: string,
-  prefixes: string[],
-) {
-  if (prefixes.length === 0) {
-    return false
-  }
-  const normalizedRoot = normalizePathForComparison(rootDir)
-  const normalizedFile = normalizePathForComparison(file)
-  const relativePath = toPosix(relative(normalizedRoot, normalizedFile))
-  const segments = relativePath.split('/')
-  return segments.some(segment =>
-    prefixes.some(prefix => segment.startsWith(prefix)),
-  )
-}
-
-/**
- * Delay for the given number of milliseconds.
- *
- * @param ms - Delay duration in milliseconds.
- * @returns A promise that resolves after the delay.
- *
- * @example
- * import { delay } from '@mokup/server'
- *
- * await delay(50)
- */
-export function delay(ms: number) {
-  return new Promise<void>(resolve => setTimeout(resolve, ms))
-}
+export {
+  hasIgnoredPrefix,
+  isInDirs,
+  matchesFilter,
+  normalizePathForComparison,
+  toPosix,
+} from '@mokup/shared/path-utils'
+export { createDebouncer, delay } from '@mokup/shared/timing'

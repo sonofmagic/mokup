@@ -2,9 +2,7 @@ import type { BuildOptions, FileInfo } from './types'
 
 import { promises as fs } from 'node:fs'
 
-import { basename, extname, isAbsolute, join, relative, resolve } from '@mokup/shared/pathe'
-
-import { normalizePathForComparison, toPosix } from './utils'
+import { basename, extname, isAbsolute, join, resolve } from '@mokup/shared/pathe'
 
 const supportedExtensions = new Set([
   '.json',
@@ -89,39 +87,6 @@ export function resolveDirs(dir: BuildOptions['dir'], root: string): string[] {
   return Array.from(new Set(normalized))
 }
 
-function testPatterns(patterns: RegExp | RegExp[], value: string) {
-  const list = Array.isArray(patterns) ? patterns : [patterns]
-  return list.some(pattern => pattern.test(value))
-}
-
-/**
- * Apply include/exclude filters to a file path.
- *
- * @param file - File path.
- * @param include - Include patterns.
- * @param exclude - Exclude patterns.
- * @returns True if the file passes the filter.
- *
- * @example
- * import { matchesFilter } from '@mokup/cli'
- *
- * const ok = matchesFilter('mock/ping.get.ts', /\.get\.ts$/)
- */
-export function matchesFilter(
-  file: string,
-  include?: RegExp | RegExp[],
-  exclude?: RegExp | RegExp[],
-) {
-  const normalized = normalizePathForComparison(file)
-  if (exclude && testPatterns(exclude, normalized)) {
-    return false
-  }
-  if (include) {
-    return testPatterns(include, normalized)
-  }
-  return true
-}
-
 /**
  * Normalize ignore prefixes into a list.
  *
@@ -159,22 +124,7 @@ export function normalizeIgnorePrefix(
  *
  * const ignored = hasIgnoredPrefix('/root/mock/.tmp/a.ts', '/root/mock', ['.'])
  */
-export function hasIgnoredPrefix(
-  file: string,
-  rootDir: string,
-  prefixes: string[],
-) {
-  if (prefixes.length === 0) {
-    return false
-  }
-  const normalizedRoot = normalizePathForComparison(rootDir)
-  const normalizedFile = normalizePathForComparison(file)
-  const relativePath = toPosix(relative(normalizedRoot, normalizedFile))
-  const segments = relativePath.split('/')
-  return segments.some(segment =>
-    prefixes.some(prefix => segment.startsWith(prefix)),
-  )
-}
+export { hasIgnoredPrefix, matchesFilter } from '@mokup/shared/path-utils'
 
 /**
  * Check whether a file is supported for manifest build.
