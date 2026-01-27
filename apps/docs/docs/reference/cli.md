@@ -90,6 +90,25 @@ await buildManifest({
 })
 ```
 
+### Bundle helper (cross-platform)
+
+Generate a bundle module source string without touching the filesystem:
+
+```ts
+import type { RouteTable } from 'mokup/bundle'
+import { buildBundleModule } from 'mokup/bundle'
+
+const routes: RouteTable = []
+const source = buildBundleModule({
+  routes,
+  root: '/project',
+  resolveModulePath: file => `/virtual/${file}`,
+})
+```
+
+`routes` uses the same resolved route shape as `scanRoutes` (from `mokup/vite`). Use
+`resolveModulePath` to control how module import ids are emitted outside of Vite.
+
 ## Notes
 
 - Multiple `--dir` values are merged into one manifest.

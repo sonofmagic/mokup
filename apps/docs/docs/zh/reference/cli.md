@@ -90,6 +90,25 @@ await buildManifest({
 })
 ```
 
+### Bundle helper（跨平台）
+
+生成 bundle 模块源码字符串，不依赖文件系统：
+
+```ts
+import type { RouteTable } from 'mokup/bundle'
+import { buildBundleModule } from 'mokup/bundle'
+
+const routes: RouteTable = []
+const source = buildBundleModule({
+  routes,
+  root: '/project',
+  resolveModulePath: file => `/virtual/${file}`,
+})
+```
+
+`routes` 的结构与 `scanRoutes`（来自 `mokup/vite`）的返回值一致。若不在 Vite
+环境内构建，请用 `resolveModulePath` 控制输出的 import 路径。
+
 ## 说明
 
 - `--dir` 可多次传入，但会在同一份 manifest 中合并。

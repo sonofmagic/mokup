@@ -8,6 +8,7 @@ export default defineBuildConfig({
   entries: [
     'src/cli-bin',
     'src/cli',
+    'src/bundle',
     'src/index',
     'src/runtime',
     'src/server',

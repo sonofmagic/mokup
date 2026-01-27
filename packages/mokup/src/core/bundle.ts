@@ -9,9 +9,9 @@ import { buildManifestData } from './manifest'
  * @returns JavaScript source string.
  *
  * @example
- * import { buildBundleModule } from 'mokup/vite'
+ * import { buildBundleModule } from 'mokup/bundle'
  *
- * const source = buildBundleModule({ routes: [], root: process.cwd() })
+ * const source = buildBundleModule({ routes: [], root: '/project' })
  */
 export function buildBundleModule(params: {
   routes: RouteTable

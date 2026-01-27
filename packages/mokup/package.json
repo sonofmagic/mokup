@@ -21,6 +21,11 @@
       "import": "./dist/cli.mjs",
       "require": "./dist/cli.cjs"
     },
+    "./bundle": {
+      "types": "./dist/bundle.d.ts",
+      "import": "./dist/bundle.mjs",
+      "require": "./dist/bundle.cjs"
+    },
     "./server": {
       "types": "./dist/server.d.ts",
       "import": "./dist/server.mjs",
