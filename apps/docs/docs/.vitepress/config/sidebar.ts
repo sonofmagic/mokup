@@ -65,6 +65,15 @@ export const zhSidebar: DefaultTheme.Sidebar = {
       ],
     },
   ],
+  '/zh/blog/': [
+    {
+      text: '博客',
+      collapsed: false,
+      items: [
+        { text: 'Mokup：一个统一运行时的 Mock 库', link: '/zh/blog/mokup-unified-mock-library' },
+      ],
+    },
+  ],
   '/zh/reference/': [
     {
       text: '参考',
@@ -144,6 +153,15 @@ export const enSidebar: DefaultTheme.Sidebar = {
         { text: 'DTS Templates', link: '/ai/prompt-templates-dts' },
         { text: 'OpenAPI Templates', link: '/ai/prompt-templates-openapi' },
         { text: 'llms.txt', link: '/ai/llms-txt' },
+      ],
+    },
+  ],
+  '/blog/': [
+    {
+      text: 'Blog',
+      collapsed: false,
+      items: [
+        { text: 'Mokup: A Unified Runtime Mock Library', link: '/blog/mokup-unified-mock-library' },
       ],
     },
   ],
