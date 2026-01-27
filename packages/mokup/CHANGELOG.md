@@ -1,5 +1,14 @@
 # mokup
 
+## 2.2.1
+
+### Patch Changes
+
+- 🐛 **Add a cross-platform `mokup/bundle` entry that exposes `buildBundleModule`.** [`1176513`](https://github.com/sonofmagic/mokup/commit/11765138c4a83ac68511884ce32125c30fbc6f08) by @sonofmagic
+
+- 🐛 **Allow explicit undefined for worker bundle module fields to satisfy exactOptionalPropertyTypes.** [`449e097`](https://github.com/sonofmagic/mokup/commit/449e09742e3a27b021af700d720441e9424fccd2) by @sonofmagic
+- 📦 Updated 4 dependencies [`449e097`](https://github.com/sonofmagic/mokup/commit/449e09742e3a27b021af700d720441e9424fccd2)
+
 ## 2.2.0
 
 ### Minor Changes
