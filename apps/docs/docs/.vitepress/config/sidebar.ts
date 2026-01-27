@@ -24,6 +24,7 @@ export const zhSidebar: DefaultTheme.Sidebar = {
         { text: 'Mock 规则', link: '/zh/core-concepts/mock-rules' },
         { text: '函数处理器', link: '/zh/core-concepts/handlers' },
         { text: 'Manifest', link: '/zh/core-concepts/manifest' },
+        { text: 'Bundle', link: '/zh/core-concepts/bundle' },
       ],
     },
     {
@@ -98,6 +99,7 @@ export const enSidebar: DefaultTheme.Sidebar = {
         { text: 'Mock Rules', link: '/core-concepts/mock-rules' },
         { text: 'Handlers', link: '/core-concepts/handlers' },
         { text: 'Manifest', link: '/core-concepts/manifest' },
+        { text: 'Bundle', link: '/core-concepts/bundle' },
       ],
     },
     {
