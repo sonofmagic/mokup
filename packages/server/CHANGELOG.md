@@ -1,5 +1,13 @@
 # @mokup/server
 
+## 1.1.6
+
+### Patch Changes
+
+- 🐛 **Allow explicit undefined for worker bundle module fields to satisfy exactOptionalPropertyTypes.** [`449e097`](https://github.com/sonofmagic/mokup/commit/449e09742e3a27b021af700d720441e9424fccd2) by @sonofmagic
+- 📦 **Dependencies** [`449e097`](https://github.com/sonofmagic/mokup/commit/449e09742e3a27b021af700d720441e9424fccd2)
+  → `@mokup/runtime@1.0.5`, `@mokup/playground@0.0.13`
+
 ## 1.1.5
 
 ### Patch Changes
