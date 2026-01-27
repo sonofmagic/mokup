@@ -2,6 +2,26 @@
 
 `mokup.manifest.json` 的核心字段：
 
+使用场景：
+
+- 在 CI 中校验或审阅生成的 manifest。
+- 自定义工具或测试场景中生成 manifest。
+
+示例：
+
+```ts
+const manifest: Manifest = {
+  version: 1,
+  routes: [
+    {
+      method: 'GET',
+      url: '/api/ping',
+      response: { type: 'text', body: 'ok' },
+    },
+  ],
+}
+```
+
 ```ts
 interface Manifest {
   version: 1

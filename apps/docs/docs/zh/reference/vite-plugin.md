@@ -26,6 +26,13 @@ bun add -d mokup
 
 ## 基本用法
 
+使用场景：
+
+- 在 Vite dev 中直接 mock API，无需额外服务器。
+- 将 mock 路由与前端工程放在同一仓库。
+
+示例：
+
 ```ts
 import mokup from 'mokup/vite'
 
@@ -67,6 +74,13 @@ export default {
 
 使用 `runtime: 'worker'` 可跳过 Vite dev 中间件，让 Worker 负责 mock 请求：
 
+使用场景：
+
+- 在 Worker 运行时调试与部署一致的行为。
+- 通过 Vite 完成打包，同时把 mock 交给 Worker 处理。
+
+示例：
+
 ```ts
 import mokup from 'mokup/vite'
 
@@ -90,6 +104,13 @@ export default {
 ## 目录配置
 
 在目录内新增 `index.config.ts`，可配置匹配与默认行为：
+
+使用场景：
+
+- 给目录下的所有接口统一响应头/状态码/延迟。
+- 将目录级中间件集中管理。
+
+示例：
 
 ```ts
 import type { RouteDirectoryConfig } from 'mokup'
@@ -119,7 +140,14 @@ export default config
 
 将 `mode` 设置为 `'sw'` 后，mock 会在浏览器的 Service Worker 中运行。插件会在 dev/preview 提供 SW 脚本，并在 build 时输出到 `sw.path`（默认 `/mokup-sw.js`，scope 默认 `/`）。默认会自动注入注册脚本，若不需要可设置 `sw.register: false`。
 
+使用场景：
+
+- 在浏览器端直接拦截请求，无需 dev 代理。
+- 测试离线或缓存相关的请求行为。
+
 ### 基本用法
+
+示例：
 
 ```ts
 export default {
@@ -136,6 +164,8 @@ export default {
 ```
 
 ### 自定义 path/scope + 手动注册
+
+示例（插件配置）：
 
 ```ts
 export default {
@@ -156,6 +186,13 @@ export default {
 }
 ```
 
+使用场景：
+
+- 需要按条件或路由手动注册 SW。
+- 多应用场景下自行控制注册逻辑。
+
+示例（手动注册）：
+
 ```ts
 import { registerMokupServiceWorker } from 'mokup/sw'
 
@@ -166,6 +203,12 @@ registerMokupServiceWorker({
 ```
 
 ### 混合模式
+
+使用场景：
+
+- 部分路由走 SW，其他路由仍走 dev server。
+
+示例：
 
 ```ts
 export default {
@@ -188,6 +231,12 @@ export default {
 
 ### 拦截范围
 
+使用场景：
+
+- 只拦截指定路径，避免影响其它请求。
+
+示例：
+
 ```ts
 export default {
   plugins: [
@@ -207,6 +256,13 @@ export default {
 
 ### 卸载
 
+使用场景：
+
+- 清理历史 SW 注册，避免 mock 残留。
+- 仅发布卸载逻辑的构建产物。
+
+示例（插件配置）：
+
 ```ts
 export default {
   plugins: [
@@ -224,6 +280,12 @@ export default {
 }
 ```
 
+使用场景：
+
+- 在客户端流程中手动卸载 SW。
+
+示例（手动卸载）：
+
 ```ts
 import { unregisterMokupServiceWorker } from 'mokup/sw'
 
@@ -239,6 +301,12 @@ await unregisterMokupServiceWorker({
 - 当没有任何 SW entry 时，插件会自动注入卸载脚本，并使用 `sw.path`/`sw.scope`（或默认值）清理旧的注册。
 
 ## 多目录
+
+使用场景：
+
+- 多个 mock 目录同时工作并映射到不同前缀。
+
+示例：
 
 ```ts
 export default {

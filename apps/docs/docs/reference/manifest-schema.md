@@ -2,6 +2,26 @@
 
 `mokup.manifest.json` core fields:
 
+Use cases:
+
+- Inspect or validate generated manifests in CI pipelines.
+- Produce custom manifests for advanced tooling or testing.
+
+Demo:
+
+```ts
+const manifest: Manifest = {
+  version: 1,
+  routes: [
+    {
+      method: 'GET',
+      url: '/api/ping',
+      response: { type: 'text', body: 'ok' },
+    },
+  ],
+}
+```
+
 ```ts
 interface Manifest {
   version: 1

@@ -6,6 +6,13 @@
 
 Generate `.mokup` outputs for server adapters and workers.
 
+Use cases:
+
+- Generate a bundle for Worker or server runtime deployment.
+- Prebuild mock artifacts for CI/CD without running a dev server.
+
+Demo:
+
 ::: code-group
 
 ```bash [pnpm]
@@ -41,6 +48,13 @@ bunx mokup build --dir mock --out .mokup
 ## Serve
 
 Start a standalone mock server from a directory.
+
+Use cases:
+
+- Spin up a local mock API server without a frontend.
+- Validate mock routes with curl or integration tests.
+
+Demo:
 
 ::: code-group
 
@@ -81,6 +95,13 @@ bunx mokup serve --dir mock --prefix /api --port 3000
 
 If you prefer programmatic usage, import `buildManifest`:
 
+Use cases:
+
+- Generate manifests inside Node scripts or build pipelines.
+- Integrate Mokup with custom tooling or frameworks.
+
+Demo:
+
 ```ts
 import { buildManifest } from 'mokup/cli'
 
@@ -93,6 +114,13 @@ await buildManifest({
 ### Bundle helper (cross-platform)
 
 Generate a bundle module source string without touching the filesystem:
+
+Use cases:
+
+- Build a bundle string in environments without filesystem access.
+- Control how module import IDs are emitted for custom runtimes.
+
+Demo:
 
 ```ts
 import type { RouteTable } from 'mokup/bundle'

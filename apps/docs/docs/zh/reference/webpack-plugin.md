@@ -26,6 +26,13 @@ bun add -d mokup
 
 ## 基本用法
 
+使用场景：
+
+- 在 webpack-dev-server 中接入 Mokup mock。
+- 构建时输出 SW 资源用于浏览器侧 mock。
+
+示例：
+
 ```js
 const { createMokupWebpackPlugin } = require('mokup/webpack')
 
@@ -45,6 +52,13 @@ module.exports = {
 ```
 
 ## Service Worker 模式
+
+使用场景：
+
+- 在浏览器 Service Worker 中运行 mock 处理器。
+- dev 与 build 共用同一套 mock 目录。
+
+示例：
 
 ```js
 const { createMokupWebpackPlugin } = require('mokup/webpack')

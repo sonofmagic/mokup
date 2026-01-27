@@ -6,6 +6,13 @@
 
 生成供服务端适配器与 Worker 使用的 `.mokup` 构建产物。
 
+使用场景：
+
+- 为 Worker 或服务端运行时生成 bundle。
+- 在 CI/CD 中预构建 mock 产物。
+
+示例：
+
 ::: code-group
 
 ```bash [pnpm]
@@ -41,6 +48,13 @@ bunx mokup build --dir mock --out .mokup
 ## Serve
 
 从目录直接启动独立的 mock 服务。
+
+使用场景：
+
+- 不依赖前端应用，快速起一个 mock API 服务。
+- 用于本地联调或接口测试。
+
+示例：
 
 ::: code-group
 
@@ -81,6 +95,13 @@ bunx mokup serve --dir mock --prefix /api --port 3000
 
 如果更喜欢编程式用法，可直接调用 `buildManifest`：
 
+使用场景：
+
+- 在 Node 脚本或构建管线中生成 manifest。
+- 集成到自定义工具链。
+
+示例：
+
 ```ts
 import { buildManifest } from 'mokup/cli'
 
@@ -93,6 +114,13 @@ await buildManifest({
 ### Bundle helper（跨平台）
 
 生成 bundle 模块源码字符串，不依赖文件系统：
+
+使用场景：
+
+- 在无文件系统的环境中生成 bundle 源码。
+- 自定义模块 import 路径输出。
+
+示例：
 
 ```ts
 import type { RouteTable } from 'mokup/bundle'

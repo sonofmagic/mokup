@@ -26,6 +26,13 @@ bun add -d mokup
 
 ## Usage
 
+Use cases:
+
+- Add Mokup mocks to webpack-dev-server without changing app code.
+- Emit SW assets during webpack builds for browser-level mocking.
+
+Demo:
+
 ```js
 const { createMokupWebpackPlugin } = require('mokup/webpack')
 
@@ -45,6 +52,13 @@ module.exports = {
 ```
 
 ## Service Worker mode
+
+Use cases:
+
+- Run mock handlers in a browser Service Worker during webpack builds.
+- Share the same mock directory between dev-server and SW.
+
+Demo:
 
 ```js
 const { createMokupWebpackPlugin } = require('mokup/webpack')
