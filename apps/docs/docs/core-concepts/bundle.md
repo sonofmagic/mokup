@@ -5,6 +5,14 @@ execute routes outside of Mokup's dev server. You will see it emitted as
 `.mokup/mokup.bundle.mjs` (CLI build) or provided as a virtual module
 (`virtual:mokup-bundle`) in Vite.
 
+## Why do we need mokupBundle?
+
+Mokup's dev server can read files and execute handlers directly, but most
+production runtimes cannot. Workers and serverless platforms block filesystem
+access and expect a single module entry. `mokupBundle` packages the manifest
+and handler module references into one object so the runtime can execute the
+same routes without local file imports.
+
 ## What is inside?
 
 A bundle contains three fields:

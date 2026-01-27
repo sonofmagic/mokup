@@ -290,13 +290,13 @@ export interface RuntimeOptions {
    *
    * @default undefined
    */
-  moduleBase?: string | URL
+  moduleBase?: string | URL | undefined
   /**
    * Map of module exports for in-memory execution.
    *
    * @default undefined
    */
-  moduleMap?: ModuleMap
+  moduleMap?: ModuleMap | undefined
 }
 
 /**

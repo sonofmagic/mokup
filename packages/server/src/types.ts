@@ -48,13 +48,13 @@ export interface WorkerBundle {
    *
    * @default undefined
    */
-  moduleMap?: ModuleMap
+  moduleMap?: ModuleMap | undefined
   /**
    * Base directory for module resolution.
    *
    * @default undefined
    */
-  moduleBase?: string | URL
+  moduleBase?: string | URL | undefined
   /**
    * Behavior when no route matches.
    *

@@ -4,6 +4,13 @@
 `.mokup/mokup.bundle.mjs`，或在 Vite 中通过虚拟模块
 `virtual:mokup-bundle` 获取。
 
+## 为什么需要 mokupBundle？
+
+在开发环境中，Mokup 可以直接读取文件并执行处理器，但多数生产运行时无法
+访问本地文件系统。Worker 与 Serverless 更倾向于单一入口模块。
+`mokupBundle` 把 manifest 与处理器模块引用打包在一起，使这些环境也能执行
+相同的路由逻辑。
+
 ## 包含哪些内容？
 
 Bundle 有三个字段：

@@ -2,11 +2,7 @@ import { Hono } from 'hono'
 import { createFetchHandler } from 'mokup/server/fetch'
 import mokupBundle from 'virtual:mokup-bundle'
 
-const handler = createFetchHandler({
-  manifest: mokupBundle.manifest,
-  moduleMap: mokupBundle.moduleMap,
-  moduleBase: mokupBundle.moduleBase,
-})
+const handler = createFetchHandler(mokupBundle)
 
 const app = new Hono()
 
