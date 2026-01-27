@@ -317,6 +317,9 @@ importers:
       axios:
         specifier: ^1.13.3
         version: 1.13.3
+      hono:
+        specifier: ^4.11.5
+        version: 4.11.5
       mokup:
         specifier: workspace:*
         version: link:../../packages/mokup

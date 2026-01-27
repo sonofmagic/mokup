@@ -38,7 +38,7 @@ wrangler deploy
 
 使用虚拟 bundle 时无需手动传入 `moduleBase` 或 `moduleMap`。
 
-如果你更喜欢 fetch handler，可以手动装配：
+下面是一个不使用任何框架的 fetch 示例：
 
 ```ts
 import { createFetchHandler } from 'mokup/server/fetch'
@@ -52,7 +52,38 @@ const handler = createFetchHandler({
 
 export default {
   fetch: async (request: Request) => {
+    const url = new URL(request.url)
+    if (url.pathname === '/health') {
+      return new Response('ok')
+    }
     return (await handler(request)) ?? new Response('Not Found', { status: 404 })
   },
 }
+```
+
+也可以与 Hono 路由结合（未安装请先添加 `hono`）：
+
+```ts
+import { Hono } from 'hono'
+import { createFetchHandler } from 'mokup/server/fetch'
+import mokupBundle from 'virtual:mokup-bundle'
+
+const handler = createFetchHandler({
+  manifest: mokupBundle.manifest,
+  moduleMap: mokupBundle.moduleMap,
+  moduleBase: mokupBundle.moduleBase,
+})
+
+const app = new Hono()
+
+app.get('/health', c => c.text('ok'))
+app.use('*', async (c, next) => {
+  const response = await handler(c.req.raw)
+  if (response) {
+    return response
+  }
+  return next()
+})
+
+export default app
 ```

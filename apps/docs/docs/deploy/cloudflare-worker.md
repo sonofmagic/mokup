@@ -36,7 +36,7 @@ wrangler deploy
 
 No extra `moduleBase` or `moduleMap` wiring is required when using the bundle.
 
-If you prefer the fetch handler, wire it manually:
+Here is a plain fetch example without any framework:
 
 ```ts
 import { createFetchHandler } from 'mokup/server/fetch'
@@ -50,7 +50,38 @@ const handler = createFetchHandler({
 
 export default {
   fetch: async (request: Request) => {
+    const url = new URL(request.url)
+    if (url.pathname === '/health') {
+      return new Response('ok')
+    }
     return (await handler(request)) ?? new Response('Not Found', { status: 404 })
   },
 }
+```
+
+You can also combine Mokup with Hono routes (install `hono` if needed):
+
+```ts
+import { Hono } from 'hono'
+import { createFetchHandler } from 'mokup/server/fetch'
+import mokupBundle from 'virtual:mokup-bundle'
+
+const handler = createFetchHandler({
+  manifest: mokupBundle.manifest,
+  moduleMap: mokupBundle.moduleMap,
+  moduleBase: mokupBundle.moduleBase,
+})
+
+const app = new Hono()
+
+app.get('/health', c => c.text('ok'))
+app.use('*', async (c, next) => {
+  const response = await handler(c.req.raw)
+  if (response) {
+    return response
+  }
+  return next()
+})
+
+export default app
 ```
