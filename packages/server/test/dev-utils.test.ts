@@ -41,6 +41,16 @@ describe('server dev utils', () => {
     expect(hasIgnoredPrefix(file, root, normalizeIgnorePrefix('_'))).toBe(false)
   })
 
+  it('compares Windows paths without case sensitivity', () => {
+    const root = String.raw`C:\Repo\Mock`
+    const file = String.raw`c:\repo\mock\users.json`
+    const ignored = String.raw`C:\Repo\Mock\.draft\users.get.json`
+
+    expect(isInDirs(file, [root])).toBe(true)
+    expect(matchesFilter(file, /mock/)).toBe(true)
+    expect(hasIgnoredPrefix(ignored, root, normalizeIgnorePrefix(undefined))).toBe(true)
+  })
+
   it('debounces and delays using timers', async () => {
     vi.useFakeTimers()
     const spy = vi.fn()

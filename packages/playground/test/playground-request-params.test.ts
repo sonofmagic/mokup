@@ -64,6 +64,10 @@ describe('playground request query', () => {
   it('parses key/value pairs and builds query strings', () => {
     expect(parseKeyValueInput('')).toEqual([])
     expect(parseKeyValueInput('\n=skip&foo=bar')).toEqual([['foo', 'bar']])
+    expect(parseKeyValueInput('foo=bar\r\nbaz=1')).toEqual([
+      ['foo', 'bar'],
+      ['baz', '1'],
+    ])
     expect(parseKeyValueInput('foo=bar&baz=1=2')).toEqual([
       ['foo', 'bar'],
       ['baz', '1=2'],

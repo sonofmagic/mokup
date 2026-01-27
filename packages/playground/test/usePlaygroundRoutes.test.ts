@@ -117,6 +117,7 @@ describe('usePlaygroundRoutes', () => {
   })
 
   it('restores selections and resets invalid groups', async () => {
+    localStorage.setItem(LAST_SELECTED_ROUTE_KEY, 'GET /api/ping')
     const routesState = usePlaygroundRoutes()
     routesState.activeGroup.value = 'missing'
     routesState.selected.value = { method: 'GET', url: '/api/ping', file: 'ping.get.ts', type: 'handler' }

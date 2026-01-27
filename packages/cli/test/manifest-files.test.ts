@@ -63,6 +63,15 @@ describe('manifest file helpers', () => {
     expect(isSupportedFile('/tmp/route.ts')).toBe(true)
   })
 
+  it('compares Windows paths without case sensitivity', () => {
+    const root = String.raw`C:\Repo\Mock`
+    const file = String.raw`c:\repo\mock\users.json`
+    const ignored = String.raw`C:\Repo\Mock\.draft\users.get.json`
+
+    expect(matchesFilter(file, /mock/)).toBe(true)
+    expect(hasIgnoredPrefix(ignored, root, normalizeIgnorePrefix(undefined))).toBe(true)
+  })
+
   it('normalizes ignore prefixes and checks path segments', () => {
     const root = path.posix.join('/tmp', 'mokup-root', 'mock')
     const file = path.posix.join(root, '.draft', 'users.get.json')

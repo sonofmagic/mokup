@@ -3,7 +3,7 @@ import { tmpdir } from 'node:os'
 import path from 'node:path'
 import { describe, expect, it } from 'vitest'
 import { createMokupWorker as createWebWorker } from '../src/worker'
-import { createMokupWorker as createNodeWorker } from '../src/worker-node'
+import { createMokupWorker as createNodeWorker, resolveModuleBase } from '../src/worker-node'
 
 const manifest = {
   version: 1,
@@ -78,5 +78,11 @@ describe('worker adapters', () => {
     finally {
       await fs.rm(root, { recursive: true, force: true })
     }
+  })
+
+  it('resolves module base URLs from bundle directories', () => {
+    const base = resolveModuleBase(path.join(tmpdir(), 'mokup-worker-base'))
+    expect(base.startsWith('file://')).toBe(true)
+    expect(base.endsWith('/')).toBe(true)
   })
 })

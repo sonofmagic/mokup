@@ -1,7 +1,12 @@
 import type { HttpMethod, VitePluginOptions } from './types'
 
-import { isAbsolute, relative, resolve } from '@mokup/shared/pathe'
+import { platform } from 'node:process'
+import { isAbsolute, normalize, relative, resolve } from '@mokup/shared/pathe'
 import { methodSet } from './constants'
+
+function isWindowsPlatform() {
+  return platform === 'win32'
+}
 
 /**
  * Normalize a method string to a supported HttpMethod.
@@ -108,6 +113,18 @@ export function toPosix(value: string) {
   return value.replace(/\\/g, '/')
 }
 
+function normalizePath(value: string) {
+  return normalize(toPosix(value))
+}
+
+function normalizePathForComparison(value: string) {
+  const normalized = normalizePath(value)
+  const isWindowsLike = isWindowsPlatform()
+    || /^[a-z]:\//i.test(normalized)
+    || normalized.startsWith('//')
+  return isWindowsLike ? normalized.toLowerCase() : normalized
+}
+
 /**
  * Check if a file path is within any of the provided directories.
  *
@@ -121,9 +138,9 @@ export function toPosix(value: string) {
  * const ok = isInDirs('/root/mock/a.ts', ['/root/mock'])
  */
 export function isInDirs(file: string, dirs: string[]) {
-  const normalized = toPosix(file)
+  const normalized = normalizePathForComparison(file)
   return dirs.some((dir) => {
-    const normalizedDir = toPosix(dir).replace(/\/$/, '')
+    const normalizedDir = normalizePathForComparison(dir).replace(/\/$/, '')
     return normalized === normalizedDir || normalized.startsWith(`${normalizedDir}/`)
   })
 }
@@ -151,7 +168,7 @@ export function matchesFilter(
   include?: RegExp | RegExp[],
   exclude?: RegExp | RegExp[],
 ) {
-  const normalized = toPosix(file)
+  const normalized = normalizePathForComparison(file)
   if (exclude && testPatterns(exclude, normalized)) {
     return false
   }
@@ -206,7 +223,9 @@ export function hasIgnoredPrefix(
   if (prefixes.length === 0) {
     return false
   }
-  const relativePath = toPosix(relative(rootDir, file))
+  const normalizedRoot = normalizePathForComparison(rootDir)
+  const normalizedFile = normalizePathForComparison(file)
+  const relativePath = toPosix(relative(normalizedRoot, normalizedFile))
   const segments = relativePath.split('/')
   return segments.some(segment =>
     prefixes.some(prefix => segment.startsWith(prefix)),

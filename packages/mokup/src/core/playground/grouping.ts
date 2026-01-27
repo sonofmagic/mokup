@@ -1,4 +1,4 @@
-import { cwd } from 'node:process'
+import { cwd, platform } from 'node:process'
 import { dirname, normalize, relative } from '@mokup/shared/pathe'
 
 interface PlaygroundGroup {
@@ -7,17 +7,29 @@ interface PlaygroundGroup {
   path: string
 }
 
+function isWindowsPlatform() {
+  return platform === 'win32'
+}
+
 function toPosixPath(value: string) {
   return value.replace(/\\/g, '/')
 }
 
 function normalizePath(value: string) {
-  return toPosixPath(normalize(value))
+  return normalize(toPosixPath(value))
+}
+
+function normalizePathForComparison(value: string) {
+  const normalized = normalizePath(value)
+  const isWindowsLike = isWindowsPlatform()
+    || /^[a-z]:\//i.test(normalized)
+    || normalized.startsWith('//')
+  return isWindowsLike ? normalized.toLowerCase() : normalized
 }
 
 function isAncestor(parent: string, child: string) {
-  const normalizedParent = normalizePath(parent).replace(/\/$/, '')
-  const normalizedChild = normalizePath(child)
+  const normalizedParent = normalizePathForComparison(parent).replace(/\/$/, '')
+  const normalizedChild = normalizePathForComparison(child)
   return normalizedChild === normalizedParent || normalizedChild.startsWith(`${normalizedParent}/`)
 }
 
@@ -60,10 +72,11 @@ function resolveGroups(dirs: string[], root: string) {
   const seen = new Set<string>()
   for (const dir of dirs) {
     const normalized = normalizePath(dir)
-    if (seen.has(normalized)) {
+    const compareKey = normalizePathForComparison(dir)
+    if (seen.has(compareKey)) {
       continue
     }
-    seen.add(normalized)
+    seen.add(compareKey)
     const rel = toPosixPath(relative(root, normalized))
     const label = rel && !rel.startsWith('..') ? rel : normalized
     groups.push({
@@ -79,10 +92,11 @@ function resolveRouteGroup(routeFile: string, groups: PlaygroundGroup[]) {
   if (groups.length === 0) {
     return undefined
   }
-  const normalizedFile = toPosixPath(normalize(routeFile))
+  const normalizedFile = normalizePathForComparison(routeFile)
   let matched: PlaygroundGroup | undefined
   for (const group of groups) {
-    if (normalizedFile === group.path || normalizedFile.startsWith(`${group.path}/`)) {
+    const normalizedGroup = normalizePathForComparison(group.path)
+    if (normalizedFile === normalizedGroup || normalizedFile.startsWith(`${normalizedGroup}/`)) {
       if (!matched || group.path.length > matched.path.length) {
         matched = group
       }

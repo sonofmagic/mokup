@@ -4,7 +4,7 @@ import { promises as fs } from 'node:fs'
 
 import { basename, extname, isAbsolute, join, relative, resolve } from '@mokup/shared/pathe'
 
-import { toPosix } from './utils'
+import { normalizePathForComparison, toPosix } from './utils'
 
 const supportedExtensions = new Set([
   '.json',
@@ -112,7 +112,7 @@ export function matchesFilter(
   include?: RegExp | RegExp[],
   exclude?: RegExp | RegExp[],
 ) {
-  const normalized = toPosix(file)
+  const normalized = normalizePathForComparison(file)
   if (exclude && testPatterns(exclude, normalized)) {
     return false
   }
@@ -167,7 +167,9 @@ export function hasIgnoredPrefix(
   if (prefixes.length === 0) {
     return false
   }
-  const relativePath = toPosix(relative(rootDir, file))
+  const normalizedRoot = normalizePathForComparison(rootDir)
+  const normalizedFile = normalizePathForComparison(file)
+  const relativePath = toPosix(relative(normalizedRoot, normalizedFile))
   const segments = relativePath.split('/')
   return segments.some(segment =>
     prefixes.some(prefix => segment.startsWith(prefix)),

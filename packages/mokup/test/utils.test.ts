@@ -62,6 +62,16 @@ describe('vite utils', () => {
     expect(matchesFilter('/src/index.ts')).toBe(true)
   })
 
+  it('compares Windows paths without case sensitivity', () => {
+    const root = String.raw`C:\Repo\Mock`
+    const file = String.raw`c:\repo\mock\Users.ts`
+    const ignored = String.raw`C:\Repo\Mock\.draft\users.get.json`
+
+    expect(isInDirs(file, [root])).toBe(true)
+    expect(matchesFilter(file, /mock/)).toBe(true)
+    expect(hasIgnoredPrefix(ignored, root, ['.'])).toBe(true)
+  })
+
   it('normalizes ignore prefixes and checks segments', () => {
     const root = path.posix.join('/tmp', 'mokup', 'mock')
     const file = path.posix.join(root, '.draft', 'users.get.json')

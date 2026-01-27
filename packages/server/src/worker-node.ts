@@ -2,6 +2,8 @@ import type { ModuleMap } from '@mokup/runtime'
 
 import type { ServerOptions, WorkerBundle, WorkerInput } from './types'
 
+import { resolve } from 'node:path'
+import { pathToFileURL } from 'node:url'
 import { createFetchHandler } from './fetch'
 
 /**
@@ -26,6 +28,15 @@ export interface FetchWorker {
  * const input: NodeWorkerInput = '.mokup'
  */
 export type NodeWorkerInput = string | WorkerInput
+
+function ensureTrailingSlash(value: string) {
+  return value.endsWith('/') ? value : `${value}/`
+}
+
+export function resolveModuleBase(dir: string) {
+  const absolute = resolve(dir)
+  return ensureTrailingSlash(pathToFileURL(absolute).href)
+}
 
 function isManifest(value: WorkerInput): value is WorkerBundle['manifest'] {
   return typeof value === 'object'
@@ -57,8 +68,6 @@ async function loadBundleFromDir(dir: string): Promise<WorkerBundle> {
   }
 
   const { readFile, access } = await import('node:fs/promises')
-  const { resolve, join } = await import('node:path')
-  const { pathToFileURL } = await import('node:url')
 
   const manifestPath = resolve(dir, 'mokup.manifest.json')
   const manifestRaw = await readFile(manifestPath, 'utf8')
@@ -77,7 +86,7 @@ async function loadBundleFromDir(dir: string): Promise<WorkerBundle> {
 
   const bundle: WorkerBundle = {
     manifest,
-    moduleBase: join(dir, '/'),
+    moduleBase: resolveModuleBase(dir),
   }
   if (typeof moduleMap !== 'undefined') {
     bundle.moduleMap = moduleMap

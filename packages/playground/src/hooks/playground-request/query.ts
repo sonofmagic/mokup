@@ -20,7 +20,7 @@ function parseKeyValueInput(input: string) {
   if (!trimmed) {
     return []
   }
-  const parts = trimmed.split(/[&\n]/)
+  const parts = trimmed.split(/[&\r\n]/)
   const entries: Array<[string, string]> = []
   for (const part of parts) {
     const segment = part.trim()
