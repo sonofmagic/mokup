@@ -1,7 +1,7 @@
 {
   "name": "@mokup/server",
   "type": "module",
-  "version": "1.1.6",
+  "version": "1.1.7",
   "description": "Server adapters for @mokup/runtime.",
   "license": "MIT",
   "homepage": "https://mokup.icebreaker.top",

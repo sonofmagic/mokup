@@ -1,5 +1,13 @@
 # @mokup/runtime
 
+## 1.0.6
+
+### Patch Changes
+
+- 🐛 **Improve Windows path normalization, module base URL handling, and add cross-platform tests.** [`0477112`](https://github.com/sonofmagic/mokup/commit/047711228c3b831a5418c14418087b5cf7e86c6b) by @sonofmagic
+- 📦 **Dependencies** [`33ac588`](https://github.com/sonofmagic/mokup/commit/33ac5886d93789087ff53d3da8cf721ee1e2707b)
+  → `@mokup/shared@1.1.1`
+
 ## 1.0.5
 
 ### Patch Changes
