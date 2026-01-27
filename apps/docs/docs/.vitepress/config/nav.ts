@@ -4,6 +4,7 @@ export const zhNav: DefaultTheme.NavItem[] = [
   { text: '开始使用', link: '/zh/getting-started/overview' },
   { text: 'AI 提示词', link: '/zh/ai/' },
   { text: '参考', link: '/zh/reference/cli' },
+  { text: '博客', link: '/zh/blog/mokup-unified-mock-library' },
   {
     text: 'Playground',
     link: '/__mokup/',
@@ -16,6 +17,7 @@ export const enNav: DefaultTheme.NavItem[] = [
   { text: 'Getting Started', link: '/getting-started/overview' },
   { text: 'AI Prompts', link: '/ai/' },
   { text: 'Reference', link: '/reference/cli' },
+  { text: 'Blog', link: '/blog/mokup-unified-mock-library' },
   {
     text: 'Playground',
     link: '/__mokup/',
