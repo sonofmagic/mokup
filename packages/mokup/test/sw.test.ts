@@ -209,4 +209,28 @@ describe('mokup SW', () => {
     })
     expect(warnings).toHaveLength(0)
   })
+
+  it('normalizes base paths and prefixes', () => {
+    const warnings: string[] = []
+    const logger = createLogger(warnings)
+    const result = resolveSwConfig([
+      { mode: 'sw', prefix: 'api' },
+      { mode: 'sw', sw: { basePath: ['/docs/', ''] } },
+    ], logger)
+
+    expect(result?.basePaths).toEqual(expect.arrayContaining(['/api', '/docs', '/']))
+  })
+
+  it('warns on unregister conflicts and normalizes basePath strings', () => {
+    const warnings: string[] = []
+    const logger = createLogger(warnings)
+    const result = resolveSwConfig([
+      { mode: 'sw', sw: { unregister: true, basePath: 'docs/' } },
+      { mode: 'sw', sw: { unregister: false } },
+    ], logger)
+
+    expect(result?.unregister).toBe(true)
+    expect(result?.basePaths).toEqual(['/docs'])
+    expect(warnings.some(message => message.includes('SW unregister'))).toBe(true)
+  })
 })

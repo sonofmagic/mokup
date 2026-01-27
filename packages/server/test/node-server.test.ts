@@ -27,13 +27,26 @@ function listenServer(server: ReturnType<typeof createAdaptorServer>) {
 
 function closeServer(server: ReturnType<typeof createAdaptorServer>) {
   return new Promise<void>((resolve, reject) => {
-    server.close((error?: Error) => {
-      if (error) {
-        reject(error)
+    try {
+      server.close((error?: Error) => {
+        if (error) {
+          if (error.message === 'Server is not running.') {
+            resolve()
+            return
+          }
+          reject(error)
+          return
+        }
+        resolve()
+      })
+    }
+    catch (error) {
+      if (error instanceof Error && error.message === 'Server is not running.') {
+        resolve()
         return
       }
-      resolve()
-    })
+      reject(error)
+    }
   })
 }
 

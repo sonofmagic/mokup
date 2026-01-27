@@ -68,4 +68,63 @@ describe('dev loader', () => {
       await fs.rm(root, { recursive: true, force: true })
     }
   })
+
+  it('loads cjs and mjs modules', async () => {
+    const root = await createTempRoot()
+    const logger = { warn: vi.fn(), info: vi.fn(), error: vi.fn() }
+    try {
+      const cjsFile = path.join(root, 'rules.cjs')
+      const mjsFile = path.join(root, 'rules.mjs')
+
+      await fs.writeFile(
+        cjsFile,
+        'module.exports = { handler: { ok: "cjs" } }',
+        'utf8',
+      )
+      await fs.writeFile(
+        mjsFile,
+        'export default { handler: { ok: "mjs" } }',
+        'utf8',
+      )
+
+      const cjsRules = await loadRules(cjsFile, logger)
+      expect(cjsRules).toEqual([{ handler: { ok: 'cjs' } }])
+
+      const mjsRules = await loadRules(mjsFile, logger)
+      expect(mjsRules).toEqual([{ handler: { ok: 'mjs' } }])
+    }
+    finally {
+      await fs.rm(root, { recursive: true, force: true })
+    }
+  })
+
+  it('warns when json files cannot be read', async () => {
+    const logger = { warn: vi.fn(), info: vi.fn(), error: vi.fn() }
+    const missingFile = path.join(tmpdir(), 'missing-rules.json')
+    const rules = await loadRules(missingFile, logger)
+    expect(rules).toEqual([])
+    expect(logger.warn).toHaveBeenCalled()
+  })
+
+  it('skips unsupported extensions and empty module exports', async () => {
+    const root = await createTempRoot()
+    const logger = { warn: vi.fn(), info: vi.fn(), error: vi.fn() }
+    try {
+      const txtFile = path.join(root, 'rules.txt')
+      const emptyFile = path.join(root, 'empty.mjs')
+
+      await fs.writeFile(txtFile, 'noop', 'utf8')
+      await fs.writeFile(emptyFile, 'export default null', 'utf8')
+
+      const txtRules = await loadRules(txtFile, logger)
+      expect(txtRules).toEqual([])
+
+      const emptyRules = await loadRules(emptyFile, logger)
+      expect(emptyRules).toHaveLength(1)
+      expect(emptyRules[0]).toHaveProperty('default', null)
+    }
+    finally {
+      await fs.rm(root, { recursive: true, force: true })
+    }
+  })
 })

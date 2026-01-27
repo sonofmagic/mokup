@@ -6,6 +6,7 @@ describe('normalize helpers', () => {
     expect(normalizeMethod('get')).toBe('GET')
     expect(normalizeMethod('HEAD')).toBe('HEAD')
     expect(normalizeMethod('INVALID')).toBeUndefined()
+    expect(normalizeMethod(null)).toBeUndefined()
 
     expect(mergeHeaders({ a: '1' }, { b: '2' })).toEqual({ a: '1', b: '2' })
     expect(mergeHeaders({ a: '1' }, undefined)).toEqual({ a: '1' })

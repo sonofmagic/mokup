@@ -129,4 +129,116 @@ describe('resolveDirectoryConfig', () => {
       await cleanupTempRoot(root)
     }
   })
+
+  it('reads middleware meta and preserves positions', async () => {
+    const { root, mockDir } = await createTempRoot()
+    const routeFile = path.join(mockDir, 'users.get.json')
+    try {
+      await fs.writeFile(routeFile, '{}', 'utf8')
+      await fs.writeFile(
+        path.join(mockDir, 'index.config.js'),
+        [
+          'const meta = {',
+          '  pre: [async (_req, _res, _ctx, next) => { await next() }],',
+          '  normal: [async (_req, _res, _ctx, next) => { await next() }],',
+          '  post: [async (_req, _res, _ctx, next) => { await next() }],',
+          '}',
+          'export default {',
+          '  [Symbol.for(\"mokup.config.middlewares\")]: meta,',
+          '}',
+        ].join('\n'),
+        'utf8',
+      )
+
+      const config = await resolveDirectoryConfig({
+        file: routeFile,
+        rootDir: mockDir,
+        configCache: new Map(),
+        fileCache: new Map(),
+      })
+
+      expect(config.middlewares.map(entry => entry.position)).toEqual([
+        'pre',
+        'normal',
+        'post',
+      ])
+    }
+    finally {
+      await cleanupTempRoot(root)
+    }
+  })
+
+  it('loads cjs and ts configs and normalizes middleware meta', async () => {
+    const { root, mockDir } = await createTempRoot()
+    try {
+      const cjsDir = path.join(mockDir, 'cjs')
+      const tsDir = path.join(mockDir, 'ts')
+      await fs.mkdir(cjsDir, { recursive: true })
+      await fs.mkdir(tsDir, { recursive: true })
+      const cjsRoute = path.join(cjsDir, 'cjs.get.json')
+      const tsRoute = path.join(tsDir, 'ts.get.json')
+      await fs.writeFile(cjsRoute, '{}', 'utf8')
+      await fs.writeFile(tsRoute, '{}', 'utf8')
+      await fs.writeFile(
+        path.join(cjsDir, 'index.config.cjs'),
+        'module.exports = { headers: { \"x-cjs\": \"1\" } }',
+        'utf8',
+      )
+      await fs.writeFile(
+        path.join(tsDir, 'index.config.ts'),
+        [
+          'const meta = { pre: \"nope\", normal: 1, post: null }',
+          'export default {',
+          '  headers: { \"x-ts\": \"1\" },',
+          '  [Symbol.for(\"mokup.config.middlewares\")]: meta,',
+          '}',
+        ].join('\n'),
+        'utf8',
+      )
+
+      const cjsConfig = await resolveDirectoryConfig({
+        file: cjsRoute,
+        rootDir: mockDir,
+        configCache: new Map(),
+        fileCache: new Map(),
+      })
+      expect(cjsConfig.headers).toEqual({ 'x-cjs': '1' })
+
+      const tsConfig = await resolveDirectoryConfig({
+        file: tsRoute,
+        rootDir: mockDir,
+        configCache: new Map(),
+        fileCache: new Map(),
+      })
+      expect(tsConfig.headers).toEqual({ 'x-ts': '1' })
+      expect(tsConfig.middlewares).toEqual([])
+    }
+    finally {
+      await cleanupTempRoot(root)
+    }
+  })
+
+  it('logs invalid cached config paths and tolerates missing roots', async () => {
+    const { root, mockDir } = await createTempRoot()
+    const logs: string[] = []
+    try {
+      const routeFile = path.join(mockDir, 'route.get.json')
+      await fs.writeFile(routeFile, '{}', 'utf8')
+      const fileCache = new Map<string, string | null>()
+      fileCache.set(mockDir, path.join(mockDir, 'index.config.txt'))
+
+      await resolveDirectoryConfig({
+        file: routeFile,
+        rootDir: path.join(root, 'not-root'),
+        log: message => logs.push(message),
+        configCache: new Map(),
+        fileCache,
+      })
+
+      expect(logs.some(message => message.includes('Invalid config'))).toBe(true)
+    }
+    finally {
+      await cleanupTempRoot(root)
+    }
+  })
 })

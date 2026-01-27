@@ -135,4 +135,25 @@ describe('manifest handler helpers', () => {
       await fs.rm(root, { recursive: true, force: true })
     }
   })
+
+  it('skips index generation when no handler modules exist', async () => {
+    const root = await fs.mkdtemp(path.join(tmpdir(), 'mokup-handlers-empty-'))
+    const handlersDir = path.join(root, 'mokup-handlers')
+    try {
+      await fs.mkdir(handlersDir, { recursive: true })
+      await writeHandlerIndex(new Map(), handlersDir, root)
+      await expect(fs.stat(path.join(handlersDir, 'index.mjs'))).rejects.toBeDefined()
+    }
+    finally {
+      await fs.rm(root, { recursive: true, force: true })
+    }
+  })
+
+  it('returns relative paths when handlersDir is outside the output root', () => {
+    const root = '/tmp/mokup-handlers'
+    const file = path.join(root, 'mock', 'handler.get.ts')
+    const handlersDir = `${root}/handlers/..`
+    const modulePath = getHandlerModulePath(file, handlersDir, root)
+    expect(modulePath.startsWith('..')).toBe(true)
+  })
 })

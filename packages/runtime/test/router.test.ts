@@ -38,6 +38,12 @@ describe('router parsing', () => {
     const parsed = parseRouteTemplate('users/[id]/[id]')
     expect(parsed.template).toBe('/users/[id]/[id]')
     expect(parsed.warnings).toContain('Duplicate param name "id"')
+
+    const catchallDup = parseRouteTemplate('/files/[id]/[...id]')
+    expect(catchallDup.warnings).toContain('Duplicate param name "id"')
+
+    const optionalDup = parseRouteTemplate('/docs/[id]/[[...id]]')
+    expect(optionalDup.warnings).toContain('Duplicate param name "id"')
   })
 
   it('rejects invalid params and segments', () => {
@@ -49,6 +55,12 @@ describe('router parsing', () => {
 
     const optionalPlacement = parseRouteTemplate('/docs/[[...slug]]/extra')
     expect(optionalPlacement.errors.length).toBeGreaterThan(0)
+
+    const invalidOptional = parseRouteTemplate('/docs/[[...slug*]]')
+    expect(invalidOptional.errors.length).toBeGreaterThan(0)
+
+    const invalidCatchall = parseRouteTemplate('/files/[...slug*]')
+    expect(invalidCatchall.errors.length).toBeGreaterThan(0)
   })
 })
 
@@ -111,5 +123,14 @@ describe('route scoring', () => {
     ])
     expect(score).toEqual([4, 3, 2])
     expect(compareRouteScore([4, 4], [4])).toBeLessThan(0)
+  })
+
+  it('handles sparse score entries', () => {
+    expect(compareRouteScore([undefined, 2] as unknown as number[], [1, 2])).toBeGreaterThan(0)
+  })
+
+  it('scores unknown token types as zero', () => {
+    const score = scoreRouteTokens([{ type: 'unknown', value: 'noop' } as any])
+    expect(score).toEqual([0])
   })
 })

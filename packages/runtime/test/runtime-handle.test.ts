@@ -2,7 +2,7 @@ import { Buffer } from 'node:buffer'
 import { promises as fs } from 'node:fs'
 import { tmpdir } from 'node:os'
 import path from 'node:path'
-import { describe, expect, it } from 'vitest'
+import { describe, expect, it, vi } from 'vitest'
 import { createRuntime, parseRouteTemplate } from '../src/index'
 
 async function createTempModule(source: string) {
@@ -22,7 +22,24 @@ const handlerSource = [
   '  handler: { step: "object" },',
   '}',
   '',
+  'export const stringHandler = () => "hello"',
+  '',
   'export const bufferHandler = () => new Uint8Array([1, 2, 3]).buffer',
+  '',
+  'export const responseHandler = () => new Response("created", { status: 202 })',
+  '',
+  'export const undefinedHandler = (c) => {',
+  '  c.status(404)',
+  '  return undefined',
+  '}',
+  '',
+  'export const middlewares = [',
+  '  async (c, next) => {',
+  '    await next()',
+  '    c.header("x-mw", "1")',
+  '  },',
+  '  "skip",',
+  ']',
   '',
   'export default function handler(c) {',
   '  c.status(201)',
@@ -176,6 +193,109 @@ describe('runtime handling', () => {
     expect(Array.from(bufferResult?.body ?? [])).toEqual([1, 2, 3])
   })
 
+  it('applies module middlewares, delay, and string handlers', async () => {
+    vi.useFakeTimers()
+    const { moduleBase } = await createTempModule(handlerSource)
+    const runtime = createRuntime({
+      manifest: {
+        version: 1,
+        routes: [
+          {
+            method: 'GET',
+            url: '/module/string',
+            response: {
+              type: 'module',
+              module: './handler.mjs',
+              exportName: 'stringHandler',
+            },
+          },
+          {
+            method: 'GET',
+            url: '/module/mw',
+            delay: 10,
+            middleware: [
+              {
+                module: './handler.mjs',
+                exportName: 'middlewares',
+                ruleIndex: 0,
+              },
+            ],
+            response: { type: 'json', body: { ok: true } },
+          },
+        ],
+      },
+      moduleBase,
+    })
+
+    const stringResult = await runtime.handle(createRequest('/module/string'))
+    expect(stringResult?.body).toBe('hello')
+
+    const mwPromise = runtime.handle(createRequest('/module/mw'))
+    await vi.runAllTimersAsync()
+    const mwResult = await mwPromise
+    expect(mwResult?.headers['x-mw']).toBe('1')
+    vi.useRealTimers()
+  })
+
+  it('handles response and undefined module handlers', async () => {
+    const { moduleBase } = await createTempModule(handlerSource)
+    const runtime = createRuntime({
+      manifest: {
+        version: 1,
+        routes: [
+          {
+            method: 'GET',
+            url: '/module/response',
+            response: {
+              type: 'module',
+              module: './handler.mjs',
+              exportName: 'responseHandler',
+            },
+          },
+          {
+            method: 'GET',
+            url: '/module/undefined',
+            response: {
+              type: 'module',
+              module: './handler.mjs',
+              exportName: 'undefinedHandler',
+            },
+          },
+        ],
+      },
+      moduleBase,
+    })
+
+    const responseResult = await runtime.handle(createRequest('/module/response'))
+    expect(responseResult?.status).toBe(202)
+    expect(responseResult?.body).toBe('created')
+
+    const undefinedResult = await runtime.handle(createRequest('/module/undefined'))
+    expect(undefinedResult?.status).toBe(404)
+    expect(undefinedResult?.body).toBeNull()
+  })
+
+  it('uses module maps with async manifests', async () => {
+    const runtime = createRuntime({
+      manifest: async () => ({
+        version: 1,
+        routes: [
+          {
+            method: 'GET',
+            url: '/mapped',
+            response: { type: 'module', module: 'mock:handler' },
+          },
+        ],
+      }),
+      moduleMap: {
+        'mock:handler': { default: () => 'ok' },
+      },
+    })
+
+    const result = await runtime.handle(createRequest('/mapped'))
+    expect(result?.body).toBe('ok')
+  })
+
   it('skips invalid routes and falls back to GET', async () => {
     const runtime = createRuntime({
       manifest: {
@@ -200,6 +320,20 @@ describe('runtime handling', () => {
 
     const skipped = await runtime.handle(createRequest('/(admin)/users'))
     expect(skipped).toBeNull()
+  })
+
+  it('returns null when no method matches', async () => {
+    const runtime = createRuntime({
+      manifest: {
+        version: 1,
+        routes: [
+          { method: 'GET', url: '/only-get', response: { type: 'text', body: 'ok' } },
+        ],
+      },
+    })
+
+    const result = await runtime.handle(createRequest('/only-get', 'POST'))
+    expect(result).toBeNull()
   })
 
   it('throws when moduleBase is missing for relative modules', async () => {

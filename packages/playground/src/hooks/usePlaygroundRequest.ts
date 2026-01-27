@@ -173,6 +173,16 @@ export function usePlaygroundRequest(
     if (typeof window === 'undefined' || !('serviceWorker' in navigator)) {
       return false
     }
+    let nextReadyPromise: Promise<void> | null = null
+    if (!swReadyPromise) {
+      nextReadyPromise = navigator.serviceWorker.ready
+        .then(() => {
+          isSwReady.value = true
+        })
+        .catch(() => {
+          swReadyPromise = null
+        })
+    }
     const controller = navigator.serviceWorker.controller
     if (isMokupController(controller)) {
       isSwMode.value = true
@@ -186,14 +196,8 @@ export function usePlaygroundRequest(
       }
       isSwMode.value = true
     }
-    if (!swReadyPromise) {
-      swReadyPromise = navigator.serviceWorker.ready
-        .then(() => {
-          isSwReady.value = true
-        })
-        .catch(() => {
-          swReadyPromise = null
-        })
+    if (!swReadyPromise && nextReadyPromise) {
+      swReadyPromise = nextReadyPromise
     }
     await swReadyPromise
     return isSwReady.value

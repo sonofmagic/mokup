@@ -65,4 +65,41 @@ describe('manifest rules loader', () => {
       await fs.rm(root, { recursive: true, force: true })
     }
   })
+
+  it('loads cjs/ts rules and skips unsupported or missing files', async () => {
+    const root = await createTempRoot()
+    try {
+      const cjsFile = path.join(root, 'rules.cjs')
+      const tsFile = path.join(root, 'rules.ts')
+      const txtFile = path.join(root, 'rules.txt')
+      const missingJson = path.join(root, 'missing.json')
+
+      await fs.writeFile(
+        cjsFile,
+        'module.exports = { handler: { ok: "cjs" } }',
+        'utf8',
+      )
+      await fs.writeFile(
+        tsFile,
+        'export default { handler: { ok: "ts" } }',
+        'utf8',
+      )
+      await fs.writeFile(txtFile, 'ignore me', 'utf8')
+
+      const cjsRules = await loadRules(cjsFile)
+      expect(cjsRules).toEqual([{ handler: { ok: 'cjs' } }])
+
+      const tsRules = await loadRules(tsFile)
+      expect(tsRules).toEqual([{ handler: { ok: 'ts' } }])
+
+      const txtRules = await loadRules(txtFile)
+      expect(txtRules).toEqual([])
+
+      const missingRules = await loadRules(missingJson)
+      expect(missingRules).toEqual([])
+    }
+    finally {
+      await fs.rm(root, { recursive: true, force: true })
+    }
+  })
 })

@@ -69,4 +69,24 @@ describe('tree utils', () => {
     expect(rows.some(row => row.kind === 'folder')).toBe(true)
     expect(rows.every(row => row.depth === 0)).toBe(true)
   })
+
+  it('sorts routes by method when labels match and handles bare urls', () => {
+    const extraRoutes: PlaygroundRoute[] = [
+      { method: 'POST', url: '/docs', file: '/repo/mock/docs.post.ts', type: 'handler' },
+      { method: 'GET', url: '/docs', file: '/repo/mock/docs.get.ts', type: 'handler' },
+      { method: 'GET', url: 'status', file: '/repo/mock/status.get.ts', type: 'handler' },
+    ]
+    const root = buildRouteTree(extraRoutes, 'route')
+    sortRouteTree(root)
+    const rows = buildTreeRows({
+      root,
+      mode: 'route',
+      isExpanded: () => true,
+      selectedKey: 'GET /docs',
+      getRouteKey: route => `${route.method} ${route.url}`,
+    })
+    const docs = rows.filter(row => row.route?.url === '/docs')
+    expect(docs[0]?.route?.method).toBe('GET')
+    expect(rows.some(row => row.route?.url === 'status')).toBe(true)
+  })
 })

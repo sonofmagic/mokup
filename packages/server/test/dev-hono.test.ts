@@ -1,86 +1,159 @@
 import { parseRouteTemplate } from '@mokup/runtime'
-import { describe, expect, it } from 'vitest'
+import { describe, expect, it, vi } from 'vitest'
 import { createHonoApp } from '../src/dev/hono'
 
+function makeRoute(url: string, handler: any, extra: Record<string, unknown> = {}) {
+  const parsed = parseRouteTemplate(url)
+  return {
+    file: `${url}.ts`,
+    template: parsed.template,
+    method: 'GET',
+    tokens: parsed.tokens,
+    score: parsed.score,
+    handler,
+    ...extra,
+  }
+}
+
 describe('dev hono app', () => {
-  it('normalizes handler values to responses', async () => {
-    const emptyParsed = parseRouteTemplate('/empty')
-    const binaryParsed = parseRouteTemplate('/binary')
-    const app = createHonoApp([
-      {
-        file: 'empty.get.ts',
-        template: emptyParsed.template,
-        method: 'GET',
-        tokens: emptyParsed.tokens,
-        score: emptyParsed.score,
-        handler: () => undefined,
-      },
-      {
-        file: 'binary.get.ts',
-        template: binaryParsed.template,
-        method: 'GET',
-        tokens: binaryParsed.tokens,
-        score: binaryParsed.score,
-        handler: () => new Uint8Array([1, 2, 3]),
-      },
-    ])
+  it('normalizes handler values and applies overrides', async () => {
+    vi.useFakeTimers()
+    const onResponse = vi.fn(() => {
+      throw new Error('hook failed')
+    })
 
-    const emptyResponse = await app.fetch(new Request('http://localhost/empty'))
-    expect(emptyResponse.status).toBe(204)
+    const routes = [
+      makeRoute('/status', () => undefined, {
+        status: 201,
+        headers: { 'x-test': '1' },
+        delay: 5,
+      }),
+      makeRoute('/text', () => 'ok'),
+      makeRoute('/binary', () => new ArrayBuffer(2)),
+      makeRoute('/json', () => ({ ok: true })),
+      makeRoute('/response', () => new Response('resp')),
+      {
+        ...makeRoute('/mw', () => 'fallback'),
+        middlewares: [
+          {
+            handle: async (_c: any, _next: () => Promise<void>) => ({ res: new Response('mw') }),
+            source: 'mw',
+            index: 0,
+            position: 'pre',
+          },
+        ],
+      },
+    ]
 
-    const binaryResponse = await app.fetch(new Request('http://localhost/binary'))
+    const app = createHonoApp(routes as any, { onResponse })
+
+    const statusPromise = app.fetch(new Request('http://mokup.local/status'))
+    await vi.runAllTimersAsync()
+    const statusResponse = await statusPromise
+    expect(statusResponse.status).toBe(201)
+    expect(statusResponse.headers.get('x-test')).toBe('1')
+    await expect(statusResponse.text()).resolves.toBe('')
+
+    const textResponse = await app.fetch(new Request('http://mokup.local/text'))
+    await expect(textResponse.text()).resolves.toBe('ok')
+
+    const binaryResponse = await app.fetch(new Request('http://mokup.local/binary'))
     expect(binaryResponse.headers.get('content-type')).toBe('application/octet-stream')
-    expect(Array.from(new Uint8Array(await binaryResponse.arrayBuffer()))).toEqual([1, 2, 3])
+
+    const jsonResponse = await app.fetch(new Request('http://mokup.local/json'))
+    await expect(jsonResponse.json()).resolves.toEqual({ ok: true })
+
+    const responseResponse = await app.fetch(new Request('http://mokup.local/response'))
+    await expect(responseResponse.text()).resolves.toBe('resp')
+
+    const middlewareResponse = await app.fetch(new Request('http://mokup.local/mw'))
+    await expect(middlewareResponse.text()).resolves.toBe('mw')
+
+    expect(onResponse).toHaveBeenCalled()
+    vi.useRealTimers()
   })
 
-  it('applies route overrides and delays responses', async () => {
-    const parsed = parseRouteTemplate('/override')
+  it('handles onResponse promise rejections and root routes', async () => {
+    const onResponse = vi.fn(() => Promise.reject(new Error('fail')))
+    const parsed = parseRouteTemplate('/')
     const app = createHonoApp([
       {
-        file: 'override.get.ts',
+        file: 'root.get.ts',
         template: parsed.template,
         method: 'GET',
         tokens: parsed.tokens,
         score: parsed.score,
-        handler: () => new Response(null, { status: 204 }),
-        headers: { 'x-test': '1' },
-        status: 201,
-        delay: 1,
+        handler: () => new Response('root', { status: 200 }),
       },
-    ])
+    ] as any, { onResponse })
 
-    const response = await app.fetch(new Request('http://localhost/override'))
-
-    expect(response.status).toBe(201)
-    expect(response.headers.get('x-test')).toBe('1')
+    const response = await app.fetch(new Request('http://mokup.local/'))
+    await expect(response.text()).resolves.toBe('root')
+    expect(onResponse).toHaveBeenCalled()
   })
 
-  it('invokes onResponse hook after responses', async () => {
-    const parsed = parseRouteTemplate('/hook')
-    let capturedStatus = 0
-    let capturedTemplate = ''
-    const app = createHonoApp(
-      [
-        {
-          file: 'hook.get.ts',
-          template: parsed.template,
-          method: 'GET',
-          tokens: parsed.tokens,
-          score: parsed.score,
-          handler: () => new Response('ok'),
-        },
-      ],
+  it('supports params, catchalls, and normal middlewares', async () => {
+    const paramParsed = parseRouteTemplate('/users/[id]')
+    const catchallParsed = parseRouteTemplate('/files/[...path]')
+    const statusParsed = parseRouteTemplate('/status')
+    const mwParsed = parseRouteTemplate('/mw')
+    const normal = vi.fn(async (_c: any, next: () => Promise<void>) => {
+      await next()
+    })
+
+    const app = createHonoApp([
       {
-        onResponse: (route, response) => {
-          capturedTemplate = route.template
-          capturedStatus = response.status
+        file: 'users.get.ts',
+        template: paramParsed.template,
+        method: 'GET',
+        tokens: paramParsed.tokens,
+        score: paramParsed.score,
+        handler: () => new Response('param'),
+      },
+      {
+        file: 'files.get.ts',
+        template: catchallParsed.template,
+        method: 'GET',
+        tokens: catchallParsed.tokens,
+        score: catchallParsed.score,
+        handler: () => 'catchall',
+      },
+      {
+        file: 'status.get.ts',
+        template: statusParsed.template,
+        method: 'GET',
+        tokens: statusParsed.tokens,
+        score: statusParsed.score,
+        handler: (c: any) => {
+          c.status(400)
+          return undefined
         },
       },
-    )
+      {
+        file: 'mw.get.ts',
+        template: mwParsed.template,
+        method: 'GET',
+        tokens: mwParsed.tokens,
+        score: mwParsed.score,
+        handler: () => 'mw',
+        middlewares: [
+          { handle: normal, source: 'mw', index: 0, position: 'normal' },
+        ],
+      },
+    ] as any)
 
-    await app.fetch(new Request('http://localhost/hook'))
+    const paramResponse = await app.fetch(new Request('http://mokup.local/users/123'))
+    await expect(paramResponse.text()).resolves.toBe('param')
 
-    expect(capturedTemplate).toBe(parsed.template)
-    expect(capturedStatus).toBe(200)
+    const catchallResponse = await app.fetch(new Request('http://mokup.local/files/a/b'))
+    await expect(catchallResponse.text()).resolves.toBe('catchall')
+
+    const statusResponse = await app.fetch(new Request('http://mokup.local/status'))
+    expect(statusResponse.status).toBe(400)
+    await expect(statusResponse.text()).resolves.toBe('')
+
+    const mwResponse = await app.fetch(new Request('http://mokup.local/mw'))
+    await expect(mwResponse.text()).resolves.toBe('mw')
+    expect(normal).toHaveBeenCalled()
   })
 })

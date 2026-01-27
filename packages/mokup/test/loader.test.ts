@@ -96,3 +96,43 @@ describe('loadRules with Vite server', () => {
     }
   })
 })
+
+describe('loadRules module outputs', () => {
+  it('normalizes default exports', async () => {
+    const root = await fs.mkdtemp(path.join(tmpdir(), 'mokup-module-'))
+    const logger = { info: vi.fn(), warn: vi.fn(), error: vi.fn() }
+    try {
+      const arrayFile = path.join(root, 'rules-array.js')
+      const fnFile = path.join(root, 'rules-fn.js')
+      const objFile = path.join(root, 'rules-obj.js')
+      const emptyFile = path.join(root, 'rules-empty.js')
+      await fs.writeFile(arrayFile, 'export default [{ handler: { ok: true } }]', 'utf8')
+      await fs.writeFile(fnFile, 'export default () => ({ ok: true })', 'utf8')
+      await fs.writeFile(objFile, 'export default { handler: { ok: true }, status: 201 }', 'utf8')
+      await fs.writeFile(emptyFile, 'export {}', 'utf8')
+
+      const arrayRules = await loadRules(arrayFile, undefined, logger)
+      expect(arrayRules).toEqual([{ handler: { ok: true } }])
+
+      const fnRules = await loadRules(fnFile, undefined, logger)
+      expect(typeof fnRules[0]?.handler).toBe('function')
+
+      const objRules = await loadRules(objFile, undefined, logger)
+      expect(objRules).toEqual([{ handler: { ok: true }, status: 201 }])
+
+      const emptyRules = await loadRules(emptyFile, undefined, logger)
+      expect(emptyRules).toHaveLength(1)
+      expect(Object.keys(emptyRules[0] ?? {})).toHaveLength(0)
+    }
+    finally {
+      await fs.rm(root, { recursive: true, force: true })
+    }
+  })
+
+  it('returns empty rules when json file is missing', async () => {
+    const logger = { info: vi.fn(), warn: vi.fn(), error: vi.fn() }
+    const rules = await loadRules(path.join(tmpdir(), 'missing.json'), undefined, logger)
+    expect(rules).toEqual([])
+    expect(logger.warn).toHaveBeenCalled()
+  })
+})

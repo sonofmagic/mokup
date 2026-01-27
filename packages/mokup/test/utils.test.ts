@@ -18,6 +18,7 @@ describe('vite utils', () => {
     expect(normalizeMethod('get')).toBe('GET')
     expect(normalizeMethod('PATCH')).toBe('PATCH')
     expect(normalizeMethod('unknown')).toBeUndefined()
+    expect(normalizeMethod(undefined)).toBeUndefined()
 
     expect(normalizePrefix('')).toBe('')
     expect(normalizePrefix('api')).toBe('/api')
@@ -58,6 +59,7 @@ describe('vite utils', () => {
     expect(matchesFilter('/src/index.ts', /src/)).toBe(true)
     expect(matchesFilter('/src/index.ts', /foo/)).toBe(false)
     expect(matchesFilter('/src/index.ts', /src/, /index/)).toBe(false)
+    expect(matchesFilter('/src/index.ts')).toBe(true)
   })
 
   it('normalizes ignore prefixes and checks segments', () => {
@@ -67,6 +69,7 @@ describe('vite utils', () => {
     expect(normalizeIgnorePrefix('_')).toEqual(['_'])
     expect(hasIgnoredPrefix(file, root, normalizeIgnorePrefix(undefined))).toBe(true)
     expect(hasIgnoredPrefix(file, root, normalizeIgnorePrefix('_'))).toBe(false)
+    expect(hasIgnoredPrefix(file, root, [])).toBe(false)
   })
 
   it('normalizes to posix paths', () => {

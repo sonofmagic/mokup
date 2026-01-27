@@ -266,4 +266,51 @@ describe('buildManifest', () => {
       await cleanupTempRoot(root)
     }
   })
+
+  it('applies config status and delay defaults', async () => {
+    const { root, mockDir } = await createTempRoot()
+    try {
+      await writeFile(
+        path.join(mockDir, 'index.config.ts'),
+        [
+          'export default {',
+          '  status: 201,',
+          '  delay: 50,',
+          '}',
+        ].join('\n'),
+      )
+      await writeFile(
+        path.join(mockDir, 'with-delay.get.ts'),
+        [
+          'export default {',
+          '  delay: 25,',
+          '  handler: { ok: true },',
+          '}',
+        ].join('\n'),
+      )
+      await writeFile(
+        path.join(mockDir, 'no-delay.get.ts'),
+        [
+          'export default {',
+          '  handler: { ok: true },',
+          '}',
+        ].join('\n'),
+      )
+
+      const result = await buildManifest({
+        root,
+        dir: 'mock',
+        outDir: 'dist',
+        handlers: false,
+      })
+
+      const byUrl = new Map(result.manifest.routes.map(route => [route.url, route]))
+      expect(byUrl.get('/with-delay')?.delay).toBe(25)
+      expect(byUrl.get('/no-delay')?.delay).toBe(50)
+      expect(byUrl.get('/no-delay')?.status).toBe(201)
+    }
+    finally {
+      await cleanupTempRoot(root)
+    }
+  })
 })

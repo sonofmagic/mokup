@@ -1,0 +1,223 @@
+import { Hono } from '@mokup/shared/hono'
+import { describe, expect, it, vi } from 'vitest'
+import { resolveSwConfig } from '../src/core/sw'
+
+import { configureDevServer, configurePreviewServer } from '../src/vite/plugin/server-hooks'
+
+const watcherMocks = vi.hoisted(() => ({
+  setupViteWatchers: vi.fn(),
+  setupPreviewWatchers: vi.fn(() => ({ close: vi.fn() })),
+}))
+
+const middlewareMocks = vi.hoisted(() => ({
+  createMiddleware: vi.fn(() => (_req: any, _res: any, next: () => void) => next()),
+}))
+
+const swMocks = vi.hoisted(() => ({
+  buildSwScript: vi.fn(() => 'self.skipWaiting()'),
+}))
+
+vi.mock('../src/vite/plugin/watcher', () => watcherMocks)
+vi.mock('../src/core/middleware', () => ({ createMiddleware: middlewareMocks.createMiddleware }))
+vi.mock('../src/core/sw', async () => {
+  const actual = await vi.importActual<typeof import('../src/core/sw')>('../src/core/sw')
+  return { ...actual, buildSwScript: swMocks.buildSwScript }
+})
+
+function createServerStub() {
+  const stack: Array<{ route: string, handle: (req: any, res: any, next: () => void) => void }> = []
+  const middlewares = {
+    stack,
+    use: (handler: (req: any, res: any, next: () => void) => void) => {
+      stack.push({ route: '', handle: handler })
+    },
+  }
+  const logger = { info: vi.fn(), warn: vi.fn(), error: vi.fn(), log: vi.fn() }
+  return {
+    middlewares,
+    watcher: {
+      add: vi.fn(),
+      on: vi.fn(),
+    },
+    ws: { send: vi.fn() },
+    config: { root: '/root', logger },
+    resolvedUrls: { local: ['http://localhost:5173/'] },
+    printUrls: () => {
+      logger.info('  ➜  Local:   http://localhost:5173/')
+    },
+  }
+}
+
+describe('vite server hooks extra coverage', () => {
+  it('returns 500 when sw generation fails', async () => {
+    swMocks.buildSwScript.mockImplementationOnce(() => {
+      throw new Error('boom')
+    })
+
+    const server = createServerStub()
+    const state = {
+      routes: [],
+      serverRoutes: [],
+      swRoutes: [{ file: '/root/mock/ping.get.json', template: '/api/ping', method: 'GET', tokens: [], score: [], handler: { ok: true } }],
+      disabledRoutes: [],
+      ignoredRoutes: [],
+      configFiles: [],
+      disabledConfigFiles: [],
+      app: new Hono(),
+      lastSignature: null,
+    }
+    const logger = { warn: vi.fn(), info: vi.fn(), error: vi.fn(), log: vi.fn() }
+    const swConfig = resolveSwConfig([{ dir: '/root/mock', prefix: '/api', mode: 'sw' }], logger)
+
+    await configureDevServer({
+      server: server as any,
+      state,
+      root: '/root',
+      base: '/',
+      logger,
+      playgroundConfig: { path: '/__mokup', enabled: false, build: false },
+      playgroundMiddleware: (_req, _res, next) => next(),
+      swConfig,
+      hasSwRoutes: () => true,
+      enableViteMiddleware: false,
+      refreshRoutes: async () => {},
+      resolveAllDirs: () => ['/root/mock'],
+      watchEnabled: false,
+    })
+
+    const swMiddleware = server.middlewares.stack[1]?.handle
+    const res = {
+      statusCode: 0,
+      headers: {} as Record<string, string>,
+      setHeader: (name: string, value: string) => {
+        res.headers[name.toLowerCase()] = value
+      },
+      end: vi.fn(),
+    }
+    await swMiddleware?.({ url: '/mokup-sw.js' }, res, vi.fn())
+    expect(res.statusCode).toBe(500)
+    expect(logger.error).toHaveBeenCalled()
+  })
+
+  it('enables vite middleware and watchers when configured', async () => {
+    const server = createServerStub()
+    const state = {
+      routes: [],
+      serverRoutes: [{ file: '/root/mock/ping.get.json', template: '/api/ping', method: 'GET', tokens: [], score: [], handler: { ok: true } }],
+      swRoutes: [],
+      disabledRoutes: [],
+      ignoredRoutes: [],
+      configFiles: [],
+      disabledConfigFiles: [],
+      app: new Hono(),
+      lastSignature: null,
+    }
+    const logger = { warn: vi.fn(), info: vi.fn(), error: vi.fn(), log: vi.fn() }
+
+    await configureDevServer({
+      server: server as any,
+      state,
+      root: '/root',
+      base: '/',
+      logger,
+      playgroundConfig: { path: '/__mokup', enabled: false, build: false },
+      playgroundMiddleware: (_req, _res, next) => next(),
+      swConfig: null,
+      hasSwRoutes: () => false,
+      enableViteMiddleware: true,
+      refreshRoutes: async () => {},
+      resolveAllDirs: () => ['/root/mock'],
+      watchEnabled: true,
+    })
+
+    expect(middlewareMocks.createMiddleware).toHaveBeenCalled()
+    expect(watcherMocks.setupViteWatchers).toHaveBeenCalled()
+  })
+
+  it('configures preview watchers when enabled', async () => {
+    const server = createServerStub()
+    server.httpServer = { once: vi.fn() } as any
+    const state = {
+      routes: [],
+      serverRoutes: [],
+      swRoutes: [],
+      disabledRoutes: [],
+      ignoredRoutes: [],
+      configFiles: [],
+      disabledConfigFiles: [],
+      app: new Hono(),
+      lastSignature: null,
+    }
+    const logger = { warn: vi.fn(), info: vi.fn(), error: vi.fn(), log: vi.fn() }
+
+    const watcher = await configurePreviewServer({
+      server: server as any,
+      state,
+      root: '/root',
+      base: '/',
+      logger,
+      playgroundConfig: { path: '/__mokup', enabled: false, build: false },
+      playgroundMiddleware: (_req, _res, next) => next(),
+      swConfig: null,
+      hasSwRoutes: () => false,
+      enableViteMiddleware: false,
+      refreshRoutes: async () => {},
+      resolveAllDirs: () => ['/root/mock'],
+      watchEnabled: true,
+    })
+
+    expect(watcherMocks.setupPreviewWatchers).toHaveBeenCalled()
+    expect(watcher).not.toBeNull()
+  })
+
+  it('reports preview sw generation errors', async () => {
+    swMocks.buildSwScript.mockImplementationOnce(() => {
+      throw new Error('boom')
+    })
+
+    const server = createServerStub()
+    const state = {
+      routes: [],
+      serverRoutes: [],
+      swRoutes: [{ file: '/root/mock/ping.get.json', template: '/api/ping', method: 'GET', tokens: [], score: [], handler: { ok: true } }],
+      disabledRoutes: [],
+      ignoredRoutes: [],
+      configFiles: [],
+      disabledConfigFiles: [],
+      app: new Hono(),
+      lastSignature: null,
+    }
+    const logger = { warn: vi.fn(), info: vi.fn(), error: vi.fn(), log: vi.fn() }
+    const swConfig = resolveSwConfig([{ dir: '/root/mock', prefix: '/api', mode: 'sw' }], logger)
+
+    await configurePreviewServer({
+      server: server as any,
+      state,
+      root: '/root',
+      base: '/',
+      logger,
+      playgroundConfig: { path: '/__mokup', enabled: false, build: false },
+      playgroundMiddleware: (_req, _res, next) => next(),
+      swConfig,
+      hasSwRoutes: () => true,
+      enableViteMiddleware: true,
+      refreshRoutes: async () => {},
+      resolveAllDirs: () => ['/root/mock'],
+      watchEnabled: false,
+    })
+
+    const swMiddleware = server.middlewares.stack[1]?.handle
+    const res = {
+      statusCode: 0,
+      headers: {} as Record<string, string>,
+      setHeader: (name: string, value: string) => {
+        res.headers[name.toLowerCase()] = value
+      },
+      end: vi.fn(),
+    }
+    await swMiddleware?.({ url: '/mokup-sw.js' }, res, vi.fn())
+    expect(res.statusCode).toBe(500)
+    expect(logger.error).toHaveBeenCalled()
+    expect(middlewareMocks.createMiddleware).toHaveBeenCalled()
+  })
+})

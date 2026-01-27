@@ -1,0 +1,124 @@
+import { afterEach, describe, expect, it, vi } from 'vitest'
+import { createConnectMiddleware, createFastifyPlugin, createKoaMiddleware } from '../src/node'
+
+const runtimeHandle = vi.fn()
+
+vi.mock('@mokup/runtime', () => ({
+  createRuntime: () => ({ handle: runtimeHandle }),
+}))
+
+describe('server adapters extra branches', () => {
+  afterEach(() => {
+    runtimeHandle.mockReset()
+  })
+  it('connect middleware calls next when no match', async () => {
+    runtimeHandle.mockResolvedValueOnce(null)
+    const middleware = createConnectMiddleware({ manifest: { version: 1, routes: [] }, onNotFound: 'next' })
+    const req = { method: 'GET', url: '/missing', headers: {}, body: '', on: vi.fn() }
+    const res = { statusCode: 0, end: vi.fn() }
+    const next = vi.fn()
+
+    await middleware(req, res as any, next)
+    expect(next).toHaveBeenCalled()
+    expect(res.end).not.toHaveBeenCalled()
+  })
+
+  it('connect middleware returns 404 when configured', async () => {
+    runtimeHandle.mockResolvedValueOnce(null)
+    const middleware = createConnectMiddleware({ manifest: { version: 1, routes: [] }, onNotFound: 'response' })
+    const req = { method: 'GET', url: '/missing', headers: {}, body: '', on: vi.fn() }
+    const res = { statusCode: 0, end: vi.fn() }
+
+    await middleware(req, res as any, vi.fn())
+    expect(res.statusCode).toBe(404)
+    expect(res.end).toHaveBeenCalled()
+  })
+
+  it('koa middleware handles different body types', async () => {
+    const middleware = createKoaMiddleware({ manifest: { version: 1, routes: [] }, onNotFound: 'response' })
+
+    runtimeHandle.mockResolvedValueOnce({ status: 200, headers: {}, body: null })
+    const ctxNull = {
+      req: { method: 'GET', url: '/null', headers: {}, body: '' },
+      request: { body: '' },
+      status: 0,
+      body: undefined,
+      set: vi.fn(),
+    }
+    await middleware(ctxNull as any, async () => {})
+    expect(ctxNull.body).toBeNull()
+
+    runtimeHandle.mockResolvedValueOnce({ status: 200, headers: {}, body: 'ok' })
+    const ctxText = {
+      req: { method: 'GET', url: '/text', headers: {}, body: '' },
+      request: { body: '' },
+      status: 0,
+      body: undefined,
+      set: vi.fn(),
+    }
+    await middleware(ctxText as any, async () => {})
+    expect(ctxText.body).toBe('ok')
+
+    runtimeHandle.mockResolvedValueOnce({ status: 200, headers: {}, body: new Uint8Array([1, 2]) })
+    const ctxBin = {
+      req: { method: 'GET', url: '/bin', headers: {}, body: '' },
+      request: { body: '' },
+      status: 0,
+      body: undefined,
+      set: vi.fn(),
+    }
+    await middleware(ctxBin as any, async () => {})
+    expect(ctxBin.body).toEqual(new Uint8Array([1, 2]))
+  })
+
+  it('fastify plugin handles not found and binary bodies', async () => {
+    const plugin = createFastifyPlugin({ manifest: { version: 1, routes: [] }, onNotFound: 'response' })
+    let hook: ((request: any, reply: any) => Promise<void>) | undefined
+    const instance = {
+      addHook: (_name: 'onRequest', handler: typeof hook) => {
+        hook = handler
+      },
+    }
+    await plugin(instance)
+
+    const reply = {
+      status: vi.fn().mockReturnThis(),
+      header: vi.fn().mockReturnThis(),
+      send: vi.fn(),
+    }
+
+    runtimeHandle.mockResolvedValueOnce(null)
+    await hook?.({ method: 'GET', url: '/missing', headers: {}, body: '' }, reply)
+    expect(reply.status).toHaveBeenCalledWith(404)
+
+    runtimeHandle.mockResolvedValueOnce({ status: 200, headers: { 'x-test': '1' }, body: new Uint8Array([3]) })
+    await hook?.({ method: 'GET', url: '/bin', headers: {}, body: '' }, reply)
+    expect(reply.header).toHaveBeenCalledWith('x-test', '1')
+    expect(reply.send).toHaveBeenCalled()
+  })
+
+  it('fastify plugin handles null and string bodies', async () => {
+    const plugin = createFastifyPlugin({ manifest: { version: 1, routes: [] }, onNotFound: 'next' })
+    let hook: ((request: any, reply: any) => Promise<void>) | undefined
+    const instance = {
+      addHook: (_name: 'onRequest', handler: typeof hook) => {
+        hook = handler
+      },
+    }
+    await plugin(instance)
+
+    const reply = {
+      status: vi.fn().mockReturnThis(),
+      header: vi.fn().mockReturnThis(),
+      send: vi.fn(),
+    }
+
+    runtimeHandle.mockResolvedValueOnce({ status: 204, headers: {}, body: null })
+    await hook?.({ method: 'GET', url: '/empty', headers: {}, body: '' }, reply)
+    expect(reply.send).toHaveBeenCalled()
+
+    runtimeHandle.mockResolvedValueOnce({ status: 200, headers: {}, body: 'ok' })
+    await hook?.({ method: 'GET', url: '/text', headers: {}, body: '' }, reply)
+    expect(reply.send).toHaveBeenCalledWith('ok')
+  })
+})

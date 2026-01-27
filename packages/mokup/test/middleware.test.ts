@@ -167,4 +167,360 @@ describe('dev middleware params', () => {
     expect(state.body).toBe('Mock handler error')
     expect(logger.error).toHaveBeenCalled()
   })
+
+  it('normalizes handler values and applies overrides', async () => {
+    const parsed = parseRouteTemplate('/payload')
+    const calls: string[] = []
+    const app = createHonoApp([
+      {
+        file: 'payload.post.ts',
+        template: parsed.template,
+        method: 'POST',
+        tokens: parsed.tokens,
+        score: parsed.score,
+        handler: () => undefined,
+        status: 201,
+        headers: { 'x-test': '1' },
+        delay: 1,
+        middlewares: [
+          {
+            handle: async (_c, next) => {
+              calls.push('pre')
+              await next()
+              return { res: new Response('mw') }
+            },
+            source: 'pre',
+            index: 0,
+            position: 'pre',
+          },
+          {
+            handle: async (_c, next) => {
+              calls.push('post')
+              await next()
+            },
+            source: 'post',
+            index: 1,
+            position: 'post',
+          },
+        ],
+      },
+    ])
+
+    const response = await app.fetch(new Request('http://mokup.local/payload', { method: 'POST' }))
+
+    expect(response.status).toBe(201)
+    expect(response.headers.get('x-test')).toBe('1')
+    await expect(response.text()).resolves.toBe('')
+    expect(calls).toEqual(['pre', 'post'])
+  })
+
+  it('handles text and binary handler values', async () => {
+    const textParsed = parseRouteTemplate('/text')
+    const binaryParsed = parseRouteTemplate('/binary')
+    const app = createHonoApp([
+      {
+        file: 'text.get.ts',
+        template: textParsed.template,
+        method: 'GET',
+        tokens: textParsed.tokens,
+        score: textParsed.score,
+        handler: () => 'ok',
+      },
+      {
+        file: 'binary.get.ts',
+        template: binaryParsed.template,
+        method: 'GET',
+        tokens: binaryParsed.tokens,
+        score: binaryParsed.score,
+        handler: () => new Uint8Array([1, 2, 3]),
+      },
+    ])
+
+    const textResponse = await app.fetch(new Request('http://mokup.local/text'))
+    expect(await textResponse.text()).toBe('ok')
+
+    const binaryResponse = await app.fetch(new Request('http://mokup.local/binary'))
+    expect(binaryResponse.headers.get('content-type')).toBe('application/octet-stream')
+    expect(Array.from(new Uint8Array(await binaryResponse.arrayBuffer()))).toEqual([1, 2, 3])
+  })
+
+  it('builds requests from node streams and headers', async () => {
+    const match = vi.fn().mockReturnValue([[{}]])
+    const received: { body?: string, header?: string } = {}
+    const app = {
+      router: { match },
+      fetch: async (request: Request) => {
+        received.body = await request.text()
+        received.header = request.headers.get('x-test') ?? ''
+        return new Response(null, { status: 204 })
+      },
+    } as never
+    const logger = { info: vi.fn(), warn: vi.fn(), error: vi.fn() }
+    const middleware = createMiddleware(() => app, logger)
+
+    const req = new EventEmitter() as IncomingMessage
+    req.url = '/payload'
+    req.method = 'POST'
+    req.headers = { 'x-test': ['a', 'b'], 'x-skip': undefined }
+
+    const state = {
+      statusCode: 0,
+      ended: false,
+    }
+    const res = {
+      setHeader: vi.fn(),
+      end: () => {
+        state.ended = true
+      },
+      get statusCode() {
+        return state.statusCode
+      },
+      set statusCode(value: number) {
+        state.statusCode = value
+      },
+      get writableEnded() {
+        return state.ended
+      },
+    } as unknown as ServerResponse
+
+    const promise = middleware(req, res, vi.fn())
+    req.emit('data', 'hello')
+    req.emit('end')
+    await promise
+
+    expect(match).toHaveBeenCalledWith('POST', '/payload')
+    expect(received.body).toBe('hello')
+    expect(received.header).toBe('a,b')
+    expect(state.ended).toBe(true)
+    expect(logger.info).toHaveBeenCalled()
+  })
+
+  it('matches HEAD requests against GET routes', async () => {
+    const match = vi.fn().mockReturnValue([[{}]])
+    const app = {
+      router: { match },
+      fetch: async () => new Response('ok'),
+    } as never
+    const middleware = createMiddleware(() => app, console)
+
+    const req = new EventEmitter() as IncomingMessage
+    req.url = '/head'
+    req.method = 'HEAD'
+    req.headers = {}
+
+    const res = { writableEnded: false, setHeader: vi.fn(), end: vi.fn() } as unknown as ServerResponse
+    const promise = middleware(req, res, vi.fn())
+    req.emit('end')
+    await promise
+
+    expect(match).toHaveBeenCalledWith('GET', '/head')
+  })
+
+  it('supports root and optional catchall routes', async () => {
+    const rootParsed = parseRouteTemplate('/')
+    const optionalParsed = parseRouteTemplate('/docs/[[...slug]]')
+    const catchallParsed = parseRouteTemplate('/files/[...path]')
+
+    const app = createHonoApp([
+      {
+        file: 'root.get.ts',
+        template: rootParsed.template,
+        method: 'GET',
+        tokens: rootParsed.tokens,
+        score: rootParsed.score,
+        handler: () => 'root',
+      },
+      {
+        file: 'optional.get.ts',
+        template: optionalParsed.template,
+        method: 'GET',
+        tokens: optionalParsed.tokens,
+        score: optionalParsed.score,
+        handler: () => 'optional',
+      },
+      {
+        file: 'catchall.get.ts',
+        template: catchallParsed.template,
+        method: 'GET',
+        tokens: catchallParsed.tokens,
+        score: catchallParsed.score,
+        handler: () => 'catchall',
+      },
+    ])
+
+    const root = await app.fetch(new Request('http://mokup.local/'))
+    await expect(root.text()).resolves.toBe('root')
+
+    const optional = await app.fetch(new Request('http://mokup.local/docs'))
+    await expect(optional.text()).resolves.toBe('optional')
+
+    const catchall = await app.fetch(new Request('http://mokup.local/files/a/b'))
+    await expect(catchall.text()).resolves.toBe('catchall')
+  })
+
+  it('handles response handlers, array buffers, and normal middlewares', async () => {
+    const responseParsed = parseRouteTemplate('/response')
+    const bufferParsed = parseRouteTemplate('/buffer')
+    const app = createHonoApp([
+      {
+        file: 'response.get.ts',
+        template: responseParsed.template,
+        method: 'GET',
+        tokens: responseParsed.tokens,
+        score: responseParsed.score,
+        handler: () => new Response('ok'),
+        middlewares: [
+          {
+            handle: async (_c, next) => next(),
+            source: 'normal',
+            index: 0,
+            position: 'normal',
+          },
+        ],
+      },
+      {
+        file: 'buffer.get.ts',
+        template: bufferParsed.template,
+        method: 'GET',
+        tokens: bufferParsed.tokens,
+        score: bufferParsed.score,
+        handler: () => new Uint8Array([4, 5, 6]).buffer,
+      },
+    ])
+
+    const response = await app.fetch(new Request('http://mokup.local/response'))
+    expect(await response.text()).toBe('ok')
+
+    const bufferResponse = await app.fetch(new Request('http://mokup.local/buffer'))
+    expect(bufferResponse.headers.get('content-type')).toBe('application/octet-stream')
+    expect(Array.from(new Uint8Array(await bufferResponse.arrayBuffer()))).toEqual([4, 5, 6])
+  })
+
+  it('supports empty token routes', async () => {
+    const app = createHonoApp([
+      {
+        file: 'root.get.ts',
+        template: '/',
+        method: 'GET',
+        tokens: [],
+        score: [],
+        handler: () => 'root',
+      },
+    ])
+
+    const response = await app.fetch(new Request('http://mokup.local/'))
+    await expect(response.text()).resolves.toBe('root')
+  })
+
+  it('normalizes missing methods and skips bodies on GET', async () => {
+    const match = vi.fn().mockReturnValue([[{}]])
+    const received: { body?: string, method?: string } = {}
+    const app = {
+      router: { match },
+      fetch: async (request: Request) => {
+        received.body = await request.text()
+        received.method = request.method
+        return new Response(null, { status: 204 })
+      },
+    } as never
+    const logger = { info: vi.fn(), warn: vi.fn(), error: vi.fn() }
+    const middleware = createMiddleware(() => app, logger)
+
+    const req = new EventEmitter() as IncomingMessage
+    req.url = undefined
+    req.method = undefined
+    req.headers = {}
+
+    const state = { ended: false }
+    const res = {
+      setHeader: vi.fn(),
+      end: () => {
+        state.ended = true
+      },
+      get statusCode() {
+        return 204
+      },
+      set statusCode(_value: number) {
+
+      },
+      get writableEnded() {
+        return state.ended
+      },
+    } as unknown as ServerResponse
+
+    const promise = middleware(req, res, vi.fn())
+    req.emit('data', 'payload')
+    req.emit('end')
+    await promise
+
+    expect(received.method).toBe('GET')
+    expect(received.body).toBe('')
+    expect(state.ended).toBe(true)
+  })
+
+  it('handles errors after headers are sent', async () => {
+    const app = {
+      router: { match: () => [[{}]] },
+      fetch: async () => {
+        throw new Error('boom')
+      },
+    } as never
+    const logger = { info: vi.fn(), warn: vi.fn(), error: vi.fn() }
+    const middleware = createMiddleware(() => app, logger)
+
+    const req = new EventEmitter() as IncomingMessage
+    req.url = '/boom'
+    req.method = 'GET'
+    req.headers = {}
+
+    const res = {
+      headersSent: true,
+      setHeader: vi.fn(),
+      end: vi.fn(),
+      get statusCode() {
+        return 0
+      },
+      set statusCode(_value: number) {
+
+      },
+      get writableEnded() {
+        return false
+      },
+    } as unknown as ServerResponse
+
+    await middleware(req, res, vi.fn())
+    expect(res.setHeader).not.toHaveBeenCalled()
+    expect(res.end).toHaveBeenCalledWith('Mock handler error')
+  })
+
+  it('skips sending responses when the stream is already ended', async () => {
+    const app = {
+      router: { match: () => [[{}]] },
+      fetch: async () => new Response('ok'),
+    } as never
+    const logger = { info: vi.fn(), warn: vi.fn(), error: vi.fn() }
+    const middleware = createMiddleware(() => app, logger)
+
+    const req = new EventEmitter() as IncomingMessage
+    req.url = '/payload'
+    req.method = 'POST'
+    req.headers = { 'x-test': 'value', 'x-omit': undefined }
+
+    const res = {
+      setHeader: vi.fn(),
+      end: vi.fn(),
+      get writableEnded() {
+        return true
+      },
+    } as unknown as ServerResponse
+
+    const promise = middleware(req, res, vi.fn())
+    req.emit('data', new Uint8Array([1, 2, 3]))
+    req.emit('data', 2 as any)
+    req.emit('end')
+    await promise
+
+    expect(res.setHeader).not.toHaveBeenCalled()
+    expect(res.end).not.toHaveBeenCalled()
+  })
 })

@@ -2,31 +2,58 @@ import { describe, expect, it, vi } from 'vitest'
 import { createLogger } from '../src/dev/logger'
 
 describe('dev logger', () => {
-  it('writes logs only when enabled', () => {
-    const infoSpy = vi.spyOn(console, 'info').mockImplementation(() => undefined)
-    const warnSpy = vi.spyOn(console, 'warn').mockImplementation(() => undefined)
-    const errorSpy = vi.spyOn(console, 'error').mockImplementation(() => undefined)
+  it('returns silent logger when disabled', () => {
+    const info = vi.spyOn(console, 'info').mockImplementation(() => {})
+    const logger = createLogger(false)
+    logger.info('hello')
+    expect(info).not.toHaveBeenCalled()
+    info.mockRestore()
+  })
 
-    const disabled = createLogger(false)
-    disabled.info('skip')
-    disabled.warn('skip')
-    disabled.error('skip')
+  it('prefixes log output with tag', () => {
+    const info = vi.spyOn(console, 'info').mockImplementation(() => {})
+    const warn = vi.spyOn(console, 'warn').mockImplementation(() => {})
+    const logger = createLogger({ tag: 'mokup' })
+    logger.info('ready')
+    logger.warn('warn')
 
-    expect(infoSpy).not.toHaveBeenCalled()
-    expect(warnSpy).not.toHaveBeenCalled()
-    expect(errorSpy).not.toHaveBeenCalled()
+    expect(info).toHaveBeenCalledWith('[mokup]', 'ready')
+    expect(warn).toHaveBeenCalledWith('[mokup]', 'warn')
+    info.mockRestore()
+    warn.mockRestore()
+  })
 
-    const enabled = createLogger(true)
-    enabled.info('ok')
-    enabled.warn('warn')
-    enabled.error('err')
+  it('skips empty log calls', () => {
+    const error = vi.spyOn(console, 'error').mockImplementation(() => {})
+    const logger = createLogger(true)
+    logger.error()
+    expect(error).not.toHaveBeenCalled()
+    error.mockRestore()
+  })
 
-    expect(infoSpy).toHaveBeenCalled()
-    expect(warnSpy).toHaveBeenCalled()
-    expect(errorSpy).toHaveBeenCalled()
+  it('logs without a tag when tag is empty', () => {
+    const log = vi.spyOn(console, 'log').mockImplementation(() => {})
+    const error = vi.spyOn(console, 'error').mockImplementation(() => {})
+    const logger = createLogger({ tag: '' })
+    logger.log('ok')
+    logger.error('boom')
 
-    infoSpy.mockRestore()
-    warnSpy.mockRestore()
-    errorSpy.mockRestore()
+    expect(log).toHaveBeenCalledWith('ok')
+    expect(error).toHaveBeenCalledWith('boom')
+    log.mockRestore()
+    error.mockRestore()
+  })
+
+  it('defaults to mokup tag and skips empty args', () => {
+    const info = vi.spyOn(console, 'info').mockImplementation(() => {})
+    const warn = vi.spyOn(console, 'warn').mockImplementation(() => {})
+    const logger = createLogger()
+    logger.info()
+    logger.warn()
+    logger.info('ready')
+    expect(info).toHaveBeenCalledWith('[mokup]', 'ready')
+    expect(warn).not.toHaveBeenCalled()
+    info.mockRestore()
+    warn.mockRestore()
   })
 })

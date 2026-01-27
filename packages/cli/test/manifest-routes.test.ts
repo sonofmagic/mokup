@@ -8,6 +8,20 @@ describe('manifest route helpers', () => {
     const log = (message: string) => logs.push(message)
     const rootDir = '/tmp/mokup-root'
 
+    const jsonDerived = deriveRouteFromFile(
+      path.join(rootDir, 'status.json'),
+      rootDir,
+      log,
+    )
+    expect(jsonDerived?.method).toBe('GET')
+
+    const missingMethod = deriveRouteFromFile(
+      path.join(rootDir, 'users.ts'),
+      rootDir,
+      log,
+    )
+    expect(missingMethod).toBeNull()
+
     const derived = deriveRouteFromFile(
       path.join(rootDir, 'users.post.ts'),
       rootDir,
@@ -15,6 +29,13 @@ describe('manifest route helpers', () => {
     )
     expect(derived?.method).toBe('POST')
     expect(derived?.template).toBe('/users')
+
+    const indexRoute = deriveRouteFromFile(
+      path.join(rootDir, 'index.get.json'),
+      rootDir,
+      log,
+    )
+    expect(indexRoute?.template).toBe('/')
 
     const emptyName = deriveRouteFromFile(
       path.join(rootDir, '.get.json'),
@@ -30,6 +51,15 @@ describe('manifest route helpers', () => {
     )
     expect(grouped).toBeNull()
     expect(logs.some(message => message.includes('Route groups'))).toBe(true)
+
+    logs.length = 0
+    const warned = deriveRouteFromFile(
+      path.join(rootDir, 'users', '[id]', '[id].get.json'),
+      rootDir,
+      log,
+    )
+    expect(warned).not.toBeNull()
+    expect(logs.some(message => message.includes('Duplicate param name'))).toBe(true)
   })
 
   it('resolves rules with prefix and sorts by method/score', () => {
@@ -41,6 +71,24 @@ describe('manifest route helpers', () => {
       file: '/tmp/mock/users.get.json',
     })
     expect(resolved?.template).toBe('/api/users/[id]')
+
+    const rootResolved = resolveRule({
+      rule: { handler: { ok: true } },
+      derivedTemplate: '/',
+      derivedMethod: 'GET',
+      prefix: 'api/',
+      file: '/tmp/mock/root.get.json',
+    })
+    expect(rootResolved?.template).toBe('/api')
+
+    const alreadyPrefixed = resolveRule({
+      rule: { handler: { ok: true } },
+      derivedTemplate: '/api/ping',
+      derivedMethod: 'GET',
+      prefix: '/api',
+      file: '/tmp/mock/ping.get.json',
+    })
+    expect(alreadyPrefixed?.template).toBe('/api/ping')
 
     expect(resolveRule({
       rule: { handler: { ok: true } },
@@ -59,5 +107,33 @@ describe('manifest route helpers', () => {
       '/users/[id]',
       '/users',
     ])
+  })
+
+  it('logs resolve errors and warnings', () => {
+    const logs: string[] = []
+    const log = (message: string) => logs.push(message)
+
+    const invalid = resolveRule({
+      rule: { handler: { ok: true } },
+      derivedTemplate: '/(group)/users',
+      derivedMethod: 'GET',
+      prefix: '',
+      file: '/tmp/mock/users.get.json',
+      log,
+    })
+    expect(invalid).toBeNull()
+    expect(logs.some(message => message.includes('Route groups'))).toBe(true)
+
+    logs.length = 0
+    const warned = resolveRule({
+      rule: { handler: { ok: true } },
+      derivedTemplate: '/users/[id]/[id]',
+      derivedMethod: 'GET',
+      prefix: '',
+      file: '/tmp/mock/users.get.json',
+      log,
+    })
+    expect(warned).not.toBeNull()
+    expect(logs.some(message => message.includes('Duplicate param name'))).toBe(true)
   })
 })
