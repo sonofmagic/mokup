@@ -9,6 +9,7 @@ import type {
 } from '../types'
 import { computed, ref, watch } from 'vue'
 import { normalizeBasePath } from '../utils/path'
+import { persistLastSelectedRouteKey, readLastSelectedRouteKey } from '../utils/selection'
 import { buildConfigImpactRoutes } from './playground-config-impact'
 
 /**
@@ -66,7 +67,14 @@ export function usePlaygroundRoutes() {
   const disabledKey = (route: PlaygroundDisabledRoute) =>
     `${route.file}|${route.reason}|${route.method ?? ''}|${route.url ?? ''}`
   const ignoredKey = (route: PlaygroundIgnoredRoute) => `${route.file}|${route.reason}`
-  const lastSelectedKey = ref('')
+  const lastSelectedKey = ref(readLastSelectedRouteKey() ?? '')
+
+  function resolveRouteFromKey(key: string, list: PlaygroundRoute[]) {
+    if (!key) {
+      return null
+    }
+    return list.find(route => routeKey(route) === key) ?? null
+  }
 
   function getGroupRoutes() {
     return activeGroup.value === 'all'
@@ -145,7 +153,7 @@ export function usePlaygroundRoutes() {
         return
       }
     }
-    selected.value = filtered.value[0] ?? null
+    selected.value = resolveRouteFromKey(lastSelectedKey.value, filtered.value)
   }
 
   function selectRoute(route: PlaygroundRoute | null) {
@@ -202,13 +210,17 @@ export function usePlaygroundRoutes() {
       applyFilter()
       applyConfigFilter()
       applyDisabledConfigFilter()
-      if (previousKey) {
-        const match = filtered.value.find(route => routeKey(route) === previousKey)
-        selected.value = match ?? null
+      const match = previousKey
+        ? resolveRouteFromKey(previousKey, filtered.value)
+        : null
+      if (previousKey && !match) {
+        const exists = resolveRouteFromKey(previousKey, routes.value)
+        if (!exists) {
+          lastSelectedKey.value = ''
+          persistLastSelectedRouteKey(null)
+        }
       }
-      else {
-        selected.value = filtered.value[0] ?? null
-      }
+      selected.value = match
       if (previousDisabledKey) {
         const match = disabledRoutes.value.find(route => disabledKey(route) === previousDisabledKey)
         selectedDisabled.value = match ?? disabledRoutes.value[0] ?? null
@@ -246,7 +258,9 @@ export function usePlaygroundRoutes() {
 
   watch(selected, (value) => {
     if (value) {
-      lastSelectedKey.value = routeKey(value)
+      const key = routeKey(value)
+      lastSelectedKey.value = key
+      persistLastSelectedRouteKey(key)
     }
   })
 

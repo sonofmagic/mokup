@@ -22,7 +22,7 @@
     "mokup": "workspace:*",
     "tailwindcss": "catalog:",
     "vite": "catalog:",
-    "vitepress": "^1.6.3",
+    "vitepress": "^2.0.0-alpha.15",
     "vitepress-plugin-group-icons": "^1.7.1",
     "vitepress-plugin-llms": "^1.10.0",
     "wrangler": "catalog:"

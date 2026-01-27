@@ -2,12 +2,25 @@ import { afterEach, describe, expect, it, vi } from 'vitest'
 import { nextTick } from 'vue'
 import { usePlaygroundRoutes } from '../src/hooks/usePlaygroundRoutes'
 
+const LAST_SELECTED_ROUTE_KEY = 'mokup.playground.lastSelectedRoute'
+
+function clearLastSelectedRoute() {
+  try {
+    localStorage.removeItem(LAST_SELECTED_ROUTE_KEY)
+  }
+  catch {
+    // ignore storage errors
+  }
+}
+
 describe('usePlaygroundRoutes', () => {
   afterEach(() => {
     vi.unstubAllGlobals()
+    clearLastSelectedRoute()
   })
 
-  it('loads routes, applies filters, and tracks selections', async () => {
+  it('loads routes, applies filters, and restores last selection', async () => {
+    localStorage.setItem(LAST_SELECTED_ROUTE_KEY, 'GET /api/ping')
     const routesState = usePlaygroundRoutes()
     routesState.setBasePath('/__mokup/')
 
@@ -60,6 +73,35 @@ describe('usePlaygroundRoutes', () => {
     routesState.selectConfig({ file: 'index.config.ts' })
     await nextTick()
     expect(routesState.configImpactRoutes.value[0]?.file).toBe('ping.get.ts')
+  })
+
+  it('leaves selection empty without a stored route', async () => {
+    const routesState = usePlaygroundRoutes()
+    routesState.setBasePath('/__mokup/')
+
+    const data = {
+      routes: [
+        { method: 'GET', url: '/api/ping', file: 'ping.get.ts', type: 'handler', groupKey: 'g1' },
+      ],
+      disabled: [],
+      ignored: [],
+      configs: [],
+      disabledConfigs: [],
+      groups: [
+        { key: 'g1', label: 'Group 1', path: '/root/mock/g1' },
+      ],
+      root: '/root',
+    }
+
+    vi.stubGlobal('fetch', vi.fn().mockResolvedValue({
+      ok: true,
+      status: 200,
+      json: async () => data,
+    }))
+
+    await routesState.loadRoutes()
+
+    expect(routesState.selected.value).toBeNull()
   })
 
   it('captures load errors', async () => {
@@ -176,7 +218,7 @@ describe('usePlaygroundRoutes', () => {
     expect(routesState.ignoredFiltered.value).toHaveLength(1)
     routesState.selected.value = data.routes[0] as any
     routesState.setActiveGroup('g2')
-    expect(routesState.selected.value?.file).toBe('bravo.get.ts')
+    expect(routesState.selected.value).toBeNull()
   })
 
   it('keeps selection when active group still contains the route', async () => {
