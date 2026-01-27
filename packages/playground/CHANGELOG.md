@@ -1,5 +1,11 @@
 # @mokup/playground
 
+## 0.0.15
+
+### Patch Changes
+
+- 🐛 **Normalize base64 decode errors to a stable message.** [`5419fb7`](https://github.com/sonofmagic/mokup/commit/5419fb7bafd892d4557d4a161713c7e6f45a139e) by @sonofmagic
+
 ## 0.0.14
 
 ### Patch Changes

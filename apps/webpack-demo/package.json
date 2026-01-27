@@ -1,7 +1,7 @@
 {
   "name": "webpack-demo",
   "type": "module",
-  "version": "0.0.10",
+  "version": "0.0.11",
   "private": true,
   "scripts": {
     "dev": "tsx node_modules/webpack-cli/bin/cli.js serve --config webpack.config.ts --mode development",

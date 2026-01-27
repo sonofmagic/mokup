@@ -1,5 +1,12 @@
 # web
 
+## 0.0.19
+
+### Patch Changes
+
+- 📦 **Dependencies**
+  → `mokup@2.2.3`
+
 ## 0.0.18
 
 ### Patch Changes

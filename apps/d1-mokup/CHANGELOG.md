@@ -1,5 +1,12 @@
 # d1-mokup
 
+## 0.0.5
+
+### Patch Changes
+
+- 📦 **Dependencies**
+  → `mokup@2.2.3`
+
 ## 0.0.4
 
 ### Patch Changes

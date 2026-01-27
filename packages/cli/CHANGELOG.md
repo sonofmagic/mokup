@@ -1,5 +1,12 @@
 # @mokup/cli
 
+## 1.0.11
+
+### Patch Changes
+
+- 📦 **Dependencies**
+  → `@mokup/server@1.1.8`
+
 ## 1.0.10
 
 ### Patch Changes
