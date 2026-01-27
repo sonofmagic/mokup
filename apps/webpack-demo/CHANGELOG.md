@@ -1,5 +1,12 @@
 # webpack-demo
 
+## 0.0.11
+
+### Patch Changes
+
+- 📦 **Dependencies**
+  → `mokup@2.2.3`
+
 ## 0.0.10
 
 ### Patch Changes
