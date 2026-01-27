@@ -1,7 +1,6 @@
 import { afterEach, describe, expect, it, vi } from 'vitest'
 
 async function setupPanel(storageValue?: string) {
-  vi.resetModules()
   const store = new Map<string, string>()
   if (storageValue) {
     store.set('mokup.playground.detailPanels', storageValue)
@@ -69,5 +68,6 @@ describe('useDetailPanel', () => {
 
   afterEach(() => {
     vi.unstubAllGlobals()
+    vi.resetModules()
   })
 })

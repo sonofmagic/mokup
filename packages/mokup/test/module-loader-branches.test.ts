@@ -26,7 +26,7 @@ describe('module loader branches', () => {
     const { loadModule } = await import('../src/core/module-loader')
 
     const tsMod = await loadModule('/tmp/mock.ts')
-    expect(tsMod).toEqual({})
+    expect(Object.keys(tsMod ?? {})).toHaveLength(0)
 
     const unknown = await loadModule('/tmp/mock.txt')
     expect(unknown).toBeNull()

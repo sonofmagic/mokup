@@ -488,7 +488,9 @@ describe('dev middleware params', () => {
       },
     } as unknown as ServerResponse
 
-    await middleware(req, res, vi.fn())
+    const promise = middleware(req, res, vi.fn())
+    req.emit('end')
+    await promise
     expect(res.setHeader).not.toHaveBeenCalled()
     expect(res.end).toHaveBeenCalledWith('Mock handler error')
   })
