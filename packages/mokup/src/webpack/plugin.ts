@@ -38,10 +38,10 @@ const lifecycleBaseName = 'mokup-sw-lifecycle.js'
  * @returns Webpack plugin instance.
  *
  * @example
- * import { createMokupWebpackPlugin } from 'mokup/webpack'
+ * import { createWebpackPlugin } from 'mokup/webpack'
  *
  * export default {
- *   plugins: [createMokupWebpackPlugin({ entries: { dir: 'mock' } })],
+ *   plugins: [createWebpackPlugin({ entries: { dir: 'mock' } })],
  * }
  */
 export function createMokupWebpackPlugin(

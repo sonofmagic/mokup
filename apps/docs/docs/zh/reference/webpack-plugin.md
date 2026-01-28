@@ -31,23 +31,36 @@ bun add -d mokup
 - 在 webpack-dev-server 中接入 Mokup mock。
 - 构建时输出 SW 资源用于浏览器侧 mock。
 
-示例：
+推荐（使用封装函数）：
 
 ```js
-const { createMokupWebpackPlugin } = require('mokup/webpack')
+const { mokupWebpack } = require('mokup/webpack')
+
+const withMokup = mokupWebpack({
+  entries: {
+    dir: 'mock',
+    prefix: '/api',
+  },
+})
+
+module.exports = withMokup({})
+```
+
+直接使用插件（短名称）：
+
+```js
+const { createWebpackPlugin } = require('mokup/webpack')
 
 module.exports = {
   plugins: [
-    createMokupWebpackPlugin({
+    createWebpackPlugin({
       entries: {
         dir: 'mock',
         prefix: '/api',
       },
     }),
   ],
-  devServer: {
-    setupMiddlewares: middlewares => middlewares,
-  },
+  devServer: {},
 }
 ```
 
@@ -61,11 +74,11 @@ module.exports = {
 示例：
 
 ```js
-const { createMokupWebpackPlugin } = require('mokup/webpack')
+const { createWebpackPlugin } = require('mokup/webpack')
 
 module.exports = {
   plugins: [
-    createMokupWebpackPlugin({
+    createWebpackPlugin({
       entries: {
         dir: 'mock',
         prefix: '/api',
@@ -87,4 +100,5 @@ module.exports = {
 ## 注意
 
 - Dev server 会通过 `devServer.setupMiddlewares` 注入中间件，请确保启用了 `webpack-dev-server`。
+- `mokupWebpack(...)` 会自动创建 `devServer` 对象，除非需要自定义 dev-server 设置，否则可以省略。
 - SW 生命周期脚本会输出到 assets 目录（默认 `assets/mokup-sw-lifecycle.js`）。如果使用 `html-webpack-plugin` 会自动注入，否则需要手动引入。

@@ -1,4 +1,6 @@
+import type { Configuration } from 'webpack'
 import type { MokupPluginOptions } from './shared/types'
+import { createMokupWebpackPlugin } from './webpack/plugin'
 
 export type {
   Context,
@@ -42,6 +44,68 @@ export type WebpackPluginOptionsInput = MokupPluginOptions
  * Create the mokup webpack plugin.
  *
  * @example
- * import { createMokupWebpackPlugin } from 'mokup/webpack'
+ * import { createWebpackPlugin } from 'mokup/webpack'
  */
-export { createMokupWebpackPlugin } from './webpack/plugin'
+export { createMokupWebpackPlugin, createMokupWebpackPlugin as createWebpackPlugin }
+
+export type WebpackConfig = Configuration
+
+type WebpackConfigFactory = (...args: unknown[]) => WebpackConfig | WebpackConfig[] | Promise<WebpackConfig | WebpackConfig[]>
+
+export type WebpackConfigInput = WebpackConfig | WebpackConfig[] | WebpackConfigFactory
+
+type WithMokup<T>
+  = T extends (...args: infer A) => infer R
+    ? (...args: A) => Promise<WithMokup<Awaited<R>>>
+    : T extends Array<infer U>
+      ? Array<WithMokup<U>>
+      : T extends WebpackConfig
+        ? T
+        : WebpackConfig
+
+/**
+ * Create a webpack config wrapper for Mokup.
+ *
+ * @example
+ * import { mokupWebpack } from 'mokup/webpack'
+ *
+ * const withMokup = mokupWebpack({ entries: { dir: 'mock' } })
+ *
+ * export default withMokup({
+ *   devServer: {},
+ * })
+ */
+export function mokupWebpack(options: WebpackPluginOptionsInput = {}) {
+  const plugin = createMokupWebpackPlugin(options)
+
+  const applyConfig = <T extends WebpackConfig>(config: T = {} as T): T => {
+    const plugins = Array.isArray(config.plugins) ? config.plugins : []
+    const devServer = config.devServer && typeof config.devServer === 'object'
+      ? { ...config.devServer }
+      : {}
+    return {
+      ...config,
+      plugins: [...plugins, plugin],
+      devServer,
+    } as T
+  }
+
+  const applyInput = <T extends WebpackConfigInput>(input: T): WithMokup<T> => {
+    if (typeof input === 'function') {
+      const wrapped = async (...args: unknown[]) => {
+        const resolved = await input(...args)
+        if (Array.isArray(resolved)) {
+          return resolved.map(item => applyConfig(item))
+        }
+        return applyConfig(resolved ?? {})
+      }
+      return wrapped as WithMokup<T>
+    }
+    if (Array.isArray(input)) {
+      return input.map(item => applyConfig(item)) as WithMokup<T>
+    }
+    return applyConfig((input ?? {}) as WebpackConfig) as WithMokup<T>
+  }
+
+  return applyInput
+}

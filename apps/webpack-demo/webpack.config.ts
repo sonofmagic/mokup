@@ -1,10 +1,10 @@
-import type { Configuration, WebpackPluginInstance } from 'webpack'
+import type { Configuration } from 'webpack'
 // Pull in webpack-dev-server's type augmentation for Configuration.devServer.
 import type {} from 'webpack-dev-server'
 import path from 'node:path'
 import { fileURLToPath } from 'node:url'
 import HtmlWebpackPlugin from 'html-webpack-plugin'
-import { createMokupWebpackPlugin } from 'mokup/webpack'
+import { mokupWebpack } from 'mokup/webpack'
 import { VueLoaderPlugin } from 'vue-loader'
 import { DefinePlugin } from 'webpack'
 
@@ -12,8 +12,14 @@ const __dirname = path.dirname(fileURLToPath(import.meta.url))
 
 function config(_env: unknown, argv: { mode?: string }): Configuration {
   const isDev = argv.mode !== 'production'
+  const withMokup = mokupWebpack({
+    entries: {
+      dir: 'mock',
+      prefix: '/api',
+    },
+  })
 
-  return {
+  const base: Configuration = {
     mode: isDev ? 'development' : 'production',
     entry: path.resolve(__dirname, 'src/main.ts'),
     output: {
@@ -59,12 +65,6 @@ function config(_env: unknown, argv: { mode?: string }): Configuration {
       new HtmlWebpackPlugin({
         template: path.resolve(__dirname, 'public/index.html'),
       }),
-      createMokupWebpackPlugin({
-        entries: {
-          dir: 'mock',
-          prefix: '/api',
-        },
-      }) as unknown as WebpackPluginInstance,
     ],
     devServer: {
       port: 8080,
@@ -73,9 +73,10 @@ function config(_env: unknown, argv: { mode?: string }): Configuration {
       static: {
         directory: path.resolve(__dirname, 'public'),
       },
-      setupMiddlewares: middlewares => middlewares,
     },
   }
+
+  return withMokup(base)
 }
 
 export default config

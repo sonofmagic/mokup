@@ -31,23 +31,36 @@ Use cases:
 - Add Mokup mocks to webpack-dev-server without changing app code.
 - Emit SW assets during webpack builds for browser-level mocking.
 
-Demo:
+Recommended (with wrapper):
 
 ```js
-const { createMokupWebpackPlugin } = require('mokup/webpack')
+const { mokupWebpack } = require('mokup/webpack')
+
+const withMokup = mokupWebpack({
+  entries: {
+    dir: 'mock',
+    prefix: '/api',
+  },
+})
+
+module.exports = withMokup({})
+```
+
+Direct plugin (short name):
+
+```js
+const { createWebpackPlugin } = require('mokup/webpack')
 
 module.exports = {
   plugins: [
-    createMokupWebpackPlugin({
+    createWebpackPlugin({
       entries: {
         dir: 'mock',
         prefix: '/api',
       },
     }),
   ],
-  devServer: {
-    setupMiddlewares: middlewares => middlewares,
-  },
+  devServer: {},
 }
 ```
 
@@ -61,11 +74,11 @@ Use cases:
 Demo:
 
 ```js
-const { createMokupWebpackPlugin } = require('mokup/webpack')
+const { createWebpackPlugin } = require('mokup/webpack')
 
 module.exports = {
   plugins: [
-    createMokupWebpackPlugin({
+    createWebpackPlugin({
       entries: {
         dir: 'mock',
         prefix: '/api',
@@ -87,4 +100,5 @@ Options match the Vite plugin: top-level `entries` + `playground`, plus entry op
 ## Notes
 
 - Dev server support uses `devServer.setupMiddlewares`; ensure `webpack-dev-server` is enabled.
+- `mokupWebpack(...)` auto-creates a `devServer` object, so you can omit it unless you need custom dev-server settings.
 - The SW lifecycle script is emitted under your assets directory (default `assets/mokup-sw-lifecycle.js`). With `html-webpack-plugin` it is auto-injected; otherwise include it manually.

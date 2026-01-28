@@ -25,21 +25,16 @@ bun add -d mokup
 ## 2. 添加插件
 
 ```js
-const { createMokupWebpackPlugin } = require('mokup/webpack')
+const { mokupWebpack } = require('mokup/webpack')
 
-module.exports = {
-  plugins: [
-    createMokupWebpackPlugin({
-      entries: {
-        dir: 'mock',
-        prefix: '/api',
-      },
-    }),
-  ],
-  devServer: {
-    setupMiddlewares: middlewares => middlewares,
+const withMokup = mokupWebpack({
+  entries: {
+    dir: 'mock',
+    prefix: '/api',
   },
-}
+})
+
+module.exports = withMokup({})
 ```
 
 ## 3. 启动开发服务
