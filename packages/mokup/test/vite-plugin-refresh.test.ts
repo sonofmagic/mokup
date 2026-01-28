@@ -84,4 +84,55 @@ describe('vite plugin route refresh', () => {
     expect(firstCall.exclude).toEqual([/skip/])
     expect(firstCall.ignorePrefix).toEqual(['_'])
   })
+
+  it('invalidates virtual modules when routes change', async () => {
+    const parsed = parseRouteTemplate('/ping')
+    mocks.scanRoutes.mockResolvedValueOnce([
+      {
+        file: '/root/mock/ping.get.json',
+        template: parsed.template,
+        method: 'GET',
+        tokens: parsed.tokens,
+        score: parsed.score,
+        handler: { ok: true },
+      },
+    ])
+
+    const state = {
+      routes: [],
+      serverRoutes: [],
+      swRoutes: [],
+      disabledRoutes: [],
+      ignoredRoutes: [],
+      configFiles: [],
+      disabledConfigFiles: [],
+      app: null,
+      lastSignature: 'old',
+    }
+
+    const moduleNode = { id: '\0virtual:mokup-bundle' }
+    const server = {
+      ws: { send: vi.fn() },
+      moduleGraph: {
+        getModuleById: vi.fn().mockImplementation((id: string) => (
+          id === '\0virtual:mokup-bundle' ? moduleNode : null
+        )),
+        invalidateModule: vi.fn(),
+      },
+    }
+
+    const refresher = createRouteRefresher({
+      state: state as never,
+      optionList: [{ dir: '/root/mock', prefix: '/api' }],
+      root: () => '/root',
+      logger: { info: vi.fn(), warn: vi.fn(), error: vi.fn() },
+      enableViteMiddleware: false,
+      virtualModuleIds: ['\0virtual:mokup-bundle', '\0virtual:missing'],
+    })
+
+    await refresher(server as never)
+
+    expect(server.moduleGraph.getModuleById).toHaveBeenCalledWith('\0virtual:mokup-bundle')
+    expect(server.moduleGraph.invalidateModule).toHaveBeenCalledWith(moduleNode)
+  })
 })

@@ -110,6 +110,7 @@ export function createMokupPlugin(options: MokupPluginOptions = {}): Plugin {
     root: () => root,
     logger,
     enableViteMiddleware,
+    virtualModuleIds: [resolvedBundleVirtualId],
   })
 
   return {

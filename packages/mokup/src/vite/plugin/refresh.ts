@@ -15,8 +15,9 @@ function createRouteRefresher(params: {
   root: () => string
   logger: Parameters<typeof scanRoutes>[0]['logger']
   enableViteMiddleware: boolean
+  virtualModuleIds?: string[]
 }) {
-  const { state, optionList, root, logger, enableViteMiddleware } = params
+  const { state, optionList, root, logger, enableViteMiddleware, virtualModuleIds } = params
 
   return async (server?: ViteDevServer | PreviewServer) => {
     const collected: RouteTable = []
@@ -85,6 +86,14 @@ function createRouteRefresher(params: {
           event: 'mokup:routes-changed',
           data: { ts: Date.now() },
         })
+        if (virtualModuleIds && virtualModuleIds.length > 0) {
+          for (const id of virtualModuleIds) {
+            const moduleNode = server.moduleGraph.getModuleById(id)
+            if (moduleNode) {
+              server.moduleGraph.invalidateModule(moduleNode)
+            }
+          }
+        }
       }
     }
     state.lastSignature = signature
