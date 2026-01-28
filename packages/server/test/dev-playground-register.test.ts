@@ -33,6 +33,9 @@ describe('registerPlaygroundRoutes', () => {
     const index = await app.fetch(new Request('http://localhost/__mokup/'))
     expect(await index.text()).toBe('index')
 
+    const indexHtml = await app.fetch(new Request('http://localhost/__mokup/index.html'))
+    expect(indexHtml.status).toBe(200)
+
     const routes = await app.fetch(new Request('http://localhost/__mokup/routes'))
     const payload = await routes.json() as { basePath: string }
     expect(payload.basePath).toBe('/__mokup')

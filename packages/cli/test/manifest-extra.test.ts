@@ -122,4 +122,72 @@ describe('buildManifest extra branches', () => {
       await cleanupTempRoot(root)
     }
   })
+
+  it('uses config include/exclude overrides and rule headers without config headers', async () => {
+    const { root, mockDir } = await createTempRoot()
+    try {
+      await writeFile(
+        path.join(mockDir, 'index.config.js'),
+        [
+          'export default {',
+          '  include: /keep|headers/,',
+          '  exclude: /skip/,',
+          '}',
+        ].join('\n'),
+      )
+      await writeFile(path.join(mockDir, 'keep.get.json'), '{"ok":true}')
+      await writeFile(path.join(mockDir, 'skip.get.json'), '{"ok":true}')
+      await writeFile(
+        path.join(mockDir, 'headers.get.ts'),
+        [
+          'export default {',
+          '  handler: { ok: true },',
+          '  headers: { \"x-rule\": \"1\" },',
+          '}',
+        ].join('\n'),
+      )
+
+      const result = await buildManifest({
+        root,
+        dir: 'mock',
+        outDir: 'dist',
+        handlers: false,
+        include: /nope/,
+        exclude: /headers/,
+      })
+
+      const urls = result.manifest.routes.map(route => route.url)
+      expect(urls).toEqual(['/headers', '/keep'])
+      const headerRoute = result.manifest.routes.find(route => route.url === '/headers')
+      expect(headerRoute?.headers).toEqual({ 'x-rule': '1' })
+    }
+    finally {
+      await cleanupTempRoot(root)
+    }
+  })
+
+  it('defaults to cwd and .mokup output when root/outDir are not provided', async () => {
+    const { root, mockDir } = await createTempRoot()
+    const cwd = process.cwd()
+    try {
+      await writeFile(path.join(mockDir, 'ping.get.json'), '{"ok":true}')
+      process.chdir(root)
+
+      const result = await buildManifest({
+        dir: 'mock',
+        handlers: false,
+      })
+
+      const manifestPath = path.join(root, '.mokup', 'mokup.manifest.json')
+      const resolvedActual = await fs.realpath(result.manifestPath)
+      const resolvedExpected = await fs.realpath(manifestPath)
+      expect(resolvedActual).toBe(resolvedExpected)
+      const stat = await fs.stat(manifestPath)
+      expect(stat.isFile()).toBe(true)
+    }
+    finally {
+      process.chdir(cwd)
+      await cleanupTempRoot(root)
+    }
+  })
 })

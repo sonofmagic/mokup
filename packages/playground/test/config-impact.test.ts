@@ -32,4 +32,20 @@ describe('playground config impact', () => {
       { kind: 'ignored', file: '/root/mock/ignored.ts' },
     ])
   })
+
+  it('keeps disabled entries without method or url', () => {
+    const selectedFile = '/root/mock/index.config.ts'
+    const result = buildConfigImpactRoutes({
+      selectedFile,
+      routes: [],
+      disabledRoutes: [
+        { file: '/root/mock/off.get.ts', configChain: [selectedFile] },
+      ],
+      ignoredRoutes: [],
+    })
+
+    expect(result).toEqual([
+      { kind: 'disabled', file: '/root/mock/off.get.ts' },
+    ])
+  })
 })

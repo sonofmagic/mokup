@@ -20,4 +20,25 @@ describe('createRuntimeApp', () => {
     expect(response.status).toBe(200)
     await expect(response.text()).resolves.toBe('ok')
   })
+
+  it('passes module options through to the runtime app', async () => {
+    const app = await createRuntimeApp({
+      manifest: {
+        version: 1,
+        routes: [
+          {
+            method: 'GET',
+            url: '/ping',
+            response: { type: 'text', body: 'pong' },
+          },
+        ],
+      },
+      moduleBase: '/tmp/base',
+      moduleMap: {},
+    })
+
+    const response = await app.fetch(new Request('http://localhost/ping'))
+    expect(response.status).toBe(200)
+    await expect(response.text()).resolves.toBe('pong')
+  })
 })

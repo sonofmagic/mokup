@@ -101,4 +101,49 @@ describe('route resolution and sorting', () => {
     expect(routes[1]?.method).toBe('GET')
     expect(routes[2]?.method).toBe('POST')
   })
+
+  it('normalizes templates for prefix edge cases', () => {
+    const logger = createLogger()
+    const baseRule = { handler: { ok: true } }
+
+    const noPrefix = resolveRule({
+      rule: baseRule,
+      derivedTemplate: 'users',
+      derivedMethod: 'GET',
+      prefix: '',
+      file: '/root/mock/users.get.ts',
+      logger,
+    })
+    expect(noPrefix?.template).toBe('/users')
+
+    const rootPrefix = resolveRule({
+      rule: baseRule,
+      derivedTemplate: '/users',
+      derivedMethod: 'GET',
+      prefix: '/',
+      file: '/root/mock/users.get.ts',
+      logger,
+    })
+    expect(rootPrefix?.template).toBe('/users')
+
+    const alreadyPrefixed = resolveRule({
+      rule: baseRule,
+      derivedTemplate: '/api/users',
+      derivedMethod: 'GET',
+      prefix: '/api',
+      file: '/root/mock/users.get.ts',
+      logger,
+    })
+    expect(alreadyPrefixed?.template).toBe('/api/users')
+
+    const rootTemplate = resolveRule({
+      rule: baseRule,
+      derivedTemplate: '/',
+      derivedMethod: 'GET',
+      prefix: '/api',
+      file: '/root/mock/index.get.ts',
+      logger,
+    })
+    expect(rootTemplate?.template).toBe('/api')
+  })
 })

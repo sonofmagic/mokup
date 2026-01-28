@@ -28,6 +28,14 @@ describe('server playground grouping', () => {
     expect(formatted).toBe('/outside/file.ts')
   })
 
+  it('deduplicates groups and handles empty matches', () => {
+    const groups = resolveGroups(['/root', '/root', '/root/api'], '/root')
+    expect(groups.filter(group => group.key === '/root')).toHaveLength(1)
+
+    const match = resolveRouteGroup('/root/api/users.get.ts', [])
+    expect(match).toBeUndefined()
+  })
+
   it('prefers server roots and handles missing roots', () => {
     const root = resolveGroupRoot(['/root/api', '/root/other'], '/root')
     expect(root).toBe('/root')

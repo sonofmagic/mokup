@@ -38,6 +38,26 @@ describe('manifest file helpers', () => {
     }
   })
 
+  it('skips non-file directory entries when collecting', async () => {
+    const root = await createTempRoot()
+    const mockDir = path.join(root, 'mock')
+    try {
+      await fs.mkdir(mockDir, { recursive: true })
+      const target = path.join(mockDir, 'target.json')
+      const link = path.join(mockDir, 'link.json')
+      await fs.writeFile(target, '{}', 'utf8')
+      await fs.symlink(target, link)
+
+      const files = await collectFiles([mockDir])
+      const basenames = files.map(entry => path.basename(entry.file)).sort()
+
+      expect(basenames).toEqual(['target.json'])
+    }
+    finally {
+      await fs.rm(root, { recursive: true, force: true })
+    }
+  })
+
   it('resolves dirs and matches include/exclude filters', () => {
     const root = '/tmp/mokup-root'
     const posixPath = path.posix
@@ -79,5 +99,6 @@ describe('manifest file helpers', () => {
     expect(normalizeIgnorePrefix([''])).toEqual([])
     expect(hasIgnoredPrefix(file, root, normalizeIgnorePrefix(undefined))).toBe(true)
     expect(hasIgnoredPrefix(file, root, normalizeIgnorePrefix('_'))).toBe(false)
+    expect(hasIgnoredPrefix(file, root, [])).toBe(false)
   })
 })

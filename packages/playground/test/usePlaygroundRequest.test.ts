@@ -197,8 +197,8 @@ describe('usePlaygroundRequest', () => {
     await nextTick()
     expect(sockets).toHaveLength(1)
 
-    socket.emit('error', {} as MessageEvent)
     socket.close()
+    socket.emit('error', {} as MessageEvent)
   })
 
   it('skips websocket when window is undefined', async () => {
@@ -207,6 +207,28 @@ describe('usePlaygroundRequest', () => {
     const request = () => usePlaygroundRequest(selected, { basePath })
     expect(request).not.toThrow()
     await nextTick()
+  })
+
+  it('skips websocket when basePath is empty', async () => {
+    const selected = ref<PlaygroundRoute | null>(route)
+    const basePath = ref('')
+    const sockets: MockWebSocket[] = []
+
+    class MockWebSocket {
+      constructor() {
+        sockets.push(this)
+      }
+
+      addEventListener() {}
+    }
+
+    vi.stubGlobal('window', { location: { origin: 'http://localhost' } })
+    vi.stubGlobal('WebSocket', MockWebSocket as never)
+
+    usePlaygroundRequest(selected, { basePath })
+    await nextTick()
+
+    expect(sockets).toHaveLength(0)
   })
 
   it('does not increment counts when server counts are active', async () => {
@@ -302,5 +324,25 @@ describe('usePlaygroundRequest', () => {
     const selected = ref<PlaygroundRoute | null>(route)
     const { requestUrl } = usePlaygroundRequest(selected)
     expect(requestUrl.value).toContain('/api/hello')
+  })
+
+  it('uses cached route tokens when available', async () => {
+    const routeWithParams: PlaygroundRoute = {
+      method: 'GET',
+      url: '/users/[id]',
+      file: 'users.get.ts',
+      type: 'handler',
+    }
+    const selected = ref<PlaygroundRoute | null>(routeWithParams)
+
+    const { requestUrl, queryText } = usePlaygroundRequest(selected)
+    selected.value = null
+    await nextTick()
+    selected.value = routeWithParams
+    await nextTick()
+
+    queryText.value = '{"q":"ok"}'
+    expect(requestUrl.value).toContain('/users/[id]')
+    expect(requestUrl.value).toContain('?q=ok')
   })
 })

@@ -233,4 +233,38 @@ describe('mokup SW', () => {
     expect(result?.basePaths).toEqual(['/docs'])
     expect(warnings.some(message => message.includes('SW unregister'))).toBe(true)
   })
+
+  it('keeps repeated SW overrides without warnings', () => {
+    const warnings: string[] = []
+    const logger = createLogger(warnings)
+    const result = resolveSwUnregisterConfig([
+      {
+        mode: 'sw',
+        sw: {
+          path: 'sw.js',
+          scope: 'api',
+          register: false,
+          unregister: true,
+        },
+      },
+      {
+        mode: 'sw',
+        sw: {
+          path: 'sw.js',
+          scope: 'api',
+          register: false,
+          unregister: true,
+        },
+      },
+    ], logger)
+
+    expect(result).toEqual({
+      path: '/sw.js',
+      scope: '/api',
+      register: false,
+      unregister: true,
+      basePaths: [],
+    })
+    expect(warnings).toHaveLength(0)
+  })
 })

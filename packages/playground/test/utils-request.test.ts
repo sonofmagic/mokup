@@ -20,6 +20,16 @@ describe('request utils', () => {
     parseSpy.mockRestore()
   })
 
+  it('handles non-error throws while parsing JSON', () => {
+    const parseSpy = vi.spyOn(JSON, 'parse').mockImplementation(() => {
+      // eslint-disable-next-line no-throw-literal
+      throw 'boom'
+    })
+    const invalid = parseJsonInput('{ bad }')
+    expect(invalid.error).toBe('Invalid JSON')
+    parseSpy.mockRestore()
+  })
+
   it('applies query parameters to URLs', () => {
     const url = new URL('https://example.com/')
     applyQuery(url, { foo: 'bar', list: [1, 2], empty: undefined })

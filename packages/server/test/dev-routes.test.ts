@@ -37,6 +37,26 @@ describe('dev routes helpers', () => {
     expect(resolved?.template).toBe('/api/users/[id]')
     expect(resolved?.status).toBe(201)
 
+    const normalized = resolveRule({
+      rule: { handler: { ok: true } },
+      derivedTemplate: 'users',
+      derivedMethod: 'GET',
+      prefix: '/',
+      file: '/tmp/mock/users.get.json',
+      logger,
+    })
+    expect(normalized?.template).toBe('/users')
+
+    const alreadyPrefixed = resolveRule({
+      rule: { handler: { ok: true } },
+      derivedTemplate: '/api/ping',
+      derivedMethod: 'GET',
+      prefix: '/api',
+      file: '/tmp/mock/ping.get.json',
+      logger,
+    })
+    expect(alreadyPrefixed?.template).toBe('/api/ping')
+
     expect(resolveRule({
       rule: { handler: { ok: true } },
       derivedTemplate: '/users',
@@ -46,6 +66,16 @@ describe('dev routes helpers', () => {
       logger,
     })).toBeNull()
     expect(logger.warn).toHaveBeenCalled()
+
+    const invalid = resolveRule({
+      rule: { handler: { ok: true } },
+      derivedTemplate: '/users',
+      derivedMethod: 'GET',
+      prefix: '/(group)',
+      file: '/tmp/mock/users.json',
+      logger,
+    })
+    expect(invalid).toBeNull()
 
     const routes = sortRoutes([
       { template: '/users/[id]', method: 'GET', score: [2, 3], file: 'a', handler: {} },

@@ -9,6 +9,7 @@ describe('runtime route compilation', () => {
       version: 1,
       routes: [
         { method: 'get', url: '/users/[id]', response: baseResponse },
+        { method: undefined as unknown as string, url: '/fallback', response: baseResponse },
         { method: 'POST', url: '/posts', response: baseResponse },
         { method: 'GET', url: '/[...slug]/extra', response: baseResponse },
         {
@@ -25,6 +26,7 @@ describe('runtime route compilation', () => {
     expect(compiled.some(entry => entry.route.url === '/[...slug]/extra')).toBe(false)
     expect(compiled.some(entry => entry.method === 'GET')).toBe(true)
     expect(compiled.some(entry => entry.method === 'POST')).toBe(true)
+    expect(compiled.some(entry => entry.route.url === '/fallback' && entry.method === 'GET')).toBe(true)
   })
 
   it('builds hono paths from tokens', () => {

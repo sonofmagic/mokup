@@ -85,6 +85,18 @@ describe('runtime request helpers', () => {
     await expect(post.text()).resolves.toBe(JSON.stringify({ ok: true }))
   })
 
+  it('stringifies primitive bodies when not objects', async () => {
+    const request = toFetchRequest({
+      method: 'POST',
+      path: '/number',
+      query: {},
+      headers: {},
+      body: 123 as unknown as number,
+    })
+
+    await expect(request.text()).resolves.toBe('123')
+  })
+
   it('detects routes that need moduleBase', () => {
     const route: ManifestRoute = {
       method: 'GET',

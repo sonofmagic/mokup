@@ -14,6 +14,10 @@ describe('runtime response helpers', () => {
     const binaryResult = await toRuntimeResult(binaryResponse)
     expect(binaryResult.body).toBeInstanceOf(Uint8Array)
     expect(Array.from(binaryResult.body as Uint8Array)).toEqual([1, 2, 3])
+
+    const emptyHeader = new Response('ok', { headers: {} })
+    const emptyHeaderResult = await toRuntimeResult(emptyHeader)
+    expect(emptyHeaderResult.body).toBe('ok')
   })
 
   it('returns null body for empty responses', async () => {
@@ -62,5 +66,23 @@ describe('runtime response helpers', () => {
 
     const fallback = resolveResponse({ res: 'nope' }, base)
     expect(fallback).toBe(base)
+
+    const direct = resolveResponse(new Response('direct'), base)
+    expect(direct).toBeInstanceOf(Response)
+
+    const missing = resolveResponse({} as any, base)
+    expect(missing).toBe(base)
+  })
+
+  it('falls back to default status for invalid responses', () => {
+    const route: ManifestRoute = {
+      method: 'GET',
+      url: '/ping',
+      response: { type: 'text', body: 'ok' },
+      status: Number.NaN,
+    }
+    const fake = { status: 0, headers: new Headers(), body: null } as Response
+    const resolved = applyRouteOverrides(fake, route)
+    expect(resolved.status).toBe(200)
   })
 })

@@ -69,6 +69,16 @@ describe('pathname normalization', () => {
     expect(normalizePathname('docs/?q=1#hash')).toBe('/docs')
     expect(normalizePathname('/docs/')).toBe('/docs')
   })
+
+  it('handles missing query/hash segments defensively', () => {
+    const missingQuery = normalizePathname({ split: () => [undefined] } as any)
+    expect(missingQuery).toBe('/')
+
+    const missingHash = normalizePathname({
+      split: () => [{ split: () => [undefined] }],
+    } as any)
+    expect(missingHash).toBe('/')
+  })
 })
 
 describe('router matching', () => {
@@ -127,6 +137,10 @@ describe('route scoring', () => {
 
   it('handles sparse score entries', () => {
     expect(compareRouteScore([undefined, 2] as unknown as number[], [1, 2])).toBeGreaterThan(0)
+  })
+
+  it('treats missing compare score entries as zero', () => {
+    expect(compareRouteScore([1], [undefined] as unknown as number[])).toBeLessThan(0)
   })
 
   it('scores unknown token types as zero', () => {

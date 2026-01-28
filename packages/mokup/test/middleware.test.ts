@@ -396,6 +396,94 @@ describe('dev middleware params', () => {
     expect(Array.from(new Uint8Array(await bufferResponse.arrayBuffer()))).toEqual([4, 5, 6])
   })
 
+  it('covers response resolution and header normalization branches', async () => {
+    const mwParsed = parseRouteTemplate('/mw')
+    const objParsed = parseRouteTemplate('/obj')
+    const binaryParsed = parseRouteTemplate('/binary-custom')
+    const dataParsed = parseRouteTemplate('/data')
+    const statusParsed = parseRouteTemplate('/status')
+
+    const app = createHonoApp([
+      {
+        file: 'mw.get.ts',
+        template: mwParsed.template,
+        method: 'GET',
+        tokens: mwParsed.tokens,
+        score: mwParsed.score,
+        handler: () => 'ok',
+        middlewares: [
+          {
+            handle: async () => new Response('mw'),
+            source: 'mw',
+            index: 0,
+            position: 'pre',
+          },
+        ],
+      },
+      {
+        file: 'obj.get.ts',
+        template: objParsed.template,
+        method: 'GET',
+        tokens: objParsed.tokens,
+        score: objParsed.score,
+        handler: () => 'ok',
+        middlewares: [
+          {
+            handle: async () => ({ res: new Response('obj') }),
+            source: 'mw',
+            index: 0,
+            position: 'post',
+          },
+        ],
+      },
+      {
+        file: 'binary.get.ts',
+        template: binaryParsed.template,
+        method: 'GET',
+        tokens: binaryParsed.tokens,
+        score: binaryParsed.score,
+        handler: (c) => {
+          c.header('content-type', 'application/custom')
+          return new Uint8Array([9])
+        },
+      },
+      {
+        file: 'data.get.ts',
+        template: dataParsed.template,
+        method: 'GET',
+        tokens: dataParsed.tokens,
+        score: dataParsed.score,
+        handler: { ok: true },
+      },
+      {
+        file: 'status.get.ts',
+        template: statusParsed.template,
+        method: 'GET',
+        tokens: statusParsed.tokens,
+        score: statusParsed.score,
+        handler: (c) => {
+          c.status(201)
+          return undefined
+        },
+      },
+    ])
+
+    const mwResponse = await app.fetch(new Request('http://mokup.local/mw'))
+    await expect(mwResponse.text()).resolves.toBe('mw')
+
+    const objResponse = await app.fetch(new Request('http://mokup.local/obj'))
+    await expect(objResponse.text()).resolves.toBe('obj')
+
+    const binaryResponse = await app.fetch(new Request('http://mokup.local/binary-custom'))
+    expect(binaryResponse.headers.get('content-type')).toBe('application/custom')
+
+    const dataResponse = await app.fetch(new Request('http://mokup.local/data'))
+    await expect(dataResponse.json()).resolves.toEqual({ ok: true })
+
+    const statusResponse = await app.fetch(new Request('http://mokup.local/status'))
+    expect(statusResponse.status).toBe(201)
+  })
+
   it('supports empty token routes', async () => {
     const app = createHonoApp([
       {

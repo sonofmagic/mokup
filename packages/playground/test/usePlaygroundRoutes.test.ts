@@ -160,6 +160,44 @@ describe('usePlaygroundRoutes', () => {
     expect(routesState.selectedConfig.value?.file).toBe('index.config.ts')
   })
 
+  it('keeps active group when it still exists', async () => {
+    const routesState = usePlaygroundRoutes()
+    routesState.activeGroup.value = 'g1'
+
+    const data = {
+      routes: [
+        { method: 'GET', url: '/api/ping', file: 'ping.get.ts', type: 'handler', groupKey: 'g1' },
+      ],
+      disabled: [],
+      ignored: [],
+      configs: [],
+      disabledConfigs: [],
+      groups: [
+        { key: 'g1', label: 'Group 1', path: '/root/mock/g1' },
+      ],
+      root: '/root',
+    }
+
+    vi.stubGlobal('fetch', vi.fn().mockResolvedValue({
+      ok: true,
+      status: 200,
+      json: async () => data,
+    }))
+
+    await routesState.loadRoutes()
+    expect(routesState.activeGroup.value).toBe('g1')
+  })
+
+  it('clears selection when active group has no routes', () => {
+    const routesState = usePlaygroundRoutes()
+    routesState.routes.value = []
+    routesState.filtered.value = []
+    routesState.selected.value = null
+
+    routesState.setActiveGroup('g1')
+    expect(routesState.selected.value).toBeNull()
+  })
+
   it('filters configs, disabled, and ignored lists', async () => {
     const routesState = usePlaygroundRoutes()
     const data = {

@@ -4,10 +4,22 @@ import { createLogger } from '../src/dev/logger'
 describe('dev logger', () => {
   it('returns silent logger when disabled', () => {
     const info = vi.spyOn(console, 'info').mockImplementation(() => {})
+    const warn = vi.spyOn(console, 'warn').mockImplementation(() => {})
+    const error = vi.spyOn(console, 'error').mockImplementation(() => {})
+    const log = vi.spyOn(console, 'log').mockImplementation(() => {})
     const logger = createLogger(false)
     logger.info('hello')
+    logger.warn('warn')
+    logger.error('error')
+    logger.log('log')
     expect(info).not.toHaveBeenCalled()
+    expect(warn).not.toHaveBeenCalled()
+    expect(error).not.toHaveBeenCalled()
+    expect(log).not.toHaveBeenCalled()
     info.mockRestore()
+    warn.mockRestore()
+    error.mockRestore()
+    log.mockRestore()
   })
 
   it('prefixes log output with tag', () => {

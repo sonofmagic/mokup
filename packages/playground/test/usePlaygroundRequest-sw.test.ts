@@ -132,6 +132,9 @@ describe('usePlaygroundRequest service worker', () => {
     await request.runRequest()
 
     expect(swMocks.resolveMokupRegistration).toHaveBeenCalled()
+
+    await request.runRequest()
+    expect(swMocks.resolveMokupRegistration).toHaveBeenCalledTimes(2)
   })
 
   it('cleans up websocket on unmount', async () => {

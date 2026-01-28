@@ -1,3 +1,6 @@
+import { promises as fs } from 'node:fs'
+import { tmpdir } from 'node:os'
+import path from 'node:path'
 import { describe, expect, it } from 'vitest'
 import {
   executeRule,
@@ -16,6 +19,9 @@ describe('module helpers', () => {
       .toBe('https://example.com/base/app.js')
 
     expect(resolveModuleUrl('app.js', '/tmp/output'))
+      .toBe('/tmp/output/app.js')
+
+    expect(resolveModuleUrl('./app.js', '/tmp/output/'))
       .toBe('/tmp/output/app.js')
   })
 
@@ -65,6 +71,39 @@ describe('module helpers', () => {
 
     const cached = await loadModuleRule(response, moduleCache, undefined, moduleMap)
     expect(cached?.handler).toBe('second')
+  })
+
+  it('loads module rules from file exports', async () => {
+    const root = await fs.mkdtemp(path.join(tmpdir(), 'mokup-runtime-modules-'))
+    try {
+      const file = path.join(root, 'handler.mjs')
+      await fs.writeFile(
+        file,
+        [
+          'export const named = { handler: \"named\" }',
+          'export default { handler: \"default\" }',
+        ].join('\n'),
+        'utf8',
+      )
+
+      const moduleCache = new Map()
+      const rule = await loadModuleRule(
+        { type: 'module', module: './handler.mjs', exportName: 'named' },
+        moduleCache,
+        new URL(`file://${root}/`),
+      )
+      expect(rule?.handler).toBe('named')
+
+      const defaultRule = await loadModuleRule(
+        { type: 'module', module: './handler.mjs', exportName: 'missing' },
+        moduleCache,
+        new URL(`file://${root}/`),
+      )
+      expect(defaultRule?.handler).toBe('default')
+    }
+    finally {
+      await fs.rm(root, { recursive: true, force: true })
+    }
   })
 
   it('resolves module map entries via resolved URLs', async () => {
@@ -157,6 +196,47 @@ describe('module helpers', () => {
       moduleMap,
     )
     expect(invalid).toBeUndefined()
+  })
+
+  it('returns undefined when middleware export is missing', async () => {
+    const middlewareCache = new Map()
+    const moduleMap = {
+      'mock:empty': { default: { middleware: undefined } },
+    }
+
+    const empty = await loadModuleMiddleware(
+      { module: 'mock:empty' },
+      middlewareCache,
+      undefined,
+      moduleMap,
+    )
+    expect(empty).toBeUndefined()
+  })
+
+  it('reuses cached middleware entries', async () => {
+    const middlewareCache = new Map()
+    const mw = async (_ctx: unknown, next: () => Promise<void>) => {
+      await next()
+    }
+    const moduleMap = {
+      'mock:cache': { default: [mw] },
+    }
+
+    const first = await loadModuleMiddleware(
+      { module: 'mock:cache' },
+      middlewareCache,
+      undefined,
+      moduleMap,
+    )
+    const second = await loadModuleMiddleware(
+      { module: 'mock:cache' },
+      middlewareCache,
+      undefined,
+      moduleMap,
+    )
+
+    expect(first).toBe(mw)
+    expect(second).toBe(mw)
   })
 
   it('resolves module URLs for slash-prefixed paths', () => {

@@ -76,6 +76,15 @@ describe('server internal helpers', () => {
     expect(runtime.rawBody).toBe('{"ok":true}')
   })
 
+  it('handles empty fetch bodies without content type', async () => {
+    const request = new Request('http://example.com/api', {
+      method: 'GET',
+    })
+    const runtime = await toRuntimeRequestFromFetch(request)
+    expect(runtime.body).toBeUndefined()
+    expect(runtime.rawBody).toBeUndefined()
+  })
+
   it('creates runtime requests from node streams', async () => {
     const stream = new PassThrough()
     const req = Object.assign(stream, {
@@ -92,6 +101,16 @@ describe('server internal helpers', () => {
     expect(runtime.query).toEqual({ x: '1' })
     expect(runtime.body).toEqual({ ok: true })
     expect(runtime.rawBody).toBe('{"ok":true}')
+  })
+
+  it('falls back to defaults when node request fields are missing', async () => {
+    const req = {
+      headers: {},
+      on: () => undefined,
+    }
+    const runtime = await toRuntimeRequestFromNode(req as any, 'ok')
+    expect(runtime.method).toBe('GET')
+    expect(runtime.path).toBe('/')
   })
 
   it('creates runtime requests from node body overrides', async () => {

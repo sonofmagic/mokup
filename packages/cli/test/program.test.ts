@@ -92,6 +92,15 @@ describe('cli program', () => {
     expect(mocks.logger.info).toHaveBeenCalledWith('hello')
   })
 
+  it('runs build without explicit dirs', async () => {
+    mocks.buildManifest.mockResolvedValue(undefined)
+
+    await runCli(['node', 'mokup', 'build'])
+
+    const [options] = mocks.buildManifest.mock.calls[0] ?? []
+    expect(options.dir).toBeUndefined()
+  })
+
   it('runs serve and registers shutdown handlers', async () => {
     const nodeServer = { close: vi.fn((cb?: (error?: Error) => void) => cb?.()) }
     const mockServer = {
@@ -185,6 +194,31 @@ describe('cli program', () => {
     )
   })
 
+  it('falls back to default host and port when server info is incomplete', async () => {
+    const nodeServer = { close: vi.fn((cb?: (error?: Error) => void) => cb?.()) }
+    const mockServer = {
+      fetch: vi.fn(),
+      close: vi.fn().mockResolvedValue(undefined),
+    }
+    mocks.createFetchServer.mockResolvedValue(mockServer)
+    mocks.serve.mockImplementation((_options, callback) => {
+      callback?.({})
+      return nodeServer
+    })
+
+    vi.spyOn(process, 'exit').mockImplementation((() => undefined) as never)
+    vi.spyOn(process, 'on').mockImplementation(((_event: string, handler: () => Promise<void>) => {
+      void handler
+      return process
+    }) as never)
+
+    await runCli(['node', 'mokup', 'serve'])
+
+    expect(mocks.logger.info).toHaveBeenCalledWith(
+      'Mock server ready at http://localhost:8080',
+    )
+  })
+
   it('propagates shutdown errors and still exits', async () => {
     const nodeServer = {
       close: vi.fn((cb?: (error?: Error) => void) => cb?.(new Error('boom'))),
@@ -210,6 +244,31 @@ describe('cli program', () => {
 
     const shutdown = handlers.get('SIGTERM')
     await expect(shutdown?.()).rejects.toThrow('boom')
+    expect(exitSpy).toHaveBeenCalledWith(0)
+  })
+
+  it('shuts down when server close handler is missing', async () => {
+    const nodeServer = { close: vi.fn((cb?: (error?: Error) => void) => cb?.()) }
+    const mockServer = {
+      fetch: vi.fn(),
+    }
+    mocks.createFetchServer.mockResolvedValue(mockServer)
+    mocks.serve.mockImplementation((_options, callback) => {
+      callback?.({ address: '127.0.0.1', port: 3000 })
+      return nodeServer
+    })
+
+    const exitSpy = vi.spyOn(process, 'exit').mockImplementation((() => undefined) as never)
+    const handlers = new Map<string, () => Promise<void>>()
+    vi.spyOn(process, 'on').mockImplementation(((event: string, handler: () => Promise<void>) => {
+      handlers.set(event, handler)
+      return process
+    }) as never)
+
+    await runCli(['node', 'mokup', 'serve'])
+
+    await handlers.get('SIGINT')?.()
+    expect(nodeServer.close).toHaveBeenCalled()
     expect(exitSpy).toHaveBeenCalledWith(0)
   })
 

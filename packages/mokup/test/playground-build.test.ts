@@ -47,7 +47,7 @@ describe('playground build output', () => {
       disabledRoutes,
       ignoredRoutes,
       configFiles: [{ file: join(mockDir, 'index.config.ts') }],
-      disabledConfigFiles: [],
+      disabledConfigFiles: [{ file: join(mockDir, 'disabled.config.ts') }],
       dirs: [mockDir],
       swScript: null,
       logger: {
@@ -59,8 +59,44 @@ describe('playground build output', () => {
     })
 
     const routesPayload = await readFile(join(outDir, '__mokup', 'routes'), 'utf8')
-    const parsed = JSON.parse(routesPayload) as { count: number, routes: unknown[] }
+    const parsed = JSON.parse(routesPayload) as {
+      count: number
+      routes: unknown[]
+      disabledConfigs: unknown[]
+    }
     expect(parsed.count).toBe(1)
     expect(parsed.routes.length).toBe(1)
+    expect(parsed.disabledConfigs.length).toBe(1)
+  })
+
+  it('injects the service worker script into index.html', async () => {
+    const root = await mkdtemp(join(tmpdir(), 'mokup-playground-sw-'))
+    const mockDir = join(root, 'mock')
+    const outDir = join(root, 'dist')
+    await mkdir(mockDir, { recursive: true })
+
+    await writePlaygroundBuild({
+      outDir,
+      base: '/',
+      playgroundPath: '/__mokup',
+      root,
+      routes: [],
+      disabledRoutes: [],
+      ignoredRoutes: [],
+      configFiles: [],
+      disabledConfigFiles: [],
+      dirs: [mockDir],
+      swScript: 'console.log("sw")',
+      logger: {
+        error: vi.fn(),
+        warn: vi.fn(),
+        info: vi.fn(),
+        log: vi.fn(),
+      },
+    })
+
+    const indexHtml = await readFile(join(outDir, '__mokup', 'index.html'), 'utf8')
+    expect(indexHtml).toContain('mokup-playground-sw')
+    expect(indexHtml).toContain('console.log("sw")')
   })
 })

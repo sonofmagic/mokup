@@ -89,4 +89,55 @@ describe('tree utils', () => {
     expect(docs[0]?.route?.method).toBe('GET')
     expect(rows.some(row => row.route?.url === 'status')).toBe(true)
   })
+
+  it('orders folders before routes and tolerates missing route metadata', () => {
+    const root = {
+      id: 'root',
+      label: '',
+      kind: 'folder',
+      path: '',
+      children: [
+        {
+          id: 'route:1',
+          label: 'x',
+          kind: 'route',
+          path: 'x',
+          route: { method: 'POST', url: '/x', file: '/repo/mock/x.post.ts', type: 'handler' },
+          children: [],
+        },
+        {
+          id: 'folder:1',
+          label: 'x',
+          kind: 'folder',
+          path: 'x',
+          children: [],
+        },
+        {
+          id: 'folder:2',
+          label: 'x',
+          kind: 'folder',
+          path: 'x',
+          children: [],
+        },
+      ],
+    }
+
+    sortRouteTree(root as any)
+    expect(root.children[0]?.kind).toBe('folder')
+  })
+
+  it('uses file titles for route rows in file mode', () => {
+    const root = buildRouteTree(routes, 'file')
+    sortRouteTree(root)
+    const rows = buildTreeRows({
+      root,
+      mode: 'file',
+      isExpanded: () => true,
+      selectedKey: 'GET /users',
+      getRouteKey: route => `${route.method} ${route.url}`,
+    })
+
+    const routeRow = rows.find(row => row.route?.file?.includes('users.get.ts'))
+    expect(routeRow?.title).toContain('users.get.ts')
+  })
 })

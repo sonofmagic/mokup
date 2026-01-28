@@ -235,4 +235,61 @@ describe('usePlaygroundModeHandlers', () => {
     handlers.setDisabledMode('api')
     expect(selectedDisabled.value).toBeNull()
   })
+
+  it('keeps existing selections when already set', () => {
+    const route = { method: 'GET', url: '/a', file: 'a.ts', type: 'handler' }
+    const disabledRoute = { file: 'b.ts', reason: 'disabled' }
+    const ignoredRoute = { file: 'c.ts', reason: 'ignored' }
+    const config = { file: 'index.config.ts' }
+    const otherDisabled = { file: 'd.ts', reason: 'disabled' }
+
+    const routeMode = ref<'active' | 'disabled' | 'ignored'>('active')
+    const enabledMode = ref<'api' | 'config'>('config')
+    const disabledMode = ref<'api' | 'config'>('api')
+    const selected = ref(route)
+    const selectedDisabled = ref<typeof disabledRoute | null>(disabledRoute)
+    const selectedIgnored = ref<typeof ignoredRoute | null>(ignoredRoute)
+    const selectedConfig = ref<typeof config | null>(config)
+    const filtered = ref([route])
+    const disabledFiltered = ref([otherDisabled])
+    const ignoredFiltered = ref([ignoredRoute])
+    const lastSelectedKey = ref('GET /a')
+
+    const handlers = usePlaygroundModeHandlers({
+      routeMode,
+      enabledMode,
+      disabledMode,
+      selected,
+      selectedDisabled,
+      selectedIgnored,
+      selectedConfig,
+      filtered,
+      disabledFiltered,
+      ignoredFiltered,
+      lastSelectedKey,
+      getRouteKey: r => `${r.method} ${r.url}`,
+      selectRoute: (value) => {
+        selected.value = value
+      },
+      selectDisabledRoute: (value) => {
+        selectedDisabled.value = value
+      },
+      selectIgnoredRoute: (value) => {
+        selectedIgnored.value = value
+      },
+      selectConfig: (value) => {
+        selectedConfig.value = value
+      },
+    })
+
+    handlers.setDisabledMode('api')
+    expect(selectedDisabled.value).toEqual(disabledRoute)
+
+    handlers.setRouteMode('active')
+    expect(selected.value).toEqual(route)
+    expect(selectedConfig.value).toBeNull()
+
+    handlers.setEnabledMode('api')
+    expect(selected.value).toEqual(route)
+  })
 })

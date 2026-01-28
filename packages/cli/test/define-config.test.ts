@@ -53,4 +53,18 @@ describe('defineConfig', () => {
     expect(meta.normal).toEqual([])
     expect(meta.post).toEqual([])
   })
+
+  it('defaults to empty config for non-object input', () => {
+    const config = defineConfig(null as unknown as Record<string, unknown>)
+    const meta = (config as Record<symbol, unknown>)[middlewareSymbol] as {
+      pre: unknown[]
+      normal: unknown[]
+      post: unknown[]
+    }
+
+    expect(config).toEqual({})
+    expect(meta.pre).toEqual([])
+    expect(meta.normal).toEqual([])
+    expect(meta.post).toEqual([])
+  })
 })

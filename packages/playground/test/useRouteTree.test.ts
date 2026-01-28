@@ -103,6 +103,52 @@ describe('useRouteTree', () => {
     expect(() => tree.setTreeMode('route')).not.toThrow()
   })
 
+  it('expands rows when search term is set and stored state is invalid', () => {
+    const store = new Map<string, string>()
+    vi.stubGlobal('localStorage', {
+      getItem: (key: string) => store.get(key) ?? null,
+      setItem: (key: string, value: string) => {
+        store.set(key, value)
+      },
+    })
+
+    store.set('mokup.playground.treeExpanded.file', JSON.stringify({}))
+
+    const routes = ref([
+      { method: 'GET', url: '/api/users/me', file: 'users/me.get.ts', type: 'handler' },
+    ])
+    const tree = useRouteTree({
+      routes,
+      selectedKey: computed(() => ''),
+      searchTerm: computed(() => 'users'),
+      getRouteKey: route => `${route.method} ${route.url}`,
+    })
+
+    expect(tree.treeRows.value.some(row => row.depth > 0)).toBe(true)
+  })
+
+  it('treats folders as expanded when no override is stored', () => {
+    const store = new Map<string, string>()
+    vi.stubGlobal('localStorage', {
+      getItem: (key: string) => store.get(key) ?? null,
+      setItem: (key: string, value: string) => {
+        store.set(key, value)
+      },
+    })
+
+    const routes = ref([
+      { method: 'GET', url: '/api/users/me', file: 'users/me.get.ts', type: 'handler' },
+    ])
+    const tree = useRouteTree({
+      routes,
+      selectedKey: computed(() => ''),
+      searchTerm: computed(() => ''),
+      getRouteKey: route => `${route.method} ${route.url}`,
+    })
+
+    expect(tree.treeRows.value.some(row => row.depth > 0)).toBe(true)
+  })
+
   afterEach(() => {
     vi.unstubAllGlobals()
   })

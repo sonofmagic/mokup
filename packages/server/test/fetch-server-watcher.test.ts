@@ -98,6 +98,12 @@ describe('fetch-server watcher', () => {
     chokidarHandlers.unlink.forEach(handler => handler('/tmp/mock/users.get.json'))
 
     expect(onChange).toHaveBeenCalledTimes(3)
+
+    const before = onChange.mock.calls.length
+    chokidarHandlers.add.forEach(handler => handler('/tmp/other/skip.get.json'))
+    chokidarHandlers.change.forEach(handler => handler('/tmp/other/skip.get.json'))
+    chokidarHandlers.unlink.forEach(handler => handler('/tmp/other/skip.get.json'))
+    expect(onChange).toHaveBeenCalledTimes(before)
     await watcher?.close()
     expect(chokidarClose).toHaveBeenCalled()
   })
@@ -141,5 +147,30 @@ describe('fetch-server watcher', () => {
     await new Promise(resolve => setTimeout(resolve, 10))
     expect(warn).toHaveBeenCalled()
     await watcher?.close()
+  })
+
+  it('suppresses deno watcher errors after close', async () => {
+    const warn = vi.fn()
+    const iterator = async function* () {
+      await new Promise(resolve => setTimeout(resolve, 5))
+      throw new Error('boom')
+    }
+    ;(globalThis as { Deno?: unknown }).Deno = {
+      watchFs: () => ({
+        close: vi.fn(),
+        [Symbol.asyncIterator]: iterator,
+      }),
+    }
+
+    const watcher = await createWatcher({
+      enabled: true,
+      dirs: ['/tmp/mock'],
+      onChange: vi.fn(),
+      logger: { warn },
+    })
+
+    await watcher?.close()
+    await new Promise(resolve => setTimeout(resolve, 10))
+    expect(warn).not.toHaveBeenCalled()
   })
 })

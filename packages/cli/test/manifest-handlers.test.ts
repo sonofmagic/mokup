@@ -2,12 +2,14 @@ import { Buffer } from 'node:buffer'
 import { promises as fs } from 'node:fs'
 import { tmpdir } from 'node:os'
 import path from 'node:path'
-import { describe, expect, it } from 'vitest'
+import { describe, expect, it, vi } from 'vitest'
 import {
   buildResponse,
   getHandlerModulePath,
   writeHandlerIndex,
 } from '../src/manifest/handlers'
+
+const toPosixPath = (value: string) => value.replace(/\\/g, '/')
 
 describe('manifest handler helpers', () => {
   it('builds responses for handler types and records handler modules', () => {
@@ -83,19 +85,26 @@ describe('manifest handler helpers', () => {
       encoding: 'base64',
     })
 
-    const bufferResponse = buildResponse(
-      Buffer.from('ok'),
-      {
-        file,
-        handlers: true,
-        handlerSources,
-        handlerModuleMap,
-        handlersDir,
-        root,
-        ruleIndex: 0,
-      },
-    )
-    expect(bufferResponse?.type).toBe('binary')
+    const originalUint8Array = globalThis.Uint8Array
+    vi.stubGlobal('Uint8Array', class {} as typeof Uint8Array)
+    try {
+      const bufferResponse = buildResponse(
+        Buffer.from('ok'),
+        {
+          file,
+          handlers: true,
+          handlerSources,
+          handlerModuleMap,
+          handlersDir,
+          root,
+          ruleIndex: 0,
+        },
+      )
+      expect(bufferResponse?.type).toBe('binary')
+    }
+    finally {
+      vi.stubGlobal('Uint8Array', originalUint8Array)
+    }
 
     const jsonResponse = buildResponse(
       { ok: true },
@@ -136,6 +145,28 @@ describe('manifest handler helpers', () => {
     }
   })
 
+  it('writes handler index imports for paths outside handlers dir', async () => {
+    const root = await fs.mkdtemp(path.join(tmpdir(), 'mokup-handlers-external-'))
+    const outDir = path.join(root, 'dist')
+    const handlersDir = path.join(outDir, 'mokup-handlers')
+    const handlerModuleMap = new Map<string, string>()
+    try {
+      await fs.mkdir(handlersDir, { recursive: true })
+      const modulePath = '../external/handler.mjs'
+      handlerModuleMap.set('/file/a', modulePath)
+
+      await writeHandlerIndex(handlerModuleMap, handlersDir, outDir)
+
+      const indexContent = await fs.readFile(path.join(handlersDir, 'index.mjs'), 'utf8')
+      const relImport = path.relative(handlersDir, path.resolve(outDir, modulePath))
+      const importPath = relImport.startsWith('.') ? relImport : `./${relImport}`
+      expect(indexContent).toContain(`import * as module0 from '${toPosixPath(importPath)}'`)
+    }
+    finally {
+      await fs.rm(root, { recursive: true, force: true })
+    }
+  })
+
   it('skips index generation when no handler modules exist', async () => {
     const root = await fs.mkdtemp(path.join(tmpdir(), 'mokup-handlers-empty-'))
     const handlersDir = path.join(root, 'mokup-handlers')
@@ -155,5 +186,37 @@ describe('manifest handler helpers', () => {
     const handlersDir = `${root}/handlers/..`
     const modulePath = getHandlerModulePath(file, handlersDir, root)
     expect(modulePath.startsWith('..')).toBe(true)
+  })
+
+  it('treats Buffer as binary when Uint8Array checks are unavailable', () => {
+    const root = '/tmp/mokup-handlers'
+    const file = path.join(root, 'mock', 'handler.get.ts')
+    const handlersDir = path.join(root, '.mokup', 'mokup-handlers')
+    const handlerSources = new Set<string>()
+    const handlerModuleMap = new Map<string, string>()
+    const originalUint8Array = globalThis.Uint8Array
+    const originalArrayBuffer = globalThis.ArrayBuffer
+
+    vi.stubGlobal('Uint8Array', class {} as typeof Uint8Array)
+    vi.stubGlobal('ArrayBuffer', class {} as typeof ArrayBuffer)
+    try {
+      const response = buildResponse(
+        Buffer.from('ok'),
+        {
+          file,
+          handlers: true,
+          handlerSources,
+          handlerModuleMap,
+          handlersDir,
+          root,
+          ruleIndex: 0,
+        },
+      )
+      expect(response).toMatchObject({ type: 'binary', encoding: 'base64' })
+    }
+    finally {
+      vi.stubGlobal('Uint8Array', originalUint8Array)
+      vi.stubGlobal('ArrayBuffer', originalArrayBuffer)
+    }
   })
 })

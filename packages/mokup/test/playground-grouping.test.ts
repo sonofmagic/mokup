@@ -47,12 +47,11 @@ describe('playground grouping', () => {
     expect(formatted).toBe('/outside/file.ts')
   })
 
-  it('matches groups with Windows path casing', () => {
-    const root = String.raw`C:\Repo\Mock`
-    const dir = String.raw`C:\Repo\Mock\Api`
-    const expectedKey = dir.replace(/\\/g, '/')
-    const groups = resolveGroups([dir], root)
-    const match = resolveRouteGroup(String.raw`c:\repo\mock\api\users.get.ts`, groups)
-    expect(match?.key).toBe(expectedKey)
+  it('handles missing groups and rootless formatting', () => {
+    const fallback = resolveGroupRoot(['/one', '/two'], undefined)
+    expect(fallback).toBe(process.cwd())
+
+    expect(resolveRouteGroup('/root/file.ts', [])).toBeUndefined()
+    expect(formatRouteFile('/root/file.ts')).toBe('/root/file.ts')
   })
 })

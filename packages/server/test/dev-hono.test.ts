@@ -156,4 +156,64 @@ describe('dev hono app', () => {
     await expect(mwResponse.text()).resolves.toBe('mw')
     expect(normal).toHaveBeenCalled()
   })
+
+  it('handles post middlewares and binary headers', async () => {
+    const mwParsed = parseRouteTemplate('/mw')
+    const binParsed = parseRouteTemplate('/binary-uint')
+    let preCalled = false
+    let postCalled = false
+    const app = createHonoApp([
+      {
+        file: 'mw.get.ts',
+        template: mwParsed.template,
+        method: 'GET',
+        tokens: mwParsed.tokens,
+        score: mwParsed.score,
+        handler: () => 'ok',
+        middlewares: [
+          {
+            handle: async (_c: any, next: () => Promise<void>) => {
+              preCalled = true
+              await next()
+              return new Response('mw')
+            },
+            source: 'mw',
+            index: 0,
+            position: 'pre',
+          },
+          {
+            handle: async (_c: any, next: () => Promise<void>) => {
+              postCalled = true
+              await next()
+              return { res: 'bad' }
+            },
+            source: 'mw',
+            index: 1,
+            position: 'post',
+          },
+        ],
+      },
+      {
+        file: 'binary.get.ts',
+        template: binParsed.template,
+        method: 'GET',
+        tokens: binParsed.tokens,
+        score: binParsed.score,
+        handler: (c: any) => {
+          c.header('content-type', 'application/custom')
+          return new Uint8Array([1, 2])
+        },
+      },
+    ] as any)
+
+    const mwResponse = await app.fetch(new Request('http://mokup.local/mw'))
+    await expect(mwResponse.text()).resolves.toBe('ok')
+    expect(preCalled).toBe(true)
+    expect(postCalled).toBe(true)
+
+    const binResponse = await app.fetch(new Request('http://mokup.local/binary-uint'))
+    expect(binResponse.headers.get('content-type')).toBe('application/custom')
+    const buffer = new Uint8Array(await binResponse.arrayBuffer())
+    expect(Array.from(buffer)).toEqual([1, 2])
+  })
 })

@@ -42,6 +42,7 @@ describe('playground websocket server', () => {
     ws.handleRouteResponse(route as any)
     expect(client.send).toHaveBeenCalled()
 
+    handlers?.onMessage?.({}, client)
     handlers?.onClose({}, client)
   })
 

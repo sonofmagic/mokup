@@ -153,6 +153,73 @@ describe('request runner', () => {
     expect(routeCounts.value['POST /upload/:id']).toBe(beforeCount)
   })
 
+  it('does not override Content-Type when headers are provided', async () => {
+    const route = { method: 'POST', url: '/upload/[id]', file: 'upload.ts', type: 'handler' }
+    const tokens = parseRouteTemplate(route.url).tokens
+    const selected = ref(route)
+    const routeTokens = ref(tokens)
+    const paramValues = ref<Record<string, string>>({ id: '1' })
+    const queryText = ref('')
+    const headersText = ref('{"Content-Type":"application/custom"}')
+    const bodyText = ref('')
+    const bodyType = ref<'json' | 'text' | 'form' | 'multipart' | 'base64'>('json')
+    const responseText = ref('')
+    const responseStatus = ref('')
+    const responseTime = ref('')
+    const routeCounts = ref<Record<string, number>>({})
+    const isServerCounts = ref(false)
+
+    vi.stubGlobal('window', { location: { origin: 'http://localhost' } })
+    vi.stubGlobal('performance', { now: vi.fn(() => 10) })
+
+    const fetchMock = vi.fn().mockResolvedValue({
+      status: 200,
+      statusText: 'OK',
+      headers: { get: () => 'application/json' },
+      text: vi.fn().mockResolvedValue('{"ok":true}'),
+    })
+    vi.stubGlobal('fetch', fetchMock)
+
+    const runner = createRequestRunner({
+      t: (key: string) => key,
+      selected,
+      routeTokens,
+      paramValues,
+      queryText,
+      headersText,
+      bodyText,
+      bodyType,
+      responseText,
+      responseStatus,
+      responseTime,
+      routeCounts,
+      isServerCounts,
+      ensureSwReady: async () => true,
+      getRouteKey: () => 'POST /upload/:id',
+    })
+
+    bodyType.value = 'json'
+    bodyText.value = '{"ok":true}'
+    await runner.runRequest()
+
+    bodyType.value = 'text'
+    bodyText.value = 'hello'
+    await runner.runRequest()
+
+    bodyType.value = 'form'
+    bodyText.value = 'a=1'
+    await runner.runRequest()
+
+    bodyType.value = 'base64'
+    bodyText.value = 'SGVsbG8='
+    await runner.runRequest()
+
+    for (const call of fetchMock.mock.calls) {
+      const init = call?.[1] as RequestInit
+      expect((init.headers as Record<string, string>)['Content-Type']).toBe('application/custom')
+    }
+  })
+
   it('handles empty selections, headers, and response failures', async () => {
     const route = { method: 'GET', url: '/ping', file: 'ping.ts', type: 'handler' }
     const selected = ref<null | typeof route>(null)

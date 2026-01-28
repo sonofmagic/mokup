@@ -27,6 +27,20 @@ describe('service worker helpers', () => {
     expect(resolved).toBe(registration)
   })
 
+  it('ignores non-mokup registrations and falls back to null', async () => {
+    const registration = { active: { scriptURL: 'https://example.com/other.js' } }
+    vi.stubGlobal('window', {})
+    vi.stubGlobal('navigator', {
+      serviceWorker: {
+        getRegistration: vi.fn().mockResolvedValue(registration),
+        getRegistrations: vi.fn().mockResolvedValue([registration]),
+      },
+    })
+
+    const resolved = await resolveMokupRegistration()
+    expect(resolved).toBeNull()
+  })
+
   it('falls back to registrations list and handles errors', async () => {
     const registration = { waiting: { scriptURL: 'https://example.com/mokup-sw.js' } }
     vi.stubGlobal('window', {})

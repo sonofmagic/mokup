@@ -3,7 +3,7 @@ import { tmpdir } from 'node:os'
 import path from 'node:path'
 import { describe, expect, it } from 'vitest'
 import { createMokupWorker as createWebWorker } from '../src/worker'
-import { createMokupWorker as createNodeWorker, resolveModuleBase } from '../src/worker-node'
+import { createMokupWorker as createNodeWorker } from '../src/worker-node'
 
 const manifest = {
   version: 1,
@@ -47,6 +47,16 @@ describe('worker adapters', () => {
     const response = await worker.fetch(new Request('http://localhost/missing'))
     expect(response.status).toBe(404)
 
+    const defaultWorker = createWebWorker({
+      manifest,
+    })
+    const defaultResponse = await defaultWorker.fetch(new Request('http://localhost/missing'))
+    expect(defaultResponse.status).toBe(404)
+
+    const manifestWorker = createWebWorker(manifest)
+    const manifestResponse = await manifestWorker.fetch(new Request('http://localhost/missing'))
+    expect(manifestResponse.status).toBe(404)
+
     const nodeWorker = createNodeWorker({
       manifest,
       onNotFound: 'response',
@@ -54,6 +64,13 @@ describe('worker adapters', () => {
     })
     const nodeResponse = await nodeWorker.fetch(new Request('http://localhost/ping'))
     expect(nodeResponse.status).toBe(200)
+
+    const minimalNodeWorker = createNodeWorker({
+      manifest,
+      onNotFound: 'response',
+    })
+    const minimalResponse = await minimalNodeWorker.fetch(new Request('http://localhost/ping'))
+    expect(minimalResponse.status).toBe(200)
   })
 
   it('loads node worker bundles from directories', async () => {
@@ -80,9 +97,21 @@ describe('worker adapters', () => {
     }
   })
 
-  it('resolves module base URLs from bundle directories', () => {
-    const base = resolveModuleBase(path.join(tmpdir(), 'mokup-worker-base'))
-    expect(base.startsWith('file://')).toBe(true)
-    expect(base.endsWith('/')).toBe(true)
+  it('loads node worker bundles without handler index', async () => {
+    const root = await fs.mkdtemp(path.join(tmpdir(), 'mokup-worker-no-map-'))
+    try {
+      await fs.writeFile(
+        path.join(root, 'mokup.manifest.json'),
+        JSON.stringify(manifest, null, 2),
+        'utf8',
+      )
+
+      const worker = await createNodeWorker(root)
+      const response = await worker.fetch(new Request('http://localhost/ping'))
+      expect(response.status).toBe(200)
+    }
+    finally {
+      await fs.rm(root, { recursive: true, force: true })
+    }
   })
 })

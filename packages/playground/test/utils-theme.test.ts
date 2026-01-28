@@ -64,6 +64,7 @@ describe('theme utils', () => {
 
   it('resolves and applies theme', () => {
     expect(resolveTheme('system', true)).toBe('dark')
+    expect(resolveTheme('system', false)).toBe('light')
     expect(resolveTheme('light', true)).toBe('light')
 
     const applied = applyTheme('dark', false)

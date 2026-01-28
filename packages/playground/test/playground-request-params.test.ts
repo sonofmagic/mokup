@@ -58,6 +58,16 @@ describe('playground request params', () => {
     const displayOptional = buildDisplayPath(optionalTokens, { slug: '' })
     expect(displayOptional).toBe('/docs')
   })
+
+  it('treats slash-only optional catchalls as empty segments', () => {
+    const optionalTokens = parseRouteTemplate('/[[...slug]]').tokens
+    const resolved = buildResolvedPath(optionalTokens, { slug: '/' })
+    expect(resolved.path).toBe('/')
+    expect(resolved.missing).toEqual([])
+
+    const display = buildDisplayPath(optionalTokens, { slug: '/' })
+    expect(display).toBe('/')
+  })
 })
 
 describe('playground request query', () => {
@@ -71,6 +81,10 @@ describe('playground request query', () => {
     expect(parseKeyValueInput('foo=bar&baz=1=2')).toEqual([
       ['foo', 'bar'],
       ['baz', '1=2'],
+    ])
+    expect(parseKeyValueInput('foo=bar&&baz=1')).toEqual([
+      ['foo', 'bar'],
+      ['baz', '1'],
     ])
     expect(parseKeyValueInput(' \n \n ')).toEqual([])
 

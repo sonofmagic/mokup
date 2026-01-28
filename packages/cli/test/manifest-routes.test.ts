@@ -90,6 +90,15 @@ describe('manifest route helpers', () => {
     })
     expect(alreadyPrefixed?.template).toBe('/api/ping')
 
+    const normalizedPrefix = resolveRule({
+      rule: { handler: { ok: true } },
+      derivedTemplate: 'users',
+      derivedMethod: 'GET',
+      prefix: '/',
+      file: '/tmp/mock/users.get.json',
+    })
+    expect(normalizedPrefix?.template).toBe('/users')
+
     expect(resolveRule({
       rule: { handler: { ok: true } },
       derivedTemplate: '/users',
@@ -107,6 +116,12 @@ describe('manifest route helpers', () => {
       '/users/[id]',
       '/users',
     ])
+
+    const scoreFallback = sortRoutes([
+      { method: 'GET', url: '/a', response: { type: 'text', body: '' } },
+      { method: 'GET', url: '/b', score: [1], response: { type: 'text', body: '' } },
+    ])
+    expect(scoreFallback.map(route => route.url)).toEqual(['/b', '/a'])
   })
 
   it('logs resolve errors and warnings', () => {

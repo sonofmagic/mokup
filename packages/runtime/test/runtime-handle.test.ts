@@ -66,6 +66,24 @@ function createRequest(pathname: string, method = 'GET') {
 }
 
 describe('runtime handling', () => {
+  it('maps HEAD requests to GET routes', async () => {
+    const runtime = createRuntime({
+      manifest: {
+        version: 1,
+        routes: [
+          {
+            method: 'GET',
+            url: '/head',
+            response: { type: 'text', body: 'ok' },
+          },
+        ],
+      },
+    })
+
+    const headResult = await runtime.handle(createRequest('/head', 'HEAD'))
+    expect(headResult?.status).toBe(200)
+  })
+
   it('serves json, text, binary, and empty bodies', async () => {
     const runtime = createRuntime({
       manifest: {

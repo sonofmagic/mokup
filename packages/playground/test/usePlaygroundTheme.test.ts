@@ -88,6 +88,28 @@ describe('usePlaygroundTheme', () => {
     expect(themeMocks.applyTheme.mock.calls.length).toBe(calls)
   })
 
+  it('ignores media updates when theme mode is fixed', () => {
+    const changeHandlers: Array<() => void> = []
+    vi.stubGlobal('window', {
+      matchMedia: () => ({
+        matches: true,
+        addEventListener: (_event: string, handler: () => void) => {
+          changeHandlers.push(handler)
+        },
+        removeEventListener: vi.fn(),
+      }),
+    })
+
+    themeMocks.applyTheme.mockClear()
+    const theme = usePlaygroundTheme()
+    themeMocks.applyTheme.mockClear()
+
+    theme.setThemeMode('light')
+    const calls = themeMocks.applyTheme.mock.calls.length
+    changeHandlers.forEach(handler => handler())
+    expect(themeMocks.applyTheme.mock.calls.length).toBe(calls)
+  })
+
   afterEach(() => {
     vi.unstubAllGlobals()
   })

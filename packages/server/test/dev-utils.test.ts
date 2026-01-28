@@ -16,11 +16,13 @@ describe('server dev utils', () => {
   it('normalizes methods, prefixes, and resolves dirs', () => {
     expect(normalizeMethod('get')).toBe('GET')
     expect(normalizeMethod('INVALID')).toBeUndefined()
+    expect(normalizeMethod(undefined)).toBeUndefined()
     expect(normalizePrefix('api/')).toBe('/api')
     expect(normalizePrefix('')).toBe('')
 
     const resolved = resolveDirs(root => [root, 'mock', root], '/tmp/mokup')
     expect(resolved).toEqual(['/tmp/mokup', '/tmp/mokup/mock'])
+    expect(resolveDirs(undefined, '/tmp/mokup')).toEqual(['/tmp/mokup/mock'])
   })
 
   it('handles path normalization and dir checks', () => {
@@ -32,6 +34,7 @@ describe('server dev utils', () => {
     expect(matchesFilter('/tmp/mock/users.json', /users/)).toBe(true)
     expect(matchesFilter('/tmp/mock/users.json', /posts/)).toBe(false)
     expect(matchesFilter('/tmp/mock/users.json', /users/, /users/)).toBe(false)
+    expect(matchesFilter('/tmp/mock/users.json', [/posts/, /users/])).toBe(true)
 
     const root = '/tmp/mock'
     const file = '/tmp/mock/.draft/users.get.json'
@@ -39,6 +42,7 @@ describe('server dev utils', () => {
     expect(normalizeIgnorePrefix('_')).toEqual(['_'])
     expect(hasIgnoredPrefix(file, root, normalizeIgnorePrefix(undefined))).toBe(true)
     expect(hasIgnoredPrefix(file, root, normalizeIgnorePrefix('_'))).toBe(false)
+    expect(hasIgnoredPrefix(file, root, [])).toBe(false)
   })
 
   it('compares Windows paths without case sensitivity', () => {

@@ -36,6 +36,9 @@ describe('playground websocket helpers', () => {
     Object.assign(import.meta.env, { DEV: false, VITE_MOKUP_PLAYGROUND_WS: 'off' })
     expect(resolvePlaygroundWsUrl('/__mokup')).toBe('')
 
+    Object.assign(import.meta.env, { DEV: false, VITE_MOKUP_PLAYGROUND_WS: 'maybe' })
+    expect(resolvePlaygroundWsUrl('/__mokup')).toBe('')
+
     Object.assign(import.meta.env, original)
   })
 })

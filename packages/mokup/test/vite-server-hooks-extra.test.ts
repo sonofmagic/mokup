@@ -132,6 +132,10 @@ describe('vite server hooks extra coverage', () => {
 
     expect(middlewareMocks.createMiddleware).toHaveBeenCalled()
     expect(watcherMocks.setupViteWatchers).toHaveBeenCalled()
+    const getApp = middlewareMocks.createMiddleware.mock.calls[0]?.[0]
+    expect(getApp?.()).toBe(state.app)
+    const refresh = watcherMocks.setupViteWatchers.mock.calls[0]?.[0]?.refresh
+    await refresh?.()
   })
 
   it('configures preview watchers when enabled', async () => {
@@ -168,6 +172,44 @@ describe('vite server hooks extra coverage', () => {
 
     expect(watcherMocks.setupPreviewWatchers).toHaveBeenCalled()
     expect(watcher).not.toBeNull()
+    const refresh = watcherMocks.setupPreviewWatchers.mock.calls[0]?.[0]?.refresh
+    await refresh?.()
+  })
+
+  it('registers preview middleware when enabled', async () => {
+    const server = createServerStub()
+    server.httpServer = { once: vi.fn() } as any
+    const state = {
+      routes: [],
+      serverRoutes: [{ file: '/root/mock/ping.get.json', template: '/api/ping', method: 'GET', tokens: [], score: [], handler: { ok: true } }],
+      swRoutes: [],
+      disabledRoutes: [],
+      ignoredRoutes: [],
+      configFiles: [],
+      disabledConfigFiles: [],
+      app: new Hono(),
+      lastSignature: null,
+    }
+    const logger = { warn: vi.fn(), info: vi.fn(), error: vi.fn(), log: vi.fn() }
+
+    await configurePreviewServer({
+      server: server as any,
+      state,
+      root: '/root',
+      base: '/',
+      logger,
+      playgroundConfig: { path: '/__mokup', enabled: false, build: false },
+      playgroundMiddleware: (_req, _res, next) => next(),
+      swConfig: null,
+      hasSwRoutes: () => false,
+      enableViteMiddleware: true,
+      refreshRoutes: async () => {},
+      resolveAllDirs: () => ['/root/mock'],
+      watchEnabled: false,
+    })
+
+    const getApp = middlewareMocks.createMiddleware.mock.calls.at(-1)?.[0]
+    expect(getApp?.()).toBe(state.app)
   })
 
   it('reports preview sw generation errors', async () => {

@@ -58,4 +58,11 @@ describe('internal body helpers', () => {
     const result = await promise
     expect(result.body).toBeUndefined()
   })
+
+  it('rejects when stream errors', async () => {
+    const stream = new EventEmitter()
+    const promise = resolveBody(undefined, 'text/plain', stream as never)
+    stream.emit('error', new Error('boom'))
+    await expect(promise).rejects.toThrow('boom')
+  })
 })
