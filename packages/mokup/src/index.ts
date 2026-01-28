@@ -1,8 +1,9 @@
-export { defineConfig } from './define/config'
+export { defineConfig, onAfterAll, onBeforeAll } from './define/config'
 export { defineHandler } from './define/handler'
 
 export type {
   Context,
+  HookErrorPolicy,
   HttpMethod,
   MiddlewareHandler,
   MiddlewarePosition,

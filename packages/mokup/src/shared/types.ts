@@ -239,6 +239,12 @@ export interface RouteDirectoryConfig {
    * @default undefined
    */
   middleware?: MiddlewareHandler | MiddlewareHandler[]
+  /**
+   * Error handling policy for defineConfig hooks.
+   *
+   * @default "warn"
+   */
+  hookError?: HookErrorPolicy
 }
 
 /**
@@ -250,6 +256,11 @@ export interface RouteDirectoryConfig {
  * const position: MiddlewarePosition = 'pre'
  */
 export type MiddlewarePosition = 'pre' | 'normal' | 'post'
+
+/**
+ * Error handling policy for config hooks.
+ */
+export type HookErrorPolicy = 'throw' | 'warn' | 'silent'
 
 /**
  * Middleware registry used by defineConfig.

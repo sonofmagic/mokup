@@ -117,11 +117,16 @@ async function loadConfig(
   if (!mod) {
     return null
   }
-  const value = (mod as { default?: unknown } | undefined)?.default ?? mod
+  const raw = (mod as { default?: unknown } | undefined)?.default ?? mod
+  const value = isPromise(raw) ? await raw : raw
   if (!value || typeof value !== 'object') {
     return null
   }
   return value as RouteDirectoryConfig
+}
+
+function isPromise<T = unknown>(value: T | Promise<T>): value is Promise<T> {
+  return !!value && typeof (value as Promise<T>).then === 'function'
 }
 
 function normalizeMiddlewares(

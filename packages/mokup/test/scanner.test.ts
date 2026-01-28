@@ -36,10 +36,10 @@ describe('scanRoutes', () => {
     await writeFile(
       join(usersDir, 'index.config.ts'),
       [
-        'import { defineConfig } from \'mokup\'',
-        'export default defineConfig(({ pre, post }) => {',
-        '  pre.use(async (_c, next) => { await next() })',
-        '  post.use(async (_c, next) => { await next() })',
+        'import { defineConfig, onBeforeAll, onAfterAll } from \'mokup\'',
+        'export default defineConfig(({ app }) => {',
+        '  onBeforeAll(() => { app.use(async (_c, next) => { await next() }) })',
+        '  onAfterAll(() => { app.use(async (_c, next) => { await next() }) })',
         '  return { status: 201, headers: { \'x-child\': \'2\' } }',
         '})',
       ].join('\n'),

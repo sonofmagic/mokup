@@ -1,12 +1,12 @@
 # 中间件顺序与 defineConfig
 
-目录配置可以通过 `defineConfig` 注册中间件。中间件阶段为 `pre`、`normal`、`post`。
+目录配置可以通过 `defineConfig` 注册中间件。中间件阶段为 `pre`、`normal`、`post`，分别对应 `onBeforeAll`、`app.use`、`onAfterAll`。
 
 ## index.config.ts 使用 defineConfig
 
 ```ts
 import type { MiddlewareHandler } from 'mokup'
-import { defineConfig } from 'mokup'
+import { defineConfig, onAfterAll, onBeforeAll } from 'mokup'
 
 const requireAuth: MiddlewareHandler = async (c, next) => {
   const header = c.req.header('authorization') ?? ''
@@ -17,17 +17,21 @@ const requireAuth: MiddlewareHandler = async (c, next) => {
   await next()
 }
 
-export default defineConfig(({ pre, normal, post }) => {
-  pre.use(requireAuth)
+export default defineConfig(({ app }) => {
+  onBeforeAll(() => {
+    app.use(requireAuth)
+  })
 
-  normal.use(async (c, next) => {
+  app.use(async (c, next) => {
     c.header('x-mokup-normal', '1')
     await next()
   })
 
-  post.use(async (c, next) => {
-    await next()
-    c.header('x-mokup-post', '1')
+  onAfterAll(() => {
+    app.use(async (c, next) => {
+      await next()
+      c.header('x-mokup-post', '1')
+    })
   })
 
   return {
@@ -77,37 +81,41 @@ mock/
 
 ```ts
 // mock/index.config.ts
-import { defineConfig } from 'mokup'
+import { defineConfig, onBeforeAll } from 'mokup'
 
-export default defineConfig(({ pre }) => {
-  pre.use(async (c, next) => {
-    c.header('x-root-pre', '1')
-    await next()
+export default defineConfig(({ app }) => {
+  onBeforeAll(() => {
+    app.use(async (c, next) => {
+      c.header('x-root-pre', '1')
+      await next()
+    })
   })
 })
 ```
 
 ```ts
 // mock/nested/index.config.ts
-import { defineConfig } from 'mokup'
+import { defineConfig, onAfterAll } from 'mokup'
 
-export default defineConfig(({ post }) => {
-  post.use(async (c, next) => {
-    await next()
-    c.header('x-nested-post', '1')
+export default defineConfig(({ app }) => {
+  onAfterAll(() => {
+    app.use(async (c, next) => {
+      await next()
+      c.header('x-nested-post', '1')
+    })
   })
 })
 ```
 
 ## object 配置与旧字段
 
-- `pre/normal/post` 只能在 `defineConfig` 内使用。
+- `onBeforeAll/app.use/onAfterAll` 只能在 `defineConfig` 内使用。
 - 直接导出 object 仅支持 `headers`、`status`、`delay`、`include`、`exclude` 等目录字段。
 - `middleware` 是旧字段，行为等同于 `normal` 阶段。
 
 ## 示例目录（apps/docs/mock）
 
-- `apps/docs/mock/example-basic`: 最小化 `pre/normal/post` 顺序。
+- `apps/docs/mock/example-basic`: 最小化 `onBeforeAll/app.use/onAfterAll` 顺序。
 - `apps/docs/mock/example-order`: 父目录 + 子目录的顺序链。
 - `apps/docs/mock/example-auth`: `pre` 鉴权与 `post` 响应头。
 - `apps/docs/mock/example-metrics`: 请求耗时与 request id 响应头。

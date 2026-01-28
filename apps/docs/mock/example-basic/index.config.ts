@@ -1,5 +1,5 @@
 import type { MiddlewareHandler } from 'mokup'
-import { defineConfig } from 'mokup'
+import { defineConfig, onAfterAll, onBeforeAll } from 'mokup'
 
 const addPreHeader: MiddlewareHandler = async (c, next) => {
   c.header('x-mokup-pre', 'example-basic')
@@ -16,10 +16,14 @@ const addPostHeader: MiddlewareHandler = async (c, next) => {
   c.header('x-mokup-post', 'example-basic')
 }
 
-export default defineConfig(({ pre, normal, post }) => {
-  pre.use(addPreHeader)
-  normal.use(addNormalHeader)
-  post.use(addPostHeader)
+export default defineConfig(({ app }) => {
+  onBeforeAll(() => {
+    app.use(addPreHeader)
+  })
+  app.use(addNormalHeader)
+  onAfterAll(() => {
+    app.use(addPostHeader)
+  })
 
   return {
     headers: {

@@ -1,5 +1,5 @@
 import type { MiddlewareHandler } from 'mokup'
-import { defineConfig } from 'mokup'
+import { defineConfig, onAfterAll, onBeforeAll } from 'mokup'
 
 const markDelay: MiddlewareHandler = async (c, next) => {
   c.header('x-mokup-delay', '120')
@@ -16,10 +16,14 @@ const markPost: MiddlewareHandler = async (c, next) => {
   c.header('x-mokup-post', 'done')
 }
 
-export default defineConfig(({ pre, normal, post }) => {
-  pre.use(markDelay)
-  normal.use(markStatus)
-  post.use(markPost)
+export default defineConfig(({ app }) => {
+  onBeforeAll(() => {
+    app.use(markDelay)
+  })
+  app.use(markStatus)
+  onAfterAll(() => {
+    app.use(markPost)
+  })
 
   return {
     delay: 120,

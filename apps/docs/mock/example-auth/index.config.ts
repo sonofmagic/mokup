@@ -1,5 +1,5 @@
 import type { MiddlewareHandler } from 'mokup'
-import { defineConfig } from 'mokup'
+import { defineConfig, onAfterAll, onBeforeAll } from 'mokup'
 
 const requireAuth: MiddlewareHandler = async (c, next) => {
   const header = c.req.header('authorization') ?? ''
@@ -23,10 +23,14 @@ const markAuthChecked: MiddlewareHandler = async (c, next) => {
   c.header('x-mokup-auth', 'checked')
 }
 
-export default defineConfig(({ pre, normal, post }) => {
-  pre.use(requireAuth)
-  normal.use(attachUser)
-  post.use(markAuthChecked)
+export default defineConfig(({ app }) => {
+  onBeforeAll(() => {
+    app.use(requireAuth)
+  })
+  app.use(attachUser)
+  onAfterAll(() => {
+    app.use(markAuthChecked)
+  })
 
   return {
     headers: {

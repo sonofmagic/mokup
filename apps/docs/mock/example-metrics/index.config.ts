@@ -1,5 +1,5 @@
 import type { MiddlewareHandler } from 'mokup'
-import { defineConfig } from 'mokup'
+import { defineConfig, onAfterAll, onBeforeAll } from 'mokup'
 
 const trackDuration: MiddlewareHandler = async (c, next) => {
   const start = Date.now()
@@ -19,10 +19,14 @@ const markMetrics: MiddlewareHandler = async (c, next) => {
   c.header('x-mokup-metrics', 'recorded')
 }
 
-export default defineConfig(({ pre, normal, post }) => {
-  pre.use(trackDuration)
-  normal.use(addRequestId)
-  post.use(markMetrics)
+export default defineConfig(({ app }) => {
+  onBeforeAll(() => {
+    app.use(trackDuration)
+  })
+  app.use(addRequestId)
+  onAfterAll(() => {
+    app.use(markMetrics)
+  })
 
   return {
     headers: {

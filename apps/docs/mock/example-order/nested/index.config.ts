@@ -1,5 +1,5 @@
 import type { MiddlewareHandler } from 'mokup'
-import { defineConfig } from 'mokup'
+import { defineConfig, onAfterAll, onBeforeAll } from 'mokup'
 
 const markNestedPre: MiddlewareHandler = async (c, next) => {
   c.header('x-mokup-order-nested-pre', '1')
@@ -16,10 +16,14 @@ const markNestedPost: MiddlewareHandler = async (c, next) => {
   c.header('x-mokup-order-nested-post', '1')
 }
 
-export default defineConfig(({ pre, normal, post }) => {
-  pre.use(markNestedPre)
-  normal.use(markNestedNormal)
-  post.use(markNestedPost)
+export default defineConfig(({ app }) => {
+  onBeforeAll(() => {
+    app.use(markNestedPre)
+  })
+  app.use(markNestedNormal)
+  onAfterAll(() => {
+    app.use(markNestedPost)
+  })
 
   return {
     headers: {

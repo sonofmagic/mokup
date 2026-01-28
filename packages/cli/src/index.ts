@@ -13,7 +13,7 @@ export { buildManifest } from './manifest'
  * @example
  * import { defineConfig } from '@mokup/cli'
  */
-export { defineConfig } from './manifest/define-config'
+export { defineConfig, onAfterAll, onBeforeAll } from './manifest/define-config'
 /**
  * Build options for the manifest CLI.
  *
@@ -22,6 +22,7 @@ export { defineConfig } from './manifest/define-config'
  */
 export type {
   BuildOptions,
+  HookErrorPolicy,
   MiddlewarePosition,
   MiddlewareRegistry,
   RouteDirectoryConfig,

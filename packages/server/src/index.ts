@@ -4,7 +4,7 @@
  * @example
  * import { defineConfig } from '@mokup/server'
  */
-export { defineConfig } from './dev/define-config'
+export { defineConfig, onAfterAll, onBeforeAll } from './dev/define-config'
 /**
  * Dev config and middleware types.
  *
@@ -12,6 +12,7 @@ export { defineConfig } from './dev/define-config'
  * import type { RouteDirectoryConfig } from '@mokup/server'
  */
 export type {
+  HookErrorPolicy,
   MiddlewareHandler,
   MiddlewarePosition,
   MiddlewareRegistry,

@@ -1,12 +1,12 @@
 # Middleware Ordering & defineConfig
 
-Directory configs can register middleware with `defineConfig`. The middleware stages are `pre`, `normal`, and `post`.
+Directory configs can register middleware with `defineConfig`. The middleware stages are `pre`, `normal`, and `post`, mapped to `onBeforeAll`, `app.use`, and `onAfterAll`.
 
 ## defineConfig in index.config.ts
 
 ```ts
 import type { MiddlewareHandler } from 'mokup'
-import { defineConfig } from 'mokup'
+import { defineConfig, onAfterAll, onBeforeAll } from 'mokup'
 
 const requireAuth: MiddlewareHandler = async (c, next) => {
   const header = c.req.header('authorization') ?? ''
@@ -17,17 +17,21 @@ const requireAuth: MiddlewareHandler = async (c, next) => {
   await next()
 }
 
-export default defineConfig(({ pre, normal, post }) => {
-  pre.use(requireAuth)
+export default defineConfig(({ app }) => {
+  onBeforeAll(() => {
+    app.use(requireAuth)
+  })
 
-  normal.use(async (c, next) => {
+  app.use(async (c, next) => {
     c.header('x-mokup-normal', '1')
     await next()
   })
 
-  post.use(async (c, next) => {
-    await next()
-    c.header('x-mokup-post', '1')
+  onAfterAll(() => {
+    app.use(async (c, next) => {
+      await next()
+      c.header('x-mokup-post', '1')
+    })
   })
 
   return {
@@ -77,37 +81,41 @@ mock/
 
 ```ts
 // mock/index.config.ts
-import { defineConfig } from 'mokup'
+import { defineConfig, onBeforeAll } from 'mokup'
 
-export default defineConfig(({ pre }) => {
-  pre.use(async (c, next) => {
-    c.header('x-root-pre', '1')
-    await next()
+export default defineConfig(({ app }) => {
+  onBeforeAll(() => {
+    app.use(async (c, next) => {
+      c.header('x-root-pre', '1')
+      await next()
+    })
   })
 })
 ```
 
 ```ts
 // mock/nested/index.config.ts
-import { defineConfig } from 'mokup'
+import { defineConfig, onAfterAll } from 'mokup'
 
-export default defineConfig(({ post }) => {
-  post.use(async (c, next) => {
-    await next()
-    c.header('x-nested-post', '1')
+export default defineConfig(({ app }) => {
+  onAfterAll(() => {
+    app.use(async (c, next) => {
+      await next()
+      c.header('x-nested-post', '1')
+    })
   })
 })
 ```
 
 ## Object configs and legacy middleware
 
-- `pre/normal/post` require `defineConfig`.
+- `onBeforeAll/app.use/onAfterAll` require `defineConfig`.
 - Plain object configs only support directory fields like `headers`, `status`, `delay`, `include`, and `exclude`.
 - `middleware` is a legacy field and behaves like the `normal` stage.
 
 ## Example map (apps/docs/mock)
 
-- `apps/docs/mock/example-basic`: minimal `pre/normal/post` ordering.
+- `apps/docs/mock/example-basic`: minimal `onBeforeAll/app.use/onAfterAll` ordering.
 - `apps/docs/mock/example-order`: parent + nested ordering chain.
 - `apps/docs/mock/example-auth`: auth check in `pre` with headers in `post`.
 - `apps/docs/mock/example-metrics`: request duration and request id headers.

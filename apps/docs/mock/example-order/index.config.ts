@@ -1,5 +1,5 @@
 import type { MiddlewareHandler } from 'mokup'
-import { defineConfig } from 'mokup'
+import { defineConfig, onAfterAll, onBeforeAll } from 'mokup'
 
 const markRootPre: MiddlewareHandler = async (c, next) => {
   c.header('x-mokup-order-root-pre', '1')
@@ -16,10 +16,14 @@ const markRootPost: MiddlewareHandler = async (c, next) => {
   c.header('x-mokup-order-root-post', '1')
 }
 
-export default defineConfig(({ pre, normal, post }) => {
-  pre.use(markRootPre)
-  normal.use(markRootNormal)
-  post.use(markRootPost)
+export default defineConfig(({ app }) => {
+  onBeforeAll(() => {
+    app.use(markRootPre)
+  })
+  app.use(markRootNormal)
+  onAfterAll(() => {
+    app.use(markRootPost)
+  })
 
   return {
     headers: {

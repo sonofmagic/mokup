@@ -1,5 +1,5 @@
 import type { MiddlewareHandler } from 'mokup'
-import { defineConfig } from 'mokup'
+import { defineConfig, onAfterAll, onBeforeAll } from 'mokup'
 
 const markPre: MiddlewareHandler = async (c, next) => {
   c.header('x-mokup-error-pre', '1')
@@ -25,10 +25,14 @@ const handleErrors: MiddlewareHandler = async (c, next) => {
   }
 }
 
-export default defineConfig(({ pre, normal, post }) => {
-  pre.use(markPre)
-  normal.use(markNormal)
-  post.use(handleErrors)
+export default defineConfig(({ app }) => {
+  onBeforeAll(() => {
+    app.use(markPre)
+  })
+  app.use(markNormal)
+  onAfterAll(() => {
+    app.use(handleErrors)
+  })
 
   return {
     headers: {
