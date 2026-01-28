@@ -1,5 +1,19 @@
 # mokup
 
+## 2.3.0
+
+### Minor Changes
+
+- ✨ **feat: replace defineConfig pre/normal/post with onBeforeAll/onAfterAll hooks and app.use; support async config hooks and hookError policy; add mokupWebpack wrapper and createWebpackPlugin alias for webpack** [`f93b392`](https://github.com/sonofmagic/mokup/commit/f93b3927cd3d86b0cfa9758c0d92523df7bedadc) by @sonofmagic
+
+### Patch Changes
+
+- 🐛 **Fix Vite worker runtime hot-reload lag by refreshing routes before rebuilding the bundle.** [`b17f49c`](https://github.com/sonofmagic/mokup/commit/b17f49c7e4a219b61e7667407203d7ff1304a4f9) by @sonofmagic
+
+- 🐛 **Fix Vite plugin route refresh to invalidate the worker bundle when mocks are removed and restored, keeping Playground responses in sync.** [`de3f493`](https://github.com/sonofmagic/mokup/commit/de3f493304d47d4f2bde655a208b63db1b7d11a3) by @sonofmagic
+- 📦 **Dependencies** [`f93b392`](https://github.com/sonofmagic/mokup/commit/f93b3927cd3d86b0cfa9758c0d92523df7bedadc)
+  → `@mokup/cli@1.1.0`, `@mokup/server@1.2.0`
+
 ## 2.2.3
 
 ### Patch Changes
