@@ -19,7 +19,10 @@ function createRouteRefresher(params: {
 }) {
   const { state, optionList, root, logger, enableViteMiddleware, virtualModuleIds } = params
 
-  return async (server?: ViteDevServer | PreviewServer) => {
+  return async (
+    server?: ViteDevServer | PreviewServer,
+    options?: { force?: boolean, silent?: boolean },
+  ) => {
     const collected: RouteTable = []
     const collectedServer: RouteTable = []
     const collectedSw: RouteTable = []
@@ -80,7 +83,10 @@ function createRouteRefresher(params: {
       state.disabledConfigFiles,
     )
     if (isViteDevServer(server) && server.ws) {
-      if (state.lastSignature && signature !== state.lastSignature) {
+      const shouldNotify = !options?.silent
+        && state.lastSignature
+        && (signature !== state.lastSignature || options?.force)
+      if (shouldNotify) {
         server.ws.send({
           type: 'custom',
           event: 'mokup:routes-changed',

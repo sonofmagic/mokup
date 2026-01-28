@@ -27,10 +27,10 @@ function setupViteWatchers(params: {
   server: ViteDevServer
   root: string
   dirs: string[]
-  refresh: () => void | Promise<void>
+  refresh: (options?: { force?: boolean, silent?: boolean }) => void | Promise<void>
 }) {
   const scheduleRefresh = createDebouncer(80, () => {
-    void params.refresh()
+    void params.refresh({ force: true })
   })
   const handleWatchedFile = (file: string) => {
     const resolvedFile = normalizeWatcherFile(file, params.server.config.root ?? params.root)
@@ -64,11 +64,11 @@ function setupPreviewWatchers(params: {
   server: PreviewServer
   root: string
   dirs: string[]
-  refresh: () => void | Promise<void>
+  refresh: (options?: { force?: boolean, silent?: boolean }) => void | Promise<void>
 }) {
   const watcher = chokidar.watch(params.dirs, { ignoreInitial: true })
   const scheduleRefresh = createDebouncer(80, () => {
-    void params.refresh()
+    void params.refresh({ force: true })
   })
   const handleWatchedFile = (file: string) => {
     const resolvedFile = normalizeWatcherFile(file, params.server.config.root ?? params.root)

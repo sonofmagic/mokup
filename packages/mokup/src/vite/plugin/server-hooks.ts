@@ -26,7 +26,10 @@ async function configureDevServer(params: {
   swConfig: ReturnType<typeof resolveSwConfig>
   hasSwRoutes: () => boolean
   enableViteMiddleware: boolean
-  refreshRoutes: (server?: ViteDevServer | PreviewServer) => Promise<void>
+  refreshRoutes: (
+    server?: ViteDevServer | PreviewServer,
+    options?: { force?: boolean, silent?: boolean },
+  ) => Promise<void>
   resolveAllDirs: () => string[]
   watchEnabled: boolean
 }) {
@@ -92,7 +95,7 @@ async function configureDevServer(params: {
     server,
     root,
     dirs,
-    refresh: () => refreshRoutes(server),
+    refresh: options => refreshRoutes(server, options),
   })
 }
 
@@ -107,7 +110,10 @@ async function configurePreviewServer(params: {
   swConfig: ReturnType<typeof resolveSwConfig>
   hasSwRoutes: () => boolean
   enableViteMiddleware: boolean
-  refreshRoutes: (server?: ViteDevServer | PreviewServer) => Promise<void>
+  refreshRoutes: (
+    server?: ViteDevServer | PreviewServer,
+    options?: { force?: boolean, silent?: boolean },
+  ) => Promise<void>
   resolveAllDirs: () => string[]
   watchEnabled: boolean
 }) {
@@ -166,7 +172,7 @@ async function configurePreviewServer(params: {
     server,
     root,
     dirs,
-    refresh: () => refreshRoutes(server),
+    refresh: options => refreshRoutes(server, options),
   })
   return watcher
 }

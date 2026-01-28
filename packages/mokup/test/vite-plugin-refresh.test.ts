@@ -1,6 +1,7 @@
 import { parseRouteTemplate } from '@mokup/runtime'
 import { describe, expect, it, vi } from 'vitest'
 import { createRouteRefresher } from '../src/vite/plugin/refresh'
+import { buildRouteSignature } from '../src/vite/plugin/routes'
 
 const mocks = vi.hoisted(() => ({
   scanRoutes: vi.fn(),
@@ -133,6 +134,54 @@ describe('vite plugin route refresh', () => {
     await refresher(server as never)
 
     expect(server.moduleGraph.getModuleById).toHaveBeenCalledWith('\0virtual:mokup-bundle')
+    expect(server.moduleGraph.invalidateModule).toHaveBeenCalledWith(moduleNode)
+  })
+
+  it('forces virtual module invalidation when signatures are unchanged', async () => {
+    const parsed = parseRouteTemplate('/about')
+    const route = {
+      file: '/root/mock/about.get.json',
+      template: parsed.template,
+      method: 'GET',
+      tokens: parsed.tokens,
+      score: parsed.score,
+      handler: { title: 'about' },
+    }
+    mocks.scanRoutes.mockResolvedValueOnce([route])
+
+    const state = {
+      routes: [],
+      serverRoutes: [],
+      swRoutes: [],
+      disabledRoutes: [],
+      ignoredRoutes: [],
+      configFiles: [],
+      disabledConfigFiles: [],
+      app: null,
+      lastSignature: buildRouteSignature([route], [], [], [], []),
+    }
+
+    const moduleNode = { id: '\0virtual:mokup-bundle' }
+    const server = {
+      ws: { send: vi.fn() },
+      moduleGraph: {
+        getModuleById: vi.fn().mockReturnValue(moduleNode),
+        invalidateModule: vi.fn(),
+      },
+    }
+
+    const refresher = createRouteRefresher({
+      state: state as never,
+      optionList: [{ dir: '/root/mock', prefix: '/api' }],
+      root: () => '/root',
+      logger: { info: vi.fn(), warn: vi.fn(), error: vi.fn() },
+      enableViteMiddleware: false,
+      virtualModuleIds: ['\0virtual:mokup-bundle'],
+    })
+
+    await refresher(server as never, { force: true })
+
+    expect(server.ws.send).toHaveBeenCalled()
     expect(server.moduleGraph.invalidateModule).toHaveBeenCalledWith(moduleNode)
   })
 })

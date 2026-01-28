@@ -130,8 +130,9 @@ export function createMokupPlugin(options: MokupPluginOptions = {}): Plugin {
     },
     async load(id) {
       if (id === resolvedBundleVirtualId) {
-        if (!state.lastSignature) {
-          await refreshRoutes(currentServer ?? undefined)
+        const shouldRefresh = command !== 'build' || !state.lastSignature
+        if (shouldRefresh) {
+          await refreshRoutes(currentServer ?? undefined, { silent: true })
         }
         const dirs = resolveAllDirs()
         for (const dir of dirs) {

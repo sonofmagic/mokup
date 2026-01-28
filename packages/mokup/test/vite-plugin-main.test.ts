@@ -1,10 +1,12 @@
-import { describe, expect, it, vi } from 'vitest'
+import { beforeEach, describe, expect, it, vi } from 'vitest'
 
 import { createMokupPlugin } from '../src/vite/plugin'
 
 const mocks = vi.hoisted(() => {
+  const refreshRoutes = vi.fn()
   const _refresh = vi.fn(async () => {})
   return {
+    refreshRoutes,
     buildBundleModule: vi.fn().mockReturnValue('bundle-code'),
     createPlaygroundMiddleware: vi.fn().mockReturnValue((_req: any, _res: any, next: () => void) => next()),
     resolvePlaygroundOptions: vi.fn().mockReturnValue({ enabled: true, path: '/__mokup', build: true }),
@@ -31,7 +33,8 @@ const mocks = vi.hoisted(() => {
     ]),
     resolveSwImportPath: vi.fn().mockReturnValue('/@id/mokup/sw'),
     createRouteRefresher: vi.fn().mockImplementation((params: any) => {
-      return async () => {
+      return async (server?: unknown, options?: unknown) => {
+        refreshRoutes(server, options)
         params.state.routes = [
           { file: '/root/mock/ping.get.ts', template: '/ping', method: 'GET', tokens: [], score: [], handler: { ok: true } },
         ]
@@ -105,6 +108,10 @@ vi.mock('../src/vite/plugin/sw', () => ({
 }))
 
 describe('mokup vite plugin', () => {
+  beforeEach(() => {
+    mocks.refreshRoutes.mockClear()
+  })
+
   it('resolves virtual ids and loads bundle', async () => {
     const plugin = createMokupPlugin({ entries: { dir: '/root/mock' } })
     const resolveId = plugin.resolveId?.('virtual:mokup-bundle')
@@ -116,6 +123,8 @@ describe('mokup vite plugin', () => {
     expect(code).toBe('bundle-code')
     expect(addWatchFile).toHaveBeenCalled()
     expect(mocks.buildBundleModule).toHaveBeenCalled()
+    expect(mocks.refreshRoutes).toHaveBeenCalled()
+    expect(mocks.refreshRoutes.mock.calls[0]?.[1]).toEqual({ silent: true })
   })
 
   it('loads sw lifecycle and sw script', async () => {
