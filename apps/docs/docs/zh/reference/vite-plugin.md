@@ -134,6 +134,28 @@ const config: RouteDirectoryConfig = {
 export default config
 ```
 
+提示：可以使用 `defineConfig` 获得更好的类型提示：
+
+```ts
+import { defineConfig } from 'mokup'
+
+export default defineConfig({
+  enabled: true,
+  headers: { 'x-mokup-scope': 'api' },
+  status: 200,
+  delay: 120,
+  ignorePrefix: ['.', '_'],
+  include: /users/,
+  exclude: /skip/,
+  middleware: [
+    async (c, next) => {
+      c.header('x-mokup', 'dir')
+      return await next()
+    },
+  ],
+})
+```
+
 配置会从根目录向下合并。headers 会合并，middleware 按顺序追加。
 
 ## Service Worker 模式

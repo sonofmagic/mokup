@@ -32,6 +32,18 @@ export default {
 }
 ```
 
+提示：可以使用 `defineHandler` 包裹 TS/JS 规则以获得更好的类型提示：
+
+```ts
+import { defineHandler } from 'mokup'
+
+export default defineHandler({
+  status: 201,
+  headers: { 'x-mock': 'ok' },
+  handler: { ok: true },
+})
+```
+
 数组导出仍使用文件路由生成路径，重复路由会提示告警。
 
 ## Faker 集成
@@ -50,6 +62,23 @@ const handler: RequestHandler = () => ({
 })
 
 export default handler
+```
+
+提示：也可以用 `defineHandler` 包裹 handler 以获得更好的类型提示：
+
+```ts
+import type { RequestHandler } from 'mokup'
+import { faker } from '@faker-js/faker'
+import { defineHandler } from 'mokup'
+
+const handler: RequestHandler = () => ({
+  id: faker.string.uuid(),
+  name: faker.person.fullName(),
+  email: faker.internet.email(),
+  createdAt: faker.date.recent({ days: 30 }).toISOString(),
+})
+
+export default defineHandler(handler)
 ```
 
 可选：通过 seed 保证可复现的数据（建议放在共享模块中统一设置一次）：

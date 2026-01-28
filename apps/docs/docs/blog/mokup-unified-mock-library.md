@@ -53,6 +53,16 @@ export default {
 }
 ```
 
+Tip: you can wrap the export with `defineHandler` for better IntelliSense:
+
+```ts
+import { defineHandler } from 'mokup'
+
+export default defineHandler({
+  handler: c => c.json([{ id: 1, name: 'Ada' }]),
+})
+```
+
 Start Vite and hit `/api/users` — the same routes can later run in Node or
 Workers without rewriting.
 

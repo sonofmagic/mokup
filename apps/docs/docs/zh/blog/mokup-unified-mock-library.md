@@ -51,6 +51,16 @@ export default {
 }
 ```
 
+提示：可以使用 `defineHandler` 包裹导出以获得更好的类型提示：
+
+```ts
+import { defineHandler } from 'mokup'
+
+export default defineHandler({
+  handler: c => c.json([{ id: 1, name: 'Ada' }]),
+})
+```
+
 启动 Vite 后访问 `/api/users`。同一套路由可以继续在 Node 或 Worker 中复用。
 
 ## 把同一套 mock 部署到 Worker

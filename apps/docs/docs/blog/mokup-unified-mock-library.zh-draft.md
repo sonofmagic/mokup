@@ -53,6 +53,16 @@ export default {
 }
 ```
 
+提示：可以使用 `defineHandler` 包裹导出以获得更好的类型提示：
+
+```ts
+import { defineHandler } from 'mokup'
+
+export default defineHandler({
+  handler: c => c.json([{ id: 1, name: 'Ada' }]),
+})
+```
+
 启动 Vite 并访问 `/api/users`，你会得到一份真实可用的响应。之后这套路由还能
 直接迁移到 Node 或 Worker，无需重写。
 

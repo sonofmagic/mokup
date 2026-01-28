@@ -38,6 +38,16 @@ export default {
 }
 ```
 
+Tip: you can wrap route exports with `defineHandler` for better IntelliSense:
+
+```ts
+import { defineHandler } from 'mokup'
+
+export default defineHandler({
+  handler: c => ({ id: c.req.param('id') }),
+})
+```
+
 ## Catch-all and optional segments
 
 ```

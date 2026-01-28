@@ -122,7 +122,7 @@ mock-extra/
 ### TS/JS 模块
 
 支持导出对象、数组、函数。规则字段使用 `handler`，`response` 不再支持。
-函数式响应建议显式声明 `RequestHandler`。
+函数式响应建议显式声明 `RequestHandler`（或使用 `defineHandler` 获取类型提示）。
 
 ## Handler 约定（强烈推荐）
 
@@ -141,6 +141,17 @@ const rule: RouteRule = {
 }
 
 export default rule
+```
+
+Tip：你也可以用 `defineHandler` 包裹导出，获得更好的智能提示：
+
+```ts
+import { defineHandler } from 'mokup'
+
+export default defineHandler((c) => {
+  c.header('x-mokup', 'ok')
+  return { ok: true }
+})
 ```
 
 ## 基础路由示例（完整 handler）
@@ -445,7 +456,7 @@ Playground 会请求 `/__mokup/routes` 获取当前扫描到的 mock 列表，UI
 
 ### `req` 报 TS7006？
 
-函数响应请显式声明 `RequestHandler`，不要直接写 `(c) => ...`。
+函数响应请显式声明 `RequestHandler`，或使用 `defineHandler`，不要直接写 `(c) => ...`。
 
 ## 应用层中间层（useRequest）
 

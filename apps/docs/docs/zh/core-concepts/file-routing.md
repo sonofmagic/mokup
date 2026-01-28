@@ -38,6 +38,16 @@ export default {
 }
 ```
 
+提示：可以使用 `defineHandler` 包裹路由导出以获得更好的类型提示：
+
+```ts
+import { defineHandler } from 'mokup'
+
+export default defineHandler({
+  handler: c => ({ id: c.req.param('id') }),
+})
+```
+
 ## Catch-all 与可选段
 
 ```

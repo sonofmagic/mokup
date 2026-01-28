@@ -135,6 +135,28 @@ const config: RouteDirectoryConfig = {
 export default config
 ```
 
+Tip: you can use `defineConfig` for better IntelliSense:
+
+```ts
+import { defineConfig } from 'mokup'
+
+export default defineConfig({
+  enabled: true,
+  headers: { 'x-mokup-scope': 'api' },
+  status: 200,
+  delay: 120,
+  ignorePrefix: ['.', '_'],
+  include: /users/,
+  exclude: /skip/,
+  middleware: [
+    async (c, next) => {
+      c.header('x-mokup', 'dir')
+      return await next()
+    },
+  ],
+})
+```
+
 Configs cascade from root to leaf. Headers merge, and middleware chains are appended in order.
 
 ## Service Worker mode

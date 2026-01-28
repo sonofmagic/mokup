@@ -32,6 +32,18 @@ export default {
 }
 ```
 
+Tip: you can wrap TS/JS rules with `defineHandler` for better IntelliSense:
+
+```ts
+import { defineHandler } from 'mokup'
+
+export default defineHandler({
+  status: 201,
+  headers: { 'x-mock': 'ok' },
+  handler: { ok: true },
+})
+```
+
 Array exports are supported, but each entry still uses file-based routing.
 
 ## Faker integration
@@ -50,6 +62,23 @@ const handler: RequestHandler = () => ({
 })
 
 export default handler
+```
+
+Tip: you can also wrap the handler with `defineHandler` for better IntelliSense:
+
+```ts
+import type { RequestHandler } from 'mokup'
+import { faker } from '@faker-js/faker'
+import { defineHandler } from 'mokup'
+
+const handler: RequestHandler = () => ({
+  id: faker.string.uuid(),
+  name: faker.person.fullName(),
+  email: faker.internet.email(),
+  createdAt: faker.date.recent({ days: 30 }).toISOString(),
+})
+
+export default defineHandler(handler)
 ```
 
 Optional: seed the generator for reproducible output (place this once in a shared module):

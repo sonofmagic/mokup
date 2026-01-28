@@ -33,6 +33,17 @@ export default async (c) => {
 }
 ```
 
+Tip: you can use `defineHandler` for better IntelliSense:
+
+```ts
+import { defineHandler } from 'mokup'
+
+export default defineHandler(async (c) => {
+  const body = await c.req.json().catch(() => ({}))
+  return { ok: true, user: body }
+})
+```
+
 Follow the docs at http://mokup.icebreaker.top/ for Vite and CLI setup.
 
 ## Contributing
