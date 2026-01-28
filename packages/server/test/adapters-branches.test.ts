@@ -3,9 +3,13 @@ import { createConnectMiddleware, createFastifyPlugin, createKoaMiddleware } fro
 
 const runtimeHandle = vi.fn()
 
-vi.mock('@mokup/runtime', () => ({
-  createRuntime: () => ({ handle: runtimeHandle }),
-}))
+vi.mock('@mokup/runtime', async (importOriginal) => {
+  const actual = await importOriginal<typeof import('@mokup/runtime')>()
+  return {
+    ...actual,
+    createRuntime: () => ({ handle: runtimeHandle }),
+  }
+})
 
 describe('server adapters extra branches', () => {
   afterEach(() => {

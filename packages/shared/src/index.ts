@@ -96,3 +96,47 @@ export type PlaygroundOptionsInput = boolean | {
    */
   enabled?: boolean
 } | undefined
+
+export { isPromise, middlewareSymbol } from './config-core'
+export {
+  buildConfigChain,
+  type ConfigSourceMap,
+  findConfigFile,
+  getConfigFileCandidates,
+  type MiddlewareMeta,
+  type MiddlewarePosition,
+  normalizeMiddlewareList,
+  readMiddlewareMeta,
+  resolveDirectoryConfig,
+} from './config-utils'
+export {
+  type ConfigApp,
+  createDefineConfig,
+  type DefineConfigFactory,
+  type HookErrorPolicy,
+  type HookHandler,
+} from './define-config'
+export { readJsoncFile } from './jsonc-utils'
+export { loadRules } from './load-rules'
+export { collectFiles, isConfigFile, isSupportedFile } from './mock-files'
+export { createTsxConfigFile, ensureTsxRegister, loadModule } from './module-loader'
+export {
+  configExtensions,
+  jsonExtensions,
+  methodSet,
+  methodSuffixSet,
+  supportedExtensions,
+} from './route-constants'
+export {
+  createRouteUtils,
+  type DerivedRoute,
+  type RouteParser,
+  type RouteParserResult,
+  type RouteScoreComparator,
+} from './route-utils'
+export {
+  normalizeIgnorePrefix,
+  normalizeMethod,
+  normalizePrefix,
+  resolveDirs,
+} from './scan-utils'

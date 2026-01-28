@@ -16,20 +16,50 @@
       "import": "./dist/index.mjs",
       "require": "./dist/index.cjs"
     },
-    "./esbuild": {
-      "types": "./dist/esbuild.d.ts",
-      "import": "./dist/esbuild.mjs",
-      "require": "./dist/esbuild.cjs"
-    },
     "./chokidar": {
       "types": "./dist/chokidar.d.ts",
       "import": "./dist/chokidar.mjs",
       "require": "./dist/chokidar.cjs"
     },
+    "./config-utils": {
+      "types": "./dist/config-utils.d.ts",
+      "import": "./dist/config-utils.mjs",
+      "require": "./dist/config-utils.cjs"
+    },
+    "./config-core": {
+      "types": "./dist/config-core.d.ts",
+      "import": "./dist/config-core.mjs",
+      "require": "./dist/config-core.cjs"
+    },
+    "./define-config": {
+      "types": "./dist/define-config.d.ts",
+      "import": "./dist/define-config.mjs",
+      "require": "./dist/define-config.cjs"
+    },
+    "./esbuild": {
+      "types": "./dist/esbuild.d.ts",
+      "import": "./dist/esbuild.mjs",
+      "require": "./dist/esbuild.cjs"
+    },
     "./hono": {
       "types": "./dist/hono.d.ts",
       "import": "./dist/hono.mjs",
       "require": "./dist/hono.cjs"
+    },
+    "./jsonc-parser": {
+      "types": "./dist/jsonc-parser.d.ts",
+      "import": "./dist/jsonc-parser.mjs",
+      "require": "./dist/jsonc-parser.cjs"
+    },
+    "./jsonc-utils": {
+      "types": "./dist/jsonc-utils.d.ts",
+      "import": "./dist/jsonc-utils.mjs",
+      "require": "./dist/jsonc-utils.cjs"
+    },
+    "./load-rules": {
+      "types": "./dist/load-rules.d.ts",
+      "import": "./dist/load-rules.mjs",
+      "require": "./dist/load-rules.cjs"
     },
     "./logger": {
       "types": "./dist/logger.d.ts",
@@ -37,6 +67,16 @@
       "worker": "./dist/logger.browser.mjs",
       "import": "./dist/logger.mjs",
       "require": "./dist/logger.cjs"
+    },
+    "./mock-files": {
+      "types": "./dist/mock-files.d.ts",
+      "import": "./dist/mock-files.mjs",
+      "require": "./dist/mock-files.cjs"
+    },
+    "./module-loader": {
+      "types": "./dist/module-loader.d.ts",
+      "import": "./dist/module-loader.mjs",
+      "require": "./dist/module-loader.cjs"
     },
     "./pathe": {
       "types": "./dist/pathe.d.ts",
@@ -53,15 +93,25 @@
       "import": "./dist/playground-grouping.mjs",
       "require": "./dist/playground-grouping.cjs"
     },
+    "./route-constants": {
+      "types": "./dist/route-constants.d.ts",
+      "import": "./dist/route-constants.mjs",
+      "require": "./dist/route-constants.cjs"
+    },
+    "./route-utils": {
+      "types": "./dist/route-utils.d.ts",
+      "import": "./dist/route-utils.mjs",
+      "require": "./dist/route-utils.cjs"
+    },
+    "./scan-utils": {
+      "types": "./dist/scan-utils.d.ts",
+      "import": "./dist/scan-utils.mjs",
+      "require": "./dist/scan-utils.cjs"
+    },
     "./timing": {
       "types": "./dist/timing.d.ts",
       "import": "./dist/timing.mjs",
       "require": "./dist/timing.cjs"
-    },
-    "./jsonc-parser": {
-      "types": "./dist/jsonc-parser.d.ts",
-      "import": "./dist/jsonc-parser.mjs",
-      "require": "./dist/jsonc-parser.cjs"
     }
   },
   "publishConfig": {
@@ -85,7 +135,8 @@
     "esbuild": "^0.27.2",
     "hono": "^4.11.7",
     "jsonc-parser": "^3.3.1",
-    "pathe": "catalog:"
+    "pathe": "catalog:",
+    "tsx": "catalog:"
   },
   "devDependencies": {
     "typescript": "catalog:",

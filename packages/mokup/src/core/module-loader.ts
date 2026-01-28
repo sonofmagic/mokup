@@ -1,12 +1,13 @@
 import type { PreviewServer, ViteDevServer } from 'vite'
-import { Buffer } from 'node:buffer'
+
 import { existsSync } from 'node:fs'
-import { createRequire } from 'node:module'
-import { fileURLToPath, pathToFileURL } from 'node:url'
-import { build as esbuild } from '@mokup/shared/esbuild'
-import { dirname, extname, resolve } from '@mokup/shared/pathe'
+import { fileURLToPath } from 'node:url'
+
+import { createTsxConfigFile, loadModule as loadModuleShared } from '@mokup/shared/module-loader'
+import { dirname, relative, resolve } from '@mokup/shared/pathe'
 
 const sourceRoot = dirname(fileURLToPath(import.meta.url))
+const packageRoot = resolve(sourceRoot, '../..')
 
 function resolveWorkspaceEntry(candidates: string[]) {
   for (const candidate of candidates) {
@@ -26,54 +27,32 @@ const mokupViteSourceEntry = resolveWorkspaceEntry([
   resolve(sourceRoot, '../../src/vite.ts'),
 ])
 
-function createWorkspaceResolvePlugin() {
-  if (!mokupSourceEntry && !mokupViteSourceEntry) {
-    return null
-  }
-  return {
-    name: 'mokup:resolve-workspace',
-    setup(build: { onResolve: (options: { filter: RegExp }, cb: () => { path: string }) => void }) {
-      if (mokupSourceEntry) {
-        build.onResolve({ filter: /^mokup$/ }, () => ({ path: mokupSourceEntry }))
-      }
-      if (mokupViteSourceEntry) {
-        build.onResolve({ filter: /^mokup\/vite$/ }, () => ({ path: mokupViteSourceEntry }))
-      }
-    },
-  }
+function toTsxConfigPath(file: string) {
+  const rel = relative(packageRoot, file)
+  return rel.startsWith('.') ? rel : `./${rel}`
 }
 
-const workspaceResolvePlugin = createWorkspaceResolvePlugin()
+function buildTsxConfigPath() {
+  const paths: Record<string, string[]> = {}
+  if (mokupSourceEntry) {
+    paths.mokup = [toTsxConfigPath(mokupSourceEntry)]
+  }
+  if (mokupViteSourceEntry) {
+    paths['mokup/vite'] = [toTsxConfigPath(mokupViteSourceEntry)]
+  }
+  if (Object.keys(paths).length === 0) {
+    return null
+  }
+  return createTsxConfigFile({
+    baseUrl: packageRoot,
+    paths,
+  })
+}
+
+const tsxConfigPath = buildTsxConfigPath()
 
 async function loadModule(file: string) {
-  const ext = extname(file).toLowerCase()
-  if (ext === '.cjs') {
-    const require = createRequire(import.meta.url)
-    delete require.cache[file]
-    return require(file)
-  }
-  if (ext === '.js' || ext === '.mjs') {
-    return import(`${pathToFileURL(file).href}?t=${Date.now()}`)
-  }
-  if (ext === '.ts') {
-    const result = await esbuild({
-      entryPoints: [file],
-      bundle: true,
-      format: 'esm',
-      platform: 'node',
-      sourcemap: 'inline',
-      target: 'es2020',
-      write: false,
-      ...(workspaceResolvePlugin ? { plugins: [workspaceResolvePlugin] } : {}),
-    })
-    const output = result.outputFiles[0]
-    const code = output?.text ?? ''
-    const dataUrl = `data:text/javascript;base64,${Buffer.from(code).toString(
-      'base64',
-    )}`
-    return import(`${dataUrl}#${Date.now()}`)
-  }
-  return null
+  return loadModuleShared(file, { tsconfigPath: tsxConfigPath })
 }
 
 async function loadModuleWithVite(server: ViteDevServer | PreviewServer, file: string) {

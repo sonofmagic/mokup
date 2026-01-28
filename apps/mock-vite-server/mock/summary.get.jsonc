@@ -4,6 +4,6 @@
   "features": ["json", "jsonc", "defineHandler", "defineConfig", "rest"],
   "counts": {
     "routes": 12,
-    "examples": 8,
-  },
+    "examples": 8
+  }
 }

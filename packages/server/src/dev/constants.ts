@@ -1,58 +1,13 @@
 import type { HttpMethod } from './types'
 
-/**
- * Supported HTTP methods for dev scanning.
- *
- * @example
- * import { methodSet } from '@mokup/server'
- *
- * const hasGet = methodSet.has('GET')
- */
-export const methodSet = new Set<HttpMethod>([
-  'GET',
-  'POST',
-  'PUT',
-  'PATCH',
-  'DELETE',
-  'OPTIONS',
-  'HEAD',
-])
+import {
+  configExtensions as sharedConfigExtensions,
+  methodSet as sharedMethodSet,
+  methodSuffixSet as sharedMethodSuffixSet,
+  supportedExtensions as sharedSupportedExtensions,
+} from '@mokup/shared/route-constants'
 
-/**
- * Lowercase method suffixes used in file names.
- *
- * @example
- * import { methodSuffixSet } from '@mokup/server'
- *
- * const ok = methodSuffixSet.has('get')
- */
-export const methodSuffixSet = new Set(
-  Array.from(methodSet, method => method.toLowerCase()),
-)
-
-/**
- * Supported file extensions for mock routes.
- *
- * @example
- * import { supportedExtensions } from '@mokup/server'
- *
- * const ok = supportedExtensions.has('.ts')
- */
-export const supportedExtensions = new Set([
-  '.json',
-  '.jsonc',
-  '.ts',
-  '.js',
-  '.mjs',
-  '.cjs',
-])
-
-/**
- * Extensions allowed for directory config files.
- *
- * @example
- * import { configExtensions } from '@mokup/server'
- *
- * const ok = configExtensions.includes('.ts')
- */
-export const configExtensions = ['.ts', '.js', '.mjs', '.cjs'] as const
+export const methodSet = sharedMethodSet as Set<HttpMethod>
+export const methodSuffixSet = sharedMethodSuffixSet
+export const supportedExtensions = sharedSupportedExtensions
+export const configExtensions = sharedConfigExtensions

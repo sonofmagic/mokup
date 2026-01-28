@@ -1,48 +1,33 @@
 import { promises as fs } from 'node:fs'
 import { tmpdir } from 'node:os'
-import path from 'node:path'
-import { describe, expect, it, vi } from 'vitest'
+import { join } from 'node:path'
+import { afterEach, describe, expect, it, vi } from 'vitest'
 
-describe('module loader workspace plugin', () => {
-  it('registers workspace resolves when sources are available', async () => {
+afterEach(async () => {
+  const { resetModuleLoaderForTests } = await import('@mokup/shared/module-loader')
+  resetModuleLoaderForTests()
+  vi.resetModules()
+  vi.clearAllMocks()
+  vi.unmock('node:fs')
+  vi.unmock('node:url')
+  vi.unmock('tsx/esm/api')
+})
+
+describe('module loader workspace config', () => {
+  it('writes tsx config with workspace src paths when available', async () => {
     vi.resetModules()
-    const onResolve = vi.fn()
-
-    vi.doMock('node:fs', async () => {
-      const actual = await vi.importActual<typeof import('node:fs')>('node:fs')
-      return { ...actual, existsSync: () => true }
-    })
-
-    vi.doMock('@mokup/shared/esbuild', () => ({
-      build: vi.fn(async (options: { plugins?: Array<{ setup: (build: { onResolve: (options: { filter: RegExp }, cb: () => { path: string }) => void }) => void }> }) => {
-        options.plugins?.forEach(plugin => plugin.setup({ onResolve }))
-        return { outputFiles: [{ text: 'export const value = 1' }] }
-      }),
-    }))
-
-    const { loadModule } = await import('../src/core/module-loader')
-    const dir = await fs.mkdtemp(path.join(tmpdir(), 'mokup-module-workspace-'))
-    const file = path.join(dir, 'value.ts')
-    try {
-      await fs.writeFile(file, 'export const value = 1', 'utf8')
-      const mod = await loadModule(file)
-      expect(mod?.value).toBe(1)
-      expect(onResolve).toHaveBeenCalledTimes(2)
-    }
-    finally {
-      await fs.rm(dir, { recursive: true, force: true })
-    }
-  })
-
-  it('falls back to workspace src when dist entries are missing', async () => {
-    vi.resetModules()
-    const onResolve = vi.fn()
+    const register = vi.fn()
+    const writes: string[] = []
+    const dir = await fs.mkdtemp(join(tmpdir(), 'mokup-module-workspace-'))
+    const valueFile = join(dir, 'value.mjs')
+    await fs.writeFile(valueFile, 'export const value = 1', 'utf8')
 
     vi.doMock('node:url', async () => {
       const actual = await vi.importActual<typeof import('node:url')>('node:url')
       return {
         ...actual,
         fileURLToPath: () => '/virtual/mokup/dist/core/module-loader.mjs',
+        pathToFileURL: () => actual.pathToFileURL(valueFile),
       }
     })
 
@@ -54,29 +39,30 @@ describe('module loader workspace plugin', () => {
           const normalized = input.replace(/\\/g, '/')
           return normalized.endsWith('/src/index.ts') || normalized.endsWith('/src/vite.ts')
         },
+        writeFileSync: (_path: string, data: string) => {
+          writes.push(data)
+        },
       }
     })
 
-    vi.doMock('@mokup/shared/esbuild', () => ({
-      build: vi.fn(async (options: { plugins?: Array<{ setup: (build: { onResolve: (options: { filter: RegExp }, cb: () => { path: string }) => void }) => void }> }) => {
-        options.plugins?.forEach(plugin => plugin.setup({ onResolve }))
-        return { outputFiles: [{ text: 'export const value = 1' }] }
-      }),
+    vi.doMock('tsx/esm/api', () => ({
+      register,
     }))
 
-    const { loadModule } = await import('../src/core/module-loader')
-    const dir = await fs.mkdtemp(path.join(tmpdir(), 'mokup-module-workspace-dist-'))
-    const file = path.join(dir, 'value.ts')
     try {
-      await fs.writeFile(file, 'export const value = 1', 'utf8')
-      const mod = await loadModule(file)
+      const { loadModule } = await import('../src/core/module-loader')
+      const mod = await loadModule('/tmp/mock.ts')
+
       expect(mod?.value).toBe(1)
-      const resolvedPaths = onResolve.mock.calls.map((entry) => {
-        const cb = entry[1] as () => { path: string }
-        return cb().path.replace(/\\/g, '/')
-      })
-      expect(resolvedPaths.some(path => path.endsWith('/src/index.ts'))).toBe(true)
-      expect(resolvedPaths.some(path => path.endsWith('/src/vite.ts'))).toBe(true)
+      expect(register).toHaveBeenCalledTimes(1)
+      const [options] = register.mock.calls[0] ?? []
+      expect(options).toMatchObject({ tsconfig: expect.any(String) })
+
+      expect(writes).toHaveLength(1)
+      const config = JSON.parse(writes[0] as string)
+      expect(config.compilerOptions.baseUrl).toBe('/virtual/mokup')
+      expect(config.compilerOptions.paths.mokup).toEqual(['./src/index.ts'])
+      expect(config.compilerOptions.paths['mokup/vite']).toEqual(['./src/vite.ts'])
     }
     finally {
       await fs.rm(dir, { recursive: true, force: true })

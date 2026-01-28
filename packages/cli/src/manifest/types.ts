@@ -209,9 +209,4 @@ export interface MiddlewareRegistry {
  *
  * const info: FileInfo = { file: 'mock/ping.get.ts', rootDir: 'mock' }
  */
-export interface FileInfo {
-  /** Absolute file path. */
-  file: string
-  /** Root directory associated with this file. */
-  rootDir: string
-}
+export type FileInfo = import('@mokup/shared/mock-files').FileInfo
