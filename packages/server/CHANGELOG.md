@@ -1,5 +1,11 @@
 # @mokup/server
 
+## 1.2.0
+
+### Minor Changes
+
+- ✨ **feat: replace defineConfig pre/normal/post with onBeforeAll/onAfterAll hooks and app.use; support async config hooks and hookError policy; add mokupWebpack wrapper and createWebpackPlugin alias for webpack** [`f93b392`](https://github.com/sonofmagic/mokup/commit/f93b3927cd3d86b0cfa9758c0d92523df7bedadc) by @sonofmagic
+
 ## 1.1.8
 
 ### Patch Changes

@@ -1,5 +1,12 @@
 # d1-mokup
 
+## 0.0.6
+
+### Patch Changes
+
+- 📦 **Dependencies** [`f93b392`](https://github.com/sonofmagic/mokup/commit/f93b3927cd3d86b0cfa9758c0d92523df7bedadc)
+  → `mokup@2.3.0`
+
 ## 0.0.5
 
 ### Patch Changes
