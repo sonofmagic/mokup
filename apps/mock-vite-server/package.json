@@ -1,0 +1,23 @@
+{
+  "name": "mock-vite-server",
+  "type": "module",
+  "version": "0.0.1",
+  "private": true,
+  "homepage": "https://mokup.icebreaker.top",
+  "scripts": {
+    "dev": "vite --host",
+    "build": "vite build",
+    "preview": "vite preview",
+    "typecheck": "tsc -p tsconfig.json --noEmit"
+  },
+  "dependencies": {
+    "@faker-js/faker": "catalog:",
+    "mokup": "workspace:*",
+    "vue": "catalog:"
+  },
+  "devDependencies": {
+    "@vitejs/plugin-vue": "catalog:",
+    "typescript": "catalog:",
+    "vite": "catalog:"
+  }
+}

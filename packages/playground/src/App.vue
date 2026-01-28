@@ -14,6 +14,7 @@ declare global {
   interface Window {
     __MOKUP_PLAYGROUND__?: {
       reloadRoutes?: () => void
+      notifyHotReload?: () => void
     }
   }
 }
@@ -148,9 +149,22 @@ const { treeMode, treeRows, toggleExpanded, setTreeMode } = useRouteTree({
   searchTerm,
   getRouteKey: routeKey,
 })
+const hotReloadVisible = ref(false)
+const hotReloadTimer = ref<number | null>(null)
 
 function handleRefresh() {
   loadRoutes().catch(() => undefined)
+}
+
+function notifyHotReload() {
+  if (hotReloadTimer.value) {
+    window.clearTimeout(hotReloadTimer.value)
+  }
+  hotReloadVisible.value = true
+  hotReloadTimer.value = window.setTimeout(() => {
+    hotReloadVisible.value = false
+    hotReloadTimer.value = null
+  }, 2000)
 }
 
 onMounted(() => {
@@ -158,17 +172,35 @@ onMounted(() => {
   restoreSplitWidth()
   window.__MOKUP_PLAYGROUND__ = {
     reloadRoutes: handleRefresh,
+    notifyHotReload,
   }
   handleRefresh()
 })
 
 onBeforeUnmount(() => {
   stopDrag()
+  if (hotReloadTimer.value) {
+    window.clearTimeout(hotReloadTimer.value)
+  }
 })
 </script>
 
 <template>
   <div class="h-screen overflow-hidden pg-app-bg" data-testid="playground-app">
+    <Transition name="pg-hot-toast">
+      <div
+        v-if="hotReloadVisible"
+        class="pointer-events-none fixed inset-x-0 top-5 z-50 flex justify-center px-4"
+      >
+        <div
+          class="pg-hot-toast inline-flex items-center gap-2 rounded-full border border-pg-border bg-pg-surface-panel px-4 py-2 text-sm font-medium text-pg-text shadow-lg"
+        >
+          <span class="i-[carbon--checkmark-filled] h-4 w-4 text-pg-accent" aria-hidden="true" />
+          Hot reload complete
+        </div>
+      </div>
+    </Transition>
+
     <div class="flex h-full w-full flex-col">
       <main class="flex min-h-0 flex-1 flex-col overflow-hidden">
         <div class="flex flex-1 flex-col overflow-hidden bg-pg-surface-shell">

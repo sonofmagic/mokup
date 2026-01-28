@@ -1,0 +1,9 @@
+{
+  // JSONC supports comments and trailing commas
+  "service": "mock-vite-server",
+  "features": ["json", "jsonc", "defineHandler", "defineConfig", "rest"],
+  "counts": {
+    "routes": 12,
+    "examples": 8,
+  },
+}

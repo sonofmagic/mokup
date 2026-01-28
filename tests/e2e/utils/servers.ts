@@ -1,7 +1,7 @@
-import { join } from 'node:path'
+import { isAbsolute, join, resolve } from 'node:path'
 import process from 'node:process'
 import { execa } from 'execa'
-import { WEB_BASE_URL, WEB_HOST, WEB_PORT } from '../constants'
+import { WEB_HOST, WEB_PORT } from '../constants'
 import { isPortOpen, waitForHttp } from './net'
 
 export interface RunningServer {
@@ -14,17 +14,24 @@ export async function startViteServer(params?: {
   reuseExistingServer?: boolean
   cwd?: string
   env?: NodeJS.ProcessEnv
+  appDir?: string
+  host?: string
+  port?: number
+  name?: string
 }) {
   const reuseExistingServer = params?.reuseExistingServer ?? false
-  const port = WEB_PORT
-  const host = WEB_HOST
+  const port = params?.port ?? WEB_PORT
+  const host = params?.host ?? WEB_HOST
+  const baseUrl = `http://${host}:${port}`
   if (reuseExistingServer && await isPortOpen(port, host)) {
     return null
   }
 
   const repoRoot = params?.cwd ?? process.cwd()
+  const appDir = params?.appDir ?? join('apps', 'web')
+  const appRoot = isAbsolute(appDir) ? appDir : resolve(repoRoot, appDir)
+  const name = params?.name ?? 'web'
   const viteBin = join(repoRoot, 'node_modules', '.bin', 'vite')
-  const appRoot = join(repoRoot, 'apps', 'web')
   const child = execa(
     viteBin,
     ['--host', host, '--port', String(port)],
@@ -38,12 +45,12 @@ export async function startViteServer(params?: {
     },
   )
 
-  await waitForHttp(WEB_BASE_URL, 60_000)
+  await waitForHttp(baseUrl, 60_000)
 
   return {
-    name: 'web',
+    name,
     process: child,
-    url: WEB_BASE_URL,
+    url: baseUrl,
   } satisfies RunningServer
 }
 

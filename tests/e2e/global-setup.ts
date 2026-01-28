@@ -1,5 +1,6 @@
 import process from 'node:process'
 import { fileURLToPath } from 'node:url'
+import { MOCK_VITE_SERVER_PORT } from './constants'
 import { runCommand } from './utils/command'
 import { startViteServer, stopServers } from './utils/servers'
 
@@ -32,6 +33,15 @@ export default async function globalSetup() {
   })
   if (viteServer) {
     servers.push(viteServer)
+  }
+  const demoServer = await startViteServer({
+    cwd: repoRoot,
+    appDir: 'apps/mock-vite-server',
+    port: MOCK_VITE_SERVER_PORT,
+    reuseExistingServer,
+  })
+  if (demoServer) {
+    servers.push(demoServer)
   }
 
   return async () => {

@@ -1,9 +1,9 @@
 import process from 'node:process'
 import { defineConfig } from '@playwright/test'
-import { WEB_PORT } from './tests/e2e/constants'
+import { MOCK_VITE_SERVER_BASE_URL, WEB_BASE_URL } from './tests/e2e/constants'
 
 const isCI = Boolean(process.env.CI)
-const webBaseURL = `http://127.0.0.1:${WEB_PORT}`
+const webBaseURL = WEB_BASE_URL
 
 export default defineConfig({
   testDir: './tests/e2e',
@@ -22,6 +22,13 @@ export default defineConfig({
     video: 'retain-on-failure',
   },
   projects: [
+    {
+      name: 'mock-vite-server',
+      testMatch: /mock-vite-server\.spec\.ts/,
+      use: {
+        baseURL: MOCK_VITE_SERVER_BASE_URL,
+      },
+    },
     {
       name: 'ui',
       testMatch: /ui\.spec\.ts/,

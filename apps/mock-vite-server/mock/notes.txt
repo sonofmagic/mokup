@@ -1,0 +1,1 @@
+This file is not a supported mock extension, so it shows up as ignored.
