@@ -1,3 +1,4 @@
+import type { Manifest } from '@mokup/runtime'
 import { promises as fs } from 'node:fs'
 import { tmpdir } from 'node:os'
 import path from 'node:path'
@@ -5,7 +6,7 @@ import { describe, expect, it } from 'vitest'
 import { createMokupWorker as createWebWorker } from '../src/worker'
 import { createMokupWorker as createNodeWorker } from '../src/worker-node'
 
-const manifest = {
+const manifest: Manifest = {
   version: 1,
   routes: [
     {
@@ -17,7 +18,7 @@ const manifest = {
       },
     },
   ],
-} as const
+}
 
 describe('worker adapters', () => {
   it('creates a node worker for manifests', async () => {
