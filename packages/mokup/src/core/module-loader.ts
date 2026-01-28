@@ -7,22 +7,36 @@ import { build as esbuild } from '@mokup/shared/esbuild'
 import { dirname, extname, resolve } from '@mokup/shared/pathe'
 
 const sourceRoot = dirname(fileURLToPath(import.meta.url))
-const mokupSourceEntry = resolve(sourceRoot, '../index.ts')
-const mokupViteSourceEntry = resolve(sourceRoot, '../vite.ts')
-const hasMokupSourceEntry = existsSync(mokupSourceEntry)
-const hasMokupViteSourceEntry = existsSync(mokupViteSourceEntry)
+
+function resolveWorkspaceEntry(candidates: string[]) {
+  for (const candidate of candidates) {
+    if (existsSync(candidate)) {
+      return candidate
+    }
+  }
+  return null
+}
+
+const mokupSourceEntry = resolveWorkspaceEntry([
+  resolve(sourceRoot, '../index.ts'),
+  resolve(sourceRoot, '../../src/index.ts'),
+])
+const mokupViteSourceEntry = resolveWorkspaceEntry([
+  resolve(sourceRoot, '../vite.ts'),
+  resolve(sourceRoot, '../../src/vite.ts'),
+])
 
 function createWorkspaceResolvePlugin() {
-  if (!hasMokupSourceEntry && !hasMokupViteSourceEntry) {
+  if (!mokupSourceEntry && !mokupViteSourceEntry) {
     return null
   }
   return {
     name: 'mokup:resolve-workspace',
     setup(build: { onResolve: (options: { filter: RegExp }, cb: () => { path: string }) => void }) {
-      if (hasMokupSourceEntry) {
+      if (mokupSourceEntry) {
         build.onResolve({ filter: /^mokup$/ }, () => ({ path: mokupSourceEntry }))
       }
-      if (hasMokupViteSourceEntry) {
+      if (mokupViteSourceEntry) {
         build.onResolve({ filter: /^mokup\/vite$/ }, () => ({ path: mokupViteSourceEntry }))
       }
     },
