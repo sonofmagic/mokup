@@ -85,7 +85,7 @@
     "tsup": "^8.5.1",
     "tsx": "catalog:",
     "turbo": "^2.7.6",
-    "type-fest": "^5.4.1",
+    "type-fest": "^5.4.2",
     "typescript": "catalog:",
     "unbuild": "catalog:",
     "vitest": "~4.0.18",
