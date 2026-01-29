@@ -2,10 +2,10 @@ import type {
   Logger,
   RouteTable,
   VitePluginOptions,
-} from '../shared/types'
+} from './shared/types'
 
-import { normalizePrefix } from '../shared/utils'
 import { buildManifestData, toViteImportPath } from './manifest'
+import { normalizePrefix } from './shared/utils'
 
 /**
  * Default service worker script path.

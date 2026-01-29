@@ -7,9 +7,13 @@ const mocks = vi.hoisted(() => ({
   scanRoutes: vi.fn(),
 }))
 
-vi.mock('../src/core/scanner', () => ({
-  scanRoutes: mocks.scanRoutes,
-}))
+vi.mock('@mokup/core', async () => {
+  const actual = await vi.importActual<typeof import('@mokup/core')>('@mokup/core')
+  return {
+    ...actual,
+    scanRoutes: mocks.scanRoutes,
+  }
+})
 
 describe('vite plugin route refresh', () => {
   it('refreshes routes and notifies the dev server', async () => {
@@ -183,5 +187,48 @@ describe('vite plugin route refresh', () => {
 
     expect(server.ws.send).toHaveBeenCalled()
     expect(server.moduleGraph.invalidateModule).toHaveBeenCalledWith(moduleNode)
+  })
+
+  it('triggers a full reload when reloadOnChange is enabled', async () => {
+    const parsed = parseRouteTemplate('/about')
+    mocks.scanRoutes.mockResolvedValueOnce([
+      {
+        file: '/root/mock/about.get.json',
+        template: parsed.template,
+        method: 'GET',
+        tokens: parsed.tokens,
+        score: parsed.score,
+        handler: { title: 'about' },
+      },
+    ])
+
+    const state = {
+      routes: [],
+      serverRoutes: [],
+      swRoutes: [],
+      disabledRoutes: [],
+      ignoredRoutes: [],
+      configFiles: [],
+      disabledConfigFiles: [],
+      app: null,
+      lastSignature: 'old',
+    }
+
+    const server = {
+      ws: { send: vi.fn() },
+    }
+
+    const refresher = createRouteRefresher({
+      state: state as never,
+      optionList: [{ dir: '/root/mock', prefix: '/api' }],
+      root: () => '/root',
+      logger: { info: vi.fn(), warn: vi.fn(), error: vi.fn() },
+      enableViteMiddleware: false,
+      reloadOnChange: true,
+    })
+
+    await refresher(server as never)
+
+    expect(server.ws.send).toHaveBeenCalledWith(expect.objectContaining({ type: 'full-reload' }))
   })
 })

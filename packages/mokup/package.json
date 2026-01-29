@@ -104,6 +104,7 @@
   },
   "dependencies": {
     "@mokup/cli": "workspace:*",
+    "@mokup/core": "workspace:*",
     "@mokup/playground": "workspace:*",
     "@mokup/runtime": "workspace:*",
     "@mokup/server": "workspace:*",

@@ -3,9 +3,7 @@ import type { MokupPluginOptions } from '../shared/types'
 
 import type { PluginState } from './plugin/state'
 import { cwd } from 'node:process'
-import { buildBundleModule } from '../core/bundle'
-import { createPlaygroundMiddleware, resolvePlaygroundOptions, writePlaygroundBuild } from '../core/playground'
-import { buildSwScript, resolveSwConfig, resolveSwUnregisterConfig } from '../core/sw'
+import { buildBundleModule, buildSwScript, createPlaygroundMiddleware, resolvePlaygroundOptions, resolveSwConfig, resolveSwUnregisterConfig, writePlaygroundBuild } from '@mokup/core'
 import { createLogger } from '../shared/logger'
 import { normalizeMokupOptions, normalizeOptions } from './plugin/options'
 import { resolveSwImportPath } from './plugin/paths'
@@ -111,6 +109,7 @@ export function createMokupPlugin(options: MokupPluginOptions = {}): Plugin {
     logger,
     enableViteMiddleware,
     virtualModuleIds: [resolvedBundleVirtualId],
+    reloadOnChange: runtime === 'worker',
   })
 
   return {

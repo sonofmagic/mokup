@@ -10,8 +10,8 @@ const playgroundMocks = vi.hoisted(() => ({
 }))
 
 vi.mock('../src/vite/plugin/refresh', () => refreshMocks)
-vi.mock('../src/core/playground', async () => {
-  const actual = await vi.importActual<typeof import('../src/core/playground')>('../src/core/playground')
+vi.mock('@mokup/core', async () => {
+  const actual = await vi.importActual<typeof import('@mokup/core')>('@mokup/core')
   return { ...actual, writePlaygroundBuild: playgroundMocks.writePlaygroundBuild }
 })
 

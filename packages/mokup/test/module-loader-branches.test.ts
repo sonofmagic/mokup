@@ -39,7 +39,7 @@ describe('module loader branches', () => {
     }))
 
     vi.resetModules()
-    const { loadModule } = await import('../src/core/module-loader')
+    const { loadModule } = await import('@mokup/core')
 
     try {
       const tsMod = await loadModule('/tmp/mock.ts')

@@ -1,7 +1,7 @@
-import type { resolveSwConfig, resolveSwUnregisterConfig } from '../../core/sw'
+import type { resolveSwConfig, resolveSwUnregisterConfig } from '@mokup/core'
 import type { Logger } from '../../shared/types'
 import type { PluginState } from './state'
-import { buildSwScript } from '../../core/sw'
+import { buildSwScript } from '@mokup/core'
 import { bundleScript } from './bundle'
 import { buildSwLifecycleScript } from './sw'
 

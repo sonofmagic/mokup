@@ -1,5 +1,5 @@
+import { runRoutePrechecks } from '@mokup/core'
 import { describe, expect, it, vi } from 'vitest'
-import { runRoutePrechecks } from '../src/core/scanner-precheck'
 
 describe('scanner prechecks', () => {
   it('skips when config disables directory', () => {

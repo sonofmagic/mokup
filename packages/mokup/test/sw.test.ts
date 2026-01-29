@@ -1,9 +1,9 @@
 import type { Manifest } from '@mokup/runtime'
 import type { ResolvedRoute } from '../src/shared/types'
 import path from 'node:path'
+import { buildSwScript, resolveSwConfig, resolveSwUnregisterConfig } from '@mokup/core'
 import { parseRouteTemplate } from '@mokup/runtime'
 import { describe, expect, it } from 'vitest'
-import { buildSwScript, resolveSwConfig, resolveSwUnregisterConfig } from '../src/core/sw'
 
 function extractManifest(code: string): Manifest {
   const marker = 'const manifest = '

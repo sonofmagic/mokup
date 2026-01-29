@@ -66,15 +66,11 @@ const mocks = vi.hoisted(() => {
   }
 })
 
-vi.mock('../src/core/bundle', () => ({
+vi.mock('@mokup/core', () => ({
   buildBundleModule: mocks.buildBundleModule,
-}))
-vi.mock('../src/core/playground', () => ({
   createPlaygroundMiddleware: mocks.createPlaygroundMiddleware,
   resolvePlaygroundOptions: mocks.resolvePlaygroundOptions,
   writePlaygroundBuild: mocks.writePlaygroundBuild,
-}))
-vi.mock('../src/core/sw', () => ({
   buildSwScript: mocks.buildSwScript,
   resolveSwConfig: mocks.resolveSwConfig,
   resolveSwUnregisterConfig: mocks.resolveSwUnregisterConfig,

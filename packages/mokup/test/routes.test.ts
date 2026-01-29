@@ -1,7 +1,7 @@
 import path from 'node:path'
+import { deriveRouteFromFile, sortRoutes } from '@mokup/core'
 import { parseRouteTemplate } from '@mokup/runtime'
 import { describe, expect, it } from 'vitest'
-import { deriveRouteFromFile, sortRoutes } from '../src/core/routes'
 
 function createLogger() {
   const warnings: string[] = []

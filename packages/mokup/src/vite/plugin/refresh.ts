@@ -1,10 +1,8 @@
+import type { RouteConfigInfo, RouteIgnoreInfo, RouteSkipInfo } from '@mokup/core'
 import type { PreviewServer, ViteDevServer } from 'vite'
-import type { RouteConfigInfo, RouteIgnoreInfo, RouteSkipInfo } from '../../core/scanner'
 import type { RouteTable, VitePluginOptions } from '../../shared/types'
 import type { PluginState } from './state'
-import { createHonoApp } from '../../core/middleware'
-import { sortRoutes } from '../../core/routes'
-import { scanRoutes } from '../../core/scanner'
+import { createHonoApp, scanRoutes, sortRoutes } from '@mokup/core'
 import { resolveDirs } from '../../shared/utils'
 import { buildRouteSignature } from './routes'
 import { isViteDevServer } from './server'
@@ -16,8 +14,17 @@ function createRouteRefresher(params: {
   logger: Parameters<typeof scanRoutes>[0]['logger']
   enableViteMiddleware: boolean
   virtualModuleIds?: string[]
+  reloadOnChange?: boolean
 }) {
-  const { state, optionList, root, logger, enableViteMiddleware, virtualModuleIds } = params
+  const {
+    state,
+    optionList,
+    root,
+    logger,
+    enableViteMiddleware,
+    virtualModuleIds,
+    reloadOnChange = false,
+  } = params
 
   return async (
     server?: ViteDevServer | PreviewServer,
@@ -99,6 +106,9 @@ function createRouteRefresher(params: {
               server.moduleGraph.invalidateModule(moduleNode)
             }
           }
+        }
+        if (reloadOnChange) {
+          server.ws.send({ type: 'full-reload', path: '*' })
         }
       }
     }

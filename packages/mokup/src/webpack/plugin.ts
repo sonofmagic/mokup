@@ -9,9 +9,7 @@ import type {
   WebpackPluginInstance,
 } from './plugin/types'
 import { cwd } from 'node:process'
-import { createMiddleware } from '../core/middleware'
-import { createPlaygroundMiddleware, resolvePlaygroundOptions } from '../core/playground'
-import { resolveSwConfig, resolveSwUnregisterConfig } from '../core/sw'
+import { createMiddleware, createPlaygroundMiddleware, resolvePlaygroundOptions, resolveSwConfig, resolveSwUnregisterConfig } from '@mokup/core'
 import { createLogger } from '../shared/logger'
 import { resolveDirs } from '../shared/utils'
 import { createBundleBuilder } from './plugin/bundles'

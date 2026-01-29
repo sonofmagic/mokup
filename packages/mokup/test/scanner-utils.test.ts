@@ -1,11 +1,11 @@
-import { describe, expect, it } from 'vitest'
 import {
   buildEffectiveConfig,
   buildSkipInfo,
   resolveSkipRoute,
   testPatterns,
   toFilterStrings,
-} from '../src/core/scanner-utils'
+} from '@mokup/core'
+import { describe, expect, it } from 'vitest'
 
 describe('scanner utils', () => {
   it('resolves skip routes and builds skip info', () => {

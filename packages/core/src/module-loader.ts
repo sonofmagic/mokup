@@ -1,6 +1,7 @@
 import type { PreviewServer, ViteDevServer } from 'vite'
 
 import { existsSync } from 'node:fs'
+import { createRequire } from 'node:module'
 import { fileURLToPath } from 'node:url'
 
 import { createTsxConfigFile, loadModule as loadModuleShared } from '@mokup/shared/module-loader'
@@ -8,9 +9,13 @@ import { dirname, relative, resolve } from '@mokup/shared/pathe'
 
 const sourceRoot = dirname(fileURLToPath(import.meta.url))
 const packageRoot = resolve(sourceRoot, '../..')
+const require = createRequire(import.meta.url)
 
-function resolveWorkspaceEntry(candidates: string[]) {
+function resolveWorkspaceEntry(candidates: Array<string | null | undefined>) {
   for (const candidate of candidates) {
+    if (!candidate) {
+      continue
+    }
     if (existsSync(candidate)) {
       return candidate
     }
@@ -18,13 +23,25 @@ function resolveWorkspaceEntry(candidates: string[]) {
   return null
 }
 
+function resolvePackageRoot(name: string) {
+  try {
+    return dirname(require.resolve(`${name}/package.json`))
+  }
+  catch {
+    return null
+  }
+}
+
+const resolvedMokupRoot = resolvePackageRoot('mokup')
+const workspaceMokupRoot = resolve(packageRoot, '../mokup')
+
 const mokupSourceEntry = resolveWorkspaceEntry([
-  resolve(sourceRoot, '../index.ts'),
-  resolve(sourceRoot, '../../src/index.ts'),
+  resolvedMokupRoot ? resolve(resolvedMokupRoot, 'src/index.ts') : null,
+  resolve(workspaceMokupRoot, 'src/index.ts'),
 ])
 const mokupViteSourceEntry = resolveWorkspaceEntry([
-  resolve(sourceRoot, '../vite.ts'),
-  resolve(sourceRoot, '../../src/vite.ts'),
+  resolvedMokupRoot ? resolve(resolvedMokupRoot, 'src/vite.ts') : null,
+  resolve(workspaceMokupRoot, 'src/vite.ts'),
 ])
 
 function toTsxConfigPath(file: string) {

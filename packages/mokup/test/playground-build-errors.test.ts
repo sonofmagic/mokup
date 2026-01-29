@@ -1,15 +1,19 @@
 import { mkdir, mkdtemp } from 'node:fs/promises'
 import { tmpdir } from 'node:os'
 import { join } from 'node:path'
-import { describe, expect, it, vi } from 'vitest'
+import { writePlaygroundBuild } from '@mokup/core'
 
-import { writePlaygroundBuild } from '../src/core/playground/build'
+import { describe, expect, it, vi } from 'vitest'
 
 const missingDist = join(tmpdir(), 'mokup-missing-playground-dist')
 
-vi.mock('../src/core/playground/assets', () => ({
-  resolvePlaygroundDist: () => missingDist,
-}))
+vi.mock('@mokup/core', async () => {
+  const actual = await vi.importActual<typeof import('@mokup/core')>('@mokup/core')
+  return {
+    ...actual,
+    resolvePlaygroundDist: () => missingDist,
+  }
+})
 
 describe('playground build errors', () => {
   it('bails out when output matches outDir', async () => {

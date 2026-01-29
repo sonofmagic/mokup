@@ -1,6 +1,6 @@
+import { resolveSwConfig } from '@mokup/core'
 import { Hono } from '@mokup/shared/hono'
 import { describe, expect, it, vi } from 'vitest'
-import { resolveSwConfig } from '../src/core/sw'
 
 import { configureDevServer, configurePreviewServer } from '../src/vite/plugin/server-hooks'
 
@@ -18,10 +18,13 @@ const swMocks = vi.hoisted(() => ({
 }))
 
 vi.mock('../src/vite/plugin/watcher', () => watcherMocks)
-vi.mock('../src/core/middleware', () => ({ createMiddleware: middlewareMocks.createMiddleware }))
-vi.mock('../src/core/sw', async () => {
-  const actual = await vi.importActual<typeof import('../src/core/sw')>('../src/core/sw')
-  return { ...actual, buildSwScript: swMocks.buildSwScript }
+vi.mock('@mokup/core', async () => {
+  const actual = await vi.importActual<typeof import('@mokup/core')>('@mokup/core')
+  return {
+    ...actual,
+    createMiddleware: middlewareMocks.createMiddleware,
+    buildSwScript: swMocks.buildSwScript,
+  }
 })
 
 function createServerStub() {

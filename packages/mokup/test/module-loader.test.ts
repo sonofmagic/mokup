@@ -1,8 +1,8 @@
 import { promises as fs } from 'node:fs'
 import { tmpdir } from 'node:os'
 import { join } from 'node:path'
+import { loadModule, loadModuleWithVite } from '@mokup/core'
 import { describe, expect, it, vi } from 'vitest'
-import { loadModule, loadModuleWithVite } from '../src/core/module-loader'
 
 async function createTempModule(name: string, content: string) {
   const dir = await fs.mkdtemp(join(tmpdir(), 'mokup-module-'))

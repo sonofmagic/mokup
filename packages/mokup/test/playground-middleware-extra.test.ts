@@ -3,17 +3,16 @@ import { Buffer } from 'node:buffer'
 import { mkdir, mkdtemp, writeFile } from 'node:fs/promises'
 import { tmpdir } from 'node:os'
 import { join } from 'node:path'
-import { describe, expect, it, vi } from 'vitest'
+import { createPlaygroundMiddleware, mimeTypes } from '@mokup/core'
 
-import { mimeTypes } from '../src/core/playground/assets'
-import { createPlaygroundMiddleware } from '../src/core/playground/middleware'
+import { describe, expect, it, vi } from 'vitest'
 
 const assetsMocks = vi.hoisted(() => ({
   resolvePlaygroundDist: vi.fn(),
 }))
 
-vi.mock('../src/core/playground/assets', async () => {
-  const actual = await vi.importActual<typeof import('../src/core/playground/assets')>('../src/core/playground/assets')
+vi.mock('@mokup/core', async () => {
+  const actual = await vi.importActual<typeof import('@mokup/core')>('@mokup/core')
   return { ...actual, resolvePlaygroundDist: assetsMocks.resolvePlaygroundDist }
 })
 

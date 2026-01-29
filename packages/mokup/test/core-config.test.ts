@@ -1,8 +1,8 @@
 import { promises as fs } from 'node:fs'
 import { tmpdir } from 'node:os'
 import path from 'node:path'
+import { resolveDirectoryConfig } from '@mokup/core'
 import { describe, expect, it, vi } from 'vitest'
-import { resolveDirectoryConfig } from '../src/core/config'
 
 async function createTempRoot() {
   const root = await fs.mkdtemp(path.join(tmpdir(), 'mokup-core-config-'))

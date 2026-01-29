@@ -1,5 +1,5 @@
-import type { RouteTable } from '../../shared/types'
 import type { RouteDecisionStep, RouteEffectiveConfig } from '../scanner'
+import type { RouteTable } from '../shared/types'
 import type { PlaygroundGroup } from './grouping'
 import { isAbsolute } from '@mokup/shared/pathe'
 import { formatRouteFile, resolveRouteGroup } from './grouping'

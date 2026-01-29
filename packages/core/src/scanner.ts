@@ -1,19 +1,19 @@
 import type { PreviewServer, ViteDevServer } from 'vite'
 
-import type { Logger, RouteDirectoryConfig, RouteTable } from '../shared/types'
 import type {
   RouteConfigInfo,
   RouteDecisionStep,
   RouteIgnoreInfo,
   RouteSkipInfo,
 } from './scanner-types'
-import { collectFiles, isConfigFile } from '../shared/files'
-import { normalizeIgnorePrefix } from '../shared/utils'
+import type { Logger, RouteDirectoryConfig, RouteTable } from './shared/types'
 import { resolveDirectoryConfig } from './config'
 import { loadRules } from './loader'
 import { deriveRouteFromFile, resolveRule, sortRoutes } from './routes'
 import { runRoutePrechecks } from './scanner-precheck'
 import { buildSkipInfo, resolveSkipRoute } from './scanner-utils'
+import { collectFiles, isConfigFile } from './shared/files'
+import { normalizeIgnorePrefix } from './shared/utils'
 
 export type {
   RouteConfigInfo,

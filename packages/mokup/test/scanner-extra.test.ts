@@ -1,8 +1,8 @@
 import { mkdir, mkdtemp, writeFile } from 'node:fs/promises'
 import { tmpdir } from 'node:os'
 import { join } from 'node:path'
+import { scanRoutes } from '@mokup/core'
 import { describe, expect, it, vi } from 'vitest'
-import { scanRoutes } from '../src/core/scanner'
 
 function createLogger() {
   return { warn: vi.fn(), info: vi.fn(), error: vi.fn(), log: vi.fn() }

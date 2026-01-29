@@ -1,10 +1,10 @@
 import type { Context } from '@mokup/shared/hono'
 import type { IncomingMessage, ServerResponse } from 'node:http'
 
-import type { Logger, ResolvedRoute, RouteTable } from '../shared/types'
+import type { Logger, ResolvedRoute, RouteTable } from './shared/types'
 import { Buffer } from 'node:buffer'
 import { Hono, PatternRouter } from '@mokup/shared/hono'
-import { delay, normalizeMethod } from '../shared/utils'
+import { delay, normalizeMethod } from './shared/utils'
 
 function toHonoPath(route: ResolvedRoute) {
   if (!route.tokens || route.tokens.length === 0) {

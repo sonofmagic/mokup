@@ -1,4 +1,4 @@
-import type { RouteTable } from '../shared/types'
+import type { RouteTable } from './shared/types'
 
 import { buildManifestData } from './manifest'
 

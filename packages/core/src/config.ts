@@ -4,11 +4,11 @@ import type {
   MiddlewareHandler,
   ResolvedMiddleware,
   RouteDirectoryConfig,
-} from '../shared/types'
+} from './shared/types'
 
 import { isPromise, resolveDirectoryConfig as resolveDirectoryConfigShared } from '@mokup/shared/config-utils'
-import { configExtensions } from '../shared/constants'
 import { loadModule, loadModuleWithVite } from './module-loader'
+import { configExtensions } from './shared/constants'
 
 async function loadConfig(
   file: string,

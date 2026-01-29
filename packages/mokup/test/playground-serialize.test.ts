@@ -1,12 +1,6 @@
+import { resolveGroups, toPlaygroundConfigFile, toPlaygroundDisabledRoute, toPlaygroundIgnoredRoute, toPlaygroundRoute } from '@mokup/core'
 import { parseRouteTemplate } from '@mokup/runtime'
 import { describe, expect, it } from 'vitest'
-import { resolveGroups } from '../src/core/playground/grouping'
-import {
-  toPlaygroundConfigFile,
-  toPlaygroundDisabledRoute,
-  toPlaygroundIgnoredRoute,
-  toPlaygroundRoute,
-} from '../src/core/playground/serialize'
 
 describe('playground serialization', () => {
   it('serializes routes with middleware and groups', () => {

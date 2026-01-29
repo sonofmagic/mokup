@@ -1,0 +1,38 @@
+import { defineBuildConfig } from 'unbuild'
+
+export default defineBuildConfig({
+  clean: true,
+  declaration: true,
+  entries: [
+    'src/index',
+    'src/bundle',
+    'src/config',
+    'src/loader',
+    'src/manifest',
+    'src/middleware',
+    'src/module-loader',
+    'src/playground',
+    'src/playground/assets',
+    'src/playground/build',
+    'src/playground/config',
+    'src/playground/grouping',
+    'src/playground/inject',
+    'src/playground/middleware',
+    'src/playground/serialize',
+    'src/routes',
+    'src/scanner',
+    'src/scanner-precheck',
+    'src/scanner-types',
+    'src/scanner-utils',
+    'src/sw',
+    'src/shared/constants',
+    'src/shared/files',
+    'src/shared/logger',
+    'src/shared/terminal',
+    'src/shared/types',
+    'src/shared/utils',
+  ],
+  rollup: {
+    emitCJS: true,
+  },
+})

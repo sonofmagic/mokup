@@ -1,8 +1,8 @@
 import { promises as fs } from 'node:fs'
 import { tmpdir } from 'node:os'
 import path from 'node:path'
+import { loadRules } from '@mokup/core'
 import { describe, expect, it, vi } from 'vitest'
-import { loadRules } from '../src/core/loader'
 
 describe('loadRules json parsing', () => {
   it('accepts json files with comments', async () => {

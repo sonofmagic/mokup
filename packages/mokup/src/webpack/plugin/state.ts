@@ -1,5 +1,5 @@
+import type { RouteConfigInfo, RouteIgnoreInfo, RouteSkipInfo } from '@mokup/core'
 import type { Hono } from '@mokup/shared/hono'
-import type { RouteConfigInfo, RouteIgnoreInfo, RouteSkipInfo } from '../../core/scanner'
 import type { RouteTable } from '../../shared/types'
 
 interface PluginState {

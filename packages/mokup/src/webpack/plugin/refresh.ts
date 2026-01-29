@@ -1,9 +1,7 @@
-import type { RouteConfigInfo, RouteIgnoreInfo, RouteSkipInfo } from '../../core/scanner'
+import type { RouteConfigInfo, RouteIgnoreInfo, RouteSkipInfo } from '@mokup/core'
 import type { RouteTable, VitePluginOptions } from '../../shared/types'
 import type { PluginState } from './state'
-import { createHonoApp } from '../../core/middleware'
-import { sortRoutes } from '../../core/routes'
-import { scanRoutes } from '../../core/scanner'
+import { createHonoApp, scanRoutes, sortRoutes } from '@mokup/core'
 import { resolveDirs } from '../../shared/utils'
 
 function createRouteRefresher(params: {

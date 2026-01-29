@@ -1,7 +1,7 @@
 import { Buffer } from 'node:buffer'
+import { buildManifestData, toViteImportPath } from '@mokup/core'
 import { parseRouteTemplate } from '@mokup/runtime'
 import { afterEach, describe, expect, it, vi } from 'vitest'
-import { buildManifestData, toViteImportPath } from '../src/core/manifest'
 
 const root = '/root'
 

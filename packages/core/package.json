@@ -1,0 +1,174 @@
+{
+  "name": "@mokup/core",
+  "type": "module",
+  "version": "1.0.0",
+  "description": "Core scanning and middleware utilities for mokup.",
+  "license": "MIT",
+  "homepage": "https://mokup.icebreaker.top",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/sonofmagic/mokup.git",
+    "directory": "packages/core"
+  },
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.mjs",
+      "require": "./dist/index.cjs"
+    },
+    "./bundle": {
+      "types": "./dist/bundle.d.ts",
+      "import": "./dist/bundle.mjs",
+      "require": "./dist/bundle.cjs"
+    },
+    "./config": {
+      "types": "./dist/config.d.ts",
+      "import": "./dist/config.mjs",
+      "require": "./dist/config.cjs"
+    },
+    "./loader": {
+      "types": "./dist/loader.d.ts",
+      "import": "./dist/loader.mjs",
+      "require": "./dist/loader.cjs"
+    },
+    "./manifest": {
+      "types": "./dist/manifest.d.ts",
+      "import": "./dist/manifest.mjs",
+      "require": "./dist/manifest.cjs"
+    },
+    "./middleware": {
+      "types": "./dist/middleware.d.ts",
+      "import": "./dist/middleware.mjs",
+      "require": "./dist/middleware.cjs"
+    },
+    "./module-loader": {
+      "types": "./dist/module-loader.d.ts",
+      "import": "./dist/module-loader.mjs",
+      "require": "./dist/module-loader.cjs"
+    },
+    "./playground": {
+      "types": "./dist/playground.d.ts",
+      "import": "./dist/playground.mjs",
+      "require": "./dist/playground.cjs"
+    },
+    "./playground/assets": {
+      "types": "./dist/playground/assets.d.ts",
+      "import": "./dist/playground/assets.mjs",
+      "require": "./dist/playground/assets.cjs"
+    },
+    "./playground/build": {
+      "types": "./dist/playground/build.d.ts",
+      "import": "./dist/playground/build.mjs",
+      "require": "./dist/playground/build.cjs"
+    },
+    "./playground/config": {
+      "types": "./dist/playground/config.d.ts",
+      "import": "./dist/playground/config.mjs",
+      "require": "./dist/playground/config.cjs"
+    },
+    "./playground/grouping": {
+      "types": "./dist/playground/grouping.d.ts",
+      "import": "./dist/playground/grouping.mjs",
+      "require": "./dist/playground/grouping.cjs"
+    },
+    "./playground/inject": {
+      "types": "./dist/playground/inject.d.ts",
+      "import": "./dist/playground/inject.mjs",
+      "require": "./dist/playground/inject.cjs"
+    },
+    "./playground/middleware": {
+      "types": "./dist/playground/middleware.d.ts",
+      "import": "./dist/playground/middleware.mjs",
+      "require": "./dist/playground/middleware.cjs"
+    },
+    "./playground/serialize": {
+      "types": "./dist/playground/serialize.d.ts",
+      "import": "./dist/playground/serialize.mjs",
+      "require": "./dist/playground/serialize.cjs"
+    },
+    "./routes": {
+      "types": "./dist/routes.d.ts",
+      "import": "./dist/routes.mjs",
+      "require": "./dist/routes.cjs"
+    },
+    "./scanner": {
+      "types": "./dist/scanner.d.ts",
+      "import": "./dist/scanner.mjs",
+      "require": "./dist/scanner.cjs"
+    },
+    "./scanner-precheck": {
+      "types": "./dist/scanner-precheck.d.ts",
+      "import": "./dist/scanner-precheck.mjs",
+      "require": "./dist/scanner-precheck.cjs"
+    },
+    "./scanner-types": {
+      "types": "./dist/scanner-types.d.ts",
+      "import": "./dist/scanner-types.mjs",
+      "require": "./dist/scanner-types.cjs"
+    },
+    "./scanner-utils": {
+      "types": "./dist/scanner-utils.d.ts",
+      "import": "./dist/scanner-utils.mjs",
+      "require": "./dist/scanner-utils.cjs"
+    },
+    "./sw": {
+      "types": "./dist/sw.d.ts",
+      "import": "./dist/sw.mjs",
+      "require": "./dist/sw.cjs"
+    },
+    "./shared/constants": {
+      "types": "./dist/shared/constants.d.ts",
+      "import": "./dist/shared/constants.mjs",
+      "require": "./dist/shared/constants.cjs"
+    },
+    "./shared/files": {
+      "types": "./dist/shared/files.d.ts",
+      "import": "./dist/shared/files.mjs",
+      "require": "./dist/shared/files.cjs"
+    },
+    "./shared/logger": {
+      "types": "./dist/shared/logger.d.ts",
+      "import": "./dist/shared/logger.mjs",
+      "require": "./dist/shared/logger.cjs"
+    },
+    "./shared/terminal": {
+      "types": "./dist/shared/terminal.d.ts",
+      "import": "./dist/shared/terminal.mjs",
+      "require": "./dist/shared/terminal.cjs"
+    },
+    "./shared/types": {
+      "types": "./dist/shared/types.d.ts",
+      "import": "./dist/shared/types.mjs",
+      "require": "./dist/shared/types.cjs"
+    },
+    "./shared/utils": {
+      "types": "./dist/shared/utils.d.ts",
+      "import": "./dist/shared/utils.mjs",
+      "require": "./dist/shared/utils.cjs"
+    }
+  },
+  "publishConfig": {
+    "access": "public"
+  },
+  "main": "./dist/index.cjs",
+  "module": "./dist/index.mjs",
+  "types": "./dist/index.d.ts",
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "build": "unbuild",
+    "dev": "unbuild --stub",
+    "lint": "eslint .",
+    "typecheck": "tsc -p tsconfig.json --noEmit"
+  },
+  "dependencies": {
+    "@mokup/playground": "workspace:*",
+    "@mokup/runtime": "workspace:*",
+    "@mokup/shared": "workspace:*"
+  },
+  "devDependencies": {
+    "typescript": "catalog:",
+    "unbuild": "catalog:"
+  }
+}

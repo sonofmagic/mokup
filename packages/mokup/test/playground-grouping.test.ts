@@ -1,5 +1,5 @@
+import { formatRouteFile, resolveGroupRoot, resolveGroups, resolveRouteGroup } from '@mokup/core'
 import { describe, expect, it } from 'vitest'
-import { formatRouteFile, resolveGroupRoot, resolveGroups, resolveRouteGroup } from '../src/core/playground/grouping'
 
 describe('playground grouping', () => {
   it('handles roots and fallbacks', () => {

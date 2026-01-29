@@ -17,9 +17,9 @@
     "node": ">=20.0.0"
   },
   "scripts": {
-    "build": "pnpm build:packages && pnpm build:apps",
+    "build": "turbo run build",
     "build:packages": "turbo run build --filter=./packages/*",
-    "build:apps": "turbo run build --filter=./apps/*",
+    "build:apps": "turbo run build --filter=./apps/*...",
     "dev": "turbo run dev --parallel",
     "docs:build": "pnpm --filter docs build",
     "docs:deploy": "pnpm --filter docs worker:deploy",

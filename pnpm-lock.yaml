@@ -445,11 +445,33 @@ importers:
         specifier: 'catalog:'
         version: 3.6.1(typescript@5.9.3)(vue@3.5.27(typescript@5.9.3))
 
+  packages/core:
+    dependencies:
+      '@mokup/playground':
+        specifier: workspace:*
+        version: link:../playground
+      '@mokup/runtime':
+        specifier: workspace:*
+        version: link:../runtime
+      '@mokup/shared':
+        specifier: workspace:*
+        version: link:../shared
+    devDependencies:
+      typescript:
+        specifier: 'catalog:'
+        version: 5.9.3
+      unbuild:
+        specifier: 'catalog:'
+        version: 3.6.1(typescript@5.9.3)(vue@3.5.27(typescript@5.9.3))
+
   packages/mokup:
     dependencies:
       '@mokup/cli':
         specifier: workspace:*
         version: link:../cli
+      '@mokup/core':
+        specifier: workspace:*
+        version: link:../core
       '@mokup/playground':
         specifier: workspace:*
         version: link:../playground

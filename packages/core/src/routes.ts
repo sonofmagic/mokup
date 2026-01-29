@@ -1,4 +1,4 @@
-import type { HttpMethod, ResolvedRoute, RouteRule } from '../shared/types'
+import type { HttpMethod, ResolvedRoute, RouteRule } from './shared/types'
 
 import { compareRouteScore, parseRouteTemplate } from '@mokup/runtime'
 import { createRouteUtils } from '@mokup/shared/route-utils'

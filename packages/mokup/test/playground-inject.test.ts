@@ -1,5 +1,5 @@
+import { injectPlaygroundHmr, injectPlaygroundSw, isViteDevServer } from '@mokup/core'
 import { describe, expect, it } from 'vitest'
-import { injectPlaygroundHmr, injectPlaygroundSw, isViteDevServer } from '../src/core/playground/inject'
 
 describe('playground html injection', () => {
   it('injects HMR script once', () => {

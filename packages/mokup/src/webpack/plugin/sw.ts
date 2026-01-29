@@ -1,4 +1,4 @@
-import type { resolveSwConfig, resolveSwUnregisterConfig } from '../../core/sw'
+import type { resolveSwConfig, resolveSwUnregisterConfig } from '@mokup/core'
 
 function buildSwLifecycleScript(params: {
   importPath: string

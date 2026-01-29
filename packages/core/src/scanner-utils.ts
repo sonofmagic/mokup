@@ -1,10 +1,10 @@
-import type { Logger, RouteRule } from '../shared/types'
 import type {
   RouteDecisionStep,
   RouteEffectiveConfig,
   RouteSkipInfo,
   RouteSkipReason,
 } from './scanner-types'
+import type { Logger, RouteRule } from './shared/types'
 import { deriveRouteFromFile, resolveRule } from './routes'
 
 const silentLogger: Logger = {

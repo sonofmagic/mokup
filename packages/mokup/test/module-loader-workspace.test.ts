@@ -26,7 +26,7 @@ describe('module loader workspace config', () => {
       const actual = await vi.importActual<typeof import('node:url')>('node:url')
       return {
         ...actual,
-        fileURLToPath: () => '/virtual/mokup/dist/core/module-loader.mjs',
+        fileURLToPath: () => '/virtual/core/dist/module-loader.mjs',
         pathToFileURL: () => actual.pathToFileURL(valueFile),
       }
     })
@@ -37,7 +37,8 @@ describe('module loader workspace config', () => {
         ...actual,
         existsSync: (input: string) => {
           const normalized = input.replace(/\\/g, '/')
-          return normalized.endsWith('/src/index.ts') || normalized.endsWith('/src/vite.ts')
+          return normalized.startsWith('/virtual/mokup/')
+            && (normalized.endsWith('/src/index.ts') || normalized.endsWith('/src/vite.ts'))
         },
         writeFileSync: (_path: string, data: string) => {
           writes.push(data)
@@ -50,7 +51,7 @@ describe('module loader workspace config', () => {
     }))
 
     try {
-      const { loadModule } = await import('../src/core/module-loader')
+      const { loadModule } = await import('@mokup/core')
       const mod = await loadModule('/tmp/mock.ts')
 
       expect(mod?.value).toBe(1)
@@ -60,9 +61,9 @@ describe('module loader workspace config', () => {
 
       expect(writes).toHaveLength(1)
       const config = JSON.parse(writes[0] as string)
-      expect(config.compilerOptions.baseUrl).toBe('/virtual/mokup')
-      expect(config.compilerOptions.paths.mokup).toEqual(['./src/index.ts'])
-      expect(config.compilerOptions.paths['mokup/vite']).toEqual(['./src/vite.ts'])
+      expect(config.compilerOptions.baseUrl).toBe('/virtual/core')
+      expect(config.compilerOptions.paths.mokup).toEqual(['../mokup/src/index.ts'])
+      expect(config.compilerOptions.paths['mokup/vite']).toEqual(['../mokup/src/vite.ts'])
     }
     finally {
       await fs.rm(dir, { recursive: true, force: true })

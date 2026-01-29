@@ -1,6 +1,6 @@
-import { describe, expect, it, vi } from 'vitest'
+import { scanRoutes } from '@mokup/core'
 
-import { scanRoutes } from '../src/core/scanner'
+import { describe, expect, it, vi } from 'vitest'
 
 const mocks = vi.hoisted(() => ({
   resolveDirectoryConfig: vi.fn(),
@@ -8,22 +8,22 @@ const mocks = vi.hoisted(() => ({
   loadRules: vi.fn(),
 }))
 
-vi.mock('../src/core/config', () => ({
+vi.mock('@mokup/core/config', () => ({
   resolveDirectoryConfig: mocks.resolveDirectoryConfig,
 }))
 
-vi.mock('../src/shared/files', () => ({
+vi.mock('@mokup/core/shared/files', () => ({
   collectFiles: mocks.collectFiles,
   isConfigFile: (file: string) => file.endsWith('index.config.ts'),
   isSupportedFile: () => true,
 }))
 
-vi.mock('../src/core/loader', () => ({
+vi.mock('@mokup/core/loader', () => ({
   loadRules: mocks.loadRules,
 }))
 
-vi.mock('../src/core/routes', async () => {
-  const actual = await vi.importActual<typeof import('../src/core/routes')>('../src/core/routes')
+vi.mock('@mokup/core/routes', async () => {
+  const actual = await vi.importActual<typeof import('@mokup/core/routes')>('@mokup/core/routes')
   return {
     ...actual,
     deriveRouteFromFile: () => ({ template: '/ping', method: 'GET', tokens: [], score: [] }),

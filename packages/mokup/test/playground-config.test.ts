@@ -1,5 +1,5 @@
+import { resolvePlaygroundOptions, resolvePlaygroundRequestPath } from '@mokup/core'
 import { describe, expect, it } from 'vitest'
-import { resolvePlaygroundOptions, resolvePlaygroundRequestPath } from '../src/core/playground/config'
 
 describe('playground config helpers', () => {
   it('returns the playground path when it already includes the base', () => {

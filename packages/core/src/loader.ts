@@ -1,5 +1,5 @@
 import type { PreviewServer, ViteDevServer } from 'vite'
-import type { Logger, RouteRule } from '../shared/types'
+import type { Logger, RouteRule } from './shared/types'
 
 import { loadRules as loadRulesShared } from '@mokup/shared/load-rules'
 import { loadModule, loadModuleWithVite } from './module-loader'

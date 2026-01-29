@@ -1,5 +1,5 @@
-import type { Logger, RouteTable } from '../../shared/types'
 import type { RouteIgnoreInfo, RouteSkipInfo } from '../scanner'
+import type { Logger, RouteTable } from '../shared/types'
 import { promises as fs } from 'node:fs'
 import { join, normalize } from '@mokup/shared/pathe'
 import { resolvePlaygroundDist } from './assets'

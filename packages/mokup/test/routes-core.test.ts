@@ -1,6 +1,6 @@
+import { deriveRouteFromFile, resolveRule, sortRoutes } from '@mokup/core'
 import { parseRouteTemplate } from '@mokup/runtime'
 import { describe, expect, it, vi } from 'vitest'
-import { deriveRouteFromFile, resolveRule, sortRoutes } from '../src/core/routes'
 
 function createLogger() {
   return { warn: vi.fn() }

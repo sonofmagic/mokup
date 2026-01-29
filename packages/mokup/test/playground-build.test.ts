@@ -1,8 +1,8 @@
 import { mkdir, mkdtemp, readFile } from 'node:fs/promises'
 import { tmpdir } from 'node:os'
 import { join } from 'node:path'
+import { writePlaygroundBuild } from '@mokup/core'
 import { describe, expect, it, vi } from 'vitest'
-import { writePlaygroundBuild } from '../src/core/playground/build'
 
 describe('playground build output', () => {
   it('writes a playground bundle with routes payload', async () => {

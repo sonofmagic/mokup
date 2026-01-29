@@ -1,6 +1,4 @@
 import type { RouteDecisionStep, RouteIgnoreInfo, RouteSkipInfo } from './scanner-types'
-import { isSupportedFile } from '../shared/files'
-import { hasIgnoredPrefix, normalizeIgnorePrefix, toPosix } from '../shared/utils'
 import {
   buildEffectiveConfig,
   buildSkipInfo,
@@ -9,6 +7,8 @@ import {
   testPatterns,
   toFilterStrings,
 } from './scanner-utils'
+import { isSupportedFile } from './shared/files'
+import { hasIgnoredPrefix, normalizeIgnorePrefix, toPosix } from './shared/utils'
 
 interface ConfigSourceMap {
   headers?: string

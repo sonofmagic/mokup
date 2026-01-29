@@ -1,6 +1,6 @@
+import { resolveSwConfig } from '@mokup/core'
 import { Hono } from '@mokup/shared/hono'
 import { describe, expect, it, vi } from 'vitest'
-import { resolveSwConfig } from '../src/core/sw'
 import { configureDevServer, configurePreviewServer } from '../src/vite/plugin/server-hooks'
 
 function createServerStub() {
