@@ -7,25 +7,16 @@ import { createPlaygroundMiddleware, mimeTypes } from '@mokup/core'
 
 import { describe, expect, it, vi } from 'vitest'
 
-const assetsMocks = vi.hoisted(() => ({
-  resolvePlaygroundDist: vi.fn(),
-}))
-
-vi.mock('@mokup/core', async () => {
-  const actual = await vi.importActual<typeof import('@mokup/core')>('@mokup/core')
-  return { ...actual, resolvePlaygroundDist: assetsMocks.resolvePlaygroundDist }
-})
-
 describe('playground middleware extra', () => {
   it('redirects base paths and blocks invalid paths', async () => {
     const distDir = await mkdtemp(join(tmpdir(), 'mokup-playground-dist-'))
-    assetsMocks.resolvePlaygroundDist.mockReturnValue(distDir)
 
     const logger = { info: vi.fn(), warn: vi.fn(), error: vi.fn(), log: vi.fn() }
     const middleware = createPlaygroundMiddleware({
       config: { enabled: true, path: '/__mokup' },
       logger,
       getRoutes: () => [],
+      resolvePlaygroundDist: () => distDir,
     })
 
     const state = { statusCode: 0, body: '', headers: {} as Record<string, string> }
@@ -57,13 +48,13 @@ describe('playground middleware extra', () => {
 
   it('skips when disabled or path is unrelated', async () => {
     const distDir = await mkdtemp(join(tmpdir(), 'mokup-playground-dist-'))
-    assetsMocks.resolvePlaygroundDist.mockReturnValue(distDir)
 
     const logger = { info: vi.fn(), warn: vi.fn(), error: vi.fn(), log: vi.fn() }
     const disabled = createPlaygroundMiddleware({
       config: { enabled: false, path: '/__mokup' },
       logger,
       getRoutes: () => [],
+      resolvePlaygroundDist: () => distDir,
     })
 
     const nextDisabled = vi.fn()
@@ -74,6 +65,7 @@ describe('playground middleware extra', () => {
       config: { enabled: true, path: '/__mokup' },
       logger,
       getRoutes: () => [],
+      resolvePlaygroundDist: () => distDir,
     })
 
     const nextMissing = vi.fn()
@@ -85,7 +77,6 @@ describe('playground middleware extra', () => {
   it('serves index with injected scripts and base path matching', async () => {
     const distDir = await mkdtemp(join(tmpdir(), 'mokup-playground-dist-'))
     await writeFile(join(distDir, 'index.html'), '<html><body>hi</body></html>', 'utf8')
-    assetsMocks.resolvePlaygroundDist.mockReturnValue(distDir)
 
     const logger = { info: vi.fn(), warn: vi.fn(), error: vi.fn(), log: vi.fn() }
     const middleware = createPlaygroundMiddleware({
@@ -94,6 +85,7 @@ describe('playground middleware extra', () => {
       getRoutes: () => [],
       getServer: () => ({ config: { base: '/base' }, ws: {} }) as never,
       getSwScript: () => 'console.log("sw")',
+      resolvePlaygroundDist: () => distDir,
     })
 
     const originalHtml = mimeTypes['.html']
@@ -134,7 +126,6 @@ describe('playground middleware extra', () => {
 
   it('serves routes with default getters and fallback path matching', async () => {
     const distDir = await mkdtemp(join(tmpdir(), 'mokup-playground-dist-'))
-    assetsMocks.resolvePlaygroundDist.mockReturnValue(distDir)
 
     const logger = { info: vi.fn(), warn: vi.fn(), error: vi.fn(), log: vi.fn() }
     const middleware = createPlaygroundMiddleware({
@@ -142,6 +133,7 @@ describe('playground middleware extra', () => {
       logger,
       getRoutes: () => [],
       getServer: () => ({ config: { base: '/base' } }) as never,
+      resolvePlaygroundDist: () => distDir,
     })
 
     const state = { statusCode: 0, body: '', headers: {} as Record<string, string> }
@@ -169,7 +161,6 @@ describe('playground middleware extra', () => {
   it('serves assets with fallback content types', async () => {
     const distDir = await mkdtemp(join(tmpdir(), 'mokup-playground-dist-'))
     await writeFile(join(distDir, 'asset.bin'), 'bin', 'utf8')
-    assetsMocks.resolvePlaygroundDist.mockReturnValue(distDir)
 
     const logger = { info: vi.fn(), warn: vi.fn(), error: vi.fn(), log: vi.fn() }
     const middleware = createPlaygroundMiddleware({
@@ -177,6 +168,7 @@ describe('playground middleware extra', () => {
       logger,
       getRoutes: () => [],
       getServer: () => ({ config: { base: '/base' } }) as never,
+      resolvePlaygroundDist: () => distDir,
     })
 
     const state = { statusCode: 0, body: '', headers: {} as Record<string, string> }
@@ -202,13 +194,13 @@ describe('playground middleware extra', () => {
   it('logs index errors and defers missing assets', async () => {
     const distDir = await mkdtemp(join(tmpdir(), 'mokup-playground-dist-'))
     await mkdir(join(distDir, 'assets'), { recursive: true })
-    assetsMocks.resolvePlaygroundDist.mockReturnValue(distDir)
 
     const logger = { info: vi.fn(), warn: vi.fn(), error: vi.fn(), log: vi.fn() }
     const middleware = createPlaygroundMiddleware({
       config: { enabled: true, path: '/__mokup' },
       logger,
       getRoutes: () => [],
+      resolvePlaygroundDist: () => distDir,
     })
 
     const res = {

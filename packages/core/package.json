@@ -172,7 +172,6 @@
     }
   },
   "dependencies": {
-    "@mokup/playground": "workspace:*",
     "@mokup/runtime": "workspace:*",
     "@mokup/shared": "workspace:*"
   }

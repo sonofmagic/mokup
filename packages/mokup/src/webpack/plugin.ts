@@ -10,6 +10,7 @@ import type {
 } from './plugin/types'
 import { cwd } from 'node:process'
 import { createMiddleware, createPlaygroundMiddleware, resolvePlaygroundOptions, resolveSwConfig, resolveSwUnregisterConfig } from '@mokup/core'
+import { resolvePlaygroundDist } from '../playground/assets'
 import { createLogger } from '../shared/logger'
 import { resolveDirs } from '../shared/utils'
 import { createBundleBuilder } from './plugin/bundles'
@@ -122,6 +123,7 @@ export function createMokupWebpackPlugin(
     logger,
     getDirs: () => resolveAllDirs(),
     getServer: () => ({ config: { base, root } } as ViteDevServer | PreviewServer),
+    resolvePlaygroundDist,
   })
 
   const swMiddleware = async (

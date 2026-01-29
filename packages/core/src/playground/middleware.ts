@@ -2,6 +2,7 @@ import type { IncomingMessage, ServerResponse } from 'node:http'
 import type { PreviewServer, ViteDevServer } from 'vite'
 import type { RouteIgnoreInfo, RouteSkipInfo } from '../scanner'
 import type { Logger, RouteTable } from '../shared/types'
+import type { PlaygroundDistResolver } from './assets'
 import type { PlaygroundConfig } from './config'
 import { promises as fs } from 'node:fs'
 import { extname, join, normalize } from '@mokup/shared/pathe'
@@ -52,8 +53,9 @@ export function createPlaygroundMiddleware(params: {
   getServer?: () => ViteDevServer | PreviewServer | null
   getDirs?: () => string[]
   getSwScript?: () => string | null
+  resolvePlaygroundDist?: PlaygroundDistResolver
 }) {
-  const distDir = resolvePlaygroundDist()
+  const distDir = resolvePlaygroundDist(params.resolvePlaygroundDist)
   const playgroundPath = params.config.path
   const indexPath = join(distDir, 'index.html')
 

@@ -1,8 +1,11 @@
 import { mkdir, mkdtemp, readFile } from 'node:fs/promises'
 import { tmpdir } from 'node:os'
 import { join } from 'node:path'
+import { fileURLToPath } from 'node:url'
 import { writePlaygroundBuild } from '@mokup/core'
 import { describe, expect, it, vi } from 'vitest'
+
+const playgroundDist = fileURLToPath(new URL('../../playground/dist', import.meta.url))
 
 describe('playground build output', () => {
   it('writes a playground bundle with routes payload', async () => {
@@ -56,6 +59,7 @@ describe('playground build output', () => {
         info: vi.fn(),
         log: vi.fn(),
       },
+      resolvePlaygroundDist: () => playgroundDist,
     })
 
     const routesPayload = await readFile(join(outDir, '__mokup', 'routes'), 'utf8')
@@ -93,6 +97,7 @@ describe('playground build output', () => {
         info: vi.fn(),
         log: vi.fn(),
       },
+      resolvePlaygroundDist: () => playgroundDist,
     })
 
     const indexHtml = await readFile(join(outDir, '__mokup', 'index.html'), 'utf8')

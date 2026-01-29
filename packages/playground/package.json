@@ -27,6 +27,7 @@
   "devDependencies": {
     "@iconify/json": "^2.2.433",
     "@iconify/tailwind": "^1.2.0",
+    "@mokup/core": "workspace:*",
     "@tailwindcss/vite": "catalog:",
     "@vitejs/plugin-vue": "catalog:",
     "tailwind-merge": "^3.4.0",

@@ -3,6 +3,8 @@ import { join } from '@mokup/shared/pathe'
 
 const require = createRequire(import.meta.url)
 
+export type PlaygroundDistResolver = () => string
+
 const mimeTypes: Record<string, string> = {
   '.html': 'text/html; charset=utf-8',
   '.css': 'text/css; charset=utf-8',
@@ -16,7 +18,10 @@ const mimeTypes: Record<string, string> = {
   '.ico': 'image/x-icon',
 }
 
-function resolvePlaygroundDist() {
+function resolvePlaygroundDist(resolver?: PlaygroundDistResolver) {
+  if (resolver) {
+    return resolver()
+  }
   const pkgPath = require.resolve('@mokup/playground/package.json')
   return join(pkgPath, '..', 'dist')
 }

@@ -3,9 +3,12 @@ import type { ViteDevServer } from 'vite'
 import type { Logger, ResolvedRoute, RouteTable } from '../src/shared/types'
 import { Buffer } from 'node:buffer'
 import path from 'node:path'
+import { fileURLToPath } from 'node:url'
 import { createPlaygroundMiddleware, resolvePlaygroundOptions } from '@mokup/core'
 import { parseRouteTemplate } from '@mokup/runtime'
 import { describe, expect, it, vi } from 'vitest'
+
+const playgroundDist = fileURLToPath(new URL('../../playground/dist', import.meta.url))
 
 function toPosixPath(value: string) {
   return value.replace(/\\/g, '/')
@@ -142,6 +145,7 @@ describe('playground routes endpoint', () => {
       logger,
       getDirs: () => [mockDir, extraDir],
       getServer: () => ({ config: { root } }) as never,
+      resolvePlaygroundDist: () => playgroundDist,
     })
 
     const { res, state } = createResponse()
@@ -253,6 +257,7 @@ describe('playground middleware responses', () => {
       getRoutes: () => [],
       config: resolvePlaygroundOptions(true),
       logger,
+      resolvePlaygroundDist: () => playgroundDist,
     })
 
     const { res, state } = createResponse()
@@ -281,6 +286,7 @@ describe('playground middleware responses', () => {
         config: { base: '/base/' },
       }) as ViteDevServer,
       getSwScript: () => 'console.log("sw")',
+      resolvePlaygroundDist: () => playgroundDist,
     })
 
     const { res, state } = createResponse()
@@ -305,6 +311,7 @@ describe('playground middleware responses', () => {
       getRoutes: () => [],
       config: resolvePlaygroundOptions(true),
       logger,
+      resolvePlaygroundDist: () => playgroundDist,
     })
 
     const { res, state } = createResponse()

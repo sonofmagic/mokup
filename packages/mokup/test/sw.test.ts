@@ -75,6 +75,26 @@ describe('mokup SW', () => {
     )
   })
 
+  it('normalizes module rules to handler in SW runtime', () => {
+    const root = path.join('/tmp', 'mokup-sw')
+    const file = path.join(root, 'mock', 'users.get.ts')
+    const parsed = parseRouteTemplate('/api/users')
+    const route: ResolvedRoute = {
+      file,
+      template: parsed.template,
+      method: 'GET',
+      tokens: parsed.tokens,
+      score: parsed.score,
+      handler: () => ({ ok: true }),
+    }
+
+    const code = buildSwScript({ routes: [route], root })
+
+    expect(code).toContain('return { handler: value }')
+    expect(code).toContain('handler: handlerRule.handler')
+    expect(code).toContain('handler: responseRule.response')
+  })
+
   it('inlines non-function handlers into the manifest', () => {
     const root = path.join('/tmp', 'mokup-sw')
     const file = path.join(root, 'mock', 'health.get.json')

@@ -4,6 +4,7 @@ import type { MokupPluginOptions } from '../shared/types'
 import type { PluginState } from './plugin/state'
 import { cwd } from 'node:process'
 import { buildBundleModule, buildSwScript, createPlaygroundMiddleware, resolvePlaygroundOptions, resolveSwConfig, resolveSwUnregisterConfig, writePlaygroundBuild } from '@mokup/core'
+import { resolvePlaygroundDist } from '../playground/assets'
 import { createLogger } from '../shared/logger'
 import { normalizeMokupOptions, normalizeOptions } from './plugin/options'
 import { resolveSwImportPath } from './plugin/paths'
@@ -100,6 +101,7 @@ export function createMokupPlugin(options: MokupPluginOptions = {}): Plugin {
       resolveRequestPath: resolveSwRequestPath,
       resolveRegisterScope: resolveSwRegisterScope,
     }),
+    resolvePlaygroundDist,
   })
 
   const refreshRoutes = createRouteRefresher({
@@ -338,6 +340,7 @@ export function createMokupPlugin(options: MokupPluginOptions = {}): Plugin {
         dirs: resolveAllDirs(),
         swScript,
         logger,
+        resolvePlaygroundDist,
       })
     },
   }

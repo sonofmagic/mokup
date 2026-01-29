@@ -7,14 +7,6 @@ import { describe, expect, it, vi } from 'vitest'
 
 const missingDist = join(tmpdir(), 'mokup-missing-playground-dist')
 
-vi.mock('@mokup/core', async () => {
-  const actual = await vi.importActual<typeof import('@mokup/core')>('@mokup/core')
-  return {
-    ...actual,
-    resolvePlaygroundDist: () => missingDist,
-  }
-})
-
 describe('playground build errors', () => {
   it('bails out when output matches outDir', async () => {
     const root = await mkdtemp(join(tmpdir(), 'mokup-playground-error-'))
@@ -35,6 +27,7 @@ describe('playground build errors', () => {
       dirs: [],
       swScript: null,
       logger,
+      resolvePlaygroundDist: () => missingDist,
     })
 
     expect(logger.error).toHaveBeenCalled()
@@ -58,6 +51,7 @@ describe('playground build errors', () => {
       dirs: [],
       swScript: null,
       logger,
+      resolvePlaygroundDist: () => missingDist,
     })
 
     expect(logger.error).toHaveBeenCalled()

@@ -1,5 +1,6 @@
 import type { RouteIgnoreInfo, RouteSkipInfo } from '../scanner'
 import type { Logger, RouteTable } from '../shared/types'
+import type { PlaygroundDistResolver } from './assets'
 import { promises as fs } from 'node:fs'
 import { join, normalize } from '@mokup/shared/pathe'
 import { resolvePlaygroundDist } from './assets'
@@ -26,6 +27,7 @@ interface PlaygroundBuildParams {
   dirs: string[]
   swScript: string | null
   logger: Logger
+  resolvePlaygroundDist?: PlaygroundDistResolver
 }
 
 function resolvePlaygroundOutDir(outDir: string, playgroundPath: string) {
@@ -86,7 +88,7 @@ async function removeLegacySwAsset(targetDir: string) {
 }
 
 export async function writePlaygroundBuild(params: PlaygroundBuildParams) {
-  const distDir = resolvePlaygroundDist()
+  const distDir = resolvePlaygroundDist(params.resolvePlaygroundDist)
   const targetDir = resolvePlaygroundOutDir(params.outDir, params.playgroundPath)
   if (targetDir === params.outDir) {
     params.logger.error('Playground build path resolves to the Vite outDir. Aborting output.')
