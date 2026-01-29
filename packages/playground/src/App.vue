@@ -61,6 +61,7 @@ const {
   headersText,
   bodyText,
   bodyType,
+  multipartFiles,
   responseText,
   responseStatus,
   responseTime,
@@ -275,6 +276,7 @@ onBeforeUnmount(() => {
                   v-model:headersText="headersText"
                   v-model:bodyText="bodyText"
                   v-model:bodyType="bodyType"
+                  v-model:multipartFiles="multipartFiles"
                   :selected="selected"
                   :selected-disabled="selectedDisabled"
                   :selected-ignored="selectedIgnored"

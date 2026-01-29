@@ -153,6 +153,84 @@ describe('request runner', () => {
     expect(routeCounts.value['POST /upload/:id']).toBe(beforeCount)
   })
 
+  it('includes multipart files in FormData', async () => {
+    const route = { method: 'POST', url: '/upload/[id]', file: 'upload.ts', type: 'handler' }
+    const tokens = parseRouteTemplate(route.url).tokens
+    const selected = ref(route)
+    const routeTokens = ref(tokens)
+    const paramValues = ref<Record<string, string>>({ id: '1' })
+    const queryText = ref('')
+    const headersText = ref('')
+    const bodyText = ref('note=alpha')
+    const bodyType = ref<'json' | 'text' | 'form' | 'multipart' | 'base64'>('multipart')
+    const multipartFiles = ref([
+      {
+        id: 'row-1',
+        name: 'files',
+        files: [new File(['hello'], 'hello.txt', { type: 'text/plain' })],
+      },
+    ])
+    const responseText = ref('')
+    const responseStatus = ref('')
+    const responseTime = ref('')
+    const routeCounts = ref<Record<string, number>>({})
+    const isServerCounts = ref(false)
+
+    vi.stubGlobal('window', { location: { origin: 'http://localhost' } })
+    vi.stubGlobal('performance', { now: vi.fn(() => 10) })
+
+    const fetchMock = vi.fn().mockResolvedValue({
+      status: 200,
+      statusText: 'OK',
+      headers: { get: () => 'application/json' },
+      text: vi.fn().mockResolvedValue('{"ok":true}'),
+    })
+    vi.stubGlobal('fetch', fetchMock)
+
+    const runner = createRequestRunner({
+      t: (key: string) => key,
+      selected,
+      routeTokens,
+      paramValues,
+      queryText,
+      headersText,
+      bodyText,
+      bodyType,
+      multipartFiles,
+      responseText,
+      responseStatus,
+      responseTime,
+      routeCounts,
+      isServerCounts,
+      ensureSwReady: async () => true,
+      getRouteKey: () => 'POST /upload/:id',
+    })
+
+    await runner.runRequest()
+    const init = fetchMock.mock.calls.at(-1)?.[1] as RequestInit
+    const formData = init.body as FormData
+    const entries = Array.from(formData.entries())
+    expect(entries).toEqual(expect.arrayContaining([
+      ['note', 'alpha'],
+      ['files', expect.any(File)],
+    ]))
+
+    bodyText.value = ''
+    multipartFiles.value = [
+      {
+        id: 'row-2',
+        name: 'assets',
+        files: [
+          new File(['one'], 'one.txt', { type: 'text/plain' }),
+          new File(['two'], 'two.txt', { type: 'text/plain' }),
+        ],
+      },
+    ]
+    await runner.runRequest()
+    const secondInit = fetchMock.mock.calls.at(-1)?.[1] as RequestInit
+    expect(secondInit.body).toBeInstanceOf(FormData)
+  })
+
   it('does not override Content-Type when headers are provided', async () => {
     const route = { method: 'POST', url: '/upload/[id]', file: 'upload.ts', type: 'handler' }
     const tokens = parseRouteTemplate(route.url).tokens

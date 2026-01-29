@@ -1,6 +1,6 @@
 import type { RouteToken } from '@mokup/runtime'
 import type { Ref } from 'vue'
-import type { BodyType, PlaygroundRoute, RouteParamField } from '../types'
+import type { BodyType, MultipartFileEntry, PlaygroundRoute, RouteParamField } from '../types'
 import type { RouteCounts } from './playground-request/websocket'
 import { parseRouteTemplate } from '@mokup/runtime'
 import { computed, getCurrentInstance, onBeforeUnmount, ref, watch } from 'vue'
@@ -36,6 +36,7 @@ export function usePlaygroundRequest(
   const headersText = ref('')
   const bodyText = ref('')
   const bodyType = ref<BodyType>('json')
+  const multipartFiles = ref<MultipartFileEntry[]>([])
   const responseText = ref(t('response.empty'))
   const responseStatus = ref(t('response.idle'))
   const responseTime = ref('')
@@ -234,6 +235,7 @@ export function usePlaygroundRequest(
     headersText,
     bodyText,
     bodyType,
+    multipartFiles,
     responseText,
     responseStatus,
     responseTime,
@@ -257,6 +259,7 @@ export function usePlaygroundRequest(
     headersText,
     bodyText,
     bodyType,
+    multipartFiles,
     responseText,
     responseStatus,
     responseTime,

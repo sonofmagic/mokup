@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import type { BodyType, PlaygroundRoute, RouteParamField } from '../types'
+import type { BodyType, MultipartFileEntry, PlaygroundRoute, RouteParamField } from '../types'
 import { useI18n } from 'vue-i18n'
 import RouteDetailRequest from './RouteDetailRequest.vue'
 import RouteDetailResponse from './RouteDetailResponse.vue'
@@ -16,6 +16,7 @@ const props = defineProps<{
   headersText: string
   bodyText: string
   bodyType: BodyType
+  multipartFiles: MultipartFileEntry[]
   responseText: string
   responseStatus: string
   responseTime: string
@@ -28,6 +29,7 @@ const emit = defineEmits<{
   (event: 'update:headersText', value: string): void
   (event: 'update:bodyText', value: string): void
   (event: 'update:bodyType', value: BodyType): void
+  (event: 'update:multipartFiles', value: MultipartFileEntry[]): void
   (event: 'update:param-value', name: string, value: string): void
   (event: 'run'): void
 }>()
@@ -58,12 +60,14 @@ const { t } = useI18n()
         :headers-text="props.headersText"
         :body-text="props.bodyText"
         :body-type="props.bodyType"
+        :multipart-files="props.multipartFiles"
         :is-sw-registering="props.isSwRegistering"
         :config-status-map="props.configStatusMap"
         @update:queryText="emit('update:queryText', $event)"
         @update:headersText="emit('update:headersText', $event)"
         @update:bodyText="emit('update:bodyText', $event)"
         @update:bodyType="emit('update:bodyType', $event)"
+        @update:multipartFiles="emit('update:multipartFiles', $event)"
         @update:param-value="(name, value) => emit('update:param-value', name, value)"
         @run="emit('run')"
       />

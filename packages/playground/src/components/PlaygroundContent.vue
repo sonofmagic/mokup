@@ -1,5 +1,7 @@
 <script setup lang="ts">
 import type {
+  BodyType,
+  MultipartFileEntry,
   PlaygroundConfigFile,
   PlaygroundConfigImpactRoute,
   PlaygroundDisabledRoute,
@@ -27,6 +29,8 @@ const props = defineProps<{
   queryText: string
   headersText: string
   bodyText: string
+  bodyType: BodyType
+  multipartFiles: MultipartFileEntry[]
   responseText: string
   responseStatus: string
   responseTime: string
@@ -42,6 +46,8 @@ const emit = defineEmits<{
   (event: 'update:queryText', value: string): void
   (event: 'update:headersText', value: string): void
   (event: 'update:bodyText', value: string): void
+  (event: 'update:bodyType', value: BodyType): void
+  (event: 'update:multipartFiles', value: MultipartFileEntry[]): void
   (event: 'update:param-value', name: string, value: string): void
   (event: 'run'): void
 }>()
@@ -89,6 +95,14 @@ const bodyModel = computed({
   get: () => props.bodyText,
   set: value => emit('update:bodyText', value),
 })
+const bodyTypeModel = computed({
+  get: () => props.bodyType,
+  set: value => emit('update:bodyType', value),
+})
+const multipartFilesModel = computed({
+  get: () => props.multipartFiles,
+  set: value => emit('update:multipartFiles', value),
+})
 const resolvedWorkspaceRoot = computed(() => props.workspaceRoot ?? '')
 
 function handleParamUpdate(name: string, value: string) {
@@ -106,6 +120,8 @@ function handleRun() {
     v-model:queryText="queryModel"
     v-model:headersText="headersModel"
     v-model:bodyText="bodyModel"
+    v-model:bodyType="bodyTypeModel"
+    v-model:multipartFiles="multipartFilesModel"
     :selected="props.selected"
     :request-url="props.requestUrl"
     :workspace-root="resolvedWorkspaceRoot"

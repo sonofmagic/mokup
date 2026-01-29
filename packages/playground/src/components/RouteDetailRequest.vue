@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import type { BodyType, PlaygroundRoute, RouteParamField } from '../types'
+import type { BodyType, MultipartFileEntry, PlaygroundRoute, RouteParamField } from '../types'
 import { computed, nextTick, onBeforeUnmount, ref, toRefs, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 import RouteDetailConfigChain from './RouteDetailConfigChain.vue'
@@ -24,6 +24,7 @@ const props = defineProps<{
   headersText: string
   bodyText: string
   bodyType: BodyType
+  multipartFiles: MultipartFileEntry[]
   isSwRegistering: boolean
   configStatusMap: Map<string, 'enabled' | 'disabled'>
 }>()
@@ -32,6 +33,7 @@ const emit = defineEmits<{
   (event: 'update:headersText', value: string): void
   (event: 'update:bodyText', value: string): void
   (event: 'update:bodyType', value: BodyType): void
+  (event: 'update:multipartFiles', value: MultipartFileEntry[]): void
   (event: 'update:param-value', name: string, value: string): void
   (event: 'run'): void
 }>()
@@ -46,6 +48,7 @@ const activeTab = ref<RequestTab>('query')
 const missingPulseActive = ref(false)
 const missingParamRefs = new Map<string, HTMLElement>()
 let missingPulseTimeout: ReturnType<typeof setTimeout> | null = null
+let multipartRowId = 0
 
 const missingParamsSet = computed(() => new Set(props.missingParams))
 const hasMissingParams = computed(() => props.missingParams.length > 0)
@@ -179,6 +182,46 @@ function resolveBodyPlaceholder() {
 }
 
 const configChain = computed(() => props.selected.configChain ?? [])
+
+function createMultipartRow(): MultipartFileEntry {
+  multipartRowId += 1
+  return {
+    id: `multipart-${multipartRowId}`,
+    name: '',
+    files: [],
+  }
+}
+
+function addMultipartRow() {
+  emit('update:multipartFiles', [...props.multipartFiles, createMultipartRow()])
+}
+
+function removeMultipartRow(id: string) {
+  emit('update:multipartFiles', props.multipartFiles.filter(row => row.id !== id))
+}
+
+function updateMultipartName(id: string, value: string) {
+  emit(
+    'update:multipartFiles',
+    props.multipartFiles.map(row => (row.id === id ? { ...row, name: value } : row)),
+  )
+}
+
+function updateMultipartFiles(id: string, event: Event) {
+  const input = event.target as HTMLInputElement | null
+  const files = Array.from(input?.files ?? [])
+  emit(
+    'update:multipartFiles',
+    props.multipartFiles.map(row => (row.id === id ? { ...row, files } : row)),
+  )
+}
+
+function resolveMultipartLabel(row: MultipartFileEntry) {
+  if (row.files.length === 0) {
+    return t('detail.bodyMultipartChoose')
+  }
+  return t('detail.bodyMultipartCount', { count: row.files.length })
+}
 </script>
 
 <template>
@@ -344,6 +387,49 @@ const configChain = computed(() => props.selected.configChain ?? [])
               @input="emit('update:bodyText', ($event.target as HTMLTextAreaElement | null)?.value ?? '')"
             />
           </UiField>
+          <div v-if="props.bodyType === 'multipart'" class="mt-4">
+            <UiField :label="t('detail.bodyMultipartFiles')">
+              <div class="mt-2 flex flex-col gap-2">
+                <div
+                  v-for="row in props.multipartFiles"
+                  :key="row.id"
+                  class="rounded-xl border p-3 border-pg-border bg-pg-surface-strong"
+                >
+                  <div class="flex flex-col gap-2 lg:flex-row lg:items-center">
+                    <UiTextInput
+                      class="flex-1"
+                      :value="row.name"
+                      :placeholder="t('detail.bodyMultipartField')"
+                      @input="updateMultipartName(row.id, ($event.target as HTMLInputElement | null)?.value ?? '')"
+                    />
+                    <label class="flex items-center gap-2 rounded-lg border px-3 py-2 text-[0.7rem] uppercase tracking-[0.2em] border-pg-border bg-pg-surface-card text-pg-text-muted">
+                      <input
+                        class="sr-only"
+                        type="file"
+                        multiple
+                        @change="updateMultipartFiles(row.id, $event)"
+                      >
+                      <span>{{ resolveMultipartLabel(row) }}</span>
+                    </label>
+                    <button
+                      class="rounded-lg border px-3 py-2 text-[0.7rem] uppercase tracking-[0.2em] transition border-pg-border bg-pg-surface-card text-pg-text-muted hover:text-pg-text-soft"
+                      type="button"
+                      @click="removeMultipartRow(row.id)"
+                    >
+                      {{ t('detail.bodyMultipartRemove') }}
+                    </button>
+                  </div>
+                </div>
+                <button
+                  class="w-full rounded-lg border px-3 py-2 text-[0.7rem] uppercase tracking-[0.2em] transition border-dashed border-pg-border bg-pg-surface-card text-pg-text-muted hover:text-pg-text-soft"
+                  type="button"
+                  @click="addMultipartRow"
+                >
+                  {{ t('detail.bodyMultipartAdd') }}
+                </button>
+              </div>
+            </UiField>
+          </div>
         </div>
       </div>
     </div>

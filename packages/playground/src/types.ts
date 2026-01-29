@@ -221,6 +221,24 @@ export interface PlaygroundResponse {
 export type BodyType = 'json' | 'text' | 'form' | 'multipart' | 'base64'
 
 /**
+ * Multipart file field row for playground requests.
+ *
+ * @example
+ * import type { MultipartFileEntry } from '@mokup/playground'
+ *
+ * const entry: MultipartFileEntry = {
+ *   id: 'upload-1',
+ *   name: 'files',
+ *   files: [],
+ * }
+ */
+export interface MultipartFileEntry {
+  id: string
+  name: string
+  files: File[]
+}
+
+/**
  * Supported route param kinds.
  *
  * @example

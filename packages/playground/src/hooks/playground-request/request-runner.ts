@@ -1,6 +1,6 @@
 import type { RouteToken } from '@mokup/runtime'
 import type { Ref } from 'vue'
-import type { BodyType, PlaygroundRoute } from '../../types'
+import type { BodyType, MultipartFileEntry, PlaygroundRoute } from '../../types'
 import type { RouteCounts } from './websocket'
 import { parseRouteTemplate } from '@mokup/runtime'
 import { applyQuery, parseJsonInput } from '../../utils/request'
@@ -17,6 +17,7 @@ function createRequestRunner(params: {
   headersText: Ref<string>
   bodyText: Ref<string>
   bodyType: Ref<BodyType>
+  multipartFiles?: Ref<MultipartFileEntry[]>
   responseText: Ref<string>
   responseStatus: Ref<string>
   responseTime: Ref<string>
@@ -116,10 +117,21 @@ function createRequestRunner(params: {
       }
       else if (params.bodyType.value === 'multipart') {
         const entries = parseKeyValueInput(rawBody)
-        if (entries.length > 0) {
+        const fileEntries = (params.multipartFiles?.value ?? [])
+          .map(entry => ({
+            name: entry.name.trim(),
+            files: entry.files,
+          }))
+          .filter(entry => entry.name.length > 0 && entry.files.length > 0)
+        if (entries.length > 0 || fileEntries.length > 0) {
           const formData = new FormData()
           for (const [key, value] of entries) {
             formData.append(key, value)
+          }
+          for (const entry of fileEntries) {
+            for (const file of entry.files) {
+              formData.append(entry.name, file)
+            }
           }
           init.body = formData
         }

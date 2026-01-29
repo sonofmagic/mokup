@@ -51,12 +51,29 @@ async function echo() {
   setOutput(result)
 }
 
+async function upload() {
+  const formData = new FormData()
+  formData.append('title', 'Mokup upload')
+  formData.append('note', 'Sent from the SW demo')
+  formData.append('files', new File(['hello'], 'hello.txt', { type: 'text/plain' }))
+  formData.append('files', new File(['world'], 'world.txt', { type: 'text/plain' }))
+  const result = await fetchJson('/api/upload', {
+    method: 'POST',
+    body: formData,
+  })
+  setOutput(result)
+}
+
 document.querySelector('[data-action="ping"]')?.addEventListener('click', () => {
   void ping()
 })
 
 document.querySelector('[data-action="echo"]')?.addEventListener('click', () => {
   void echo()
+})
+
+document.querySelector('[data-action="upload"]')?.addEventListener('click', () => {
+  void upload()
 })
 
 updateSwStatus()

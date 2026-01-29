@@ -9,6 +9,8 @@ const busy = ref(false)
 const userId = ref('1')
 const loginUsername = ref('mokup')
 const loginPassword = ref('123456')
+const uploadTitle = ref('Mokup upload')
+const uploadFiles = ref<File[]>([])
 
 async function runRequest(label: string, url: string, init?: RequestInit) {
   busy.value = true
@@ -59,6 +61,26 @@ function submitLogin() {
       username: loginUsername.value,
       password: loginPassword.value,
     }),
+  })
+}
+
+function handleUploadFiles(event: Event) {
+  const input = event.target as HTMLInputElement | null
+  uploadFiles.value = Array.from(input?.files ?? [])
+}
+
+function submitUpload() {
+  const formData = new FormData()
+  const title = uploadTitle.value.trim()
+  if (title) {
+    formData.append('title', title)
+  }
+  for (const file of uploadFiles.value) {
+    formData.append('files', file)
+  }
+  return runRequest('upload', '/api/upload', {
+    method: 'POST',
+    body: formData,
   })
 }
 </script>
@@ -131,6 +153,25 @@ function submitLogin() {
             </button>
           </div>
         </div>
+
+        <div class="card">
+          <div>
+            <h2>Upload</h2>
+            <p class="endpoint">
+              POST /api/upload (multipart/form-data)
+            </p>
+          </div>
+          <div class="stack">
+            <input v-model="uploadTitle" class="input" type="text" placeholder="Title">
+            <input class="input file-input" type="file" multiple @change="handleUploadFiles">
+            <p class="hint">
+              {{ uploadFiles.length ? `${uploadFiles.length} files selected` : 'Select files to upload.' }}
+            </p>
+            <button class="btn" :disabled="busy" @click="submitUpload">
+              Run
+            </button>
+          </div>
+        </div>
       </section>
 
       <section class="panel response">
@@ -156,6 +197,7 @@ function submitLogin() {
           <li><span class="tag">GET</span> /api/profile (defineHandler)</li>
           <li><span class="tag">GET</span> /api/users/:id (dynamic)</li>
           <li><span class="tag">POST</span> /api/login</li>
+          <li><span class="tag">POST</span> /api/upload (multipart)</li>
           <li><span class="tag">GET</span> /api/status (json file)</li>
           <li><span class="tag">GET</span> /api/summary (jsonc file)</li>
           <li><span class="tag">GET</span> /api/items</li>
@@ -313,6 +355,18 @@ h1 {
   border-radius: 12px;
   border: 1px solid #e2d6ca;
   font-size: 0.95rem;
+}
+
+.file-input {
+  border-style: dashed;
+  background: #fffaf4;
+  font-size: 0.85rem;
+}
+
+.hint {
+  margin: 0;
+  font-size: 0.8rem;
+  color: #6b7280;
 }
 
 .btn {
