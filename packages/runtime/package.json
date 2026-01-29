@@ -30,7 +30,8 @@
     "build": "unbuild",
     "dev": "unbuild --stub",
     "lint": "eslint .",
-    "typecheck": "tsc -p tsconfig.json --noEmit"
+    "typecheck": "tsc -p tsconfig.json --noEmit",
+    "test:types": "tsd"
   },
   "dependencies": {
     "@mokup/shared": "workspace:*"
