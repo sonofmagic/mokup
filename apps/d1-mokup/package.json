@@ -6,13 +6,11 @@
   "homepage": "https://mokup.icebreaker.top",
   "scripts": {
     "dev": "vite --host",
-    "prebuild": "pnpm --filter mokup build",
     "build": "vite build",
     "preview": "vite preview",
     "typecheck": "tsc -p tsconfig.json --noEmit",
     "db:generate": "drizzle-kit generate",
     "db:migrate": "drizzle-kit migrate",
-    "preworker:deploy": "pnpm --filter mokup build",
     "worker:deploy": "vite build && wrangler deploy"
   },
   "dependencies": {

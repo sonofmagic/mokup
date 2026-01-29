@@ -87,12 +87,6 @@
     "@hono/node-ws": "^1.1.1",
     "@mokup/playground": "workspace:*",
     "@mokup/runtime": "workspace:*",
-    "@mokup/shared": "workspace:*",
-    "tsx": "catalog:"
-  },
-  "devDependencies": {
-    "@types/node": "catalog:",
-    "typescript": "catalog:",
-    "unbuild": "catalog:"
+    "@mokup/shared": "workspace:*"
   }
 }

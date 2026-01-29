@@ -7,6 +7,7 @@ import HtmlWebpackPlugin from 'html-webpack-plugin'
 import { mokupWebpack } from 'mokup/webpack'
 import { VueLoaderPlugin } from 'vue-loader'
 import { DefinePlugin } from 'webpack'
+import { getMokupWebpackAliases } from '../../scripts/mokup-alias.mjs'
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url))
 
@@ -32,6 +33,7 @@ function config(_env: unknown, argv: { mode?: string }): Configuration {
     resolve: {
       extensions: ['.ts', '.js', '.vue', '.json'],
       alias: {
+        ...getMokupWebpackAliases(),
         vue$: 'vue/dist/vue.esm-bundler.js',
       },
     },

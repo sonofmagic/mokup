@@ -128,6 +128,9 @@ importers:
       stylelint:
         specifier: ^17.0.0
         version: 17.0.0(typescript@5.9.3)
+      tsd:
+        specifier: ^0.33.0
+        version: 0.33.0
       tsdown:
         specifier: 0.20.1
         version: 0.20.1(synckit@0.11.12)(typescript@5.9.3)
@@ -434,16 +437,6 @@ importers:
       commander:
         specifier: ^14.0.0
         version: 14.0.2
-    devDependencies:
-      '@types/node':
-        specifier: 'catalog:'
-        version: 25.0.10
-      typescript:
-        specifier: 'catalog:'
-        version: 5.9.3
-      unbuild:
-        specifier: 'catalog:'
-        version: 3.6.1(typescript@5.9.3)(vue@3.5.27(typescript@5.9.3))
 
   packages/core:
     dependencies:
@@ -456,15 +449,8 @@ importers:
       '@mokup/shared':
         specifier: workspace:*
         version: link:../shared
-    devDependencies:
-      typescript:
-        specifier: 'catalog:'
-        version: 5.9.3
-      unbuild:
-        specifier: 'catalog:'
-        version: 3.6.1(typescript@5.9.3)(vue@3.5.27(typescript@5.9.3))
       vite:
-        specifier: 'catalog:'
+        specifier: ^5.0.0 || ^6.0.0 || ^7.0.0
         version: 7.3.1(@types/node@25.0.10)(jiti@2.6.1)(lightningcss@1.30.2)(terser@5.46.0)(tsx@4.21.0)(yaml@2.8.2)
 
   packages/mokup:
@@ -493,27 +479,18 @@ importers:
       picocolors:
         specifier: ^1.1.1
         version: 1.1.1
+      vite:
+        specifier: ^5.0.0 || ^6.0.0 || ^7.0.0
+        version: 7.3.1(@types/node@25.0.10)(jiti@2.6.1)(lightningcss@1.30.2)(terser@5.46.0)(tsx@4.21.0)(yaml@2.8.2)
       webpack:
         specifier: ^5.0.0
         version: 5.104.1(esbuild@0.27.2)
-    devDependencies:
-      '@types/node':
-        specifier: 'catalog:'
-        version: 25.0.10
-      tsd:
-        specifier: ^0.33.0
-        version: 0.33.0
-      typescript:
-        specifier: 'catalog:'
-        version: 5.9.3
-      unbuild:
-        specifier: 'catalog:'
-        version: 3.6.1(typescript@5.9.3)(vue@3.5.27(typescript@5.9.3))
-      vite:
-        specifier: 'catalog:'
-        version: 7.3.1(@types/node@25.0.10)(jiti@2.6.1)(lightningcss@1.30.2)(terser@5.46.0)(tsx@4.21.0)(yaml@2.8.2)
 
   packages/playground:
+    dependencies:
+      '@mokup/runtime':
+        specifier: workspace:*
+        version: link:../runtime
     devDependencies:
       '@iconify/json':
         specifier: ^2.2.432
@@ -521,9 +498,6 @@ importers:
       '@iconify/tailwind':
         specifier: ^1.2.0
         version: 1.2.0
-      '@mokup/runtime':
-        specifier: workspace:*
-        version: link:../runtime
       '@tailwindcss/vite':
         specifier: 'catalog:'
         version: 4.1.18(vite@7.3.1(@types/node@25.0.10)(jiti@2.6.1)(lightningcss@1.30.2)(terser@5.46.0)(tsx@4.21.0)(yaml@2.8.2))
@@ -557,13 +531,6 @@ importers:
       '@mokup/shared':
         specifier: workspace:*
         version: link:../shared
-    devDependencies:
-      typescript:
-        specifier: 'catalog:'
-        version: 5.9.3
-      unbuild:
-        specifier: 'catalog:'
-        version: 3.6.1(typescript@5.9.3)(vue@3.5.27(typescript@5.9.3))
 
   packages/server:
     dependencies:
@@ -582,19 +549,6 @@ importers:
       '@mokup/shared':
         specifier: workspace:*
         version: link:../shared
-      tsx:
-        specifier: 'catalog:'
-        version: 4.21.0
-    devDependencies:
-      '@types/node':
-        specifier: 'catalog:'
-        version: 25.0.10
-      typescript:
-        specifier: 'catalog:'
-        version: 5.9.3
-      unbuild:
-        specifier: 'catalog:'
-        version: 3.6.1(typescript@5.9.3)(vue@3.5.27(typescript@5.9.3))
 
   packages/shared:
     dependencies:
@@ -619,13 +573,6 @@ importers:
       tsx:
         specifier: 'catalog:'
         version: 4.21.0
-    devDependencies:
-      typescript:
-        specifier: 'catalog:'
-        version: 5.9.3
-      unbuild:
-        specifier: 'catalog:'
-        version: 3.6.1(typescript@5.9.3)(vue@3.5.27(typescript@5.9.3))
 
 packages:
 

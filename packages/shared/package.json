@@ -137,9 +137,5 @@
     "jsonc-parser": "^3.3.1",
     "pathe": "catalog:",
     "tsx": "catalog:"
-  },
-  "devDependencies": {
-    "typescript": "catalog:",
-    "unbuild": "catalog:"
   }
 }

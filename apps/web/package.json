@@ -7,9 +7,7 @@
   "scripts": {
     "dev": "vite --host",
     "worker:dev": "vite --host",
-    "prebuild": "pnpm --filter mokup build",
     "build": "vite build",
-    "preworker:deploy": "pnpm --filter mokup build",
     "worker:deploy": "vite build && wrangler deploy",
     "preview": "vite preview",
     "lint": "eslint .",

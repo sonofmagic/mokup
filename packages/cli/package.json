@@ -37,10 +37,5 @@
     "@mokup/server": "workspace:*",
     "@mokup/shared": "workspace:*",
     "commander": "^14.0.0"
-  },
-  "devDependencies": {
-    "@types/node": "catalog:",
-    "typescript": "catalog:",
-    "unbuild": "catalog:"
   }
 }

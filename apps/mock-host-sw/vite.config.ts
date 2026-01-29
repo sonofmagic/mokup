@@ -1,8 +1,12 @@
 import mokup from 'mokup/vite'
 import { defineConfig } from 'vite'
 import { VitePWA } from 'vite-plugin-pwa'
+import { getMokupViteAliases } from '../../scripts/mokup-alias.mjs'
 
 export default defineConfig({
+  resolve: {
+    alias: getMokupViteAliases(),
+  },
   plugins: [
     mokup({
       entries: {

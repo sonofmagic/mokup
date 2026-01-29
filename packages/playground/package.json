@@ -21,10 +21,12 @@
     "dev": "vite --host",
     "preview": "vite preview"
   },
+  "dependencies": {
+    "@mokup/runtime": "workspace:*"
+  },
   "devDependencies": {
     "@iconify/json": "^2.2.432",
     "@iconify/tailwind": "^1.2.0",
-    "@mokup/runtime": "workspace:*",
     "@tailwindcss/vite": "catalog:",
     "@vitejs/plugin-vue": "catalog:",
     "tailwind-merge": "^3.4.0",

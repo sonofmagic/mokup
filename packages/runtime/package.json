@@ -34,9 +34,5 @@
   },
   "dependencies": {
     "@mokup/shared": "workspace:*"
-  },
-  "devDependencies": {
-    "typescript": "catalog:",
-    "unbuild": "catalog:"
   }
 }

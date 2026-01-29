@@ -3,11 +3,21 @@
     // 指定 ECMAScript 目标版本，ESNext 表示支持最新的 ES 特性
     "target": "ESNext",
 
+    // 统一 workspace 内 mokup 源码路径解析，避免依赖 dist 产物
+    "baseUrl": ".",
     // 指定模块系统，ESNext 使用原生 ES 模块 (import/export)
     "module": "ESNext",
 
     // 模块解析策略，Bundler 模式适用于打包工具（如 Vite、Webpack），支持更宽松的解析规则
     "moduleResolution": "Bundler",
+    "paths": {
+      "mokup": [
+        "packages/mokup/src/index.ts"
+      ],
+      "mokup/*": [
+        "packages/mokup/src/*"
+      ]
+    },
 
     // 允许导入 .json 文件，并自动生成类型声明
     "resolveJsonModule": true,
