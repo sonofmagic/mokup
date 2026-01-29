@@ -15,7 +15,7 @@
 
 ## Implementation Plan
 
-- Install `@tailwindcss/vite` + `tailwindcss` in `apps/docs`.
+- Install `@tailwindcss/vite` + `tailwindcss` in `apps/mokup-docs`.
 - Register Tailwind Vite plugin in `docs/.vitepress/config.ts`.
 - Replace `docs/.vitepress/theme/custom.css` with Tailwind v4 CSS:
   - `@import "tailwindcss";`
@@ -32,5 +32,5 @@
 
 ## Testing
 
-- Run `pnpm -C apps/docs dev` and validate layout in light/dark.
+- Run `pnpm -C apps/mokup-docs dev` and validate layout in light/dark.
 - Check `/playground` still loads and inherits the global theme.

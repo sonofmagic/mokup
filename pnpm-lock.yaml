@@ -162,7 +162,7 @@ importers:
         specifier: ^2.8.2
         version: 2.8.2
 
-  apps/d1-mokup:
+  apps/mokup-d1-demo:
     dependencies:
       better-auth:
         specifier: ^1.4.18
@@ -205,7 +205,7 @@ importers:
         specifier: 'catalog:'
         version: 4.61.0(@cloudflare/workers-types@4.20260129.0)
 
-  apps/docs:
+  apps/mokup-docs:
     dependencies:
       '@faker-js/faker':
         specifier: 'catalog:'
@@ -236,7 +236,7 @@ importers:
         specifier: 'catalog:'
         version: 4.61.0(@cloudflare/workers-types@4.20260129.0)
 
-  apps/middleware:
+  apps/mokup-middleware-demo:
     dependencies:
       '@faker-js/faker':
         specifier: 'catalog:'
@@ -258,7 +258,7 @@ importers:
         specifier: 'catalog:'
         version: 5.9.3
 
-  apps/mixture:
+  apps/mokup-web-demo:
     dependencies:
       '@faker-js/faker':
         specifier: 'catalog:'
@@ -301,7 +301,7 @@ importers:
         specifier: 'catalog:'
         version: 4.61.0(@cloudflare/workers-types@4.20260129.0)
 
-  apps/node:
+  apps/mokup-node-demo:
     dependencies:
       '@faker-js/faker':
         specifier: 'catalog:'
@@ -320,7 +320,7 @@ importers:
         specifier: 'catalog:'
         version: 5.9.3
 
-  apps/vite-host-sw:
+  apps/mokup-vite-host-sw-demo:
     dependencies:
       '@faker-js/faker':
         specifier: 'catalog:'
@@ -328,7 +328,13 @@ importers:
       mokup:
         specifier: workspace:*
         version: link:../../packages/mokup
+      vue:
+        specifier: 'catalog:'
+        version: 3.5.27(typescript@5.9.3)
     devDependencies:
+      '@vitejs/plugin-vue':
+        specifier: 'catalog:'
+        version: 6.0.3(vite@7.3.1(@types/node@25.1.0)(jiti@2.6.1)(lightningcss@1.30.2)(terser@5.46.0)(tsx@4.21.0)(yaml@2.8.2))(vue@3.5.27(typescript@5.9.3))
       typescript:
         specifier: 'catalog:'
         version: 5.9.3
@@ -339,7 +345,7 @@ importers:
         specifier: ^1.2.0
         version: 1.2.0(vite@7.3.1(@types/node@25.1.0)(jiti@2.6.1)(lightningcss@1.30.2)(terser@5.46.0)(tsx@4.21.0)(yaml@2.8.2))(workbox-build@7.4.0)(workbox-window@7.4.0)
 
-  apps/vite-server:
+  apps/mokup-vite-server-demo:
     dependencies:
       '@faker-js/faker':
         specifier: 'catalog:'
@@ -361,7 +367,7 @@ importers:
         specifier: 'catalog:'
         version: 7.3.1(@types/node@25.1.0)(jiti@2.6.1)(lightningcss@1.30.2)(terser@5.46.0)(tsx@4.21.0)(yaml@2.8.2)
 
-  apps/vite-sw:
+  apps/mokup-vite-sw-demo:
     dependencies:
       '@faker-js/faker':
         specifier: 'catalog:'
@@ -369,7 +375,13 @@ importers:
       mokup:
         specifier: workspace:*
         version: link:../../packages/mokup
+      vue:
+        specifier: 'catalog:'
+        version: 3.5.27(typescript@5.9.3)
     devDependencies:
+      '@vitejs/plugin-vue':
+        specifier: 'catalog:'
+        version: 6.0.3(vite@7.3.1(@types/node@25.1.0)(jiti@2.6.1)(lightningcss@1.30.2)(terser@5.46.0)(tsx@4.21.0)(yaml@2.8.2))(vue@3.5.27(typescript@5.9.3))
       typescript:
         specifier: 'catalog:'
         version: 5.9.3
@@ -377,7 +389,7 @@ importers:
         specifier: 'catalog:'
         version: 7.3.1(@types/node@25.1.0)(jiti@2.6.1)(lightningcss@1.30.2)(terser@5.46.0)(tsx@4.21.0)(yaml@2.8.2)
 
-  apps/webpack-server:
+  apps/mokup-webpack-demo:
     dependencies:
       '@faker-js/faker':
         specifier: 'catalog:'

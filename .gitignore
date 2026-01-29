@@ -35,7 +35,7 @@ yarn-error.log*
 .turbo
 
 dist
-apps/mock-sw/src/.moku
+apps/mokup-vite-sw-demo/src/.moku
 vite.config.ts.timestamp-*.mjs
 config.ts.timestamp-*.mjs
 .vite-inspect

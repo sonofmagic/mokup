@@ -1,0 +1,33 @@
+{
+  "name": "mokup-web-demo",
+  "type": "module",
+  "version": "0.0.20",
+  "private": true,
+  "homepage": "https://mokup.icebreaker.top",
+  "scripts": {
+    "dev": "vite --host",
+    "worker:dev": "vite --host",
+    "build": "vite build",
+    "worker:deploy": "vite build && wrangler deploy",
+    "preview": "vite preview",
+    "lint": "eslint .",
+    "typecheck": "tsc -p tsconfig.json --noEmit"
+  },
+  "dependencies": {
+    "@faker-js/faker": "catalog:",
+    "axios": "^1.13.4",
+    "hono": "^4.11.7",
+    "mokup": "workspace:*",
+    "vue": "catalog:",
+    "vue-router": "^4.6.0"
+  },
+  "devDependencies": {
+    "@cloudflare/vite-plugin": "^1.22.0",
+    "@tailwindcss/vite": "catalog:",
+    "@vitejs/plugin-vue": "catalog:",
+    "tailwindcss": "catalog:",
+    "typescript": "catalog:",
+    "vite": "catalog:",
+    "wrangler": "catalog:"
+  }
+}

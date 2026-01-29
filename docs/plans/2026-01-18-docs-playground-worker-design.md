@@ -3,7 +3,7 @@
 ## Goals
 
 - Deploy the docs site and the Mokup Playground UI from a single Cloudflare Worker.
-- Serve mock APIs under `/api` using Mokup manifests generated from `apps/docs/mock`.
+- Serve mock APIs under `/api` using Mokup manifests generated from `apps/mokup-docs/mock`.
 - Keep the Playground UI working at `/playground` with route metadata at `/playground/routes`.
 
 ## Non-goals
@@ -13,9 +13,9 @@
 
 ## Architecture
 
-- Build VitePress output into `apps/docs/docs/.vitepress/dist`.
-- Copy `@mokup/playground/dist` into `apps/docs/docs/.vitepress/dist/playground`.
-- Generate mock manifest into `apps/docs/worker/src/.mokup` with prefix `/api`.
+- Build VitePress output into `apps/mokup-docs/docs/.vitepress/dist`.
+- Copy `@mokup/playground/dist` into `apps/mokup-docs/docs/.vitepress/dist/playground`.
+- Generate mock manifest into `apps/mokup-docs/worker/src/.mokup` with prefix `/api`.
 - Worker entry routes:
   - `/api/*` -> Mokup fetch handler (`@mokup/server`), 404 if no match.
   - `/playground/routes` -> JSON payload derived from the manifest.
@@ -36,7 +36,7 @@
 
 ## Mock Data
 
-- Seed `apps/docs/mock` with JSON/JSONC, handler routes, and a `index.config.ts`
+- Seed `apps/mokup-docs/mock` with JSON/JSONC, handler routes, and a `index.config.ts`
   that adds headers, delay, and middleware to show Playground capabilities.
 
 ## Error Handling
@@ -48,5 +48,5 @@
 
 ## Testing
 
-- Manual: `pnpm -C apps/docs worker:dev`, visit `/`, `/playground`, `/api/ping`.
+- Manual: `pnpm -C apps/mokup-docs worker:dev`, visit `/`, `/playground`, `/api/ping`.
 - Verify playground lists routes and shows middleware chips.

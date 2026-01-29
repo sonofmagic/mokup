@@ -2,7 +2,7 @@
 
 ## Summary
 
-Audit all docs under `apps/docs/docs` and `apps/docs/docs/zh` to ensure they reflect current behavior, options, and examples from the codebase. Update only factual accuracy (flags, defaults, paths, behavior) while keeping the existing structure and voice.
+Audit all docs under `apps/mokup-docs/docs` and `apps/mokup-docs/docs/zh` to ensure they reflect current behavior, options, and examples from the codebase. Update only factual accuracy (flags, defaults, paths, behavior) while keeping the existing structure and voice.
 
 ## Goals
 
@@ -18,9 +18,9 @@ Audit all docs under `apps/docs/docs` and `apps/docs/docs/zh` to ensure they ref
 
 ## Approach
 
-1. Inventory all Markdown pages in `apps/docs/docs` and `apps/docs/docs/zh`.
+1. Inventory all Markdown pages in `apps/mokup-docs/docs` and `apps/mokup-docs/docs/zh`.
 2. For each page, extract claims about options, defaults, endpoints, or behaviors.
-3. Validate claims against source code in `packages/mokup`, `packages/server`, `packages/playground`, and `apps/docs`.
+3. Validate claims against source code in `packages/mokup`, `packages/server`, `packages/playground`, and `apps/mokup-docs`.
 4. Apply minimal edits to align facts and examples while preserving structure.
 5. Mirror updates in both EN and ZH pages.
 

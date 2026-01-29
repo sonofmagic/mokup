@@ -4,7 +4,7 @@ Date: 2026-01-23
 
 ## Goals
 
-- Run `apps/web` in dev and build without generating `.mokup/mokup.bundle.mjs`.
+- Run `apps/mokup-web-demo` in dev and build without generating `.mokup/mokup.bundle.mjs`.
 - Keep worker entry code stable across dev and deploy.
 - Use Vite (`@cloudflare/vite-plugin`) as the only build/runtime pipeline for Workers.
 - Remove the `pnpm build:manifest` requirement from web workflows.
@@ -56,7 +56,7 @@ Date: 2026-01-23
 
 ### Worker entry change
 
-- Update `apps/web/worker/src/index.ts` to:
+- Update `apps/mokup-web-demo/worker/src/index.ts` to:
   `import mokupBundle from 'virtual:mokup-bundle'`.
 - Keep `export default createMokupWorker(mokupBundle)` unchanged.
 
@@ -96,6 +96,6 @@ Date: 2026-01-23
 
 1. Add bundle generator helper in `packages/mokup/src/vite`.
 2. Wire `virtual:mokup-bundle` into `createMokupPlugin`.
-3. Update `apps/web/worker/src/index.ts` import.
-4. Update `apps/web` scripts and Cloudflare docs.
+3. Update `apps/mokup-web-demo/worker/src/index.ts` import.
+4. Update `apps/mokup-web-demo` scripts and Cloudflare docs.
 5. Add/adjust tests for bundle output and dev/build flows.

@@ -5,7 +5,7 @@ import vue from '@vitejs/plugin-vue'
 import { defineConfig } from 'vite'
 import mokup from '../mokup/src/vite'
 
-const mockDir = fileURLToPath(new URL('../../apps/docs/mock', import.meta.url))
+const mockDir = fileURLToPath(new URL('../../apps/mokup-docs/mock', import.meta.url))
 const runtimeEntry = fileURLToPath(new URL('../runtime/src/index.ts', import.meta.url))
 
 function resolveDocsSwRegister(command: string) {

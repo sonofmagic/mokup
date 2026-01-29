@@ -8,7 +8,7 @@ pattern alongside the existing fetch handler example.
 ## Goals
 
 - Provide a Hono + Mokup Worker example in the Cloudflare guide.
-- Add a matching example file under `apps/web/worker/src`.
+- Add a matching example file under `apps/mokup-web-demo/worker/src`.
 - Keep the existing `createMokupWorker` example intact.
 
 ## Non-Goals
@@ -18,10 +18,10 @@ pattern alongside the existing fetch handler example.
 
 ## Approach
 
-- Extend `apps/docs/docs/deploy/cloudflare-worker.md` with a Hono example that
+- Extend `apps/mokup-docs/docs/deploy/cloudflare-worker.md` with a Hono example that
   uses `createFetchHandler` and `app.use('*', ...)`.
 - Mirror the same snippet in the Chinese doc.
-- Add `apps/web/worker/src/hono.ts` as a supplemental example file.
+- Add `apps/mokup-web-demo/worker/src/hono.ts` as a supplemental example file.
 
 ## Testing
 

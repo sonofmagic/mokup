@@ -1,6 +1,6 @@
 import { expect, test } from '@playwright/test'
 
-test('mock-vite-server endpoints respond', async ({ page, request }) => {
+test('mokup-vite-server-demo endpoints respond', async ({ page, request }) => {
   await page.goto('/')
   await expect(page.getByRole('heading', { name: 'Mock Vite Server' })).toBeVisible()
 
@@ -21,7 +21,7 @@ test('mock-vite-server endpoints respond', async ({ page, request }) => {
   const summaryResponse = await request.get('/api/summary')
   expect(summaryResponse.ok()).toBe(true)
   const summary = await summaryResponse.json() as Record<string, unknown>
-  expect(summary.service).toBe('mock-vite-server')
+  expect(summary.service).toBe('mokup-vite-server-demo')
 
   const userResponse = await request.get('/api/users/42')
   expect(userResponse.ok()).toBe(true)

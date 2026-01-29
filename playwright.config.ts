@@ -23,7 +23,7 @@ export default defineConfig({
   },
   projects: [
     {
-      name: 'mock-vite-server',
+      name: 'mokup-vite-server-demo',
       testMatch: /mock-vite-server\.spec\.ts/,
       use: {
         baseURL: MOCK_VITE_SERVER_BASE_URL,

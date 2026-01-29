@@ -4,7 +4,7 @@ import { runMokup } from './utils/command'
 import { ensureEmptyDir } from './utils/fs'
 import { repoRoot } from './utils/paths'
 
-const mockDir = 'apps/web/mock'
+const mockDir = 'apps/mokup-web-demo/mock'
 
 test('worker bundle serves json and handler responses', async ({ request: _request }, testInfo) => {
   const outDir = testInfo.outputPath('worker-build')

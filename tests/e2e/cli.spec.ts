@@ -12,7 +12,7 @@ test('mokup build emits manifest and bundle outputs', async ({ request: _request
   await ensureEmptyDir(outDir)
 
   await runMokup(
-    ['build', '--dir', 'apps/web/mock', '--out', outDir],
+    ['build', '--dir', 'apps/mokup-web-demo/mock', '--out', outDir],
     { cwd: repoRoot },
   )
 
@@ -40,7 +40,7 @@ test('mokup bundle works with createFetchHandler', async ({ request: _request },
   await ensureEmptyDir(outDir)
 
   await runMokup(
-    ['build', '--dir', 'apps/web/mock', '--out', outDir],
+    ['build', '--dir', 'apps/mokup-web-demo/mock', '--out', outDir],
     { cwd: repoRoot },
   )
 

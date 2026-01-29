@@ -2,7 +2,7 @@
 
 ## Goal
 
-Refactor the `apps/d1-mokup` frontend to Vue 3 using Tailwind CSS v4 while keeping the existing feature set: GitHub OAuth sign-in, email/password sign-in + sign-up, user list display, user creation, and status messaging. Visual direction is retro collage with bold typography, paper textures, and punchy accents.
+Refactor the `apps/mokup-d1-demo` frontend to Vue 3 using Tailwind CSS v4 while keeping the existing feature set: GitHub OAuth sign-in, email/password sign-in + sign-up, user list display, user creation, and status messaging. Visual direction is retro collage with bold typography, paper textures, and punchy accents.
 
 ## Architecture
 

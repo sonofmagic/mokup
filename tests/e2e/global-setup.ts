@@ -36,7 +36,7 @@ export default async function globalSetup() {
   }
   const demoServer = await startViteServer({
     cwd: repoRoot,
-    appDir: 'apps/mock-vite-server',
+    appDir: 'apps/mokup-vite-server-demo',
     port: MOCK_VITE_SERVER_PORT,
     reuseExistingServer,
   })

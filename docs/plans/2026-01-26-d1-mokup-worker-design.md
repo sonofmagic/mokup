@@ -2,7 +2,7 @@
 
 ## Goal
 
-Add a new app at `apps/d1-mokup` that demonstrates Cloudflare Workers + D1 with drizzle-orm and better-auth, while using mokup mock rules for both local development and deployment. The app exposes `/api/users` endpoints and better-auth routes under `/api/auth`, plus a minimal front-end page showing usage.
+Add a new app at `apps/mokup-d1-demo` that demonstrates Cloudflare Workers + D1 with drizzle-orm and better-auth, while using mokup mock rules for both local development and deployment. The app exposes `/api/users` endpoints and better-auth routes under `/api/auth`, plus a minimal front-end page showing usage.
 
 ## Architecture
 
@@ -13,13 +13,13 @@ Add a new app at `apps/d1-mokup` that demonstrates Cloudflare Workers + D1 with 
 
 ## Components
 
-- `apps/d1-mokup/worker/src/index.ts`: Worker fetch entry that dispatches to mokup runtime and passes `env`/`ctx`.
-- `apps/d1-mokup/mock/index.config.ts`: Middleware registration via `defineConfig` that attaches `db` and `auth` to the context.
-- `apps/d1-mokup/mock/users.get.ts`: Query `users` table via drizzle and return JSON list.
-- `apps/d1-mokup/mock/users.post.ts`: Validate input, insert into `users`, return created record.
-- `apps/d1-mokup/mock/auth/[[...slug]].ts`: Delegate auth routes to better-auth handler for `/api/auth/*`.
-- `apps/d1-mokup/db/schema.ts`: Drizzle schema for `users` and better-auth tables.
-- `apps/d1-mokup/drizzle.config.ts`: Drizzle-kit config for D1.
+- `apps/mokup-d1-demo/worker/src/index.ts`: Worker fetch entry that dispatches to mokup runtime and passes `env`/`ctx`.
+- `apps/mokup-d1-demo/mock/index.config.ts`: Middleware registration via `defineConfig` that attaches `db` and `auth` to the context.
+- `apps/mokup-d1-demo/mock/users.get.ts`: Query `users` table via drizzle and return JSON list.
+- `apps/mokup-d1-demo/mock/users.post.ts`: Validate input, insert into `users`, return created record.
+- `apps/mokup-d1-demo/mock/auth/[[...slug]].ts`: Delegate auth routes to better-auth handler for `/api/auth/*`.
+- `apps/mokup-d1-demo/db/schema.ts`: Drizzle schema for `users` and better-auth tables.
+- `apps/mokup-d1-demo/drizzle.config.ts`: Drizzle-kit config for D1.
 - Minimal front-end (`src/`): a simple page that displays users and a login link.
 
 ## Data Flow

@@ -1,0 +1,30 @@
+{
+  "name": "mokup-docs",
+  "type": "module",
+  "version": "0.0.3",
+  "private": true,
+  "homepage": "https://mokup.icebreaker.top",
+  "scripts": {
+    "dev": "vitepress dev docs --host",
+    "prebuild:docs": "pnpm --filter mokup build",
+    "build:docs": "vitepress build docs",
+    "build:playground": "pnpm --filter @mokup/playground build",
+    "build": "pnpm build:playground && pnpm build:docs",
+    "preview": "vitepress preview docs",
+    "worker:dev": "pnpm build && wrangler dev",
+    "worker:deploy": "pnpm build && wrangler deploy"
+  },
+  "dependencies": {
+    "@faker-js/faker": "catalog:"
+  },
+  "devDependencies": {
+    "@tailwindcss/vite": "catalog:",
+    "mokup": "workspace:*",
+    "tailwindcss": "catalog:",
+    "vite": "catalog:",
+    "vitepress": "^2.0.0-alpha.15",
+    "vitepress-plugin-group-icons": "^1.7.1",
+    "vitepress-plugin-llms": "^1.10.0",
+    "wrangler": "catalog:"
+  }
+}

@@ -4,7 +4,7 @@
 
 - Allow the Playground to send `multipart/form-data` requests that include files.
 - Keep the existing key=value textarea for text fields, and add a file picker area for multipart only.
-- Provide mock examples in `apps/mock-sw` and `apps/mock-vite-server` to demonstrate file uploads.
+- Provide mock examples in `apps/mokup-vite-sw-demo` and `apps/mokup-vite-server-demo` to demonstrate file uploads.
 
 ## Non-goals
 
@@ -43,4 +43,4 @@
   - Files-only multipart still builds a FormData body.
 - Manual verification:
   - Use Playground to send a multipart request with text + files.
-  - Verify the new mock endpoints in `apps/mock-sw` and `apps/mock-vite-server` receive files.
+  - Verify the new mock endpoints in `apps/mokup-vite-sw-demo` and `apps/mokup-vite-server-demo` receive files.

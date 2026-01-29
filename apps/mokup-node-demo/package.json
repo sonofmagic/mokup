@@ -1,0 +1,21 @@
+{
+  "name": "mokup-node-demo",
+  "type": "module",
+  "version": "0.0.20",
+  "private": true,
+  "homepage": "https://mokup.icebreaker.top",
+  "scripts": {
+    "build:manifest": "pnpm --filter mokup build && pnpm exec mokup build --dir mock --out dist",
+    "dev": "tsx src/index.ts",
+    "typecheck": "tsc -p tsconfig.json --noEmit"
+  },
+  "dependencies": {
+    "@faker-js/faker": "catalog:",
+    "@hono/node-server": "^1.12.0",
+    "mokup": "workspace:*"
+  },
+  "devDependencies": {
+    "tsx": "catalog:",
+    "typescript": "catalog:"
+  }
+}

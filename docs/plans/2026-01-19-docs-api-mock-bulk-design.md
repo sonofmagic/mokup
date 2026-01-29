@@ -2,7 +2,7 @@
 
 ## Overview
 
-Add roughly 200 mock API endpoints under `apps/docs/mock/api/**` to cover SaaS, ecommerce, and social domains. Existing mocks in `apps/docs/mock` will be removed (except `index.config.ts`) and replaced by the new `/api` directory structure. The goal is a large, browseable mock surface for the docs playground with stable, predictable response shapes.
+Add roughly 200 mock API endpoints under `apps/mokup-docs/mock/api/**` to cover SaaS, ecommerce, and social domains. Existing mocks in `apps/mokup-docs/mock` will be removed (except `index.config.ts`) and replaced by the new `/api` directory structure. The goal is a large, browseable mock surface for the docs playground with stable, predictable response shapes.
 
 ## Goals
 
@@ -19,10 +19,10 @@ Add roughly 200 mock API endpoints under `apps/docs/mock/api/**` to cover SaaS, 
 
 ## Route Layout
 
-Routes live in `apps/docs/mock/api/` with module folders, for example:
+Routes live in `apps/mokup-docs/mock/api/` with module folders, for example:
 
-- `apps/docs/mock/api/users.get.json` -> `GET /api/users`
-- `apps/docs/mock/api/users/[id].get.ts` -> `GET /api/users/:id`
+- `apps/mokup-docs/mock/api/users.get.json` -> `GET /api/users`
+- `apps/mokup-docs/mock/api/users/[id].get.ts` -> `GET /api/users/:id`
 
 Modules (approx. allocation):
 
@@ -63,14 +63,14 @@ Dynamic routes use TS to read `req.params` and shape deterministic responses; pa
   - `payments/charge.post.ts` can return `402`.
   - `orders/[id]/cancel.post.ts` returns `409` when status is `shipped`.
 
-Global headers and delay stay in `apps/docs/mock/index.config.ts`.
+Global headers and delay stay in `apps/mokup-docs/mock/index.config.ts`.
 
 ## Implementation Approach
 
-- Remove existing mocks under `apps/docs/mock` except `index.config.ts`.
-- Generate module folders and route files under `apps/docs/mock/api`.
+- Remove existing mocks under `apps/mokup-docs/mock` except `index.config.ts`.
+- Generate module folders and route files under `apps/mokup-docs/mock/api`.
 - Use JSONC for static routes; TS for dynamic `id` and pagination.
-- Optionally retain a small generator script under `apps/docs/scripts/` for future changes.
+- Optionally retain a small generator script under `apps/mokup-docs/scripts/` for future changes.
 
 ## Verification
 

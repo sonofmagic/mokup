@@ -12,8 +12,8 @@
 - `packages/runtime`: core matching + response runtime.
 - `packages/hono`: Hono adapter for Node/Workers.
 - `packages/cli`: build CLI to generate manifest/handlers.
-- `apps/mock-node`: Node deployment template.
-- `apps/mock-sw`: Service Worker demo template.
+- `apps/mokup-node-demo`: Node deployment template.
+- `apps/mokup-vite-sw-demo`: Service Worker demo template.
 
 ## Manifest Format
 

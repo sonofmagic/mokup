@@ -1,0 +1,9 @@
+{
+  // JSONC supports comments and trailing commas
+  "service": "mokup-vite-server-demo",
+  "features": ["json", "jsonc", "defineHandler", "defineConfig", "rest"],
+  "counts": {
+    "routes": 12,
+    "examples": 8
+  }
+}

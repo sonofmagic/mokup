@@ -20,7 +20,7 @@ import { readJson } from './utils/fs'
 import { fetchJson, listen } from './utils/http'
 import { repoRoot } from './utils/paths'
 
-const mockDir = 'apps/web/mock'
+const mockDir = 'apps/mokup-web-demo/mock'
 
 let outDir = ''
 let options: ServerOptions

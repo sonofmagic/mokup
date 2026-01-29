@@ -20,7 +20,7 @@ test.describe.serial('playground', () => {
   })
 
   test('playground recovers after deleting and restoring a jsonc mock', async ({ page }) => {
-    const filePath = join(repoRoot, 'apps/web/mock/about.get.jsonc')
+    const filePath = join(repoRoot, 'apps/mokup-web-demo/mock/about.get.jsonc')
     const original = await readFile(filePath, 'utf8')
 
     try {
@@ -53,7 +53,7 @@ test.describe.serial('playground', () => {
   })
 
   test('playground updates after a single mock edit', async ({ page, request }) => {
-    const filePath = join(repoRoot, 'apps/web/mock/about.get.jsonc')
+    const filePath = join(repoRoot, 'apps/mokup-web-demo/mock/about.get.jsonc')
     const original = await readFile(filePath, 'utf8')
     const stamp = `e2e-${Date.now()}`
     const updated = original.replace(/\n\}\s*$/, `,\n  "e2e": "${stamp}"\n}\n`)

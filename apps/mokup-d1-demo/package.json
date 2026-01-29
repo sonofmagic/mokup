@@ -1,0 +1,33 @@
+{
+  "name": "mokup-d1-demo",
+  "type": "module",
+  "version": "0.0.6",
+  "private": true,
+  "homepage": "https://mokup.icebreaker.top",
+  "scripts": {
+    "dev": "vite --host",
+    "build": "vite build",
+    "preview": "vite preview",
+    "typecheck": "tsc -p tsconfig.json --noEmit",
+    "db:generate": "drizzle-kit generate",
+    "db:migrate": "drizzle-kit migrate",
+    "worker:deploy": "vite build && wrangler deploy"
+  },
+  "dependencies": {
+    "better-auth": "^1.4.18",
+    "drizzle-orm": "^0.45.1",
+    "mokup": "workspace:*",
+    "vue": "catalog:"
+  },
+  "devDependencies": {
+    "@cloudflare/vite-plugin": "^1.22.0",
+    "@cloudflare/workers-types": "^4.20260129.0",
+    "@tailwindcss/vite": "catalog:",
+    "@vitejs/plugin-vue": "catalog:",
+    "drizzle-kit": "^0.31.5",
+    "tailwindcss": "catalog:",
+    "typescript": "catalog:",
+    "vite": "catalog:",
+    "wrangler": "catalog:"
+  }
+}

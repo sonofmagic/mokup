@@ -4,7 +4,7 @@ import { expect, test } from '@playwright/test'
 import { writeJson } from './utils/fs'
 import { repoRoot } from './utils/paths'
 
-const heartbeatPath = join(repoRoot, 'apps/web/mock/heartbeat.get.json')
+const heartbeatPath = join(repoRoot, 'apps/mokup-web-demo/mock/heartbeat.get.json')
 
 let originalRaw = ''
 let originalJson: Record<string, unknown> = {}

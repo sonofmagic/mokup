@@ -2,21 +2,21 @@
 
 ## Goals
 
-- Add a Vite + Vue 3 + TypeScript demo app under `apps/web`.
-- Use the `mokup/vite` plugin to serve mock APIs from `apps/web/mock`.
+- Add a Vite + Vue 3 + TypeScript demo app under `apps/mokup-web-demo`.
+- Use the `mokup/vite` plugin to serve mock APIs from `apps/mokup-web-demo/mock`.
 - Use axios via a small `src/api` module.
 - Provide two example endpoints: one GET via JSON and one POST via mock TS.
 
 ## App Structure
 
-- `apps/web/index.html`: Vite entry HTML.
-- `apps/web/src/main.ts`: Vue bootstrap and global styles.
-- `apps/web/src/App.vue`: Demo UI and state handling.
-- `apps/web/src/style.css`: App styling.
-- `apps/web/src/api/client.ts`: axios instance.
-- `apps/web/src/api/index.ts`: `fetchProfile()` and `login()` helpers.
-- `apps/web/mock/profile.get.json`: GET response example.
-- `apps/web/mock/login.post.ts`: POST response example.
+- `apps/mokup-web-demo/index.html`: Vite entry HTML.
+- `apps/mokup-web-demo/src/main.ts`: Vue bootstrap and global styles.
+- `apps/mokup-web-demo/src/App.vue`: Demo UI and state handling.
+- `apps/mokup-web-demo/src/style.css`: App styling.
+- `apps/mokup-web-demo/src/api/client.ts`: axios instance.
+- `apps/mokup-web-demo/src/api/index.ts`: `fetchProfile()` and `login()` helpers.
+- `apps/mokup-web-demo/mock/profile.get.json`: GET response example.
+- `apps/mokup-web-demo/mock/login.post.ts`: POST response example.
 
 ## Plugin Usage
 

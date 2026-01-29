@@ -13,15 +13,15 @@
 
 ## Test Matrix
 
-- ui: `apps/web` Vite dev server loads, key UI panels render, API smoke requests via Playwright request.
+- ui: `apps/mokup-web-demo` Vite dev server loads, key UI panels render, API smoke requests via Playwright request.
 - playground: `/__mokup` UI loads, routes list is present, search/filter works, route detail shows response.
 - cli: `mokup build` emits `mokup.manifest.*`, `mokup.bundle.*`, and handlers; ESM manifest importable.
 - adapters: server middleware coverage (connect/express/koa/fastify/hono/fetch) and worker bundle usage.
 
 ## Environment & Services
 
-- Vite dev server (`apps/web`) on a fixed port.
-- Node mock server (`apps/mock-node`) for real HTTP adapter checks.
+- Vite dev server (`apps/mokup-web-demo`) on a fixed port.
+- Node mock server (`apps/mokup-node-demo`) for real HTTP adapter checks.
 - Worker bundle tested via `createMokupWorker` with local fetch (no wrangler).
 
 ## Playwright Structure
@@ -33,7 +33,7 @@
 
 ## HMR & File Update
 
-- Update `apps/web/mock/heartbeat.get.json`, re-request endpoint, assert payload change.
+- Update `apps/mokup-web-demo/mock/heartbeat.get.json`, re-request endpoint, assert payload change.
 - Restore original file content after test completes.
 
 ## Scripts

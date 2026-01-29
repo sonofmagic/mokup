@@ -2,7 +2,7 @@
 
 ## Summary
 
-Create a new `apps/mock-host-sw` demo that shows how an existing host Service Worker can load Mokup's SW output in both dev and production. The host SW is generated with `vite-plugin-pwa` (generateSW) and uses a small bridge script to import `/mokup-sw.js` so Mokup routes continue to work without relying on Mokup's auto-registration.
+Create a new `apps/mokup-vite-host-sw-demo` demo that shows how an existing host Service Worker can load Mokup's SW output in both dev and production. The host SW is generated with `vite-plugin-pwa` (generateSW) and uses a small bridge script to import `/mokup-sw.js` so Mokup routes continue to work without relying on Mokup's auto-registration.
 
 ## Goals
 
@@ -17,7 +17,7 @@ Create a new `apps/mock-host-sw` demo that shows how an existing host Service Wo
 
 ## Approach
 
-1. Add `vite-plugin-pwa` to `apps/mock-host-sw` and configure `generateSW` with auto registration.
+1. Add `vite-plugin-pwa` to `apps/mokup-vite-host-sw-demo` and configure `generateSW` with auto registration.
 2. Add `public/mokup-sw-bridge.js` to load `/mokup-sw.js` via dynamic import and post status to clients.
 3. Update the demo UI and `src/main.ts` to display host SW and bridge state, plus manual register/update/unregister actions.
 

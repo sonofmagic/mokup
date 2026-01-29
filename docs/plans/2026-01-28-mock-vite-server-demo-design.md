@@ -2,7 +2,7 @@
 
 ## Summary
 
-Add a new `apps/mock-vite-server` demo app that showcases Mokup's default Vite server runtime with a simple Vue UI and three mock endpoints powered by `@faker-js/faker`. The app demonstrates GET, POST, and dynamic route handling under `/api/*` without service workers.
+Add a new `apps/mokup-vite-server-demo` demo app that showcases Mokup's default Vite server runtime with a simple Vue UI and three mock endpoints powered by `@faker-js/faker`. The app demonstrates GET, POST, and dynamic route handling under `/api/*` without service workers.
 
 ## Goals
 
@@ -19,7 +19,7 @@ Add a new `apps/mock-vite-server` demo app that showcases Mokup's default Vite s
 
 ## Approach
 
-1. Create `apps/mock-vite-server` with Vite + Vue scaffold, matching repo conventions.
+1. Create `apps/mokup-vite-server-demo` with Vite + Vue scaffold, matching repo conventions.
 2. Configure `vite.config.ts` to use `mokup({ entries: { dir: 'mock', prefix: '/api' } })` and default runtime.
 3. Add `mock/` routes:
    - `profile.get.ts` returns a profile object from faker.
@@ -30,6 +30,6 @@ Add a new `apps/mock-vite-server` demo app that showcases Mokup's default Vite s
 
 ## Validation
 
-- Run `pnpm --filter mock-vite-server dev` and confirm the UI loads.
+- Run `pnpm --filter mokup-vite-server-demo dev` and confirm the UI loads.
 - Click each action and verify `/api/*` responses render in the response panel.
 - Add a Playwright e2e test that calls the three endpoints and checks for expected keys.

@@ -2,7 +2,7 @@
 
 ## Goals
 
-- Add a new `apps/docs` VitePress site for Mokup documentation.
+- Add a new `apps/mokup-docs` VitePress site for Mokup documentation.
 - Provide comprehensive bilingual docs (zh-CN + en-US).
 - Structure content around: Getting Started, Core Concepts, Advanced, Deploy, Reference.
 - Keep docs easy to extend and consistent between locales.
@@ -15,13 +15,13 @@
 
 ## Site Structure
 
-Create a new app at `apps/docs` with this layout:
+Create a new app at `apps/mokup-docs` with this layout:
 
-- `apps/docs/docs/.vitepress/config.ts`
-- `apps/docs/docs/.vitepress/theme/index.ts`
-- `apps/docs/docs/.vitepress/theme/custom.css`
-- `apps/docs/docs/index.md` (zh-CN)
-- `apps/docs/docs/en/index.md` (en-US)
+- `apps/mokup-docs/docs/.vitepress/config.ts`
+- `apps/mokup-docs/docs/.vitepress/theme/index.ts`
+- `apps/mokup-docs/docs/.vitepress/theme/custom.css`
+- `apps/mokup-docs/docs/index.md` (zh-CN)
+- `apps/mokup-docs/docs/en/index.md` (en-US)
 - Content groups mirrored in `docs/` and `docs/en/`.
 
 ## Navigation and i18n

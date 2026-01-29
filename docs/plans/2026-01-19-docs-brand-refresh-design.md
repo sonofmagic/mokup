@@ -13,7 +13,7 @@
 
 ## Approach
 
-- Add the mascot SVG to `apps/docs/docs/public/brand/mokup-logo.svg`.
+- Add the mascot SVG to `apps/mokup-docs/docs/public/brand/mokup-logo.svg`.
 - Create a reusable `BrandLogo` component with size and text options.
 - Wrap the default layout and inject:
   - `nav-bar-title`: small logo + Mokup text.
