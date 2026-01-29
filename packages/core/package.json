@@ -162,6 +162,14 @@
     "lint": "eslint .",
     "typecheck": "tsc -p tsconfig.json --noEmit"
   },
+  "peerDependencies": {
+    "vite": "^5.0.0 || ^6.0.0 || ^7.0.0"
+  },
+  "peerDependenciesMeta": {
+    "vite": {
+      "optional": true
+    }
+  },
   "dependencies": {
     "@mokup/playground": "workspace:*",
     "@mokup/runtime": "workspace:*",
@@ -169,6 +177,7 @@
   },
   "devDependencies": {
     "typescript": "catalog:",
-    "unbuild": "catalog:"
+    "unbuild": "catalog:",
+    "vite": "catalog:"
   }
 }
