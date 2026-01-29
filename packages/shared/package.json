@@ -124,7 +124,7 @@
     "dist"
   ],
   "scripts": {
-    "build": "unbuild",
+    "build": "cross-env NODE_OPTIONS=--max-old-space-size=4096 unbuild",
     "dev": "unbuild --stub",
     "lint": "eslint .",
     "typecheck": "tsc -p tsconfig.json --noEmit",

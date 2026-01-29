@@ -17,7 +17,7 @@
     "node": ">=20.0.0"
   },
   "scripts": {
-    "build": "turbo run build",
+    "build": "cross-env NODE_OPTIONS=--max-old-space-size=4096 turbo run build",
     "build:packages": "turbo run build --filter=./packages/*",
     "build:apps": "turbo run build --filter=./apps/*...",
     "dev": "turbo run dev --parallel",
