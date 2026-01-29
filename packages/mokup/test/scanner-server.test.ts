@@ -1,4 +1,3 @@
-import { createRequire } from 'node:module'
 import { scanRoutes } from '@mokup/core'
 
 import { describe, expect, it, vi } from 'vitest'
@@ -9,11 +8,6 @@ const mocks = vi.hoisted(() => ({
   loadRules: vi.fn(),
 }))
 
-const require = createRequire(import.meta.url)
-const coreConfigPath = require.resolve('@mokup/core/config')
-const coreLoaderPath = require.resolve('@mokup/core/loader')
-const coreRoutesPath = require.resolve('@mokup/core/routes')
-
 vi.mock('@mokup/core/config', () => ({
   resolveDirectoryConfig: mocks.resolveDirectoryConfig,
 }))
@@ -21,9 +15,6 @@ vi.mock('../../core/src/config', () => ({
   resolveDirectoryConfig: mocks.resolveDirectoryConfig,
 }))
 vi.mock('../../core/dist/config.mjs', () => ({
-  resolveDirectoryConfig: mocks.resolveDirectoryConfig,
-}))
-vi.mock(coreConfigPath, () => ({
   resolveDirectoryConfig: mocks.resolveDirectoryConfig,
 }))
 
@@ -52,9 +43,6 @@ vi.mock('../../core/src/loader', () => ({
 vi.mock('../../core/dist/loader.mjs', () => ({
   loadRules: mocks.loadRules,
 }))
-vi.mock(coreLoaderPath, () => ({
-  loadRules: mocks.loadRules,
-}))
 
 vi.mock('@mokup/core/routes', async () => {
   const actual = await vi.importActual<typeof import('@mokup/core/routes')>('@mokup/core/routes')
@@ -72,13 +60,6 @@ vi.mock('../../core/src/routes', async () => {
 })
 vi.mock('../../core/dist/routes.mjs', async () => {
   const actual = await vi.importActual<typeof import('../../core/dist/routes.mjs')>('../../core/dist/routes.mjs')
-  return {
-    ...actual,
-    deriveRouteFromFile: () => ({ template: '/ping', method: 'GET', tokens: [], score: [] }),
-  }
-})
-vi.mock(coreRoutesPath, async () => {
-  const actual = await vi.importActual<typeof import('@mokup/core/routes')>('@mokup/core/routes')
   return {
     ...actual,
     deriveRouteFromFile: () => ({ template: '/ping', method: 'GET', tokens: [], score: [] }),

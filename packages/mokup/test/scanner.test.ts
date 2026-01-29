@@ -1,6 +1,7 @@
-import { mkdir, mkdtemp, writeFile } from 'node:fs/promises'
+import { mkdir, mkdtemp, symlink, writeFile } from 'node:fs/promises'
 import { tmpdir } from 'node:os'
-import { join } from 'node:path'
+import { dirname, join, resolve } from 'node:path'
+import { fileURLToPath } from 'node:url'
 import { scanRoutes } from '@mokup/core'
 import { describe, expect, it, vi } from 'vitest'
 
@@ -15,6 +16,17 @@ function createLogger() {
 describe('scanRoutes', () => {
   it('collects routes, configs, skips, and ignores', async () => {
     const root = await mkdtemp(join(tmpdir(), 'mokup-scan-'))
+    const nodeModulesDir = join(root, 'node_modules')
+    const mokupTarget = resolve(dirname(fileURLToPath(import.meta.url)), '..')
+    await mkdir(nodeModulesDir, { recursive: true })
+    try {
+      await symlink(mokupTarget, join(nodeModulesDir, 'mokup'), 'dir')
+    }
+    catch (error) {
+      if (!(error && typeof error === 'object' && 'code' in error && error.code === 'EEXIST')) {
+        throw error
+      }
+    }
     const mockDir = join(root, 'mock')
     const usersDir = join(mockDir, 'users')
     const ignoredDir = join(mockDir, '_ignored')
