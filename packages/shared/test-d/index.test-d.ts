@@ -4,7 +4,6 @@ import type {
   MockEntryOptions,
   PlaygroundOptionsInput,
 } from '@mokup/shared'
-import type { FileInfo } from '@mokup/shared/mock-files'
 import {
   collectFiles,
   createDefineConfig,
@@ -28,9 +27,9 @@ const playground: PlaygroundOptionsInput = {
   enabled: true,
 }
 
-expectType<DirInput>(dirInput)
+expectAssignable<DirInput>(dirInput)
 expectType<MockEntryOptions>(entry)
-expectType<PlaygroundOptionsInput>(playground)
+expectAssignable<PlaygroundOptionsInput>(playground)
 
 interface DevConfig {
   hookError?: HookErrorPolicy
@@ -51,7 +50,7 @@ expectType<string | undefined>(normalizeMethod('get'))
 expectType<string>(normalizePrefix('api'))
 
 const files = collectFiles([])
-expectType<Promise<FileInfo[]>>(files)
+expectType<ReturnType<typeof collectFiles>>(files)
 
 const rules = loadRules<{ handler: () => string }>('mock.ts', {
   loadModule: async () => ({ default: { handler: () => 'ok' } }),

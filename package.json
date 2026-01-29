@@ -25,7 +25,7 @@
     "docs:deploy": "pnpm --filter docs worker:deploy",
     "test": "vitest run",
     "test:dev": "vitest",
-    "test:types": "pnpm -r --filter ./packages/* --filter '!./packages/playground' run test:types",
+    "test:types": "pnpm -r --filter \"./packages/*\" --filter \"!./packages/playground\" run test:types",
     "lint": "turbo run lint",
     "lint:lines": "node scripts/lint-lines.mjs",
     "audit": "pnpm audit --audit-level=moderate",
