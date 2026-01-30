@@ -20,7 +20,7 @@
     "hono": "^4.11.7",
     "mokup": "workspace:*",
     "vue": "catalog:",
-    "vue-router": "^5.0.0"
+    "vue-router": "^5.0.1"
   },
   "devDependencies": {
     "@cloudflare/vite-plugin": "^1.22.1",
