@@ -41,7 +41,7 @@ const modeIcon = computed(() => {
   if (props.requestMode === 'sw') {
     return 'i-[carbon--network-3]'
   }
-  return 'i-[carbon--server]'
+  return 'i-[carbon--bare-metal-server]'
 })
 
 function toggleLocale() {
