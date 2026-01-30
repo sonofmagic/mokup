@@ -1,11 +1,13 @@
-import { existsSync } from 'node:fs'
-import { createServer } from 'node:net'
+import { existsSync, promises as fs } from 'node:fs'
+import { connect, createServer } from 'node:net'
 import { dirname, join, relative, resolve } from 'node:path'
 import process from 'node:process'
 import { execa } from 'execa'
 
 const HOST = '127.0.0.1'
 const DEFAULT_TIMEOUT_MS = 60_000
+const VITE_LOCK_NAME = '.e2e-vite.lock'
+const VITE_LOCK_STALE_MS = 10 * 60 * 1000
 
 function findRepoRoot(startDir) {
   let current = resolve(startDir)
@@ -41,10 +43,64 @@ function detectAppName(repoRoot, cwd, argName) {
   throw new Error('Unable to determine app name. Pass it as the first argument.')
 }
 
+async function acquireLock(lockPath, timeoutMs) {
+  const start = Date.now()
+  const payload = JSON.stringify({
+    pid: process.pid,
+    startedAt: new Date().toISOString(),
+  })
+
+  while (Date.now() - start < timeoutMs) {
+    try {
+      await fs.writeFile(lockPath, payload, { flag: 'wx' })
+      return true
+    }
+    catch (error) {
+      if (error?.code !== 'EEXIST') {
+        throw error
+      }
+      try {
+        const stat = await fs.stat(lockPath)
+        if (Date.now() - stat.mtimeMs > VITE_LOCK_STALE_MS) {
+          await fs.unlink(lockPath)
+          continue
+        }
+      }
+      catch {
+        // ignore stat/unlink errors, keep waiting
+      }
+    }
+    await new Promise(resolve => setTimeout(resolve, 250))
+  }
+
+  throw new Error(`Timeout waiting to acquire Vite lock at ${lockPath}`)
+}
+
+async function releaseLock(lockPath) {
+  try {
+    await fs.unlink(lockPath)
+  }
+  catch {
+    // ignore missing lock
+  }
+}
+
+function resolveBin(binName, appRoot, repoRoot) {
+  const appBin = join(appRoot, 'node_modules', '.bin', binName)
+  if (existsSync(appBin)) {
+    return appBin
+  }
+  const rootBin = join(repoRoot, 'node_modules', '.bin', binName)
+  if (existsSync(rootBin)) {
+    return rootBin
+  }
+  return binName
+}
+
 function getAppConfig(appName, repoRoot, appRoot) {
-  const viteBin = join(repoRoot, 'node_modules', '.bin', 'vite')
-  const vitepressBin = join(repoRoot, 'node_modules', '.bin', 'vitepress')
-  const tsxBin = join(repoRoot, 'node_modules', '.bin', 'tsx')
+  const viteBin = resolveBin('vite', appRoot, repoRoot)
+  const vitepressBin = resolveBin('vitepress', appRoot, repoRoot)
+  const tsxBin = resolveBin('tsx', appRoot, repoRoot)
 
   const configs = {
     'mokup-web-demo': {
@@ -133,9 +189,13 @@ function getFreePort(host) {
 async function waitForHttp(url, timeoutMs) {
   const deadline = Date.now() + timeoutMs
   let lastError
+  const perRequestTimeout = Math.min(2_000, Math.max(500, timeoutMs))
   while (Date.now() < deadline) {
+    let timer
     try {
-      const response = await fetch(url, { method: 'GET' })
+      const controller = new AbortController()
+      timer = setTimeout(() => controller.abort(), perRequestTimeout)
+      const response = await fetch(url, { method: 'GET', signal: controller.signal })
       if (response.ok || response.status < 500) {
         return
       }
@@ -143,9 +203,174 @@ async function waitForHttp(url, timeoutMs) {
     catch (error) {
       lastError = error
     }
+    finally {
+      if (timer) {
+        clearTimeout(timer)
+      }
+    }
     await new Promise(resolve => setTimeout(resolve, 250))
   }
   throw new Error(`Timeout waiting for ${url}: ${String(lastError)}`)
+}
+
+async function waitForPort(host, port, timeoutMs) {
+  const deadline = Date.now() + timeoutMs
+  let lastError
+  while (Date.now() < deadline) {
+    try {
+      await new Promise((resolve, reject) => {
+        const socket = connect(port, host)
+        const cleanup = () => {
+          socket.removeAllListeners()
+          socket.destroy()
+        }
+        socket.once('connect', () => {
+          cleanup()
+          resolve()
+        })
+        socket.once('error', (error) => {
+          cleanup()
+          reject(error)
+        })
+        socket.setTimeout(500)
+        socket.once('timeout', () => {
+          cleanup()
+          reject(new Error('Timeout while connecting'))
+        })
+      })
+      return
+    }
+    catch (error) {
+      lastError = error
+    }
+    await new Promise(resolve => setTimeout(resolve, 250))
+  }
+  throw new Error(`Timeout waiting for ${host}:${port}: ${String(lastError)}`)
+}
+
+function createLineBuffer() {
+  let buffer = ''
+  return (chunk, onLine) => {
+    buffer += chunk.toString()
+    let index = buffer.indexOf('\n')
+    while (index !== -1) {
+      const line = buffer.slice(0, index)
+      buffer = buffer.slice(index + 1)
+      onLine(line)
+      index = buffer.indexOf('\n')
+    }
+  }
+}
+
+async function waitForViteReady(child, timeoutMs, onServerUrl) {
+  return new Promise((resolve, reject) => {
+    const onLineBuffer = createLineBuffer()
+    let timeout
+
+    function cleanup() {
+      if (timeout) {
+        clearTimeout(timeout)
+      }
+      child.stdout?.off('data', onData)
+      child.stderr?.off('data', onData)
+      child.off('exit', onExit)
+    }
+
+    function handleLine(line) {
+      const match = line.match(/Local:\s+(https?:\/\/[^\s/]+:\d+)\//i)
+      if (match) {
+        onServerUrl?.(match[1])
+        cleanup()
+        resolve()
+      }
+    }
+
+    function onData(chunk) {
+      onLineBuffer(chunk, handleLine)
+    }
+
+    function onExit(code, signal) {
+      cleanup()
+      reject(new Error(`Dev server exited before ready (code: ${code ?? 'null'}, signal: ${signal ?? 'null'}).`))
+    }
+
+    timeout = setTimeout(() => {
+      cleanup()
+      reject(new Error('Timeout waiting for Vite dev server to report readiness.'))
+    }, timeoutMs)
+
+    child.stdout?.on('data', onData)
+    child.stderr?.on('data', onData)
+    child.once('exit', onExit)
+  })
+}
+
+async function waitForReady({ host, port, url, timeoutMs }) {
+  await waitForPort(host, port, timeoutMs)
+  const httpTimeoutMs = Math.min(10_000, timeoutMs)
+  try {
+    await waitForHttp(url, httpTimeoutMs)
+  }
+  catch (error) {
+    process.stderr.write(
+      `Warning: HTTP readiness check failed for ${url}: ${error instanceof Error ? error.message : String(error)}\n`,
+    )
+  }
+}
+
+async function waitForViteStable({
+  child,
+  readyPath,
+  timeoutMs,
+  defaultBaseURL,
+}) {
+  const deadline = Date.now() + timeoutMs
+  let baseURL = defaultBaseURL
+  let lastError
+
+  const updateBaseURL = (url) => {
+    try {
+      const parsed = new URL(url)
+      baseURL = `${parsed.protocol}//${parsed.host}`
+    }
+    catch {
+      // ignore malformed URLs from logs
+    }
+  }
+
+  const initialWait = Math.min(10_000, timeoutMs)
+  try {
+    await waitForViteReady(child, initialWait, updateBaseURL)
+  }
+  catch (error) {
+    lastError = error
+  }
+
+  while (Date.now() < deadline) {
+    const remaining = deadline - Date.now()
+    const parsed = new URL(baseURL)
+    const host = parsed.hostname
+    const port = parsed.port ? Number(parsed.port) : Number(new URL(defaultBaseURL).port)
+    const readyUrl = new URL(readyPath, baseURL).toString()
+
+    try {
+      await waitForReady({
+        host,
+        port,
+        url: readyUrl,
+        timeoutMs: Math.min(5_000, remaining),
+      })
+      return { baseURL, readyUrl }
+    }
+    catch (error) {
+      lastError = error
+    }
+    await new Promise(resolve => setTimeout(resolve, 250))
+  }
+
+  throw new Error(
+    `Timeout waiting for Vite dev server to stabilize: ${lastError instanceof Error ? lastError.message : String(lastError)}`,
+  )
 }
 
 async function stopProcess(child) {
@@ -182,14 +407,17 @@ async function main() {
   const appName = detectAppName(repoRoot, cwd, appArg)
   const appRoot = join(repoRoot, 'apps', appName)
   const appConfig = getAppConfig(appName, repoRoot, appRoot)
+  const viteLockPath = join(repoRoot, VITE_LOCK_NAME)
 
   const port = await getFreePort(HOST)
-  const baseURL = `http://${HOST}:${port}`
-  const readyUrl = new URL(appConfig.readyPath, baseURL).toString()
+  let host = HOST
+  let baseURL = `http://${host}:${port}`
+  let readyUrl = new URL(appConfig.readyPath, baseURL).toString()
 
   const env = {
     ...process.env,
     ...appConfig.server.env,
+    E2E: '1',
     PORT: String(port),
   }
 
@@ -221,8 +449,10 @@ async function main() {
   const devProcess = execa(appConfig.server.command, devArgs, {
     cwd: appRoot,
     env,
-    stdio: 'inherit',
+    stdio: ['inherit', 'pipe', 'pipe'],
   })
+  devProcess.stdout?.pipe(process.stdout)
+  devProcess.stderr?.pipe(process.stderr)
 
   const onExit = async () => {
     await stopProcess(devProcess)
@@ -230,8 +460,37 @@ async function main() {
   process.once('SIGINT', onExit)
   process.once('SIGTERM', onExit)
 
+  const isVite
+    = appConfig.server.command.includes('vite')
+      && !appConfig.server.command.includes('vitepress')
+  let hasViteLock = false
+
   try {
-    await waitForHttp(readyUrl, DEFAULT_TIMEOUT_MS)
+    if (isVite) {
+      await acquireLock(viteLockPath, DEFAULT_TIMEOUT_MS)
+      hasViteLock = true
+    }
+
+    if (isVite) {
+      const result = await waitForViteStable({
+        child: devProcess,
+        readyPath: appConfig.readyPath,
+        timeoutMs: DEFAULT_TIMEOUT_MS,
+        defaultBaseURL: baseURL,
+      })
+      baseURL = result.baseURL
+      readyUrl = result.readyUrl
+      const parsed = new URL(baseURL)
+      host = parsed.hostname
+    }
+    else {
+      await waitForReady({
+        host,
+        port,
+        url: readyUrl,
+        timeoutMs: DEFAULT_TIMEOUT_MS,
+      })
+    }
 
     const playwrightArgs = ['exec', 'playwright', 'test', ...extraArgs]
     await execa('pnpm', playwrightArgs, {
@@ -239,7 +498,7 @@ async function main() {
       env: {
         ...env,
         E2E_BASE_URL: baseURL,
-        E2E_PORT: String(port),
+        E2E_PORT: String(new URL(baseURL).port || port),
         E2E_APP_NAME: appName,
       },
       stdio: 'inherit',
@@ -249,6 +508,9 @@ async function main() {
     process.off('SIGINT', onExit)
     process.off('SIGTERM', onExit)
     await stopProcess(devProcess)
+    if (hasViteLock) {
+      await releaseLock(viteLockPath)
+    }
   }
 }
 

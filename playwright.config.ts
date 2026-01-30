@@ -16,6 +16,7 @@ export default defineConfig({
   reporter: [['list']],
   use: {
     browserName: 'chromium',
+    channel: 'chrome',
     baseURL: webBaseURL,
     trace: 'retain-on-failure',
     screenshot: 'only-on-failure',

@@ -69,7 +69,7 @@ export async function toRuntimeRequestFromNode(
 ): Promise<RuntimeRequest> {
   const headers = normalizeNodeHeaders(req.headers)
   const contentType = (headers['content-type'] ?? '').split(';')[0]?.trim() ?? ''
-  const url = resolveUrl(req.originalUrl ?? req.url ?? '/', headers)
+  const url = resolveUrl(req.url ?? req.originalUrl ?? '/', headers)
   const resolvedBody = await resolveBody(
     typeof bodyOverride === 'undefined' ? req.body : bodyOverride,
     contentType,

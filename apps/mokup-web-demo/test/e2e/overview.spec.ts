@@ -11,7 +11,7 @@ test('overview shows stats and route inventory', async ({ page }) => {
 test('navigation switches between overview and playground', async ({ page }) => {
   await page.goto('/')
 
-  await page.getByRole('link', { name: 'Playground' }).click()
+  await page.getByRole('link', { name: 'Playground', exact: true }).click()
   await expect(page).toHaveURL(/\/playground/)
   await expect(page.getByRole('heading', { name: /Trigger every mock endpoint/i })).toBeVisible()
 
