@@ -225,32 +225,32 @@ onBeforeUnmount(() => {
 
 <style>
 :root {
-  color-scheme: light;
   font-family: 'Space Grotesk', 'IBM Plex Sans', ui-sans-serif, system-ui;
-  background: radial-gradient(circle at 10% 10%, #f6f2ff 0%, #fef7e5 45%, #f3f9ff 100%);
   color: #1a1a1a;
+  color-scheme: light;
+  background: radial-gradient(circle at 10% 10%, #f6f2ff 0%, #fef7e5 45%, #f3f9ff 100%);
 }
 
 body {
-  margin: 0;
-  min-height: 100vh;
   display: grid;
   place-items: center;
+  min-height: 100vh;
+  margin: 0;
 }
 
 main {
   width: min(940px, 92vw);
-  background: rgba(255, 255, 255, 0.75);
-  border: 1px solid rgba(0, 0, 0, 0.06);
-  border-radius: 28px;
   padding: 32px;
-  box-shadow: 0 24px 60px rgba(31, 32, 41, 0.12);
+  background: rgb(255 255 255 / 75%);
+  border: 1px solid rgb(0 0 0 / 6%);
+  border-radius: 28px;
+  box-shadow: 0 24px 60px rgb(31 32 41 / 12%);
   backdrop-filter: blur(12px);
 }
 
 h1 {
-  font-size: clamp(28px, 5vw, 40px);
   margin: 0 0 8px;
+  font-size: clamp(28px, 5vw, 40px);
 }
 
 p {
@@ -260,64 +260,64 @@ p {
 
 .meta {
   display: flex;
-  gap: 12px;
   flex-wrap: wrap;
+  gap: 12px;
   margin-bottom: 24px;
   font-size: 14px;
 }
 
 .pill {
   padding: 6px 12px;
-  border-radius: 999px;
-  background: #111;
-  color: #fff;
   font-weight: 600;
+  color: #fff;
+  background: #111;
+  border-radius: 999px;
 }
 
 .pill.secondary {
-  background: #fff;
   color: #111;
-  border: 1px solid rgba(0, 0, 0, 0.1);
+  background: #fff;
+  border: 1px solid rgb(0 0 0 / 10%);
 }
 
 .actions {
   display: flex;
-  gap: 12px;
   flex-wrap: wrap;
+  gap: 12px;
   margin-bottom: 20px;
 }
 
 button {
   padding: 10px 16px;
-  border-radius: 12px;
-  border: none;
   font-weight: 600;
+  color: #fff;
   cursor: pointer;
   background: #111;
-  color: #fff;
+  border: none;
+  border-radius: 12px;
   transition:
     transform 0.15s ease,
     box-shadow 0.15s ease;
 }
 
 button.secondary {
-  background: #fff;
   color: #111;
-  border: 1px solid rgba(0, 0, 0, 0.12);
+  background: #fff;
+  border: 1px solid rgb(0 0 0 / 12%);
 }
 
 button:hover {
+  box-shadow: 0 12px 24px rgb(17 17 17 / 18%);
   transform: translateY(-2px);
-  box-shadow: 0 12px 24px rgba(17, 17, 17, 0.18);
 }
 
 pre {
-  margin: 0;
-  background: #0f172a;
-  color: #e2e8f0;
-  padding: 16px;
-  border-radius: 16px;
   min-height: 180px;
+  padding: 16px;
+  margin: 0;
+  color: #e2e8f0;
   white-space: pre-wrap;
+  background: #0f172a;
+  border-radius: 16px;
 }
 </style>

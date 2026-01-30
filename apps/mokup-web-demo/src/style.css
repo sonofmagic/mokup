@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=Orbitron:wght@500;600;700&family=Rajdhani:wght@400;500;600&display=swap');
+@import 'https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=Orbitron:wght@500;600;700&family=Rajdhani:wght@400;500;600&display=swap';
 @import 'tailwindcss';
 
 @layer base {
@@ -8,7 +8,8 @@
 
   body {
     @apply bg-slate-950 text-slate-100;
-    font-family: 'Rajdhani', 'Segoe UI', sans-serif;
+
+    font-family: Rajdhani, 'Segoe UI', sans-serif;
   }
 
   code,
@@ -20,21 +21,21 @@
 @layer utilities {
   .grid-glow {
     background-image:
-      radial-gradient(circle at 20% 20%, rgba(56, 189, 248, 0.15), transparent 45%),
-      radial-gradient(circle at 80% 10%, rgba(192, 132, 252, 0.18), transparent 50%),
-      linear-gradient(120deg, rgba(59, 130, 246, 0.08), transparent 35%),
-      linear-gradient(160deg, rgba(14, 165, 233, 0.08), transparent 55%),
+      radial-gradient(circle at 20% 20%, rgb(56 189 248 / 15%), transparent 45%),
+      radial-gradient(circle at 80% 10%, rgb(192 132 252 / 18%), transparent 50%),
+      linear-gradient(120deg, rgb(59 130 246 / 8%), transparent 35%),
+      linear-gradient(160deg, rgb(14 165 233 / 8%), transparent 55%),
       repeating-linear-gradient(
         90deg,
-        rgba(148, 163, 184, 0.08) 0px,
-        rgba(148, 163, 184, 0.08) 1px,
+        rgb(148 163 184 / 8%) 0,
+        rgb(148 163 184 / 8%) 1px,
         transparent 1px,
         transparent 60px
       ),
       repeating-linear-gradient(
         0deg,
-        rgba(148, 163, 184, 0.08) 0px,
-        rgba(148, 163, 184, 0.08) 1px,
+        rgb(148 163 184 / 8%) 0,
+        rgb(148 163 184 / 8%) 1px,
         transparent 1px,
         transparent 60px
       );
@@ -42,18 +43,18 @@
 
   .panel-glow {
     box-shadow:
-      0 0 40px rgba(56, 189, 248, 0.15),
-      0 0 80px rgba(59, 130, 246, 0.1);
+      0 0 40px rgb(56 189 248 / 15%),
+      0 0 80px rgb(59 130 246 / 10%);
   }
 
   .glass {
-    background: linear-gradient(135deg, rgba(15, 23, 42, 0.7), rgba(15, 23, 42, 0.35));
-    border: 1px solid rgba(148, 163, 184, 0.18);
+    background: linear-gradient(135deg, rgb(15 23 42 / 70%), rgb(15 23 42 / 35%));
+    border: 1px solid rgb(148 163 184 / 18%);
     backdrop-filter: blur(24px);
   }
 
   .font-display {
-    font-family: 'Orbitron', 'Rajdhani', sans-serif;
+    font-family: Orbitron, Rajdhani, sans-serif;
     letter-spacing: 0.02em;
   }
 
@@ -71,6 +72,7 @@
     opacity: 0;
     transform: translateY(18px);
   }
+
   to {
     opacity: 1;
     transform: translateY(0);

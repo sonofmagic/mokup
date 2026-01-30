@@ -16,6 +16,7 @@ This pnpm + Turbo monorepo keeps deployable surfaces under `apps/` (`cli`, `clie
 ## Coding Style & Naming Conventions
 
 Follow the root `.editorconfig`: two-space indentation, LF line endings, UTF-8. Prefer TypeScript (`.ts`/`.tsx`) and Vue SFCs; name files with kebab-case (`user-table.vue`) and exported symbols with PascalCase for components or camelCase for utilities. ESLint (`@icebreakers/eslint-config`) and Stylelint enforce formatting; run `pnpm lint` before committing, and rely on Husky + lint-staged to auto-fix staged files via `eslint --fix`.
+AI-generated code must comply with this project's ESLint and Stylelint rules, and any generated TypeScript must be free of type errors.
 
 ## Testing Guidelines
 
