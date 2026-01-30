@@ -11,6 +11,7 @@
     "build:playground": "pnpm --filter @mokup/playground build",
     "build": "pnpm build:playground && pnpm build:docs",
     "preview": "vitepress preview docs",
+    "test:e2e": "node ../../tests/e2e/run-app-e2e.mjs",
     "worker:dev": "pnpm build && wrangler dev",
     "worker:deploy": "pnpm build && wrangler deploy"
   },

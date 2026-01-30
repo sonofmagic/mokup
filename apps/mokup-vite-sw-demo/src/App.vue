@@ -87,20 +87,20 @@ onBeforeUnmount(() => {
       <span class="pill">/api/ping</span>
       <span class="pill">/api/echo</span>
       <span class="pill">/api/upload</span>
-      <span class="pill secondary">SW: <span>{{ status }}</span></span>
+      <span class="pill secondary">SW: <span data-testid="sw-status">{{ status }}</span></span>
     </div>
     <div class="actions">
-      <button type="button" @click="ping">
+      <button type="button" data-testid="sw-run-ping" @click="ping">
         Ping mock
       </button>
-      <button type="button" class="secondary" @click="echo">
+      <button type="button" class="secondary" data-testid="sw-run-echo" @click="echo">
         Echo mock
       </button>
-      <button type="button" class="secondary" @click="upload">
+      <button type="button" class="secondary" data-testid="sw-run-upload" @click="upload">
         Upload mock
       </button>
     </div>
-    <pre>{{ output }}</pre>
+    <pre data-testid="sw-output">{{ output }}</pre>
   </main>
 </template>
 

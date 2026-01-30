@@ -92,7 +92,9 @@ function submitUpload() {
         <p class="eyebrow">
           Mokup / Vite server mode
         </p>
-        <h1>Mock Vite Server</h1>
+        <h1 data-testid="page-title">
+          Mock Vite Server
+        </h1>
         <p class="subtitle">
           Three mock endpoints powered by faker. Hit run to generate fresh data.
         </p>
@@ -118,7 +120,7 @@ function submitUpload() {
               GET /api/profile
             </p>
           </div>
-          <button class="btn" :disabled="busy" @click="fetchProfile">
+          <button class="btn" :disabled="busy" data-testid="run-profile" @click="fetchProfile">
             Run
           </button>
         </div>
@@ -131,8 +133,8 @@ function submitUpload() {
             </p>
           </div>
           <div class="inline">
-            <input v-model="userId" class="input" type="text" placeholder="User id">
-            <button class="btn" :disabled="busy" @click="fetchUser">
+            <input v-model="userId" class="input" type="text" placeholder="User id" data-testid="input-user-id">
+            <button class="btn" :disabled="busy" data-testid="run-user" @click="fetchUser">
               Run
             </button>
           </div>
@@ -146,9 +148,9 @@ function submitUpload() {
             </p>
           </div>
           <div class="stack">
-            <input v-model="loginUsername" class="input" type="text" placeholder="Username">
-            <input v-model="loginPassword" class="input" type="password" placeholder="Password">
-            <button class="btn" :disabled="busy" @click="submitLogin">
+            <input v-model="loginUsername" class="input" type="text" placeholder="Username" data-testid="input-login-username">
+            <input v-model="loginPassword" class="input" type="password" placeholder="Password" data-testid="input-login-password">
+            <button class="btn" :disabled="busy" data-testid="run-login" @click="submitLogin">
               Run
             </button>
           </div>
@@ -162,12 +164,12 @@ function submitUpload() {
             </p>
           </div>
           <div class="stack">
-            <input v-model="uploadTitle" class="input" type="text" placeholder="Title">
-            <input class="input file-input" type="file" multiple @change="handleUploadFiles">
+            <input v-model="uploadTitle" class="input" type="text" placeholder="Title" data-testid="input-upload-title">
+            <input class="input file-input" type="file" multiple data-testid="input-upload-files" @change="handleUploadFiles">
             <p class="hint">
               {{ uploadFiles.length ? `${uploadFiles.length} files selected` : 'Select files to upload.' }}
             </p>
-            <button class="btn" :disabled="busy" @click="submitUpload">
+            <button class="btn" :disabled="busy" data-testid="run-upload" @click="submitUpload">
               Run
             </button>
           </div>
@@ -180,15 +182,15 @@ function submitUpload() {
             <h2>Response</h2>
             <p class="status">
               <span class="status-label">Status</span>
-              <span class="status-value">{{ responseStatus }}</span>
+              <span class="status-value" data-testid="response-status">{{ responseStatus }}</span>
             </p>
           </div>
           <div class="meta">
             <span class="meta-label">Last action</span>
-            <span class="meta-value">{{ responseMeta }}</span>
+            <span class="meta-value" data-testid="response-meta">{{ responseMeta }}</span>
           </div>
         </div>
-        <pre class="response-body">{{ responseText }}</pre>
+        <pre class="response-body" data-testid="response-body">{{ responseText }}</pre>
       </section>
 
       <section class="panel catalog">

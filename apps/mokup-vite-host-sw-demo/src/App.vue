@@ -198,28 +198,28 @@ onBeforeUnmount(() => {
     <div class="meta">
       <span class="pill">/api/ping</span>
       <span class="pill">/api/echo</span>
-      <span class="pill secondary">Host SW: <span>{{ hostStatus }}</span></span>
-      <span class="pill">Host script: <span>{{ hostScript }}</span></span>
-      <span class="pill secondary">Bridge: <span>{{ bridgeStatus }}</span></span>
+      <span class="pill secondary">Host SW: <span data-testid="host-status">{{ hostStatus }}</span></span>
+      <span class="pill">Host script: <span data-testid="host-script">{{ hostScript }}</span></span>
+      <span class="pill secondary">Bridge: <span data-testid="bridge-status">{{ bridgeStatus }}</span></span>
     </div>
     <div class="actions">
-      <button type="button" @click="ping">
+      <button type="button" data-testid="host-run-ping" @click="ping">
         Ping mock
       </button>
-      <button type="button" class="secondary" @click="echo">
+      <button type="button" class="secondary" data-testid="host-run-echo" @click="echo">
         Echo mock
       </button>
-      <button type="button" @click="updateHostSw">
+      <button type="button" data-testid="host-update-sw" @click="updateHostSw">
         Update host SW
       </button>
-      <button type="button" class="secondary" @click="registerHostSw">
+      <button type="button" class="secondary" data-testid="host-register-sw" @click="registerHostSw">
         Register host SW
       </button>
-      <button type="button" class="secondary" @click="unregisterHostSw">
+      <button type="button" class="secondary" data-testid="host-unregister-sw" @click="unregisterHostSw">
         Unregister host SW
       </button>
     </div>
-    <pre>{{ output }}</pre>
+    <pre data-testid="host-output">{{ output }}</pre>
   </main>
 </template>
 

@@ -61,6 +61,24 @@
         "coverage/**"
       ]
     },
+    "test:e2e": {
+      "cache": false,
+      "inputs": [
+        "src/**",
+        "mock/**",
+        "public/**",
+        "worker/**",
+        "test/e2e/**",
+        "playwright.config.ts",
+        "vite.config.ts",
+        "webpack.config.ts",
+        "package.json"
+      ],
+      "outputs": [
+        "test-results/**",
+        "playwright-report/**"
+      ]
+    },
     "typecheck": {
       "dependsOn": [
         "^typecheck"

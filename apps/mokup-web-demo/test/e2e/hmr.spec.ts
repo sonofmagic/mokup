@@ -1,8 +1,8 @@
 import { readFile, writeFile } from 'node:fs/promises'
 import { join } from 'node:path'
 import { expect, test } from '@playwright/test'
-import { writeJson } from './utils/fs'
-import { repoRoot } from './utils/paths'
+import { writeJson } from '../../../../tests/e2e/utils/fs'
+import { repoRoot } from '../../../../tests/e2e/utils/paths'
 
 const heartbeatPath = join(repoRoot, 'apps/mokup-web-demo/mock/heartbeat.get.json')
 

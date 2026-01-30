@@ -6,6 +6,7 @@
   "scripts": {
     "dev": "tsx node_modules/webpack-cli/bin/cli.js serve --config webpack.config.ts --mode development",
     "build": "tsx node_modules/webpack-cli/bin/cli.js --config webpack.config.ts --mode production",
+    "test:e2e": "node ../../tests/e2e/run-app-e2e.mjs",
     "typecheck": "tsc -p tsconfig.json --noEmit"
   },
   "dependencies": {

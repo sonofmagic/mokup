@@ -187,7 +187,7 @@ onMounted(() => {
         </p>
         <div class="mt-5 flex flex-wrap items-end justify-between gap-6">
           <div class="max-w-xl">
-            <h1 class="text-3xl font-semibold leading-tight md:text-4xl">
+            <h1 class="text-3xl font-semibold leading-tight md:text-4xl" data-testid="page-title">
               D1 auth playground with real mocks.
             </h1>
             <p class="mt-3 text-sm text-stone-700 md:text-base">
@@ -200,6 +200,7 @@ onMounted(() => {
               class="collage-button disabled:cursor-not-allowed disabled:opacity-70"
               type="button"
               :disabled="authBusy"
+              data-testid="auth-github"
               @click="signInGithub"
             >
               Sign in with GitHub
@@ -208,6 +209,7 @@ onMounted(() => {
               class="collage-button-ghost disabled:cursor-not-allowed disabled:opacity-70"
               type="button"
               :disabled="authBusy"
+              data-testid="auth-signout"
               @click="signOut"
             >
               Sign out
@@ -229,6 +231,7 @@ onMounted(() => {
                 class="collage-input mt-2"
                 type="text"
                 placeholder="Ada Lovelace"
+                data-testid="email-name"
               >
             </label>
             <label class="block text-xs font-semibold uppercase tracking-[0.2em] text-stone-600">
@@ -238,6 +241,7 @@ onMounted(() => {
                 class="collage-input mt-2"
                 type="email"
                 placeholder="ada@mokup.dev"
+                data-testid="email-email"
               >
             </label>
             <label class="block text-xs font-semibold uppercase tracking-[0.2em] text-stone-600">
@@ -247,6 +251,7 @@ onMounted(() => {
                 class="collage-input mt-2"
                 type="password"
                 minlength="8"
+                data-testid="email-password"
               >
             </label>
             <div class="flex flex-wrap gap-3">
@@ -254,6 +259,7 @@ onMounted(() => {
                 class="collage-button disabled:cursor-not-allowed disabled:opacity-70"
                 type="button"
                 :disabled="authBusy"
+                data-testid="auth-email-signup"
                 @click="signUpEmail"
               >
                 Sign up
@@ -262,6 +268,7 @@ onMounted(() => {
                 class="collage-button-ghost disabled:cursor-not-allowed disabled:opacity-70"
                 type="button"
                 :disabled="authBusy"
+                data-testid="auth-email-signin"
                 @click="signInEmail"
               >
                 Sign in
@@ -279,6 +286,7 @@ onMounted(() => {
               class="collage-button-ghost px-4 py-1.5 text-xs"
               type="button"
               :disabled="loadingUsers"
+              data-testid="users-refresh"
               @click="loadUsers"
             >
               Refresh
@@ -316,17 +324,20 @@ onMounted(() => {
               class="collage-input"
               type="text"
               placeholder="Name"
+              data-testid="user-name"
             >
             <input
               v-model.trim="userForm.email"
               class="collage-input"
               type="email"
               placeholder="Email"
+              data-testid="user-email"
             >
             <button
               class="collage-button disabled:cursor-not-allowed disabled:opacity-70"
               type="submit"
               :disabled="userBusy"
+              data-testid="user-create"
             >
               Create user
             </button>
@@ -337,7 +348,7 @@ onMounted(() => {
           <h2 class="text-xl font-semibold">
             Status
           </h2>
-          <p class="mt-3 text-sm font-semibold text-orange-700">
+          <p class="mt-3 text-sm font-semibold text-orange-700" data-testid="status-message">
             {{ status }}
           </p>
           <p class="mt-4 text-xs uppercase tracking-[0.3em] text-stone-500">

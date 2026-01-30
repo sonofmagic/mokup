@@ -106,7 +106,7 @@ function runAll() {
           Try dev server mode or build the bundle to see the same API responses.
         </p>
       </div>
-      <button class="primary" type="button" @click="runAll">
+      <button class="primary" type="button" data-testid="run-all" @click="runAll">
         Run all requests
       </button>
     </header>
@@ -120,12 +120,12 @@ function runAll() {
               GET /api/health
             </p>
           </div>
-          <span class="status" :data-status="state.health.status">{{ state.health.status }}</span>
+          <span class="status" data-testid="status-health" :data-status="state.health.status">{{ state.health.status }}</span>
         </div>
         <button type="button" @click="loadHealth">
           Request
         </button>
-        <pre>{{ state.health.output }}</pre>
+        <pre data-testid="output-health">{{ state.health.output }}</pre>
       </article>
 
       <article class="card">
@@ -136,12 +136,12 @@ function runAll() {
               GET /api/users
             </p>
           </div>
-          <span class="status" :data-status="state.users.status">{{ state.users.status }}</span>
+          <span class="status" data-testid="status-users" :data-status="state.users.status">{{ state.users.status }}</span>
         </div>
         <button type="button" @click="loadUsers">
           Request
         </button>
-        <pre>{{ state.users.output }}</pre>
+        <pre data-testid="output-users">{{ state.users.output }}</pre>
       </article>
 
       <article class="card">
@@ -152,12 +152,12 @@ function runAll() {
               GET /api/users/42
             </p>
           </div>
-          <span class="status" :data-status="state.user.status">{{ state.user.status }}</span>
+          <span class="status" data-testid="status-user" :data-status="state.user.status">{{ state.user.status }}</span>
         </div>
         <button type="button" @click="loadUser">
           Request
         </button>
-        <pre>{{ state.user.output }}</pre>
+        <pre data-testid="output-user">{{ state.user.output }}</pre>
       </article>
 
       <article class="card">
@@ -168,12 +168,12 @@ function runAll() {
               POST /api/echo
             </p>
           </div>
-          <span class="status" :data-status="state.echo.status">{{ state.echo.status }}</span>
+          <span class="status" data-testid="status-echo" :data-status="state.echo.status">{{ state.echo.status }}</span>
         </div>
         <button type="button" @click="sendEcho">
           Request
         </button>
-        <pre>{{ state.echo.output }}</pre>
+        <pre data-testid="output-echo">{{ state.echo.output }}</pre>
       </article>
     </section>
   </div>

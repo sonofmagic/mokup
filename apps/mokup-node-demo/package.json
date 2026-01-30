@@ -7,6 +7,7 @@
   "scripts": {
     "build:manifest": "pnpm --filter mokup build && pnpm exec mokup build --dir mock --out dist",
     "dev": "tsx src/index.ts",
+    "test:e2e": "node ../../tests/e2e/run-app-e2e.mjs",
     "typecheck": "tsc -p tsconfig.json --noEmit"
   },
   "dependencies": {
