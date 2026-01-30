@@ -1,5 +1,20 @@
 # @mokup/playground
 
+## 0.1.0
+
+### Minor Changes
+
+- ✨ **Miscellaneous improvements** [`436a594`](https://github.com/sonofmagic/mokup/commit/436a594564eeaeb650924b3fd60651824c333d9b) by @sonofmagic
+  - add multipart file upload rows in the playground request builder
+
+### Patch Changes
+
+- 🐛 **Add a mode indicator in the playground header to show SW vs server handling.** [`c3fde3e`](https://github.com/sonofmagic/mokup/commit/c3fde3ec2f7dd576f658123267b678b25367aedc) by @sonofmagic
+
+- 🐛 **chore: add type test coverage and scripts across packages** [`c2ff07c`](https://github.com/sonofmagic/mokup/commit/c2ff07c213681edce0e26d93e8b7d9df420b6093) by @sonofmagic
+- 📦 **Dependencies** [`c2ff07c`](https://github.com/sonofmagic/mokup/commit/c2ff07c213681edce0e26d93e8b7d9df420b6093)
+  → `@mokup/runtime@1.0.7`
+
 ## 0.0.15
 
 ### Patch Changes

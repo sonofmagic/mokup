@@ -1,5 +1,13 @@
 # @mokup/server
 
+## 1.2.1
+
+### Patch Changes
+
+- 🐛 **chore: add type test coverage and scripts across packages** [`c2ff07c`](https://github.com/sonofmagic/mokup/commit/c2ff07c213681edce0e26d93e8b7d9df420b6093) by @sonofmagic
+- 📦 **Dependencies** [`c3fde3e`](https://github.com/sonofmagic/mokup/commit/c3fde3ec2f7dd576f658123267b678b25367aedc)
+  → `@mokup/playground@0.1.0`, `@mokup/runtime@1.0.7`, `@mokup/shared@1.1.2`
+
 ## 1.2.0
 
 ### Minor Changes

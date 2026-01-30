@@ -1,5 +1,13 @@
 # @mokup/cli
 
+## 1.1.1
+
+### Patch Changes
+
+- 🐛 **chore: add type test coverage and scripts across packages** [`c2ff07c`](https://github.com/sonofmagic/mokup/commit/c2ff07c213681edce0e26d93e8b7d9df420b6093) by @sonofmagic
+- 📦 **Dependencies** [`c2ff07c`](https://github.com/sonofmagic/mokup/commit/c2ff07c213681edce0e26d93e8b7d9df420b6093)
+  → `@mokup/runtime@1.0.7`, `@mokup/server@1.2.1`, `@mokup/shared@1.1.2`
+
 ## 1.1.0
 
 ### Minor Changes
