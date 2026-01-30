@@ -30,9 +30,6 @@ const vitePlugins = [
       dir: '../mock',
       prefix: '/api',
       mode: 'sw',
-      sw: {
-        fallback: false,
-      },
     },
     playground: {
       build: true,
