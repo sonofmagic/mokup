@@ -265,6 +265,7 @@ export function usePlaygroundRequest(
     responseTime,
     resetResponse,
     runRequest,
+    isSwMode,
     isSwRegistering,
     routeParams,
     paramValues,

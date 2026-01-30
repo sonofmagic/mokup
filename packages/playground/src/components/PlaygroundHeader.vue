@@ -7,9 +7,10 @@ import { persistLocale } from '../i18n'
 import UiChipButton from './ui/UiChipButton.vue'
 import UiPill from './ui/UiPill.vue'
 
-defineProps<{
+const props = defineProps<{
   visibleCount: number
   totalCount: number
+  requestMode: 'server' | 'sw' | 'sw-registering'
 }>()
 
 const emit = defineEmits<{
@@ -24,6 +25,24 @@ const themeIcon = computed(() =>
 )
 const themeLabel = computed(() => t(`theme.${themeMode.value}`))
 const localeLabel = computed(() => (locale.value === 'zh-CN' ? '中文' : 'EN'))
+const modeLabel = computed(() => {
+  if (props.requestMode === 'sw-registering') {
+    return t('header.mode', { mode: t('header.modeSwRegistering') })
+  }
+  if (props.requestMode === 'sw') {
+    return t('header.mode', { mode: t('header.modeSw') })
+  }
+  return t('header.mode', { mode: t('header.modeServer') })
+})
+const modeIcon = computed(() => {
+  if (props.requestMode === 'sw-registering') {
+    return 'i-[carbon--time]'
+  }
+  if (props.requestMode === 'sw') {
+    return 'i-[carbon--network-3]'
+  }
+  return 'i-[carbon--server]'
+})
 
 function toggleLocale() {
   const next = locale.value === 'en-US' ? 'zh-CN' : 'en-US'
@@ -46,6 +65,10 @@ function handleRefresh() {
       <UiPill tone="strong" size="xs">
         <span class="i-[carbon--activity] h-3.5 w-3.5" aria-hidden="true" />
         <span>{{ t('header.calls', { count: totalCount }) }}</span>
+      </UiPill>
+      <UiPill tone="strong" size="xs">
+        <span :class="modeIcon" class="h-3.5 w-3.5" aria-hidden="true" />
+        <span>{{ modeLabel }}</span>
       </UiPill>
     </div>
     <div class="flex flex-wrap items-center gap-2">

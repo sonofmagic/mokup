@@ -66,6 +66,7 @@ const {
   responseStatus,
   responseTime,
   runRequest,
+  isSwMode,
   isSwRegistering,
   routeParams,
   paramValues,
@@ -78,6 +79,12 @@ const {
 } = usePlaygroundRequest(selected, { basePath })
 
 const selectedKey = computed(() => (selected.value ? routeKey(selected.value) : ''))
+const requestMode = computed<'server' | 'sw' | 'sw-registering'>(() => {
+  if (isSwMode.value) {
+    return isSwRegistering.value ? 'sw-registering' : 'sw'
+  }
+  return 'server'
+})
 const routeMode = ref<'active' | 'disabled' | 'ignored'>('active')
 const enabledMode = ref<'api' | 'config'>('api')
 const disabledMode = ref<'api' | 'config'>('api')
@@ -267,6 +274,7 @@ onBeforeUnmount(() => {
               <PlaygroundHeader
                 :visible-count="visibleCount"
                 :total-count="totalCount"
+                :request-mode="requestMode"
                 @refresh="handleRefresh"
               />
 
