@@ -19,10 +19,10 @@
     "hono": "^4.11.7",
     "mokup": "workspace:*",
     "vue": "catalog:",
-    "vue-router": "^4.6.0"
+    "vue-router": "^5.0.0"
   },
   "devDependencies": {
-    "@cloudflare/vite-plugin": "^1.22.0",
+    "@cloudflare/vite-plugin": "^1.22.1",
     "@tailwindcss/vite": "catalog:",
     "@vitejs/plugin-vue": "catalog:",
     "tailwindcss": "catalog:",
