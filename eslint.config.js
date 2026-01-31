@@ -4,5 +4,8 @@ export default icebreaker(
   {
     vue: true,
     ignores: ['**/fixtures/**'],
+    rules: {
+      'dot-notation': 'off',
+    },
   },
 )
