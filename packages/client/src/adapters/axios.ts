@@ -62,11 +62,21 @@ export function createAxiosRequestInterceptor(options: AxiosAdapterOptions = {})
     const resolvedUrl = combineBaseUrl(baseURL, config.url)
     const descriptor: RequestDescriptor = {
       url: resolvedUrl || config.url || baseURL || '',
-      method: config.method,
-      headers: normalizeHeaders(config.headers),
-      mock: config.mock,
-      meta: config.meta,
-      body: config.data,
+    }
+    if (config.method) {
+      descriptor.method = config.method
+    }
+    if (config.headers) {
+      descriptor.headers = normalizeHeaders(config.headers)
+    }
+    if (typeof config.mock === 'boolean') {
+      descriptor.mock = config.mock
+    }
+    if (config.meta) {
+      descriptor.meta = config.meta
+    }
+    if (typeof config.data !== 'undefined') {
+      descriptor.body = config.data
     }
     const resolved = resolver.resolve(descriptor)
     const nextHeaders = mergeHeaders(descriptor.headers, resolved.headers)
@@ -84,9 +94,12 @@ export function applyMokupToAxios(instance: AxiosInstanceLike, options: AxiosAda
   const defaultBaseURL = instance.defaults?.baseURL
   const interceptor = createAxiosRequestInterceptor(options)
   instance.interceptors.request.use(async (config) => {
-    const mergedConfig = {
+    const mergedConfig: AxiosRequestConfig = {
       ...config,
-      baseURL: config.baseURL ?? defaultBaseURL,
+    }
+    const baseURL = config.baseURL ?? defaultBaseURL
+    if (typeof baseURL === 'string') {
+      mergedConfig.baseURL = baseURL
     }
     return interceptor(mergedConfig)
   })

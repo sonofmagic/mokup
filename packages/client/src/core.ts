@@ -108,7 +108,7 @@ function readExplicitMock(req: RequestDescriptor): boolean | undefined {
   if (typeof direct === 'boolean') {
     return direct
   }
-  const metaValue = req.meta ? parseBoolean(req.meta.mokup) : undefined
+  const metaValue = req.meta ? parseBoolean(req.meta['mokup']) : undefined
   if (typeof metaValue === 'boolean') {
     return metaValue
   }
@@ -232,15 +232,19 @@ export function createMockResolver(options: MockResolverOptions = {}): MockResol
         }
       : undefined
 
+    const meta: ResolveResult['meta'] = {
+      reason,
+      baseType,
+    }
+    if (warning) {
+      meta.warning = warning
+    }
+
     return {
       mode,
       url: nextUrl,
       headers: mergeHeaders(headers, markerHeaders),
-      meta: {
-        reason,
-        warning,
-        baseType,
-      },
+      meta,
     }
   }
 

@@ -1,3 +1,5 @@
+import './axios-augment'
+
 export {
   applyMokupToAxios,
   createAxiosRequestInterceptor,

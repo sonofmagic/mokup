@@ -47,11 +47,20 @@ export function createFetchAdapter(options: FetchAdapterOptions = {}) {
     const mergedHeaders = mergeHeaders(requestHeaders, initHeaders)
     const descriptor: RequestDescriptor = {
       url,
-      method: sourceRequest?.method ?? init?.method,
       headers: mergedHeaders,
-      body: init?.body ?? sourceRequest?.body,
-      mock: init?.mock,
-      meta: init?.meta,
+    }
+    const method = sourceRequest?.method ?? init?.method
+    if (method) {
+      descriptor.method = method
+    }
+    if (typeof init?.body !== 'undefined' || sourceRequest?.body) {
+      descriptor.body = init?.body ?? sourceRequest?.body
+    }
+    if (typeof init?.mock === 'boolean') {
+      descriptor.mock = init.mock
+    }
+    if (init?.meta) {
+      descriptor.meta = init.meta
     }
 
     const resolved = resolver.resolve(descriptor)
