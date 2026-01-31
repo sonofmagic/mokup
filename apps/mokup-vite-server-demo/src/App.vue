@@ -1,5 +1,6 @@
 <script setup lang="ts">
-import { ref } from 'vue'
+import { createFetchAdapter, createMockResolver } from '@mokup/client'
+import { computed, ref, watch } from 'vue'
 
 const responseText = ref('Click Run to see mock output.')
 const responseStatus = ref('idle')
@@ -12,12 +13,73 @@ const loginPassword = ref('123456')
 const uploadTitle = ref('Mokup upload')
 const uploadFiles = ref<File[]>([])
 
+const truthyValues = new Set(['1', 'true', 'yes', 'on'])
+const falsyValues = new Set(['0', 'false', 'no', 'off'])
+const storageKey = 'mokup.useMock'
+
+function parseEnvBoolean(value?: string): boolean | undefined {
+  if (!value) {
+    return undefined
+  }
+  const normalized = value.trim().toLowerCase()
+  if (truthyValues.has(normalized)) {
+    return true
+  }
+  if (falsyValues.has(normalized)) {
+    return false
+  }
+  return undefined
+}
+
+function readStoredUseMock(): boolean | undefined {
+  if (typeof window === 'undefined' || !window.localStorage) {
+    return undefined
+  }
+  return parseEnvBoolean(window.localStorage.getItem(storageKey) ?? undefined)
+}
+
+function createStorage() {
+  if (typeof window === 'undefined' || !window.localStorage) {
+    return undefined
+  }
+  return {
+    get: () => readStoredUseMock(),
+    set: (value: boolean) => window.localStorage.setItem(storageKey, value ? '1' : '0'),
+  }
+}
+
+const mockBase = import.meta.env.VITE_MOKUP_BASE ?? '/api'
+const realBase = import.meta.env.VITE_API_BASE ?? '/api'
+const envUseMock = parseEnvBoolean(import.meta.env.VITE_USE_MOKUP)
+const storedUseMock = readStoredUseMock()
+const useMock = ref(
+  typeof storedUseMock === 'boolean'
+    ? storedUseMock
+    : (typeof envUseMock === 'boolean' ? envUseMock : import.meta.env.DEV),
+)
+
+const resolver = createMockResolver({
+  mockBase,
+  realBase,
+  markers: { header: true },
+  storage: createStorage(),
+})
+resolver.setUseMock(useMock.value)
+watch(useMock, (value) => {
+  resolver.setUseMock(value, true)
+})
+
+const mokupFetch = createFetchAdapter({ resolver })
+
+const activeMode = computed(() => useMock.value ? 'mokup' : 'real')
+const activeBase = computed(() => (useMock.value ? mockBase : realBase))
+
 async function runRequest(label: string, url: string, init?: RequestInit) {
   busy.value = true
   responseStatus.value = 'loading'
   responseMeta.value = label
   try {
-    const res = await fetch(url, init)
+    const res = await mokupFetch(url, init)
     const contentType = res.headers.get('content-type') ?? ''
     const raw = await res.text()
     if (contentType.includes('application/json')) {
@@ -107,6 +169,15 @@ function submitUpload() {
         <div class="meta-card">
           <span class="meta-label">Runtime</span>
           <span class="meta-value">server</span>
+        </div>
+        <div class="meta-card mode-card">
+          <span class="meta-label">Mode</span>
+          <label class="switch">
+            <input v-model="useMock" type="checkbox" data-testid="toggle-mokup">
+            <span class="switch-track" aria-hidden="true" />
+            <span class="switch-label">{{ activeMode }}</span>
+          </label>
+          <span class="meta-note">Base: {{ activeBase }}</span>
         </div>
       </div>
     </header>
@@ -299,6 +370,70 @@ h1 {
   display: block;
   margin-top: 6px;
   font-weight: 600;
+}
+
+.meta-note {
+  display: block;
+  margin-top: 6px;
+  font-size: 0.75rem;
+  color: #6b7280;
+}
+
+.mode-card {
+  display: grid;
+  gap: 6px;
+}
+
+.switch {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: #3d3a36;
+  cursor: pointer;
+}
+
+.switch input {
+  position: absolute;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.switch-track {
+  position: relative;
+  width: 42px;
+  height: 22px;
+  background: #d6c7b8;
+  border-radius: 999px;
+  transition: background 0.2s ease;
+}
+
+.switch-track::after {
+  position: absolute;
+  top: 3px;
+  left: 3px;
+  width: 16px;
+  height: 16px;
+  content: '';
+  background: #fff;
+  border-radius: 50%;
+  box-shadow: 0 2px 6px rgb(15 23 42 / 20%);
+  transition: transform 0.2s ease;
+}
+
+.switch input:checked + .switch-track {
+  background: #3d5a80;
+}
+
+.switch input:checked + .switch-track::after {
+  transform: translateX(20px);
+}
+
+.switch-label {
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  font-size: 0.75rem;
 }
 
 .content {

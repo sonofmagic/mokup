@@ -13,6 +13,7 @@
   },
   "dependencies": {
     "@faker-js/faker": "catalog:",
+    "@mokup/client": "workspace:*",
     "mokup": "workspace:*",
     "vue": "catalog:"
   },

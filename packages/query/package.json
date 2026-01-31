@@ -1,0 +1,40 @@
+{
+  "name": "@mokup/query",
+  "type": "module",
+  "version": "0.1.0",
+  "description": "TanStack Query integrations for mokup client switching.",
+  "license": "MIT",
+  "homepage": "https://mokup.icebreaker.top",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/sonofmagic/mokup.git",
+    "directory": "packages/query"
+  },
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.mjs",
+      "require": "./dist/index.cjs"
+    }
+  },
+  "publishConfig": {
+    "access": "public"
+  },
+  "main": "./dist/index.cjs",
+  "module": "./dist/index.mjs",
+  "types": "./dist/index.d.ts",
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "build": "unbuild",
+    "dev": "unbuild --stub",
+    "lint": "eslint .",
+    "test": "vitest",
+    "typecheck": "tsc -p tsconfig.json --noEmit",
+    "test:types": "tsd"
+  },
+  "dependencies": {
+    "@mokup/client": "workspace:*"
+  }
+}

@@ -307,6 +307,9 @@ importers:
       '@faker-js/faker':
         specifier: 'catalog:'
         version: 10.2.0
+      '@mokup/client':
+        specifier: workspace:*
+        version: link:../../packages/client
       mokup:
         specifier: workspace:*
         version: link:../../packages/mokup
@@ -450,6 +453,8 @@ importers:
         specifier: ^14.0.3
         version: 14.0.3
 
+  packages/client: {}
+
   packages/core:
     dependencies:
       '@mokup/runtime':
@@ -537,6 +542,12 @@ importers:
       vue-i18n:
         specifier: ^11.1.12
         version: 11.2.8(vue@3.5.27(typescript@5.9.3))
+
+  packages/query:
+    dependencies:
+      '@mokup/client':
+        specifier: workspace:*
+        version: link:../client
 
   packages/runtime:
     dependencies:

@@ -1,0 +1,47 @@
+{
+  "name": "@mokup/client",
+  "type": "module",
+  "version": "0.1.0",
+  "description": "Client-side request switching and adapters for mokup.",
+  "license": "MIT",
+  "homepage": "https://mokup.icebreaker.top",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/sonofmagic/mokup.git",
+    "directory": "packages/client"
+  },
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.mjs",
+      "require": "./dist/index.cjs"
+    },
+    "./axios": {
+      "types": "./dist/axios.d.ts",
+      "import": "./dist/axios.mjs",
+      "require": "./dist/axios.cjs"
+    },
+    "./fetch": {
+      "types": "./dist/fetch.d.ts",
+      "import": "./dist/fetch.mjs",
+      "require": "./dist/fetch.cjs"
+    }
+  },
+  "publishConfig": {
+    "access": "public"
+  },
+  "main": "./dist/index.cjs",
+  "module": "./dist/index.mjs",
+  "types": "./dist/index.d.ts",
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "build": "unbuild",
+    "dev": "unbuild --stub",
+    "lint": "eslint .",
+    "test": "vitest",
+    "typecheck": "tsc -p tsconfig.json --noEmit",
+    "test:types": "tsd"
+  }
+}
