@@ -1,5 +1,11 @@
 # @mokup/shared
 
+## 1.1.3
+
+### Patch Changes
+
+- 🐛 **Fix ESM type resolution for subpath exports and add a Node moduleResolution fallback.** [`66f1612`](https://github.com/sonofmagic/mokup/commit/66f161228064fb525242f37512842353bd22980d) by @sonofmagic
+
 ## 1.1.2
 
 ### Patch Changes

@@ -1,5 +1,12 @@
 # mokup
 
+## 2.3.2
+
+### Patch Changes
+
+- 🐛 **Fix ESM type resolution for subpath exports and add a Node moduleResolution fallback.** [`66f1612`](https://github.com/sonofmagic/mokup/commit/66f161228064fb525242f37512842353bd22980d) by @sonofmagic
+- 📦 Updated 6 dependencies [`66f1612`](https://github.com/sonofmagic/mokup/commit/66f161228064fb525242f37512842353bd22980d)
+
 ## 2.3.1
 
 ### Patch Changes
