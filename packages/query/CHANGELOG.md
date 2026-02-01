@@ -1,5 +1,11 @@
 # @mokup/query
 
+## 0.2.1
+
+### Patch Changes
+
+- 🐛 **Normalize query and mutation requests before passing them to the executor.** [`5f7af81`](https://github.com/sonofmagic/mokup/commit/5f7af8137c0fbcd6a8cef9fb80356129754d5aa3) by @sonofmagic
+
 ## 0.2.0
 
 ### Minor Changes
