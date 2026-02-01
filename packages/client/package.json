@@ -12,17 +12,26 @@
   },
   "exports": {
     ".": {
-      "types": "./dist/index.d.ts",
+      "types": {
+        "import": "./dist/index.d.mts",
+        "require": "./dist/index.d.cts"
+      },
       "import": "./dist/index.mjs",
       "require": "./dist/index.cjs"
     },
     "./axios": {
-      "types": "./dist/axios.d.ts",
+      "types": {
+        "import": "./dist/axios.d.mts",
+        "require": "./dist/axios.d.cts"
+      },
       "import": "./dist/axios.mjs",
       "require": "./dist/axios.cjs"
     },
     "./fetch": {
-      "types": "./dist/fetch.d.ts",
+      "types": {
+        "import": "./dist/fetch.d.mts",
+        "require": "./dist/fetch.d.cts"
+      },
       "import": "./dist/fetch.mjs",
       "require": "./dist/fetch.cjs"
     }
@@ -33,6 +42,16 @@
   "main": "./dist/index.cjs",
   "module": "./dist/index.mjs",
   "types": "./dist/index.d.ts",
+  "typesVersions": {
+    "*": {
+      "axios": [
+        "dist/axios.d.mts"
+      ],
+      "fetch": [
+        "dist/fetch.d.mts"
+      ]
+    }
+  },
   "files": [
     "dist"
   ],

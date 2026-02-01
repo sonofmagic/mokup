@@ -12,57 +12,90 @@
   },
   "exports": {
     ".": {
-      "types": "./dist/index.d.ts",
+      "types": {
+        "import": "./dist/index.d.mts",
+        "require": "./dist/index.d.cts"
+      },
       "import": "./dist/index.mjs",
       "require": "./dist/index.cjs"
     },
     "./connect": {
-      "types": "./dist/connect.d.ts",
+      "types": {
+        "import": "./dist/connect.d.mts",
+        "require": "./dist/connect.d.cts"
+      },
       "import": "./dist/connect.mjs",
       "require": "./dist/connect.cjs"
     },
     "./express": {
-      "types": "./dist/express.d.ts",
+      "types": {
+        "import": "./dist/express.d.mts",
+        "require": "./dist/express.d.cts"
+      },
       "import": "./dist/express.mjs",
       "require": "./dist/express.cjs"
     },
     "./fastify": {
-      "types": "./dist/fastify.d.ts",
+      "types": {
+        "import": "./dist/fastify.d.mts",
+        "require": "./dist/fastify.d.cts"
+      },
       "import": "./dist/fastify.mjs",
       "require": "./dist/fastify.cjs"
     },
     "./fetch": {
-      "types": "./dist/fetch.d.ts",
+      "types": {
+        "import": "./dist/fetch.d.mts",
+        "require": "./dist/fetch.d.cts"
+      },
       "import": "./dist/fetch.mjs",
       "require": "./dist/fetch.cjs"
     },
     "./fetch-server": {
-      "types": "./dist/fetch-server.d.ts",
+      "types": {
+        "import": "./dist/fetch-server.d.mts",
+        "require": "./dist/fetch-server.d.cts"
+      },
       "import": "./dist/fetch-server.mjs",
       "require": "./dist/fetch-server.cjs"
     },
     "./hono": {
-      "types": "./dist/hono.d.ts",
+      "types": {
+        "import": "./dist/hono.d.mts",
+        "require": "./dist/hono.d.cts"
+      },
       "import": "./dist/hono.mjs",
       "require": "./dist/hono.cjs"
     },
     "./koa": {
-      "types": "./dist/koa.d.ts",
+      "types": {
+        "import": "./dist/koa.d.mts",
+        "require": "./dist/koa.d.cts"
+      },
       "import": "./dist/koa.mjs",
       "require": "./dist/koa.cjs"
     },
     "./node": {
-      "types": "./dist/node.d.ts",
+      "types": {
+        "import": "./dist/node.d.mts",
+        "require": "./dist/node.d.cts"
+      },
       "import": "./dist/node.mjs",
       "require": "./dist/node.cjs"
     },
     "./worker-node": {
-      "types": "./dist/worker-node.d.ts",
+      "types": {
+        "import": "./dist/worker-node.d.mts",
+        "require": "./dist/worker-node.d.cts"
+      },
       "import": "./dist/worker-node.mjs",
       "require": "./dist/worker-node.cjs"
     },
     "./worker": {
-      "types": "./dist/worker.d.ts",
+      "types": {
+        "import": "./dist/worker.d.mts",
+        "require": "./dist/worker.d.cts"
+      },
       "import": "./dist/worker.mjs",
       "require": "./dist/worker.cjs"
     }
@@ -73,6 +106,40 @@
   "main": "./dist/index.cjs",
   "module": "./dist/index.mjs",
   "types": "./dist/index.d.ts",
+  "typesVersions": {
+    "*": {
+      "connect": [
+        "dist/connect.d.mts"
+      ],
+      "express": [
+        "dist/express.d.mts"
+      ],
+      "fastify": [
+        "dist/fastify.d.mts"
+      ],
+      "fetch": [
+        "dist/fetch.d.mts"
+      ],
+      "fetch-server": [
+        "dist/fetch-server.d.mts"
+      ],
+      "hono": [
+        "dist/hono.d.mts"
+      ],
+      "koa": [
+        "dist/koa.d.mts"
+      ],
+      "node": [
+        "dist/node.d.mts"
+      ],
+      "worker-node": [
+        "dist/worker-node.d.mts"
+      ],
+      "worker": [
+        "dist/worker.d.mts"
+      ]
+    }
+  },
   "files": [
     "dist"
   ],
