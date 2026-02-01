@@ -263,10 +263,8 @@ export function createMokupQueryClient(options: MokupQueryOptions = {}) {
     if (!request) {
       throw new Error('Failed to build request from queryKey. Provide buildRequest to customize.')
     }
-    return executor({
-      ...request,
-      meta: mergeMeta(request.meta as Record<string, unknown> | undefined, context.meta),
-    }, { signal: context.signal })
+    const normalized = normalizeRequest(request, context.meta)
+    return executor(normalized, { signal: context.signal })
   }
 
   const mutationFn: MutationFunction = async (variables) => {
@@ -274,7 +272,7 @@ export function createMokupQueryClient(options: MokupQueryOptions = {}) {
     if (!request) {
       throw new Error('Failed to build request from mutation variables. Provide buildMutationRequest to customize.')
     }
-    return executor(request)
+    return executor(normalizeRequest(request))
   }
 
   return {
