@@ -506,9 +506,9 @@ importers:
         specifier: workspace:*
         version: link:../runtime
     devDependencies:
-      '@iconify/json':
-        specifier: ^2.2.433
-        version: 2.2.433
+      '@iconify-json/carbon':
+        specifier: ^1.2.11
+        version: 1.2.18
       '@iconify/tailwind':
         specifier: ^1.2.0
         version: 1.2.0
@@ -2314,6 +2314,9 @@ packages:
     resolution: {integrity: sha512-/TmmfrIi75KGbVrSFUCySNlXrql2KvTEUXQYIs8/DjEQcvp8jjLEkBMRr9QI9rhxH8cv5Gk/5P2p1awENBxeBg==}
     hasBin: true
 
+  '@iconify-json/carbon@1.2.18':
+    resolution: {integrity: sha512-Grb13E6r/RqTEV4Sqd/BQR2FUt57U2WLuticJ5H8JbTdHLop1LmdePu3EJJA3Xi8DcWRbD6OnC133hKfOwlgtg==}
+
   '@iconify-json/logos@1.2.10':
     resolution: {integrity: sha512-qxaXKJ6fu8jzTMPQdHtNxlfx6tBQ0jXRbHZIYy5Ilh8Lx9US9FsAdzZWUR8MXV8PnWTKGDFO4ZZee9VwerCyMA==}
 
@@ -2322,9 +2325,6 @@ packages:
 
   '@iconify-json/vscode-icons@1.2.40':
     resolution: {integrity: sha512-Q7JIWAxENwmcRg4EGRY+u16gBwrAj6mWeuSmuyuPvNvoTJHh8Ss8qoeDhrFYNgtWqNkzH5hSf4b2T9XLK5MsrA==}
-
-  '@iconify/json@2.2.433':
-    resolution: {integrity: sha512-9jLUb472cTux0pphkyswS/zl/Ty27b8VvuzI/BEsOYbLWgKAS1b9NBN9/etM6YP9+GnKbA97txbj6B1P6dkWgQ==}
 
   '@iconify/tailwind@1.2.0':
     resolution: {integrity: sha512-KgpIHWOTcRYw1XcoUqyNSrmYyfLLqZYu3AmP8zdfLk0F5TqRO8YerhlvlQmGfn7rJXgPeZN569xPAJnJ53zZxA==}
@@ -12792,6 +12792,10 @@ snapshots:
       - stylelint
       - stylelint-order
 
+  '@iconify-json/carbon@1.2.18':
+    dependencies:
+      '@iconify/types': 2.0.0
+
   '@iconify-json/logos@1.2.10':
     dependencies:
       '@iconify/types': 2.0.0
@@ -12803,11 +12807,6 @@ snapshots:
   '@iconify-json/vscode-icons@1.2.40':
     dependencies:
       '@iconify/types': 2.0.0
-
-  '@iconify/json@2.2.433':
-    dependencies:
-      '@iconify/types': 2.0.0
-      pathe: 2.0.3
 
   '@iconify/tailwind@1.2.0':
     dependencies:

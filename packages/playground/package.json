@@ -25,7 +25,7 @@
     "@mokup/runtime": "workspace:*"
   },
   "devDependencies": {
-    "@iconify/json": "^2.2.433",
+    "@iconify-json/carbon": "^1.2.11",
     "@iconify/tailwind": "^1.2.0",
     "@mokup/core": "workspace:*",
     "@tailwindcss/vite": "catalog:",
