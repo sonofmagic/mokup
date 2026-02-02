@@ -1,5 +1,13 @@
 # mokup
 
+## 2.3.3
+
+### Patch Changes
+
+- 🐛 **Miscellaneous improvements** [`691723f`](https://github.com/sonofmagic/mokup/commit/691723f453baf692dca588cf0f2d329ffaa4acad) by @sonofmagic
+  - Register mock middleware before Vite HTML fallback so SPA `/api/*` routes hit mokup.
+  - Only inject the SW unregister script when `sw.unregister` is explicitly enabled.
+
 ## 2.3.2
 
 ### Patch Changes
