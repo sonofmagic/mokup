@@ -7,7 +7,7 @@ catalogs:
   default:
     '@faker-js/faker': ^10.2.0
     '@tailwindcss/vite': ^4.1.13
-    '@types/node': ^25.1.0
+    '@types/node': ^25.2.0
     '@vitejs/plugin-vue': ^6.0.3
     pathe: ^2.0.3
     tailwindcss: ^4.1.13
