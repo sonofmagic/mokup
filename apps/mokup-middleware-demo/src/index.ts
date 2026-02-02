@@ -56,7 +56,16 @@ async function start() {
     })
   })
 
-  app.use('/api', createExpressMiddleware(options))
+  const mokupMiddleware = createExpressMiddleware(options)
+  app.use('/api', (req, res, next) => {
+    if (req.url?.startsWith('/api/')) {
+      req.url = req.url.slice(4)
+    }
+    else if (req.url === '/api') {
+      req.url = '/'
+    }
+    return mokupMiddleware(req, res, next)
+  })
 
   app.use(express.static(path.join(rootDir, 'public')))
 

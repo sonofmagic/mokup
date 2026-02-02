@@ -318,7 +318,11 @@ onMounted(() => {
               Loading users...
             </li>
           </ul>
-          <form class="mt-4 grid gap-3 sm:grid-cols-[1fr_1fr_auto]" @submit.prevent="createUser">
+          <form
+            class="mt-4 grid gap-3 sm:grid-cols-[1fr_1fr_auto]"
+            novalidate
+            @submit.prevent="createUser"
+          >
             <input
               v-model.trim="userForm.name"
               class="collage-input"

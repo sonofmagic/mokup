@@ -4,10 +4,16 @@ import { dirname, join, relative, resolve } from 'node:path'
 import process from 'node:process'
 import { execa } from 'execa'
 
-const HOST = '127.0.0.1'
+const ACCESS_HOST = 'localhost'
+const BIND_HOST = '0.0.0.0'
 const DEFAULT_TIMEOUT_MS = 60_000
 const VITE_LOCK_NAME = '.e2e-vite.lock'
 const VITE_LOCK_STALE_MS = 10 * 60 * 1000
+
+function stripAnsi(input) {
+  // eslint-disable-next-line no-control-regex
+  return input.replace(/\u001B\[[0-9;]*m/g, '')
+}
 
 function findRepoRoot(startDir) {
   let current = resolve(startDir)
@@ -266,10 +272,15 @@ async function waitForViteReady(child, timeoutMs, onServerUrl) {
   return new Promise((resolve, reject) => {
     const onLineBuffer = createLineBuffer()
     let timeout
+    let graceTimer
+    let resolved = false
 
     function cleanup() {
       if (timeout) {
         clearTimeout(timeout)
+      }
+      if (graceTimer) {
+        clearTimeout(graceTimer)
       }
       child.stdout?.off('data', onData)
       child.stderr?.off('data', onData)
@@ -277,11 +288,21 @@ async function waitForViteReady(child, timeoutMs, onServerUrl) {
     }
 
     function handleLine(line) {
-      const match = line.match(/Local:\s+(https?:\/\/[^\s/]+:\d+)\//i)
+      const cleaned = stripAnsi(line)
+      const match = cleaned.match(/(Local|Network):\s+(https?:\/\/[^\s/]+:\d+)\//i)
       if (match) {
-        onServerUrl?.(match[1])
-        cleanup()
-        resolve()
+        onServerUrl?.(match[2], match[1].toLowerCase())
+        if (!resolved) {
+          resolved = true
+          if (timeout) {
+            clearTimeout(timeout)
+            timeout = undefined
+          }
+          resolve()
+          graceTimer = setTimeout(() => {
+            cleanup()
+          }, 250)
+        }
       }
     }
 
@@ -327,11 +348,37 @@ async function waitForViteStable({
   const deadline = Date.now() + timeoutMs
   let baseURL = defaultBaseURL
   let lastError
+  let hasViteUrl = false
+  const observedHosts = new Set()
 
-  const updateBaseURL = (url) => {
+  const normalizeAccessHost = (host) => {
+    if (!host) {
+      return ACCESS_HOST
+    }
+    const lowered = host.toLowerCase()
+    if (lowered === '0.0.0.0' || lowered === '::') {
+      return ACCESS_HOST
+    }
+    return host
+  }
+
+  const getHostCandidates = (host) => {
+    const normalized = normalizeAccessHost(host)
+    const candidates = [normalized, ACCESS_HOST, '127.0.0.1', '::1']
+    return [...new Set(candidates.filter(Boolean))]
+  }
+
+  const updateBaseURL = (url, kind) => {
     try {
       const parsed = new URL(url)
-      baseURL = `${parsed.protocol}//${parsed.host}`
+      const hostname = normalizeAccessHost(parsed.hostname)
+      const hostForUrl = hostname.includes(':') ? `[${hostname}]` : hostname
+      if (hostname) {
+        observedHosts.add(hostname)
+      }
+      if (kind === 'local' || !hasViteUrl) {
+        baseURL = `${parsed.protocol}//${hostForUrl}:${parsed.port}`
+      }
     }
     catch {
       // ignore malformed URLs from logs
@@ -341,6 +388,7 @@ async function waitForViteStable({
   const initialWait = Math.min(10_000, timeoutMs)
   try {
     await waitForViteReady(child, initialWait, updateBaseURL)
+    hasViteUrl = true
   }
   catch (error) {
     lastError = error
@@ -351,21 +399,42 @@ async function waitForViteStable({
     const parsed = new URL(baseURL)
     const host = parsed.hostname
     const port = parsed.port ? Number(parsed.port) : Number(new URL(defaultBaseURL).port)
-    const readyUrl = new URL(readyPath, baseURL).toString()
+    const hostsToTry = getHostCandidates(host)
+    for (const observedHost of observedHosts) {
+      if (!hostsToTry.includes(observedHost)) {
+        hostsToTry.push(observedHost)
+      }
+    }
 
-    try {
-      await waitForReady({
-        host,
-        port,
-        url: readyUrl,
-        timeoutMs: Math.min(5_000, remaining),
-      })
-      return { baseURL, readyUrl }
+    for (const candidateHost of hostsToTry) {
+      const hostForUrl = candidateHost.includes(':') ? `[${candidateHost}]` : candidateHost
+      const candidateBaseURL = `${parsed.protocol}//${hostForUrl}:${port}`
+      const candidateReadyUrl = new URL(readyPath, candidateBaseURL).toString()
+
+      try {
+        await waitForReady({
+          host: candidateHost,
+          port,
+          url: candidateReadyUrl,
+          timeoutMs: Math.min(5_000, remaining),
+        })
+        baseURL = candidateBaseURL
+        return { baseURL, readyUrl: candidateReadyUrl }
+      }
+      catch (error) {
+        lastError = error
+      }
     }
-    catch (error) {
-      lastError = error
-    }
+
     await new Promise(resolve => setTimeout(resolve, 250))
+  }
+
+  if (hasViteUrl) {
+    const fallbackReadyUrl = new URL(readyPath, baseURL).toString()
+    process.stderr.write(
+      `Warning: Vite readiness probe failed, proceeding with ${fallbackReadyUrl}.\n`,
+    )
+    return { baseURL, readyUrl: fallbackReadyUrl }
   }
 
   throw new Error(
@@ -409,8 +478,8 @@ async function main() {
   const appConfig = getAppConfig(appName, repoRoot, appRoot)
   const viteLockPath = join(repoRoot, VITE_LOCK_NAME)
 
-  const port = await getFreePort(HOST)
-  let host = HOST
+  const port = await getFreePort(BIND_HOST)
+  let host = ACCESS_HOST
   let baseURL = `http://${host}:${port}`
   let readyUrl = new URL(appConfig.readyPath, baseURL).toString()
 
@@ -434,12 +503,12 @@ async function main() {
   const devArgs = [
     ...appConfig.server.args,
     ...(appConfig.server.command.includes('vitepress')
-      ? ['--host', HOST, '--port', String(port)]
+      ? ['--host', BIND_HOST, '--port', String(port)]
       : []),
   ]
 
   if (appConfig.server.command.includes('vite') && !appConfig.server.command.includes('vitepress')) {
-    devArgs.push('--host', HOST, '--port', String(port))
+    devArgs.push('--host', BIND_HOST, '--port', String(port))
   }
 
   if (appName === 'mokup-webpack-demo') {

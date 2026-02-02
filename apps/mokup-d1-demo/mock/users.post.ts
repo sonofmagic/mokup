@@ -17,6 +17,10 @@ const handler: RequestHandler = async (c) => {
     return c.json({ ok: false, message: 'email is invalid.' }, 400)
   }
 
+  if (!db || typeof db.select !== 'function') {
+    return c.json({ ok: false, message: 'D1 binding is not available.' }, 503)
+  }
+
   const existing = await db.select().from(user).where(eq(user.email, email)).get()
   if (existing) {
     return c.json({ ok: false, message: 'email already exists.' }, 409)
