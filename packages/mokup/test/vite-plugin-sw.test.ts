@@ -45,6 +45,27 @@ describe('vite plugin sw helpers', () => {
     expect(inline).toContain('navigator.serviceWorker.getRegistrations')
   })
 
+  it('skips unregister scripts when not explicitly enabled', () => {
+    const script = buildSwLifecycleScript({
+      importPath: 'mokup/sw',
+      swConfig: null,
+      unregisterConfig: { path: '/sw.js', scope: '/', register: true, unregister: false, basePaths: [] },
+      hasSwEntries: false,
+      hasSwRoutes: false,
+      ...baseResolvers,
+    })
+    expect(script).toBeNull()
+
+    const inline = buildSwLifecycleInlineScript({
+      swConfig: null,
+      unregisterConfig: { path: '/sw.js', scope: '/', register: true, unregister: false, basePaths: [] },
+      hasSwEntries: false,
+      hasSwRoutes: false,
+      ...baseResolvers,
+    })
+    expect(inline).toBeNull()
+  })
+
   it('builds registration scripts when enabled', () => {
     const script = buildSwLifecycleScript({
       importPath: 'mokup/sw',

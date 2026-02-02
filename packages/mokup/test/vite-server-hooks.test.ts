@@ -27,6 +27,27 @@ function createServerStub() {
   }
 }
 
+async function findSwMiddleware(
+  stack: Array<{ handle: (req: any, res: any, next: () => void) => void }>,
+) {
+  for (const entry of stack) {
+    const res = {
+      statusCode: 0,
+      headers: {} as Record<string, string>,
+      setHeader: (name: string, value: string) => {
+        res.headers[name.toLowerCase()] = value
+      },
+      end: vi.fn(),
+    }
+    const next = vi.fn()
+    await entry.handle({ url: '/mokup-sw.js' }, res, next)
+    if (res.statusCode !== 0 || res.end.mock.calls.length > 0) {
+      return entry.handle
+    }
+  }
+  return undefined
+}
+
 describe('vite server hooks', () => {
   it('configures dev server middleware', async () => {
     const server = createServerStub()
@@ -61,7 +82,7 @@ describe('vite server hooks', () => {
     })
 
     expect(server.middlewares.stack.length).toBeGreaterThan(0)
-    const swMiddleware = server.middlewares.stack[1]?.handle
+    const swMiddleware = await findSwMiddleware(server.middlewares.stack)
     const res = {
       statusCode: 0,
       headers: {} as Record<string, string>,
@@ -107,7 +128,7 @@ describe('vite server hooks', () => {
       watchEnabled: false,
     })
 
-    const swMiddleware = server.middlewares.stack[1]?.handle
+    const swMiddleware = await findSwMiddleware(server.middlewares.stack)
     const next = vi.fn()
     await swMiddleware?.({ url: '/not-sw.js' }, { setHeader: vi.fn(), end: vi.fn() }, next)
     expect(next).toHaveBeenCalled()
@@ -148,7 +169,7 @@ describe('vite server hooks', () => {
       watchEnabled: false,
     })
 
-    const swMiddleware = server.middlewares.stack[1]?.handle
+    const swMiddleware = await findSwMiddleware(server.middlewares.stack)
     const res = { statusCode: 0, setHeader: vi.fn(), end: vi.fn() }
     await swMiddleware?.({ url: '/mokup-sw.js' }, res, vi.fn())
     expect(res.statusCode).toBe(200)

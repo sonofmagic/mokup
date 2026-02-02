@@ -51,9 +51,30 @@ function createServerStub() {
   }
 }
 
+async function findSwMiddleware(
+  stack: Array<{ handle: (req: any, res: any, next: () => void) => void }>,
+) {
+  for (const entry of stack) {
+    const res = {
+      statusCode: 0,
+      headers: {} as Record<string, string>,
+      setHeader: (name: string, value: string) => {
+        res.headers[name.toLowerCase()] = value
+      },
+      end: vi.fn(),
+    }
+    const next = vi.fn()
+    await entry.handle({ url: '/mokup-sw.js' }, res, next)
+    if (res.statusCode !== 0 || res.end.mock.calls.length > 0) {
+      return entry.handle
+    }
+  }
+  return undefined
+}
+
 describe('vite server hooks extra coverage', () => {
   it('returns 500 when sw generation fails', async () => {
-    swMocks.buildSwScript.mockImplementationOnce(() => {
+    swMocks.buildSwScript.mockImplementation(() => {
       throw new Error('boom')
     })
 
@@ -88,7 +109,7 @@ describe('vite server hooks extra coverage', () => {
       watchEnabled: false,
     })
 
-    const swMiddleware = server.middlewares.stack[1]?.handle
+    const swMiddleware = await findSwMiddleware(server.middlewares.stack)
     const res = {
       statusCode: 0,
       headers: {} as Record<string, string>,
@@ -100,6 +121,7 @@ describe('vite server hooks extra coverage', () => {
     await swMiddleware?.({ url: '/mokup-sw.js' }, res, vi.fn())
     expect(res.statusCode).toBe(500)
     expect(logger.error).toHaveBeenCalled()
+    swMocks.buildSwScript.mockImplementation(() => 'self.skipWaiting()')
   })
 
   it('enables vite middleware and watchers when configured', async () => {
@@ -216,7 +238,7 @@ describe('vite server hooks extra coverage', () => {
   })
 
   it('reports preview sw generation errors', async () => {
-    swMocks.buildSwScript.mockImplementationOnce(() => {
+    swMocks.buildSwScript.mockImplementation(() => {
       throw new Error('boom')
     })
 
@@ -251,7 +273,7 @@ describe('vite server hooks extra coverage', () => {
       watchEnabled: false,
     })
 
-    const swMiddleware = server.middlewares.stack[1]?.handle
+    const swMiddleware = await findSwMiddleware(server.middlewares.stack)
     const res = {
       statusCode: 0,
       headers: {} as Record<string, string>,
@@ -264,5 +286,6 @@ describe('vite server hooks extra coverage', () => {
     expect(res.statusCode).toBe(500)
     expect(logger.error).toHaveBeenCalled()
     expect(middlewareMocks.createMiddleware).toHaveBeenCalled()
+    swMocks.buildSwScript.mockImplementation(() => 'self.skipWaiting()')
   })
 })

@@ -13,12 +13,11 @@ function buildSwLifecycleScript(params: {
     importPath,
     swConfig,
     unregisterConfig,
-    hasSwEntries,
     hasSwRoutes,
     resolveRequestPath,
     resolveRegisterScope,
   } = params
-  const shouldUnregister = unregisterConfig.unregister === true || !hasSwEntries
+  const shouldUnregister = unregisterConfig.unregister === true
   if (shouldUnregister) {
     const path = resolveRequestPath(unregisterConfig.path)
     const scope = resolveRegisterScope(unregisterConfig.scope)

@@ -159,7 +159,7 @@ export interface ServiceWorkerOptions {
    */
   register?: boolean
   /**
-   * Auto-unregister when no SW entries exist.
+   * Inject an unregister script instead of registering a service worker.
    *
    * @default false
    */

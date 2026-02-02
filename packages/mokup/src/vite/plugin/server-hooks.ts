@@ -48,6 +48,9 @@ async function configureDevServer(params: {
   } = params
 
   await refreshRoutes(server)
+  if (enableViteMiddleware && state.serverRoutes.length > 0) {
+    addMiddlewareFirst(server, createMiddleware(() => state.app, logger))
+  }
   addMiddlewareFirst(server, playgroundMiddleware)
   if (playgroundConfig.enabled) {
     const playgroundPath = resolveRegisterPath(base, playgroundConfig.path)
@@ -81,9 +84,6 @@ async function configureDevServer(params: {
         logger.error('SW generation failed:', error)
       }
     })
-  }
-  if (enableViteMiddleware && state.serverRoutes.length > 0) {
-    server.middlewares.use(createMiddleware(() => state.app, logger))
   }
   if (!watchEnabled) {
     return
@@ -131,6 +131,9 @@ async function configurePreviewServer(params: {
   } = params
 
   await refreshRoutes(server)
+  if (enableViteMiddleware && state.serverRoutes.length > 0) {
+    addMiddlewareFirst(server, createMiddleware(() => state.app, logger))
+  }
   addMiddlewareFirst(server, playgroundMiddleware)
   const swPath = swConfig ? resolveRegisterPath(base, swConfig.path) : null
   if (swPath && hasSwRoutes()) {
@@ -158,9 +161,6 @@ async function configurePreviewServer(params: {
         logger.error('SW generation failed:', error)
       }
     })
-  }
-  if (enableViteMiddleware && state.serverRoutes.length > 0) {
-    server.middlewares.use(createMiddleware(() => state.app, logger))
   }
   if (!watchEnabled) {
     return null
