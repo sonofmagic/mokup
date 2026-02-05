@@ -31,6 +31,7 @@ import {
  * @param params.getServer - Getter for the active dev server.
  * @param params.getDirs - Getter for scanned directories.
  * @param params.getSwScript - Getter for service worker lifecycle script.
+ * @param params.resolvePlaygroundDist - Resolver for playground dist location.
  * @returns Connect-style middleware handler.
  *
  * @example

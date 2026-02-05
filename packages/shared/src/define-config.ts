@@ -73,6 +73,7 @@ export function createDefineConfig<
       return
     }
     if (policy === 'warn') {
+      // eslint-disable-next-line no-console
       console.warn(`${options.logPrefix} defineConfig hook failed:`, error)
     }
   }
