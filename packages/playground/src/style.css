@@ -192,6 +192,18 @@
     letter-spacing: 0.2em;
   }
 
+  .pg-highlight {
+    @apply inline-flex items-center rounded-full border border-pg-accent/55 bg-pg-accent/30 px-2 py-1 text-[0.65rem] font-bold uppercase tracking-[0.12em] leading-none shadow-[0_0_0_1px_var(--color-pg-accent-ring)];
+
+    color: var(--color-pg-text-strong);
+  }
+
+  .pg-highlight::before {
+    margin-right: 0.25em;
+    content: '#';
+    opacity: 0.85;
+  }
+
   @keyframes pg-hot-toast-pulse {
     0% {
       box-shadow: 0 0 0 0 var(--color-pg-accent-ring);

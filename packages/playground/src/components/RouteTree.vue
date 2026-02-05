@@ -1,12 +1,14 @@
 <script setup lang="ts">
 import type { PlaygroundRoute, TreeRow } from '../types'
 import { openInEditor, resolveEditorUrl } from '../utils/editor'
+import { buildHighlightParts } from '../utils/search'
 import UiPill from './ui/UiPill.vue'
 
 const props = defineProps<{
   rows: TreeRow[]
   workspaceRoot?: string
   getRouteCount?: (route: PlaygroundRoute) => number
+  highlightTokens?: string[]
 }>()
 
 const emit = defineEmits<{
@@ -38,6 +40,10 @@ function resolveRouteCount(route: PlaygroundRoute) {
 
 function resolveIndent(depth: number) {
   return `${depth * 12}px`
+}
+
+function highlightParts(text: string) {
+  return buildHighlightParts(text, props.highlightTokens ?? [])
 }
 </script>
 
@@ -77,7 +83,9 @@ function resolveIndent(depth: number) {
               {{ row.route.method }}
             </span>
             <span class="text-[0.78rem]" :class="row.kind === 'folder' ? 'font-semibold' : 'font-medium'">
-              {{ row.label }}
+              <template v-for="(part, index) in highlightParts(row.label)" :key="`${row.id}-label-${index}`">
+                <span :class="part.highlight ? 'pg-highlight' : ''">{{ part.text }}</span>
+              </template>
             </span>
           </div>
         </div>

@@ -9,10 +9,12 @@ import type {
 import { computed } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { openInEditor, resolveEditorUrl } from '../utils/editor'
+import { buildHighlightParts, extractSearchValues } from '../utils/search'
 import RouteTree from './RouteTree.vue'
 import UiPill from './ui/UiPill.vue'
 
 const props = defineProps<{
+  search: string
   routeMode: 'active' | 'disabled' | 'ignored'
   enabledMode: 'api' | 'config'
   disabledMode: 'api' | 'config'
@@ -42,6 +44,7 @@ const emit = defineEmits<{
 const { t } = useI18n()
 
 const selectedRowClass = 'relative bg-pg-accent/12 text-pg-text-strong font-semibold shadow-[inset_4px_0_0_0_var(--color-pg-accent)]'
+const highlightTokens = computed(() => extractSearchValues(props.search))
 
 const routeTreeProps = computed(() => {
   const base: {
@@ -76,6 +79,17 @@ function formatRoutePath(value?: string) {
 
 function formatConfigLabel(value: string) {
   return value.toLowerCase()
+}
+
+function highlightParts(text: string) {
+  return buildHighlightParts(text, highlightTokens.value)
+}
+
+function resolveRouteLabel(route: PlaygroundDisabledRoute) {
+  if (route.method && route.url) {
+    return `${route.method} ${formatRoutePath(route.url)}`
+  }
+  return formatRoutePath(route.url) || route.file
 }
 
 function resolveEditorUrlForFile(file: string) {
@@ -164,17 +178,17 @@ function isSelectedIgnored(route: PlaygroundIgnoredRoute) {
           <div class="flex flex-wrap items-center justify-between gap-2">
             <div class="flex flex-col gap-1">
               <span class="text-[0.7rem] uppercase tracking-[0.18em] text-pg-text-muted">
-                {{
-                  route.method && route.url
-                    ? `${route.method} ${formatRoutePath(route.url)}`
-                    : formatRoutePath(route.url) || route.file
-                }}
+                <template v-for="(part, index) in highlightParts(resolveRouteLabel(route))" :key="`${route.file}-label-${index}`">
+                  <span :class="part.highlight ? 'pg-highlight' : ''">{{ part.text }}</span>
+                </template>
               </span>
               <span
                 v-if="route.method && route.url"
                 class="text-[0.75rem] text-pg-text-subtle"
               >
-                {{ route.file }}
+                <template v-for="(part, index) in highlightParts(route.file)" :key="`${route.file}-file-${index}`">
+                  <span :class="part.highlight ? 'pg-highlight' : ''">{{ part.text }}</span>
+                </template>
               </span>
             </div>
             <div class="flex items-center gap-2">
@@ -220,7 +234,9 @@ function isSelectedIgnored(route: PlaygroundIgnoredRoute) {
           <div class="flex flex-wrap items-center justify-between gap-2">
             <div class="flex flex-col gap-1">
               <span class="text-[0.7rem] uppercase tracking-[0.18em] text-pg-text-muted">
-                {{ formatConfigLabel(entry.file) }}
+                <template v-for="(part, index) in highlightParts(formatConfigLabel(entry.file))" :key="`${entry.file}-disabled-${index}`">
+                  <span :class="part.highlight ? 'pg-highlight' : ''">{{ part.text }}</span>
+                </template>
               </span>
             </div>
             <div class="flex items-center gap-2">
@@ -260,7 +276,9 @@ function isSelectedIgnored(route: PlaygroundIgnoredRoute) {
           <div class="flex flex-wrap items-center justify-between gap-2">
             <div class="flex flex-col gap-1">
               <span class="text-[0.7rem] uppercase tracking-[0.18em] text-pg-text-muted">
-                {{ route.file }}
+                <template v-for="(part, index) in highlightParts(route.file)" :key="`${route.file}-ignored-${index}`">
+                  <span :class="part.highlight ? 'pg-highlight' : ''">{{ part.text }}</span>
+                </template>
               </span>
             </div>
             <div class="flex items-center gap-2">
@@ -300,7 +318,9 @@ function isSelectedIgnored(route: PlaygroundIgnoredRoute) {
           <div class="flex flex-wrap items-center justify-between gap-2">
             <div class="flex flex-col gap-1">
               <span class="text-[0.7rem] tracking-[0.18em] text-pg-text-muted">
-                {{ formatConfigLabel(entry.file) }}
+                <template v-for="(part, index) in highlightParts(formatConfigLabel(entry.file))" :key="`${entry.file}-config-${index}`">
+                  <span :class="part.highlight ? 'pg-highlight' : ''">{{ part.text }}</span>
+                </template>
               </span>
             </div>
             <div class="flex items-center gap-2">
@@ -331,6 +351,7 @@ function isSelectedIgnored(route: PlaygroundIgnoredRoute) {
       <RouteTree
         v-else
         v-bind="routeTreeProps"
+        :highlight-tokens="highlightTokens"
         @toggle="emit('toggle', $event)"
         @select="handleSelectRow"
       />

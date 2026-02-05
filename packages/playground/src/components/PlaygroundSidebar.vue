@@ -8,10 +8,13 @@ import type {
   TreeMode,
   TreeRow,
 } from '../types'
+import { computed } from 'vue'
+import { useI18n } from 'vue-i18n'
 import PlaygroundSidebarBody from './PlaygroundSidebarBody.vue'
 import PlaygroundSidebarHeader from './PlaygroundSidebarHeader.vue'
 
 const props = defineProps<{
+  collapsed: boolean
   search: string
   basePath?: string
   groups: PlaygroundGroup[]
@@ -49,61 +52,195 @@ const emit = defineEmits<{
   (event: 'set-enabled-mode', mode: 'api' | 'config'): void
   (event: 'set-disabled-mode', mode: 'api' | 'config'): void
   (event: 'update:treeMode', mode: TreeMode): void
+  (event: 'toggle-collapse'): void
   (event: 'toggle', id: string): void
   (event: 'select-route', route: PlaygroundRoute): void
   (event: 'select-disabled-route', route: PlaygroundDisabledRoute): void
   (event: 'select-ignored-route', route: PlaygroundIgnoredRoute): void
   (event: 'select-config', entry: PlaygroundConfigFile): void
 }>()
+
+const { t } = useI18n()
+
+const sidebarClass = computed(() => {
+  const base = 'flex min-h-0 w-full max-w-none flex-col overflow-hidden border-b border-pg-border lg:flex-none lg:border-b-0 lg:border-r'
+  if (props.collapsed) {
+    return `${base} p-2 lg:w-[72px] lg:min-w-[72px] lg:max-w-[72px]`
+  }
+  return `${base} gap-3 p-3 lg:w-[var(--left-width)] lg:min-w-[240px] lg:max-w-[560px]`
+})
+
+const collapsedGroupLabel = computed(() => {
+  const label = (props.activeGroup || 'all').toUpperCase()
+  return label.length > 6 ? `${label.slice(0, 6)}…` : label
+})
+
+const hasSearch = computed(() => props.search.trim().length > 0)
+const isApiMode = computed(() => (props.routeMode === 'disabled' ? props.disabledMode : props.enabledMode) === 'api')
+const isConfigMode = computed(() => (props.routeMode === 'disabled' ? props.disabledMode : props.enabledMode) === 'config')
+
+function handleSubMode(mode: 'api' | 'config') {
+  if (props.routeMode === 'disabled') {
+    emit('set-disabled-mode', mode)
+    return
+  }
+  emit('set-enabled-mode', mode)
+}
 </script>
 
 <template>
-  <aside class="flex min-h-0 w-full max-w-none flex-col gap-3 overflow-hidden border-b p-3 border-pg-border lg:w-[var(--left-width)] lg:min-w-[240px] lg:max-w-[560px] lg:flex-none lg:border-b-0 lg:border-r">
-    <PlaygroundSidebarHeader
-      :search="props.search"
-      :base-path="props.basePath"
-      :groups="props.groups"
-      :active-group="props.activeGroup"
-      :tree-mode="props.treeMode"
-      :route-mode="props.routeMode"
-      :enabled-mode="props.enabledMode"
-      :disabled-mode="props.disabledMode"
-      :active-total="props.activeTotal"
-      :api-total="props.apiTotal"
-      :disabled-total="props.disabledTotal"
-      :ignored-total="props.ignoredTotal"
-      :config-total="props.configTotal"
-      :disabled-api-total="props.disabledApiTotal"
-      :disabled-config-total="props.disabledConfigTotal"
-      @update:search="emit('update:search', $event)"
-      @select-group="emit('select-group', $event)"
-      @set-route-mode="emit('set-route-mode', $event)"
-      @set-enabled-mode="emit('set-enabled-mode', $event)"
-      @set-disabled-mode="emit('set-disabled-mode', $event)"
-      @update:treeMode="emit('update:treeMode', $event)"
-    />
-    <PlaygroundSidebarBody
-      :route-mode="props.routeMode"
-      :enabled-mode="props.enabledMode"
-      :disabled-mode="props.disabledMode"
-      :selected-config="props.selectedConfig"
-      :selected-disabled="props.selectedDisabled"
-      :selected-ignored="props.selectedIgnored"
-      :error="props.error"
-      :loading="props.loading"
-      :filtered="props.filtered"
-      :disabled-filtered="props.disabledFiltered"
-      :ignored-filtered="props.ignoredFiltered"
-      :config-filtered="props.configFiltered"
-      :disabled-config-filtered="props.disabledConfigFiltered"
-      :tree-rows="props.treeRows"
-      :workspace-root="props.workspaceRoot"
-      :get-route-count="props.getRouteCount"
-      @toggle="emit('toggle', $event)"
-      @select-route="emit('select-route', $event)"
-      @select-disabled-route="emit('select-disabled-route', $event)"
-      @select-ignored-route="emit('select-ignored-route', $event)"
-      @select-config="emit('select-config', $event)"
-    />
+  <aside :class="sidebarClass">
+    <div v-if="!props.collapsed" class="flex min-h-0 flex-1 flex-col gap-3">
+      <PlaygroundSidebarHeader
+        :search="props.search"
+        :base-path="props.basePath"
+        :groups="props.groups"
+        :active-group="props.activeGroup"
+        :tree-mode="props.treeMode"
+        :route-mode="props.routeMode"
+        :enabled-mode="props.enabledMode"
+        :disabled-mode="props.disabledMode"
+        :active-total="props.activeTotal"
+        :api-total="props.apiTotal"
+        :disabled-total="props.disabledTotal"
+        :ignored-total="props.ignoredTotal"
+        :config-total="props.configTotal"
+        :disabled-api-total="props.disabledApiTotal"
+        :disabled-config-total="props.disabledConfigTotal"
+        @update:search="emit('update:search', $event)"
+        @select-group="emit('select-group', $event)"
+        @set-route-mode="emit('set-route-mode', $event)"
+        @set-enabled-mode="emit('set-enabled-mode', $event)"
+        @set-disabled-mode="emit('set-disabled-mode', $event)"
+        @update:treeMode="emit('update:treeMode', $event)"
+      >
+        <template #actions>
+          <button
+            class="flex h-8 w-8 items-center justify-center rounded-full border shadow-sm transition border-pg-border bg-pg-surface-strong text-pg-text-muted hover:text-pg-text-soft"
+            type="button"
+            :aria-label="t('controls.collapseSidebar')"
+            :title="t('controls.collapseSidebar')"
+            @click="emit('toggle-collapse')"
+          >
+            <span class="i-[carbon--chevron-left] h-4 w-4" aria-hidden="true" />
+          </button>
+        </template>
+      </PlaygroundSidebarHeader>
+      <PlaygroundSidebarBody
+        :search="props.search"
+        :route-mode="props.routeMode"
+        :enabled-mode="props.enabledMode"
+        :disabled-mode="props.disabledMode"
+        :selected-config="props.selectedConfig"
+        :selected-disabled="props.selectedDisabled"
+        :selected-ignored="props.selectedIgnored"
+        :error="props.error"
+        :loading="props.loading"
+        :filtered="props.filtered"
+        :disabled-filtered="props.disabledFiltered"
+        :ignored-filtered="props.ignoredFiltered"
+        :config-filtered="props.configFiltered"
+        :disabled-config-filtered="props.disabledConfigFiltered"
+        :tree-rows="props.treeRows"
+        :workspace-root="props.workspaceRoot"
+        :get-route-count="props.getRouteCount"
+        @toggle="emit('toggle', $event)"
+        @select-route="emit('select-route', $event)"
+        @select-disabled-route="emit('select-disabled-route', $event)"
+        @select-ignored-route="emit('select-ignored-route', $event)"
+        @select-config="emit('select-config', $event)"
+      />
+    </div>
+    <div v-else class="flex min-h-0 flex-1 flex-col items-center gap-2 py-2">
+      <button
+        class="flex h-8 w-8 items-center justify-center rounded-full border shadow-sm transition border-pg-border bg-pg-surface-strong text-pg-text-muted hover:text-pg-text-soft"
+        type="button"
+        :aria-label="t('controls.expandSidebar')"
+        :title="t('controls.expandSidebar')"
+        @click="emit('toggle-collapse')"
+      >
+        <span class="i-[carbon--chevron-right] h-4 w-4" aria-hidden="true" />
+      </button>
+      <div class="flex flex-col items-center gap-2">
+        <button
+          class="flex h-9 w-9 items-center justify-center rounded-full border transition"
+          :class="props.routeMode === 'active'
+            ? 'border-pg-accent/60 bg-pg-accent/15 text-pg-accent shadow-[0_0_0_1px_var(--color-pg-accent-ring)]'
+            : 'border-pg-border bg-pg-surface-strong text-pg-text-muted hover:bg-pg-hover-strong hover:text-pg-text-soft'"
+          type="button"
+          :title="t('disabled.active', { count: props.activeTotal })"
+          @click="emit('set-route-mode', 'active')"
+        >
+          <span class="i-[carbon--checkmark-filled] h-4 w-4" aria-hidden="true" />
+        </button>
+        <button
+          class="flex h-9 w-9 items-center justify-center rounded-full border transition"
+          :class="props.routeMode === 'disabled'
+            ? 'border-pg-accent/60 bg-pg-accent/15 text-pg-accent shadow-[0_0_0_1px_var(--color-pg-accent-ring)]'
+            : 'border-pg-border bg-pg-surface-strong text-pg-text-muted hover:bg-pg-hover-strong hover:text-pg-text-soft'"
+          type="button"
+          :title="t('disabled.disabled', { count: props.disabledTotal })"
+          @click="emit('set-route-mode', 'disabled')"
+        >
+          <span class="i-[carbon--close-filled] h-4 w-4" aria-hidden="true" />
+        </button>
+        <button
+          class="flex h-9 w-9 items-center justify-center rounded-full border transition"
+          :class="props.routeMode === 'ignored'
+            ? 'border-pg-accent/60 bg-pg-accent/15 text-pg-accent shadow-[0_0_0_1px_var(--color-pg-accent-ring)]'
+            : 'border-pg-border bg-pg-surface-strong text-pg-text-muted hover:bg-pg-hover-strong hover:text-pg-text-soft'"
+          type="button"
+          :title="t('disabled.ignored', { count: props.ignoredTotal })"
+          @click="emit('set-route-mode', 'ignored')"
+        >
+          <span class="i-[carbon--view-off] h-4 w-4" aria-hidden="true" />
+        </button>
+      </div>
+
+      <div class="h-px w-8 bg-pg-border/70" />
+
+      <div
+        v-if="props.routeMode !== 'ignored'"
+        class="flex flex-col items-center gap-2"
+      >
+        <button
+          class="flex h-9 w-9 items-center justify-center rounded-full border transition"
+          :class="isApiMode
+            ? 'border-pg-accent/60 bg-pg-accent/15 text-pg-accent shadow-[0_0_0_1px_var(--color-pg-accent-ring)]'
+            : 'border-pg-border bg-pg-surface-strong text-pg-text-muted hover:bg-pg-hover-strong hover:text-pg-text-soft'"
+          type="button"
+          :title="props.routeMode === 'disabled'
+            ? t('enabled.api', { count: props.disabledApiTotal })
+            : t('enabled.api', { count: props.apiTotal })"
+          @click="handleSubMode('api')"
+        >
+          <span class="i-[carbon--api] h-4 w-4" aria-hidden="true" />
+        </button>
+        <button
+          class="flex h-9 w-9 items-center justify-center rounded-full border transition"
+          :class="isConfigMode
+            ? 'border-pg-accent/60 bg-pg-accent/15 text-pg-accent shadow-[0_0_0_1px_var(--color-pg-accent-ring)]'
+            : 'border-pg-border bg-pg-surface-strong text-pg-text-muted hover:bg-pg-hover-strong hover:text-pg-text-soft'"
+          type="button"
+          :title="props.routeMode === 'disabled'
+            ? t('enabled.config', { count: props.disabledConfigTotal })
+            : t('enabled.config', { count: props.configTotal })"
+          @click="handleSubMode('config')"
+        >
+          <span class="i-[carbon--settings] h-4 w-4" aria-hidden="true" />
+        </button>
+      </div>
+
+      <div class="h-px w-8 bg-pg-border/70" />
+
+      <div class="flex flex-col items-center gap-2 text-pg-text-muted">
+        <span class="rounded-full border px-2 py-0.5 text-[0.55rem] uppercase tracking-[0.2em] border-pg-border bg-pg-surface-strong">
+          {{ collapsedGroupLabel }}
+        </span>
+        <span v-if="hasSearch" class="flex h-8 w-8 items-center justify-center rounded-full border border-pg-accent/40 bg-pg-accent/10 text-pg-accent">
+          <span class="i-[carbon--search] h-4 w-4" aria-hidden="true" />
+        </span>
+      </div>
+    </div>
   </aside>
 </template>

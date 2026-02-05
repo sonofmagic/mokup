@@ -87,18 +87,21 @@ onBeforeUnmount(() => {
         :compact="true"
         class="flex-1"
       />
-      <UiChipButton
-        ref="moreButtonRef"
-        size="sm"
-        class="h-9"
-        :aria-expanded="showMore"
-        aria-haspopup="true"
-        aria-controls="playground-more-panel"
-        @click="toggleMore"
-      >
-        <span class="i-[carbon--settings-adjust] h-3.5 w-3.5" aria-hidden="true" />
-        <span>{{ t('controls.more') }}</span>
-      </UiChipButton>
+      <div class="flex items-center gap-2">
+        <UiChipButton
+          ref="moreButtonRef"
+          size="sm"
+          class="h-9"
+          :aria-expanded="showMore"
+          aria-haspopup="true"
+          aria-controls="playground-more-panel"
+          @click="toggleMore"
+        >
+          <span class="i-[carbon--settings-adjust] h-3.5 w-3.5" aria-hidden="true" />
+          <span>{{ t('controls.more') }}</span>
+        </UiChipButton>
+        <slot name="actions" />
+      </div>
     </div>
     <div class="mt-2 flex flex-wrap items-center gap-2">
       <UiChipButton

@@ -14,6 +14,8 @@ const zhMessages = {
   },
   controls: {
     more: '更多',
+    collapseSidebar: '收起侧边栏',
+    expandSidebar: '展开侧边栏',
   },
   theme: {
     system: '跟随系统',
@@ -23,7 +25,7 @@ const zhMessages = {
   filters: {
     search: '搜索',
     base: '基路径',
-    searchPlaceholder: '按方法、路径或文件过滤',
+    searchPlaceholder: '例如 method:post path:/users file:auth',
   },
   disabled: {
     active: '启用 ({count})',

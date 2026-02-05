@@ -15,6 +15,8 @@ const enMessages = {
   },
   controls: {
     more: 'More',
+    collapseSidebar: 'Collapse sidebar',
+    expandSidebar: 'Expand sidebar',
   },
   theme: {
     system: 'System',
@@ -24,7 +26,7 @@ const enMessages = {
   filters: {
     search: 'Search',
     base: 'Base',
-    searchPlaceholder: 'Filter by method, path, or file',
+    searchPlaceholder: 'Search method:post path:/users file:auth',
   },
   disabled: {
     active: 'Active ({count})',

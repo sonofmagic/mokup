@@ -151,6 +151,7 @@ const {
   handleDragStart,
   restoreSplitWidth,
   stopDrag,
+  splitWidth,
 } = useSplitPane({
   storageKey: 'mokup:playground:split-width',
   defaultWidth: 320,
@@ -165,6 +166,10 @@ const { treeMode, treeRows, toggleExpanded, setTreeMode } = useRouteTree({
 })
 const hotReloadVisible = ref(false)
 const hotReloadTimer = ref<number | null>(null)
+const sidebarCollapsed = ref(false)
+const sidebarLastWidth = ref(320)
+const sidebarCollapsedKey = 'mokup.playground.sidebarCollapsed'
+const sidebarCollapsedWidth = 72
 
 function handleRefresh() {
   loadRoutes().catch(() => undefined)
@@ -181,9 +186,28 @@ function notifyHotReload() {
   }, 2000)
 }
 
+function toggleSidebar() {
+  if (sidebarCollapsed.value) {
+    sidebarCollapsed.value = false
+    splitWidth.value = sidebarLastWidth.value
+  }
+  else {
+    sidebarLastWidth.value = splitWidth.value
+    sidebarCollapsed.value = true
+    splitWidth.value = sidebarCollapsedWidth
+  }
+  localStorage.setItem(sidebarCollapsedKey, String(sidebarCollapsed.value))
+}
+
 onMounted(() => {
   setBasePath(window.location.pathname)
   restoreSplitWidth()
+  sidebarLastWidth.value = splitWidth.value
+  const storedCollapsed = localStorage.getItem(sidebarCollapsedKey)
+  if (storedCollapsed === 'true') {
+    sidebarCollapsed.value = true
+    splitWidth.value = sidebarCollapsedWidth
+  }
   window.__MOKUP_PLAYGROUND__ = {
     reloadRoutes: handleRefresh,
     notifyHotReload,
@@ -225,6 +249,7 @@ onBeforeUnmount(() => {
           >
             <PlaygroundSidebar
               v-model:search="search"
+              :collapsed="sidebarCollapsed"
               :base-path="basePath"
               :groups="groups"
               :active-group="activeGroup"
@@ -252,6 +277,7 @@ onBeforeUnmount(() => {
               :tree-rows="treeRows"
               :workspace-root="workspaceRoot"
               :get-route-count="getRouteCount"
+              @toggle-collapse="toggleSidebar"
               @select-group="setActiveGroup"
               @set-route-mode="setRouteMode"
               @set-enabled-mode="setEnabledMode"
@@ -264,7 +290,10 @@ onBeforeUnmount(() => {
               @update:treeMode="setTreeMode"
             />
 
-            <div class="relative hidden w-4 flex-none items-center justify-center lg:flex">
+            <div
+              v-if="!sidebarCollapsed"
+              class="relative hidden w-4 flex-none items-center justify-center lg:flex"
+            >
               <div class="h-full w-px bg-pg-divider" />
               <button
                 class="group absolute flex h-10 w-10 cursor-col-resize items-center justify-center rounded-full border shadow-sm transition hover:-translate-y-0.5 border-pg-border bg-pg-surface-strong text-pg-text-muted hover:text-pg-text-soft"
