@@ -8,7 +8,7 @@ catalogs:
     '@faker-js/faker': ^10.2.0
     '@tailwindcss/vite': ^4.1.13
     '@types/node': ^25.2.0
-    '@vitejs/plugin-vue': ^6.0.3
+    '@vitejs/plugin-vue': ^6.0.4
     pathe: ^2.0.3
     tailwindcss: ^4.1.13
     tsx: ^4.21.0
@@ -16,7 +16,7 @@ catalogs:
     unbuild: ^3.6.1
     vite: ^7.3.1
     vue: ^3.5.27
-    wrangler: ^4.61.1
+    wrangler: ^4.62.0
 
 onlyBuiltDependencies:
   - '@tailwindcss/oxide'
