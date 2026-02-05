@@ -1,5 +1,12 @@
 # mokup-vite-sw-demo
 
+## 0.0.24
+
+### Patch Changes
+
+- 📦 **Dependencies** [`19a3fbb`](https://github.com/sonofmagic/mokup/commit/19a3fbbb82a839c197a76ded28f42abf8d024cfc)
+  → `mokup@2.3.4`
+
 ## 0.0.23
 
 ### Patch Changes
