@@ -1,3 +1,4 @@
+import type { PluginOption } from 'vite'
 import process from 'node:process'
 import { cloudflare } from '@cloudflare/vite-plugin'
 import tailwindcss from '@tailwindcss/vite'
@@ -8,21 +9,23 @@ import { getMokupViteAliases } from '../../scripts/mokup-alias.mjs'
 
 const isE2E = process.env.E2E === '1'
 
+const plugins = [
+  vue(),
+  tailwindcss(),
+  cloudflare(),
+  mokup({
+    runtime: 'worker',
+    entries: {
+      dir: 'mock',
+      prefix: '/api',
+    },
+  }),
+] as PluginOption[]
+
 export default defineConfig({
-  optimizeDeps: isE2E ? { noDiscovery: true, entries: [] } : undefined,
+  ...(isE2E ? { optimizeDeps: { noDiscovery: true, entries: [] } } : {}),
   resolve: {
     alias: getMokupViteAliases(),
   },
-  plugins: [
-    vue(),
-    tailwindcss(),
-    cloudflare(),
-    mokup({
-      runtime: 'worker',
-      entries: {
-        dir: 'mock',
-        prefix: '/api',
-      },
-    }),
-  ],
+  plugins,
 })
