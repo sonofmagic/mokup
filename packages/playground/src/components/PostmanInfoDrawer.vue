@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import type { PlaygroundRoute } from '../types'
+import { computed } from 'vue'
 import { useI18n } from 'vue-i18n'
 import RouteDetailConfigChain from './RouteDetailConfigChain.vue'
 import RouteDetailMiddlewares from './RouteDetailMiddlewares.vue'
@@ -16,6 +17,11 @@ const emit = defineEmits<{
 }>()
 
 const { t } = useI18n()
+
+const configChainProps = computed(() => {
+  const configChain = props.selected.configChain
+  return configChain !== undefined ? { configChain } : {}
+})
 </script>
 
 <template>
@@ -49,7 +55,7 @@ const { t } = useI18n()
         </div>
         <div class="flex-1 overflow-auto">
           <RouteDetailConfigChain
-            :config-chain="props.selected.configChain"
+            v-bind="configChainProps"
             :config-status-map="props.configStatusMap"
           />
           <RouteDetailMiddlewares

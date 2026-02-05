@@ -79,6 +79,72 @@ const hasSearch = computed(() => props.search.trim().length > 0)
 const isApiMode = computed(() => (props.routeMode === 'disabled' ? props.disabledMode : props.enabledMode) === 'api')
 const isConfigMode = computed(() => (props.routeMode === 'disabled' ? props.disabledMode : props.enabledMode) === 'config')
 
+const sidebarHeaderProps = computed(() => {
+  const base = {
+    search: props.search,
+    groups: props.groups,
+    activeGroup: props.activeGroup,
+    treeMode: props.treeMode,
+    routeMode: props.routeMode,
+    enabledMode: props.enabledMode,
+    disabledMode: props.disabledMode,
+    activeTotal: props.activeTotal,
+    apiTotal: props.apiTotal,
+    disabledTotal: props.disabledTotal,
+    ignoredTotal: props.ignoredTotal,
+    configTotal: props.configTotal,
+    disabledApiTotal: props.disabledApiTotal,
+    disabledConfigTotal: props.disabledConfigTotal,
+  }
+  if (props.basePath !== undefined) {
+    return { ...base, basePath: props.basePath }
+  }
+  return base
+})
+
+const sidebarBodyProps = computed(() => {
+  const base = {
+    search: props.search,
+    routeMode: props.routeMode,
+    enabledMode: props.enabledMode,
+    disabledMode: props.disabledMode,
+    loading: props.loading,
+    filtered: props.filtered,
+    disabledFiltered: props.disabledFiltered,
+    ignoredFiltered: props.ignoredFiltered,
+    configFiltered: props.configFiltered,
+    disabledConfigFiltered: props.disabledConfigFiltered,
+    treeRows: props.treeRows,
+  }
+  const next: typeof base & {
+    selectedConfig?: PlaygroundConfigFile | null
+    selectedDisabled?: PlaygroundDisabledRoute | null
+    selectedIgnored?: PlaygroundIgnoredRoute | null
+    error?: string
+    workspaceRoot?: string
+    getRouteCount?: (route: PlaygroundRoute) => number
+  } = { ...base }
+  if (props.selectedConfig !== undefined) {
+    next.selectedConfig = props.selectedConfig
+  }
+  if (props.selectedDisabled !== undefined) {
+    next.selectedDisabled = props.selectedDisabled
+  }
+  if (props.selectedIgnored !== undefined) {
+    next.selectedIgnored = props.selectedIgnored
+  }
+  if (props.error !== undefined) {
+    next.error = props.error
+  }
+  if (props.workspaceRoot !== undefined) {
+    next.workspaceRoot = props.workspaceRoot
+  }
+  if (props.getRouteCount) {
+    next.getRouteCount = props.getRouteCount
+  }
+  return next
+})
+
 function handleSubMode(mode: 'api' | 'config') {
   if (props.routeMode === 'disabled') {
     emit('set-disabled-mode', mode)
@@ -92,21 +158,7 @@ function handleSubMode(mode: 'api' | 'config') {
   <aside :class="sidebarClass">
     <div v-if="!props.collapsed" class="flex min-h-0 flex-1 flex-col gap-3">
       <PlaygroundSidebarHeader
-        :search="props.search"
-        :base-path="props.basePath"
-        :groups="props.groups"
-        :active-group="props.activeGroup"
-        :tree-mode="props.treeMode"
-        :route-mode="props.routeMode"
-        :enabled-mode="props.enabledMode"
-        :disabled-mode="props.disabledMode"
-        :active-total="props.activeTotal"
-        :api-total="props.apiTotal"
-        :disabled-total="props.disabledTotal"
-        :ignored-total="props.ignoredTotal"
-        :config-total="props.configTotal"
-        :disabled-api-total="props.disabledApiTotal"
-        :disabled-config-total="props.disabledConfigTotal"
+        v-bind="sidebarHeaderProps"
         @update:search="emit('update:search', $event)"
         @select-group="emit('select-group', $event)"
         @set-route-mode="emit('set-route-mode', $event)"
@@ -127,23 +179,7 @@ function handleSubMode(mode: 'api' | 'config') {
         </template>
       </PlaygroundSidebarHeader>
       <PlaygroundSidebarBody
-        :search="props.search"
-        :route-mode="props.routeMode"
-        :enabled-mode="props.enabledMode"
-        :disabled-mode="props.disabledMode"
-        :selected-config="props.selectedConfig"
-        :selected-disabled="props.selectedDisabled"
-        :selected-ignored="props.selectedIgnored"
-        :error="props.error"
-        :loading="props.loading"
-        :filtered="props.filtered"
-        :disabled-filtered="props.disabledFiltered"
-        :ignored-filtered="props.ignoredFiltered"
-        :config-filtered="props.configFiltered"
-        :disabled-config-filtered="props.disabledConfigFiltered"
-        :tree-rows="props.treeRows"
-        :workspace-root="props.workspaceRoot"
-        :get-route-count="props.getRouteCount"
+        v-bind="sidebarBodyProps"
         @toggle="emit('toggle', $event)"
         @select-route="emit('select-route', $event)"
         @select-disabled-route="emit('select-disabled-route', $event)"

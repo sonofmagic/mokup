@@ -57,7 +57,10 @@ export function buildRouteTree(routes: PlaygroundRoute[], mode: TreeMode) {
     let current = root
     const total = segments.length
     for (let index = 0; index < total; index += 1) {
-      const segment = segments[index]
+      const segment = segments[index] ?? ''
+      if (!segment) {
+        continue
+      }
       const isLeaf = index === total - 1
       if (isLeaf) {
         const leafId = `${mode}:route:${route.method} ${route.url}|${route.file}`
@@ -75,19 +78,21 @@ export function buildRouteTree(routes: PlaygroundRoute[], mode: TreeMode) {
         current.map = new Map()
       }
       const path = segments.slice(0, index + 1).join('/')
-      let next = current.map.get(path)
-      if (!next) {
-        next = {
-          id: `${mode}:folder:${path}`,
-          label: segment,
-          kind: 'folder',
-          path,
-          children: [],
-        }
-        current.map.set(path, next)
-        current.children.push(next)
+      const existing = current.map.get(path)
+      if (existing) {
+        current = existing
+        continue
       }
-      current = next
+      const created: TreeNode = {
+        id: `${mode}:folder:${path}`,
+        label: segment,
+        kind: 'folder',
+        path,
+        children: [],
+      }
+      current.map.set(path, created)
+      current.children.push(created)
+      current = created
     }
   }
   return root
@@ -168,10 +173,10 @@ function toRows(
     const title = child.kind === 'folder'
       ? child.path
       : mode === 'file'
-        ? child.route?.file
-        : child.route?.url
-    const expanded = child.kind === 'folder' ? isExpanded(child.id) : undefined
-    rows.push({
+        ? child.route?.file ?? child.label
+        : child.route?.url ?? child.label
+    const expanded = child.kind === 'folder' ? isExpanded(child.id) : false
+    const row: TreeRow = {
       id: child.id,
       label: child.label,
       kind: child.kind,
@@ -179,8 +184,11 @@ function toRows(
       title,
       expanded,
       selected: child.route ? getRouteKey(child.route) === selectedKey : false,
-      route: child.route,
-    })
+    }
+    if (child.route) {
+      row.route = child.route
+    }
+    rows.push(row)
     if (child.kind === 'folder' && expanded) {
       toRows(child, depth + 1, mode, rows, isExpanded, selectedKey, getRouteKey)
     }

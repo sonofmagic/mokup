@@ -16,16 +16,22 @@ const emit = defineEmits<{
   (event: 'select', row: TreeRow): void
 }>()
 
-function methodBadge(method: string, selected: boolean) {
+function methodBadge(method: string, selected?: boolean) {
   const base = `method-${method.toLowerCase()}`
   return selected ? `${base} ${base}-strong` : base
 }
 
-function resolveEditorUrlForRoute(route: PlaygroundRoute) {
+function resolveEditorUrlForRoute(route?: PlaygroundRoute) {
+  if (!route) {
+    return null
+  }
   return resolveEditorUrl(route.file, props.workspaceRoot)
 }
 
-function openInEditorForRoute(route: PlaygroundRoute) {
+function openInEditorForRoute(route?: PlaygroundRoute) {
+  if (!route) {
+    return
+  }
   openInEditor(route.file, props.workspaceRoot)
 }
 
@@ -37,7 +43,10 @@ function handleRowClick(row: TreeRow) {
   emit('select', row)
 }
 
-function resolveRouteCount(route: PlaygroundRoute) {
+function resolveRouteCount(route?: PlaygroundRoute) {
+  if (!route) {
+    return 0
+  }
   return props.getRouteCount ? props.getRouteCount(route) : 0
 }
 

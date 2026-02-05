@@ -65,7 +65,6 @@ const emit = defineEmits<{
 const { t } = useI18n()
 
 const isActiveMode = computed(() => props.routeMode === 'active' && props.enabledMode === 'api')
-const isConfigMode = computed(() => !!props.selectedConfig)
 const isDisabledApiMode = computed(() => props.routeMode === 'disabled' && props.disabledMode === 'api')
 const isIgnoredMode = computed(() => props.routeMode === 'ignored')
 const selectedConfigStatus = computed(() => {
@@ -169,22 +168,22 @@ function handleRun() {
     v-else-if="isDisabledApiMode && props.selectedDisabled"
     mode="disabled"
     :selected="props.selectedDisabled"
-    :workspace-root="props.workspaceRoot"
+    :workspace-root="resolvedWorkspaceRoot"
     :config-status-map="props.configStatusMap"
   />
   <RouteDetailInactive
     v-else-if="isIgnoredMode && props.selectedIgnored"
     mode="ignored"
     :selected="props.selectedIgnored"
-    :workspace-root="props.workspaceRoot"
+    :workspace-root="resolvedWorkspaceRoot"
     :config-status-map="props.configStatusMap"
   />
   <ConfigDetail
-    v-else-if="props.selectedConfig && isConfigMode"
+    v-else-if="props.selectedConfig"
     :selected="props.selectedConfig"
     :impacted="props.configImpactRoutes"
     :is-disabled="selectedConfigStatus === 'disabled'"
-    :workspace-root="props.workspaceRoot"
+    :workspace-root="resolvedWorkspaceRoot"
   />
   <div
     v-else

@@ -10,12 +10,20 @@ import { useI18n } from 'vue-i18n'
 import { openInEditor, resolveEditorUrl } from '../utils/editor'
 import UiPill from './ui/UiPill.vue'
 
-const props = defineProps<{
-  mode: 'disabled' | 'ignored'
-  selected: PlaygroundDisabledRoute | PlaygroundIgnoredRoute
-  workspaceRoot?: string
-  configStatusMap: Map<string, 'enabled' | 'disabled'>
-}>()
+const props = defineProps<
+  | {
+    mode: 'disabled'
+    selected: PlaygroundDisabledRoute
+    workspaceRoot?: string
+    configStatusMap: Map<string, 'enabled' | 'disabled'>
+  }
+  | {
+    mode: 'ignored'
+    selected: PlaygroundIgnoredRoute
+    workspaceRoot?: string
+    configStatusMap: Map<string, 'enabled' | 'disabled'>
+  }
+>()
 
 const { t } = useI18n()
 
@@ -32,14 +40,17 @@ const reasonLabel = computed(() => {
   return t(`disabled.reason.${props.selected.reason}`)
 })
 
-const routeTitle = computed(() => {
-  if (props.selected.url) {
-    return props.selected.url
-  }
-  return props.selected.file
-})
+const selectedFile = computed(() => props.selected.file)
+const selectedMethod = computed(() => (props.mode === 'disabled' ? props.selected.method : undefined))
+const selectedUrl = computed(() => (props.mode === 'disabled' ? props.selected.url : undefined))
+const routeTitle = computed(() => selectedUrl.value ?? selectedFile.value)
 
-const methodBadge = (method: string) => `method-${method.toLowerCase()}`
+function methodBadge(method?: string) {
+  if (!method) {
+    return ''
+  }
+  return `method-${method.toLowerCase()}`
+}
 
 const decisionChain = computed(() => props.selected.decisionChain ?? [])
 const configChain = computed(() => props.selected.configChain ?? [])
@@ -121,18 +132,18 @@ function openInEditorForFile(file: string) {
           </span>
           <div class="flex flex-wrap items-center gap-2">
             <span
-              v-if="props.selected.method"
+              v-if="selectedMethod"
               class="rounded-full px-3 py-1 text-[0.6rem] uppercase tracking-[0.2em]"
-              :class="methodBadge(props.selected.method)"
+              :class="methodBadge(selectedMethod)"
             >
-              {{ props.selected.method }}
+              {{ selectedMethod }}
             </span>
             <span class="text-lg font-display text-pg-text-strong">
               {{ routeTitle }}
             </span>
           </div>
           <span class="text-xs text-pg-text-subtle">
-            {{ props.selected.file }}
+            {{ selectedFile }}
           </span>
         </div>
         <div class="flex items-center gap-2">
@@ -140,12 +151,12 @@ function openInEditorForFile(file: string) {
             {{ reasonLabel }}
           </UiPill>
           <button
-            v-if="resolveEditorUrlForFile(props.selected.file)"
+            v-if="resolveEditorUrlForFile(selectedFile)"
             class="flex h-8 w-8 items-center justify-center rounded-md transition text-pg-text-muted hover:bg-pg-hover-strong hover:text-pg-text-soft"
             type="button"
-            :aria-label="`Open ${props.selected.file} in VS Code`"
+            :aria-label="`Open ${selectedFile} in VS Code`"
             :title="t('detail.openInVscode')"
-            @click="openInEditorForFile(props.selected.file)"
+            @click="openInEditorForFile(selectedFile)"
           >
             <span class="i-[carbon--launch] h-4 w-4" aria-hidden="true" />
           </button>
@@ -266,24 +277,24 @@ function openInEditorForFile(file: string) {
         {{ t('inactive.routeSummary') }}
       </div>
       <div class="mt-3 grid gap-2 text-sm text-pg-text-soft">
-        <div v-if="props.selected.method" class="flex items-center gap-2">
+        <div v-if="selectedMethod" class="flex items-center gap-2">
           <span class="text-[0.6rem] uppercase tracking-[0.3em] text-pg-text-muted">
             {{ t('inactive.summaryMethod') }}
           </span>
-          <span>{{ props.selected.method }}</span>
+          <span>{{ selectedMethod }}</span>
         </div>
-        <div v-if="props.selected.url" class="flex items-center gap-2">
+        <div v-if="selectedUrl" class="flex items-center gap-2">
           <span class="text-[0.6rem] uppercase tracking-[0.3em] text-pg-text-muted">
             {{ t('inactive.summaryPath') }}
           </span>
-          <span>{{ props.selected.url }}</span>
+          <span>{{ selectedUrl }}</span>
         </div>
         <div class="flex items-center gap-2">
           <span class="text-[0.6rem] uppercase tracking-[0.3em] text-pg-text-muted">
             {{ t('inactive.summaryFile') }}
           </span>
           <span class="text-pg-text-subtle">
-            {{ props.selected.file }}
+            {{ selectedFile }}
           </span>
         </div>
       </div>

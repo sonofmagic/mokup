@@ -51,6 +51,10 @@ const { t } = useI18n()
 const { bodyType } = toRefs(props)
 
 const methodBadge = computed(() => `method-${props.selected.method.toLowerCase()}`)
+const configChainProps = computed(() => {
+  const configChain = props.selected.configChain
+  return configChain !== undefined ? { configChain } : {}
+})
 
 const activeTab = ref<RequestTab>('params')
 const missingPulseActive = ref(false)
@@ -605,7 +609,7 @@ function formatBytes(size: number) {
 
         <div v-show="activeTab === 'config'" class="rounded-xl border border-pg-border bg-pg-surface-strong">
           <RouteDetailConfigChain
-            :config-chain="props.selected.configChain"
+            v-bind="configChainProps"
             :config-status-map="props.configStatusMap"
           />
         </div>

@@ -117,7 +117,7 @@ export function resolveTheme(mode: ThemeMode, prefersDark: boolean): ThemeValue 
  */
 export function applyTheme(mode: ThemeMode, prefersDark: boolean) {
   const theme = resolveTheme(mode, prefersDark)
-  document.documentElement.dataset.theme = theme
+  document.documentElement.dataset['theme'] = theme
   document.documentElement.style.colorScheme = theme
   return theme
 }

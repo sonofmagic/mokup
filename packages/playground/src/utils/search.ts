@@ -48,7 +48,12 @@ export function parseSearchTokens(raw: string): SearchToken[] {
       tokens.push({ field: 'text', value: part.toLowerCase() })
       continue
     }
-    const [, key, , value] = match
+    const key = match[1]
+    const value = match[3]
+    if (!key || !value) {
+      tokens.push({ field: 'text', value: part.toLowerCase() })
+      continue
+    }
     const normalized = value.trim()
     if (!normalized) {
       tokens.push({ field: 'text', value: part.toLowerCase() })
