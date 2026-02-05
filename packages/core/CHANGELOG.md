@@ -1,5 +1,11 @@
 # @mokup/core
 
+## 1.1.2
+
+### Patch Changes
+
+- 🐛 **Rename the Vite plugin runtime option to `RuntimeTarget` (`'node' | 'worker'`), change the default to `'node'`, and throw on legacy `runtime: 'vite'`.** [`19a3fbb`](https://github.com/sonofmagic/mokup/commit/19a3fbbb82a839c197a76ded28f42abf8d024cfc) by @sonofmagic
+
 ## 1.1.1
 
 ### Patch Changes

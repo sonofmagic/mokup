@@ -1,5 +1,12 @@
 # mokup-middleware-demo
 
+## 0.0.16
+
+### Patch Changes
+
+- 📦 **Dependencies** [`19a3fbb`](https://github.com/sonofmagic/mokup/commit/19a3fbbb82a839c197a76ded28f42abf8d024cfc)
+  → `mokup@2.3.4`
+
 ## 0.0.15
 
 ### Patch Changes

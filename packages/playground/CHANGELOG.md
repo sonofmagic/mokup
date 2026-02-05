@@ -1,5 +1,15 @@
 # @mokup/playground
 
+## 0.2.0
+
+### Minor Changes
+
+- ✨ **Update the playground request body editor to Postman-style modes (none, form-data, x-www-form-urlencoded, raw with subtype, binary) with raw JSON validation toggle and binary upload support.** [`67b09a6`](https://github.com/sonofmagic/mokup/commit/67b09a6142120e5c4c9b593d4efb8024558664ff) by @sonofmagic
+
+### Patch Changes
+
+- 🐛 **Align playground request/response UI with Postman-style tabs, fixed method badge sizing, smarter search filters, search term highlighting, and a collapsible sidebar with a collapsed mode rail.** [`b58e7ed`](https://github.com/sonofmagic/mokup/commit/b58e7ed8d427ae907a5c9c511017de0d565a5cd7) by @sonofmagic
+
 ## 0.1.1
 
 ### Patch Changes
