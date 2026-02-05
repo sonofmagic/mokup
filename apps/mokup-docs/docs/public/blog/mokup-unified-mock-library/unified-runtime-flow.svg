@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="675" viewBox="0 0 1200 675" role="img" aria-label="统一运行时流程图占位">
+  <rect width="1200" height="675" fill="#f5f7fb"/>
+  <rect x="60" y="120" width="260" height="120" rx="16" fill="#ffffff" stroke="#c7d2fe" stroke-width="2"/>
+  <rect x="390" y="120" width="260" height="120" rx="16" fill="#ffffff" stroke="#c7d2fe" stroke-width="2"/>
+  <rect x="720" y="120" width="260" height="120" rx="16" fill="#ffffff" stroke="#c7d2fe" stroke-width="2"/>
+  <rect x="180" y="360" width="840" height="200" rx="20" fill="#ffffff" stroke="#c7d2fe" stroke-width="2"/>
+  <text x="190" y="185" font-size="24" fill="#1f2937" font-family="Arial, sans-serif">mock/</text>
+  <text x="520" y="185" font-size="24" fill="#1f2937" font-family="Arial, sans-serif">manifest</text>
+  <text x="820" y="185" font-size="24" fill="#1f2937" font-family="Arial, sans-serif">runtime</text>
+  <text x="220" y="445" font-size="22" fill="#1f2937" font-family="Arial, sans-serif">Vite / Node / Worker 适配器</text>
+  <text x="60" y="80" font-size="28" fill="#111827" font-family="Arial, sans-serif">统一运行时流程图（占位）</text>
+</svg>

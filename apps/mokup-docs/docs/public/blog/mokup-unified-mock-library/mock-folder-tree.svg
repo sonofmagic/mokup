@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="675" viewBox="0 0 1200 675" role="img" aria-label="mock 目录结构占位">
+  <rect width="1200" height="675" fill="#f8fafc"/>
+  <rect x="80" y="120" width="1040" height="420" rx="18" fill="#ffffff" stroke="#e2e8f0" stroke-width="2"/>
+  <text x="120" y="180" font-size="26" fill="#0f172a" font-family="Arial, sans-serif">mock/</text>
+  <text x="160" y="230" font-size="22" fill="#334155" font-family="Arial, sans-serif">users.get.ts</text>
+  <text x="160" y="270" font-size="22" fill="#334155" font-family="Arial, sans-serif">index.config.ts (optional)</text>
+  <text x="80" y="80" font-size="28" fill="#111827" font-family="Arial, sans-serif">mock 目录结构（占位）</text>
+</svg>

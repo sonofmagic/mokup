@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="675" viewBox="0 0 1200 675" role="img" aria-label="Playground 路由详情占位">
+  <rect width="1200" height="675" fill="#f8fafc"/>
+  <rect x="70" y="110" width="1060" height="455" rx="18" fill="#ffffff" stroke="#e2e8f0" stroke-width="2"/>
+  <rect x="100" y="150" width="260" height="380" rx="12" fill="#f1f5f9"/>
+  <rect x="390" y="150" width="700" height="380" rx="12" fill="#f8fafc"/>
+  <text x="100" y="80" font-size="28" fill="#111827" font-family="Arial, sans-serif">Playground 路由详情（占位）</text>
+  <text x="420" y="220" font-size="22" fill="#334155" font-family="Arial, sans-serif">Route detail / config chain</text>
+</svg>
