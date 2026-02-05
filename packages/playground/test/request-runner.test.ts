@@ -1,3 +1,4 @@
+import type { BodyType, RawBodyType } from '../src/types'
 import { parseRouteTemplate } from '@mokup/runtime'
 import { afterEach, describe, expect, it, vi } from 'vitest'
 import { ref } from 'vue'
@@ -13,7 +14,9 @@ describe('request runner', () => {
     const queryText = ref('')
     const headersText = ref('')
     const bodyText = ref('')
-    const bodyType = ref<'json' | 'text' | 'form' | 'multipart' | 'base64'>('json')
+    const bodyType = ref<BodyType>('raw')
+    const rawType = ref<RawBodyType>('json')
+    const rawValidate = ref(true)
     const responseText = ref('')
     const responseStatus = ref('')
     const responseTime = ref('')
@@ -29,6 +32,8 @@ describe('request runner', () => {
       headersText,
       bodyText,
       bodyType,
+      rawType,
+      rawValidate,
       responseText,
       responseStatus,
       responseTime,
@@ -53,15 +58,12 @@ describe('request runner', () => {
     expect(responseText.value).toBe('errors.headersJson')
 
     headersText.value = '{}'
-    bodyType.value = 'json'
+    bodyType.value = 'raw'
+    rawType.value = 'json'
+    rawValidate.value = true
     bodyText.value = '{'
     await runner.runRequest()
     expect(responseText.value).toBe('errors.bodyJson')
-
-    bodyType.value = 'base64'
-    bodyText.value = '###'
-    await runner.runRequest()
-    expect(responseText.value).toBe('errors.bodyBase64')
   })
 
   it('builds request bodies and handles responses', async () => {
@@ -73,7 +75,10 @@ describe('request runner', () => {
     const queryText = ref('')
     const headersText = ref('')
     const bodyText = ref('')
-    const bodyType = ref<'json' | 'text' | 'form' | 'multipart' | 'base64'>('text')
+    const bodyType = ref<BodyType>('raw')
+    const rawType = ref<RawBodyType>('text')
+    const rawValidate = ref(true)
+    const binaryFile = ref<File | null>(null)
     const responseText = ref('')
     const responseStatus = ref('')
     const responseTime = ref('')
@@ -100,6 +105,9 @@ describe('request runner', () => {
       headersText,
       bodyText,
       bodyType,
+      rawType,
+      rawValidate,
+      binaryFile,
       responseText,
       responseStatus,
       responseTime,
@@ -109,7 +117,8 @@ describe('request runner', () => {
       getRouteKey: () => 'POST /upload/:id',
     })
 
-    bodyType.value = 'text'
+    bodyType.value = 'raw'
+    rawType.value = 'text'
     bodyText.value = 'hello'
     await runner.runRequest()
     expect(fetchMock).toHaveBeenCalledWith(
@@ -120,7 +129,7 @@ describe('request runner', () => {
       }),
     )
 
-    bodyType.value = 'form'
+    bodyType.value = 'form-urlencoded'
     bodyText.value = 'a=1'
     await runner.runRequest()
     expect(fetchMock).toHaveBeenCalledWith(
@@ -131,17 +140,17 @@ describe('request runner', () => {
       }),
     )
 
-    bodyType.value = 'multipart'
+    bodyType.value = 'form-data'
     bodyText.value = 'a=1'
     await runner.runRequest()
     const lastMultipart = fetchMock.mock.calls.at(-1)?.[1] as RequestInit
     expect(lastMultipart.body).toBeInstanceOf(FormData)
 
-    bodyType.value = 'base64'
-    bodyText.value = 'SGVsbG8='
+    bodyType.value = 'binary'
+    binaryFile.value = new File(['hello'], 'hello.bin', { type: 'application/octet-stream' })
     await runner.runRequest()
-    const lastBase64 = fetchMock.mock.calls.at(-1)?.[1] as RequestInit
-    expect(lastBase64.headers).toEqual(expect.objectContaining({ 'Content-Type': 'application/octet-stream' }))
+    const lastBinary = fetchMock.mock.calls.at(-1)?.[1] as RequestInit
+    expect(lastBinary.headers).toEqual(expect.objectContaining({ 'Content-Type': 'application/octet-stream' }))
 
     expect(responseStatus.value).toBe('200 OK')
     expect(responseText.value).toContain('"ok"')
@@ -162,7 +171,9 @@ describe('request runner', () => {
     const queryText = ref('')
     const headersText = ref('')
     const bodyText = ref('note=alpha')
-    const bodyType = ref<'json' | 'text' | 'form' | 'multipart' | 'base64'>('multipart')
+    const bodyType = ref<BodyType>('form-data')
+    const rawType = ref<RawBodyType>('text')
+    const rawValidate = ref(true)
     const multipartFiles = ref([
       {
         id: 'row-1',
@@ -196,6 +207,8 @@ describe('request runner', () => {
       headersText,
       bodyText,
       bodyType,
+      rawType,
+      rawValidate,
       multipartFiles,
       responseText,
       responseStatus,
@@ -240,7 +253,10 @@ describe('request runner', () => {
     const queryText = ref('')
     const headersText = ref('{"Content-Type":"application/custom"}')
     const bodyText = ref('')
-    const bodyType = ref<'json' | 'text' | 'form' | 'multipart' | 'base64'>('json')
+    const bodyType = ref<BodyType>('raw')
+    const rawType = ref<RawBodyType>('json')
+    const rawValidate = ref(true)
+    const binaryFile = ref<File | null>(null)
     const responseText = ref('')
     const responseStatus = ref('')
     const responseTime = ref('')
@@ -267,6 +283,9 @@ describe('request runner', () => {
       headersText,
       bodyText,
       bodyType,
+      rawType,
+      rawValidate,
+      binaryFile,
       responseText,
       responseStatus,
       responseTime,
@@ -276,20 +295,22 @@ describe('request runner', () => {
       getRouteKey: () => 'POST /upload/:id',
     })
 
-    bodyType.value = 'json'
+    bodyType.value = 'raw'
+    rawType.value = 'json'
     bodyText.value = '{"ok":true}'
     await runner.runRequest()
 
-    bodyType.value = 'text'
+    bodyType.value = 'raw'
+    rawType.value = 'text'
     bodyText.value = 'hello'
     await runner.runRequest()
 
-    bodyType.value = 'form'
+    bodyType.value = 'form-urlencoded'
     bodyText.value = 'a=1'
     await runner.runRequest()
 
-    bodyType.value = 'base64'
-    bodyText.value = 'SGVsbG8='
+    bodyType.value = 'binary'
+    binaryFile.value = new File(['hello'], 'hello.bin', { type: 'application/octet-stream' })
     await runner.runRequest()
 
     for (const call of fetchMock.mock.calls) {
@@ -306,7 +327,9 @@ describe('request runner', () => {
     const queryText = ref('')
     const headersText = ref(JSON.stringify({ 'x-optional': undefined, 'list': ['a', 'b'] }))
     const bodyText = ref('')
-    const bodyType = ref<'json' | 'text' | 'form' | 'multipart' | 'base64'>('text')
+    const bodyType = ref<BodyType>('none')
+    const rawType = ref<RawBodyType>('text')
+    const rawValidate = ref(true)
     const responseText = ref('')
     const responseStatus = ref('')
     const responseTime = ref('')
@@ -322,6 +345,8 @@ describe('request runner', () => {
       headersText,
       bodyText,
       bodyType,
+      rawType,
+      rawValidate,
       responseText,
       responseStatus,
       responseTime,
@@ -355,7 +380,10 @@ describe('request runner', () => {
     const queryText = ref('')
     const headersText = ref('{}')
     const bodyText = ref(' ')
-    const bodyType = ref<'json' | 'text' | 'form' | 'multipart' | 'base64'>('text')
+    const bodyType = ref<BodyType>('raw')
+    const rawType = ref<RawBodyType>('text')
+    const rawValidate = ref(true)
+    const binaryFile = ref<File | null>(null)
     const responseText = ref('')
     const responseStatus = ref('')
     const responseTime = ref('')
@@ -382,6 +410,9 @@ describe('request runner', () => {
       headersText,
       bodyText,
       bodyType,
+      rawType,
+      rawValidate,
+      binaryFile,
       responseText,
       responseStatus,
       responseTime,
@@ -396,20 +427,21 @@ describe('request runner', () => {
     expect(init.body).toBeUndefined()
     expect(responseText.value).toBe('response.emptyPayload')
 
-    bodyType.value = 'json'
+    bodyType.value = 'raw'
+    rawType.value = 'json'
     bodyText.value = ''
     await runner.runRequest()
 
-    bodyType.value = 'form'
+    bodyType.value = 'form-urlencoded'
     bodyText.value = ''
     await runner.runRequest()
 
-    bodyType.value = 'multipart'
+    bodyType.value = 'form-data'
     bodyText.value = ''
     await runner.runRequest()
 
-    bodyType.value = 'base64'
-    bodyText.value = ''
+    bodyType.value = 'binary'
+    binaryFile.value = null
     await runner.runRequest()
   })
 

@@ -1,3 +1,4 @@
+import type { BodyType, RawBodyType } from '../src/types'
 import { describe, expect, it, vi } from 'vitest'
 import { ref } from 'vue'
 
@@ -24,7 +25,9 @@ describe('request runner undefined headers', () => {
     const queryText = ref('')
     const headersText = ref('{}')
     const bodyText = ref('')
-    const bodyType = ref<'json' | 'text' | 'form' | 'multipart' | 'base64'>('text')
+    const bodyType = ref<BodyType>('none')
+    const rawType = ref<RawBodyType>('json')
+    const rawValidate = ref(true)
     const responseText = ref('')
     const responseStatus = ref('')
     const responseTime = ref('')
@@ -51,6 +54,8 @@ describe('request runner undefined headers', () => {
       headersText,
       bodyText,
       bodyType,
+      rawType,
+      rawValidate,
       responseText,
       responseStatus,
       responseTime,

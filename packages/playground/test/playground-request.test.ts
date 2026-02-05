@@ -1,3 +1,4 @@
+import type { BodyType, RawBodyType } from '../src/types'
 import { describe, expect, it, vi } from 'vitest'
 import { ref } from 'vue'
 import { decodeBase64 } from '../src/hooks/playground-request/base64'
@@ -97,7 +98,9 @@ describe('playground request helpers', () => {
     const queryText = ref('{"q":"ok"}')
     const headersText = ref('{"X-Test":"1"}')
     const bodyText = ref('{"name":"Ada"}')
-    const bodyType = ref<'json'>('json')
+    const bodyType = ref<BodyType>('raw')
+    const rawType = ref<RawBodyType>('json')
+    const rawValidate = ref(true)
     const t = (key: string, params?: Record<string, string | number>) => {
       if (!params) {
         return key
@@ -119,6 +122,8 @@ describe('playground request helpers', () => {
       headersText,
       bodyText,
       bodyType,
+      rawType,
+      rawValidate,
       responseText,
       responseStatus,
       responseTime,
