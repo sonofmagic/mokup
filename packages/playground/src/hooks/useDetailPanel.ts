@@ -3,10 +3,10 @@ import { computed, ref } from 'vue'
 type DetailPanelKey = 'configChain' | 'middlewares'
 type DetailPanelState = Record<DetailPanelKey, boolean>
 
-const STORAGE_KEY = 'mokup.playground.detailPanels'
+const STORAGE_KEY = 'mokup.playground.detailPanels.v2'
 const defaultState: DetailPanelState = {
-  configChain: false,
-  middlewares: false,
+  configChain: true,
+  middlewares: true,
 }
 
 const panelState = ref<DetailPanelState>(defaultState)

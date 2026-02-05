@@ -228,7 +228,7 @@ export type BodyType = 'none' | 'form-data' | 'form-urlencoded' | 'raw' | 'binar
  *
  * const raw: RawBodyType = 'json'
  */
-export type RawBodyType = 'text' | 'javascript' | 'json' | 'html' | 'wxml'
+export type RawBodyType = 'text' | 'javascript' | 'json' | 'html' | 'xml'
 
 /**
  * Multipart file field row for playground requests.

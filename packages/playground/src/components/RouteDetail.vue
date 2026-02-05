@@ -1,10 +1,8 @@
 <script setup lang="ts">
 import type { BodyType, MultipartFileEntry, PlaygroundRoute, RawBodyType, RouteParamField } from '../types'
-import { ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
-import PostmanInfoDrawer from './PostmanInfoDrawer.vue'
-import PostmanRequestPanel from './PostmanRequestPanel.vue'
-import PostmanResponsePanel from './PostmanResponsePanel.vue'
+import PostmanRequestView from './PostmanRequestView.vue'
+import PostmanResponseView from './PostmanResponseView.vue'
 
 const props = defineProps<{
   selected: PlaygroundRoute | null
@@ -22,7 +20,10 @@ const props = defineProps<{
   rawValidate: boolean
   multipartFiles: MultipartFileEntry[]
   binaryFile: File | null
-  responseText: string
+  responseRaw: string
+  responsePretty: string
+  responseHeaders: Record<string, string>
+  responseContentType: string
   responseStatus: string
   responseTime: string
   isSwRegistering: boolean
@@ -43,22 +44,6 @@ const emit = defineEmits<{
 }>()
 
 const { t } = useI18n()
-const infoOpen = ref(false)
-
-function toggleInfo() {
-  infoOpen.value = !infoOpen.value
-}
-
-function closeInfo() {
-  infoOpen.value = false
-}
-
-watch(
-  () => props.selected?.file ?? '',
-  () => {
-    infoOpen.value = false
-  },
-)
 </script>
 
 <template>
@@ -72,9 +57,10 @@ watch(
       </p>
     </div>
     <div v-else class="relative flex min-h-0 h-full flex-col gap-4">
-      <PostmanRequestPanel
+      <PostmanRequestView
         :selected="props.selected"
         :request-url="props.requestUrl"
+        :workspace-root="props.workspaceRoot"
         :route-params="props.routeParams"
         :param-values="props.paramValues"
         :missing-params="props.missingParams"
@@ -88,6 +74,7 @@ watch(
         :multipart-files="props.multipartFiles"
         :binary-file="props.binaryFile"
         :is-sw-registering="props.isSwRegistering"
+        :config-status-map="props.configStatusMap"
         @update:queryText="emit('update:queryText', $event)"
         @update:headersText="emit('update:headersText', $event)"
         @update:bodyText="emit('update:bodyText', $event)"
@@ -98,19 +85,14 @@ watch(
         @update:binaryFile="emit('update:binaryFile', $event)"
         @update:param-value="(name, value) => emit('update:param-value', name, value)"
         @run="emit('run')"
-        @toggle-info="toggleInfo"
       />
-      <PostmanResponsePanel
-        :response-text="props.responseText"
+      <PostmanResponseView
+        :response-raw="props.responseRaw"
+        :response-pretty="props.responsePretty"
+        :response-headers="props.responseHeaders"
+        :response-content-type="props.responseContentType"
         :response-status="props.responseStatus"
         :response-time="props.responseTime"
-      />
-      <PostmanInfoDrawer
-        :open="infoOpen"
-        :selected="props.selected"
-        :workspace-root="props.workspaceRoot"
-        :config-status-map="props.configStatusMap"
-        @close="closeInfo"
       />
     </div>
   </section>

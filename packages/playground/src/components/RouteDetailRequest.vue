@@ -67,8 +67,8 @@ const rawTypeLabel = computed(() => {
       return t('detail.rawTypeJavascript')
     case 'html':
       return t('detail.rawTypeHtml')
-    case 'wxml':
-      return t('detail.rawTypeWxml')
+    case 'xml':
+      return t('detail.rawTypeXml')
     default:
       return t('detail.rawTypeJson')
   }
@@ -188,7 +188,7 @@ const bodyExample = '{ "name": "Ada" }'
 const rawTextExample = 'Hello Mokup'
 const rawJavascriptExample = 'export const data = { ok: true }'
 const rawHtmlExample = '<div class="card">Hello</div>'
-const rawWxmlExample = '<view class="card">{{ title }}</view>'
+const rawXmlExample = '<note>Hello</note>'
 const formExample = 'title=alpha\ncount=3'
 function resolveBodyPlaceholder() {
   switch (props.bodyType) {
@@ -200,8 +200,8 @@ function resolveBodyPlaceholder() {
           return t('detail.bodyPlaceholderRawJavascript', { sample: rawJavascriptExample })
         case 'html':
           return t('detail.bodyPlaceholderRawHtml', { sample: rawHtmlExample })
-        case 'wxml':
-          return t('detail.bodyPlaceholderRawWxml', { sample: rawWxmlExample })
+        case 'xml':
+          return t('detail.bodyPlaceholderRawXml', { sample: rawXmlExample })
         default:
           return t('detail.bodyPlaceholderRawJson', { json: bodyExample })
       }
@@ -455,8 +455,8 @@ function formatBytes(size: number) {
                   <option value="html">
                     {{ t('detail.rawTypeHtml') }}
                   </option>
-                  <option value="wxml">
-                    {{ t('detail.rawTypeWxml') }}
+                  <option value="xml">
+                    {{ t('detail.rawTypeXml') }}
                   </option>
                 </select>
                 <span

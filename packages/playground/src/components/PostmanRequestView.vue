@@ -2,15 +2,22 @@
 import type { BodyType, MultipartFileEntry, PlaygroundRoute, RawBodyType, RouteParamField } from '../types'
 import { computed, nextTick, onBeforeUnmount, ref, toRefs, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
+import RouteDetailConfigChain from './RouteDetailConfigChain.vue'
+import RouteDetailMiddlewares from './RouteDetailMiddlewares.vue'
 import UiField from './ui/UiField.vue'
 import UiPill from './ui/UiPill.vue'
 import UiTextarea from './ui/UiTextarea.vue'
 import UiTextInput from './ui/UiTextInput.vue'
 
-type RequestTab = 'params' | 'auth' | 'headers' | 'body'
+type RequestTab = 'params' | 'auth' | 'headers' | 'body' | 'config' | 'middlewares'
+type BodyOption
+  = | { value: BodyType, label: string, disabled?: false }
+    | { value: 'graphql', label: string, disabled: true }
+
 const props = defineProps<{
   selected: PlaygroundRoute
   requestUrl: string
+  workspaceRoot: string
   routeParams: RouteParamField[]
   paramValues: Record<string, string>
   missingParams: string[]
@@ -24,7 +31,9 @@ const props = defineProps<{
   multipartFiles: MultipartFileEntry[]
   binaryFile: File | null
   isSwRegistering: boolean
+  configStatusMap: Map<string, 'enabled' | 'disabled'>
 }>()
+
 const emit = defineEmits<{
   (event: 'update:queryText', value: string): void
   (event: 'update:headersText', value: string): void
@@ -36,12 +45,13 @@ const emit = defineEmits<{
   (event: 'update:binaryFile', value: File | null): void
   (event: 'update:param-value', name: string, value: string): void
   (event: 'run'): void
-  (event: 'toggle-info'): void
 }>()
+
 const { t } = useI18n()
 const { bodyType } = toRefs(props)
 
 const methodBadge = computed(() => `method-${props.selected.method.toLowerCase()}`)
+
 const activeTab = ref<RequestTab>('params')
 const missingPulseActive = ref(false)
 const missingParamRefs = new Map<string, HTMLElement>()
@@ -81,6 +91,23 @@ const bodyTypeLabel = computed(() => {
       return t('detail.bodyTypeNone')
   }
 })
+
+const bodyTypeOptions = computed<BodyOption[]>(() => [
+  { value: 'none', label: t('detail.bodyTypeNone') },
+  { value: 'form-data', label: t('detail.bodyTypeFormData') },
+  { value: 'form-urlencoded', label: t('detail.bodyTypeFormUrlencoded') },
+  { value: 'raw', label: t('detail.bodyTypeRaw') },
+  { value: 'binary', label: t('detail.bodyTypeBinary') },
+  { value: 'graphql', label: t('detail.bodyTypeGraphql'), disabled: true },
+])
+
+const rawTypeOptions = computed(() => [
+  { value: 'text', label: t('detail.rawTypeText') },
+  { value: 'javascript', label: t('detail.rawTypeJavascript') },
+  { value: 'json', label: t('detail.rawTypeJson') },
+  { value: 'html', label: t('detail.rawTypeHtml') },
+  { value: 'xml', label: t('detail.rawTypeXml') },
+])
 
 function paramPlaceholder(param: RouteParamField) {
   return param.kind === 'param'
@@ -171,6 +198,7 @@ const rawJavascriptExample = 'export const data = { ok: true }'
 const rawHtmlExample = '<div class="card">Hello</div>'
 const rawXmlExample = '<note>Hello</note>'
 const formExample = 'title=alpha\ncount=3'
+
 function resolveBodyPlaceholder() {
   switch (props.bodyType) {
     case 'raw':
@@ -264,10 +292,10 @@ function formatBytes(size: number) {
     <div class="flex flex-col gap-3 px-4 py-4">
       <div class="flex flex-wrap items-center gap-2">
         <span
-          class="rounded-md px-2.5 py-1 text-[0.6rem] uppercase tracking-[0.2em]"
+          class="inline-flex h-[34px] w-[96px] flex-none items-center justify-center rounded-lg border px-3 py-2 text-[0.65rem] uppercase tracking-[0.25em] border-pg-border bg-pg-surface-strong text-pg-text"
           :class="methodBadge"
         >
-          {{ props.selected.method }}
+          {{ props.selected.method.toUpperCase() }}
         </span>
         <UiTextInput
           :value="props.requestUrl"
@@ -288,14 +316,6 @@ function formatBytes(size: number) {
           />
           {{ t('detail.run') }}
         </button>
-        <button
-          class="inline-flex items-center gap-2 rounded-lg border px-3 py-2 text-[0.6rem] uppercase tracking-[0.25em] transition border-pg-border bg-pg-surface-strong text-pg-text-muted hover:text-pg-text-soft"
-          type="button"
-          @click="emit('toggle-info')"
-        >
-          <span class="i-[carbon--information] h-3.5 w-3.5" aria-hidden="true" />
-          {{ t('detail.info') }}
-        </button>
       </div>
       <div class="text-[0.65rem] text-pg-text-subtle">
         {{ props.selected.file }}
@@ -307,9 +327,13 @@ function formatBytes(size: number) {
         <button
           type="button"
           class="border-b-2 pb-2 transition"
-          :class="activeTab === 'params'
-            ? 'border-pg-accent text-pg-text-strong'
-            : 'border-transparent text-pg-text-muted hover:text-pg-text-soft'"
+          :class="[
+            activeTab === 'params'
+              ? 'border-pg-accent text-pg-text-strong'
+              : 'border-transparent text-pg-text-muted hover:text-pg-text-soft',
+            hasMissingParams ? 'pg-tab-missing' : '',
+            missingPulseActive && hasMissingParams ? 'pg-pulse' : '',
+          ]"
           @click="activeTab = 'params'"
         >
           <span>{{ t('detail.params') }}</span>
@@ -355,6 +379,26 @@ function formatBytes(size: number) {
           <UiPill size="xxs" tone="chip" :caps="false" class="ml-2">
             {{ bodyTypeLabel }}
           </UiPill>
+        </button>
+        <button
+          type="button"
+          class="border-b-2 pb-2 transition"
+          :class="activeTab === 'config'
+            ? 'border-pg-accent text-pg-text-strong'
+            : 'border-transparent text-pg-text-muted hover:text-pg-text-soft'"
+          @click="activeTab = 'config'"
+        >
+          {{ t('detail.configChain') }}
+        </button>
+        <button
+          type="button"
+          class="border-b-2 pb-2 transition"
+          :class="activeTab === 'middlewares'
+            ? 'border-pg-accent text-pg-text-strong'
+            : 'border-transparent text-pg-text-muted hover:text-pg-text-soft'"
+          @click="activeTab = 'middlewares'"
+        >
+          {{ t('detail.middlewares') }}
         </button>
       </div>
 
@@ -424,36 +468,26 @@ function formatBytes(size: number) {
 
         <div v-show="activeTab === 'body'">
           <UiField :label="t('detail.bodyType')">
-            <div class="relative">
-              <select
-                class="w-full appearance-none rounded-lg border px-3 py-2 text-[0.7rem] uppercase tracking-[0.2em] outline-none transition border-pg-border bg-pg-surface-strong text-pg-text focus:border-pg-accent"
-                :value="bodyType"
-                @change="emit('update:bodyType', ($event.target as HTMLSelectElement | null)?.value as BodyType)"
+            <div class="flex flex-wrap items-center gap-4 text-[0.65rem] uppercase tracking-[0.2em] text-pg-text-muted">
+              <label
+                v-for="option in bodyTypeOptions"
+                :key="option.value"
+                class="inline-flex items-center gap-2 rounded-full border px-3 py-1 transition border-pg-border bg-pg-surface-strong"
+                :class="option.disabled ? 'opacity-60 cursor-not-allowed' : 'text-pg-text-soft'"
               >
-                <option value="none">
-                  {{ t('detail.bodyTypeNone') }}
-                </option>
-                <option value="form-data">
-                  {{ t('detail.bodyTypeFormData') }}
-                </option>
-                <option value="form-urlencoded">
-                  {{ t('detail.bodyTypeFormUrlencoded') }}
-                </option>
-                <option value="raw">
-                  {{ t('detail.bodyTypeRaw') }}
-                </option>
-                <option value="binary">
-                  {{ t('detail.bodyTypeBinary') }}
-                </option>
-              </select>
-              <span
-                class="pointer-events-none absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 text-pg-text-muted"
-                aria-hidden="true"
-              >
-                <span class="i-[carbon--chevron-down] block h-4 w-4" />
-              </span>
+                <input
+                  class="h-3.5 w-3.5 rounded-full border-pg-border text-pg-accent"
+                  type="radio"
+                  name="bodyType"
+                  :disabled="option.disabled"
+                  :checked="props.bodyType === option.value"
+                  @change="option.disabled ? null : emit('update:bodyType', option.value as BodyType)"
+                >
+                <span>{{ option.label }}</span>
+              </label>
             </div>
           </UiField>
+
           <div v-if="props.bodyType === 'raw'" class="mt-3 flex flex-wrap items-center gap-3">
             <UiField :label="t('detail.rawType')" class="flex-1 min-w-[200px]">
               <div class="relative">
@@ -462,20 +496,8 @@ function formatBytes(size: number) {
                   :value="props.rawType"
                   @change="emit('update:rawType', ($event.target as HTMLSelectElement | null)?.value as RawBodyType)"
                 >
-                  <option value="text">
-                    {{ t('detail.rawTypeText') }}
-                  </option>
-                  <option value="javascript">
-                    {{ t('detail.rawTypeJavascript') }}
-                  </option>
-                  <option value="json">
-                    {{ t('detail.rawTypeJson') }}
-                  </option>
-                  <option value="html">
-                    {{ t('detail.rawTypeHtml') }}
-                  </option>
-                  <option value="xml">
-                    {{ t('detail.rawTypeXml') }}
+                  <option v-for="option in rawTypeOptions" :key="option.value" :value="option.value">
+                    {{ option.label }}
                   </option>
                 </select>
                 <span
@@ -579,6 +601,20 @@ function formatBytes(size: number) {
               </div>
             </UiField>
           </div>
+        </div>
+
+        <div v-show="activeTab === 'config'" class="rounded-xl border border-pg-border bg-pg-surface-strong">
+          <RouteDetailConfigChain
+            :config-chain="props.selected.configChain"
+            :config-status-map="props.configStatusMap"
+          />
+        </div>
+
+        <div v-show="activeTab === 'middlewares'" class="rounded-xl border border-pg-border bg-pg-surface-strong">
+          <RouteDetailMiddlewares
+            :selected="props.selected"
+            :workspace-root="props.workspaceRoot"
+          />
         </div>
       </div>
     </div>

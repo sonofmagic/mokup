@@ -20,7 +20,10 @@ function createRequestRunner(params: {
   rawValidate: Ref<boolean>
   multipartFiles?: Ref<MultipartFileEntry[]>
   binaryFile?: Ref<File | null>
-  responseText: Ref<string>
+  responseRaw: Ref<string>
+  responsePretty: Ref<string>
+  responseHeaders: Ref<Record<string, string>>
+  responseContentType: Ref<string>
   responseStatus: Ref<string>
   responseTime: Ref<string>
   routeCounts: Ref<RouteCounts>
@@ -37,14 +40,17 @@ function createRequestRunner(params: {
         return 'application/json; charset=utf-8'
       case 'html':
         return 'text/html; charset=utf-8'
-      case 'wxml':
+      case 'xml':
         return 'text/xml; charset=utf-8'
       default:
         return 'text/plain; charset=utf-8'
     }
   }
   const resetResponse = () => {
-    params.responseText.value = params.t('response.empty')
+    params.responseRaw.value = ''
+    params.responsePretty.value = params.t('response.empty')
+    params.responseHeaders.value = {}
+    params.responseContentType.value = ''
     params.responseStatus.value = params.t('response.idle')
     params.responseTime.value = ''
   }
@@ -59,18 +65,36 @@ function createRequestRunner(params: {
     const resolved = buildResolvedPath(tokens, params.paramValues.value)
     if (resolved.missing.length > 0) {
       params.onMissingParams?.(resolved.missing)
-      params.responseText.value = params.t('errors.routeParams', { params: resolved.missing.join(', ') })
+      const message = params.t('errors.routeParams', { params: resolved.missing.join(', ') })
+      params.responseRaw.value = ''
+      params.responsePretty.value = message
+      params.responseHeaders.value = {}
+      params.responseContentType.value = ''
+      params.responseStatus.value = params.t('response.error')
+      params.responseTime.value = ''
       return
     }
     const requestKey = params.getRouteKey(params.selected.value)
     const parsedQuery = parseJsonInput(params.queryText.value)
     if (parsedQuery.error) {
-      params.responseText.value = params.t('errors.queryJson', { message: parsedQuery.error })
+      const message = params.t('errors.queryJson', { message: parsedQuery.error })
+      params.responseRaw.value = ''
+      params.responsePretty.value = message
+      params.responseHeaders.value = {}
+      params.responseContentType.value = ''
+      params.responseStatus.value = params.t('response.error')
+      params.responseTime.value = ''
       return
     }
     const parsedHeaders = parseJsonInput(params.headersText.value)
     if (parsedHeaders.error) {
-      params.responseText.value = params.t('errors.headersJson', { message: parsedHeaders.error })
+      const message = params.t('errors.headersJson', { message: parsedHeaders.error })
+      params.responseRaw.value = ''
+      params.responsePretty.value = message
+      params.responseHeaders.value = {}
+      params.responseContentType.value = ''
+      params.responseStatus.value = params.t('response.error')
+      params.responseTime.value = ''
       return
     }
     const url = new URL(resolved.path, window.location.origin)
@@ -101,7 +125,13 @@ function createRequestRunner(params: {
         if (params.rawType.value === 'json' && params.rawValidate.value) {
           const parsedBody = parseJsonInput(rawBody)
           if (parsedBody.error) {
-            params.responseText.value = params.t('errors.bodyJson', { message: parsedBody.error })
+            const message = params.t('errors.bodyJson', { message: parsedBody.error })
+            params.responseRaw.value = ''
+            params.responsePretty.value = message
+            params.responseHeaders.value = {}
+            params.responseContentType.value = ''
+            params.responseStatus.value = params.t('response.error')
+            params.responseTime.value = ''
             return
           }
         }
@@ -159,7 +189,10 @@ function createRequestRunner(params: {
 
     params.responseStatus.value = params.t('response.loading')
     params.responseTime.value = ''
-    params.responseText.value = params.t('response.waiting')
+    params.responseRaw.value = ''
+    params.responsePretty.value = params.t('response.waiting')
+    params.responseHeaders.value = {}
+    params.responseContentType.value = ''
 
     await params.ensureSwReady()
     const startedAt = performance.now()
@@ -171,23 +204,34 @@ function createRequestRunner(params: {
       const duration = Math.round(performance.now() - startedAt)
       params.responseTime.value = `${duration}ms`
       params.responseStatus.value = `${response.status} ${response.statusText}`
+      const headersRecord: Record<string, string> = {}
+      response.headers.forEach((value, key) => {
+        headersRecord[key] = value
+      })
+      params.responseHeaders.value = headersRecord
       const contentType = response.headers.get('content-type') ?? ''
+      params.responseContentType.value = contentType
       const raw = await response.text()
+      params.responseRaw.value = raw
       if (contentType.includes('application/json')) {
         try {
-          params.responseText.value = JSON.stringify(JSON.parse(raw), null, 2)
+          params.responsePretty.value = JSON.stringify(JSON.parse(raw), null, 2)
         }
         catch {
-          params.responseText.value = raw
+          params.responsePretty.value = raw || params.t('response.emptyPayload')
         }
       }
       else {
-        params.responseText.value = raw || params.t('response.emptyPayload')
+        params.responsePretty.value = raw || params.t('response.emptyPayload')
       }
     }
     catch (err) {
       params.responseStatus.value = params.t('response.error')
-      params.responseText.value = err instanceof Error ? err.message : String(err)
+      const message = err instanceof Error ? err.message : String(err)
+      params.responseRaw.value = ''
+      params.responsePretty.value = message
+      params.responseHeaders.value = {}
+      params.responseContentType.value = ''
     }
   }
 

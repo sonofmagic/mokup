@@ -65,7 +65,10 @@ const {
   rawValidate,
   multipartFiles,
   binaryFile,
-  responseText,
+  responseRaw,
+  responsePretty,
+  responseHeaders,
+  responseContentType,
   responseStatus,
   responseTime,
   runRequest,
@@ -297,7 +300,10 @@ onBeforeUnmount(() => {
                   :selected-config="selectedConfig"
                   :request-url="requestUrl"
                   :workspace-root="workspaceRoot"
-                  :response-text="responseText"
+                  :response-raw="responseRaw"
+                  :response-pretty="responsePretty"
+                  :response-headers="responseHeaders"
+                  :response-content-type="responseContentType"
                   :response-status="responseStatus"
                   :response-time="responseTime"
                   :is-sw-registering="isSwRegistering"

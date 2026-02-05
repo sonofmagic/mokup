@@ -40,7 +40,10 @@ export function usePlaygroundRequest(
   const rawValidate = ref(true)
   const binaryFile = ref<File | null>(null)
   const multipartFiles = ref<MultipartFileEntry[]>([])
-  const responseText = ref(t('response.empty'))
+  const responseRaw = ref('')
+  const responsePretty = ref(t('response.empty'))
+  const responseHeaders = ref<Record<string, string>>({})
+  const responseContentType = ref('')
   const responseStatus = ref(t('response.idle'))
   const responseTime = ref('')
   const isSwMode = ref(false)
@@ -242,7 +245,10 @@ export function usePlaygroundRequest(
     rawValidate,
     multipartFiles,
     binaryFile,
-    responseText,
+    responseRaw,
+    responsePretty,
+    responseHeaders,
+    responseContentType,
     responseStatus,
     responseTime,
     routeCounts,
@@ -269,7 +275,10 @@ export function usePlaygroundRequest(
     rawValidate,
     multipartFiles,
     binaryFile,
-    responseText,
+    responseRaw,
+    responsePretty,
+    responseHeaders,
+    responseContentType,
     responseStatus,
     responseTime,
     resetResponse,

@@ -35,7 +35,10 @@ const props = defineProps<{
   rawValidate: boolean
   multipartFiles: MultipartFileEntry[]
   binaryFile: File | null
-  responseText: string
+  responseRaw: string
+  responsePretty: string
+  responseHeaders: Record<string, string>
+  responseContentType: string
   responseStatus: string
   responseTime: string
   isSwRegistering: boolean
@@ -147,7 +150,10 @@ function handleRun() {
     :selected="props.selected"
     :request-url="props.requestUrl"
     :workspace-root="resolvedWorkspaceRoot"
-    :response-text="props.responseText"
+    :response-raw="props.responseRaw"
+    :response-pretty="props.responsePretty"
+    :response-headers="props.responseHeaders"
+    :response-content-type="props.responseContentType"
     :response-status="props.responseStatus"
     :response-time="props.responseTime"
     :is-sw-registering="props.isSwRegistering"
