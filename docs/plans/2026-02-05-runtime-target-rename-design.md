@@ -2,13 +2,13 @@
 
 ## Summary
 
-Rename the Vite plugin runtime option to a more general "runtime target" that is not tied to Vite, using `'node' | 'worker'` as values. Keep `ViteRuntime` as a deprecated alias for compatibility, but remove support for the `'vite'` runtime value and throw an error if it is used.
+Rename the Vite plugin runtime option to a more general "runtime target" that is not tied to Vite, using `'node' | 'worker'` as values. Remove support for the `'vite'` runtime value and throw an error if it is used.
 
 ## Goals
 
 - Replace the Vite-bound runtime name with a general runtime target name.
 - Use `'node' | 'worker'` as the supported runtime values.
-- Keep existing type imports working via a deprecated alias.
+- Provide a general runtime target type for Vite and non-Vite usage.
 - Fail fast when legacy `'vite'` is provided.
 - Update documentation to reflect the new naming and default.
 
@@ -30,9 +30,6 @@ export interface MokupPluginOptions {
 }
 
 export type RuntimeTarget = 'node' | 'worker'
-
-/** @deprecated Use RuntimeTarget instead. */
-export type ViteRuntime = RuntimeTarget
 ```
 
 ## Execution Model
@@ -48,7 +45,6 @@ export type ViteRuntime = RuntimeTarget
 
 ## Compatibility
 
-- `ViteRuntime` remains available as a deprecated alias.
 - Any runtime config using `'vite'` will now fail fast.
 
 ## Implementation Notes

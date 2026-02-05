@@ -31,6 +31,11 @@ function normalizeMokupOptions(options: MokupPluginOptions | null | undefined): 
       '[mokup] Invalid config: use mokup({ entries: { ... } }) instead of mokup({ dir, prefix, ... }).',
     )
   }
+  if ((options as { runtime?: string }).runtime === 'vite') {
+    throw new Error(
+      '[mokup] Invalid config: runtime "vite" is no longer supported. Use "node" or "worker".',
+    )
+  }
   return options
 }
 

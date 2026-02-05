@@ -56,7 +56,7 @@ export default {
 | ------------ | ----------------------------------------------------------------- | --------------------------- |
 | `entries`    | `VitePluginOptions / VitePluginOptions[]`                         | mock 目录配置               |
 | `playground` | `boolean / { path?: string; enabled?: boolean; build?: boolean }` | Playground 配置             |
-| `runtime`    | `'vite' / 'worker'`                                               | 开发运行目标（默认 `vite`） |
+| `runtime`    | `'node' / 'worker'`                                               | 开发运行目标（默认 `node`） |
 
 ### Entry 选项
 

@@ -119,14 +119,14 @@ export interface RouteRule {
  */
 export type RuntimeMode = 'server' | 'sw'
 /**
- * Execution runtime for the Vite plugin.
+ * Execution runtime target for mokup plugins.
  *
  * @example
- * import type { ViteRuntime } from 'mokup/vite'
+ * import type { RuntimeTarget } from 'mokup/vite'
  *
- * const runtime: ViteRuntime = 'vite'
+ * const runtime: RuntimeTarget = 'node'
  */
-export type ViteRuntime = 'vite' | 'worker'
+export type RuntimeTarget = 'node' | 'worker'
 
 /**
  * Service worker behavior options for mokup.
@@ -349,11 +349,11 @@ export interface MokupPluginOptions {
    */
   playground?: PlaygroundOptionsInput
   /**
-   * Runtime for the Vite plugin.
+   * Runtime target for the Vite plugin.
    *
-   * @default "vite"
+   * @default "node"
    */
-  runtime?: ViteRuntime
+  runtime?: RuntimeTarget
 }
 
 /**

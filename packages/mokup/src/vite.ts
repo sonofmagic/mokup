@@ -11,10 +11,10 @@ export type {
   RouteResponse,
   RouteRule,
   RuntimeMode,
+  RuntimeTarget,
   ServiceWorkerOptions,
   VitePluginOptions,
   VitePluginOptionsInput,
-  ViteRuntime,
 } from './shared/types'
 
 /**

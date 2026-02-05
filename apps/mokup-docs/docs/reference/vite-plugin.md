@@ -56,7 +56,7 @@ export default {
 | ------------ | ----------------------------------------------------------------- | ----------------------------------- |
 | `entries`    | `VitePluginOptions / VitePluginOptions[]`                         | Mock entry configs                  |
 | `playground` | `boolean / { path?: string; enabled?: boolean; build?: boolean }` | Playground config                   |
-| `runtime`    | `'vite' / 'worker'`                                               | Dev runtime target (default `vite`) |
+| `runtime`    | `'node' / 'worker'`                                               | Dev runtime target (default `node`) |
 
 ### Entry options
 

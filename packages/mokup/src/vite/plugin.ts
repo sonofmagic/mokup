@@ -54,7 +54,7 @@ export function createMokupPlugin(options: MokupPluginOptions = {}): Plugin {
   let currentServer: ViteDevServer | PreviewServer | null = null
 
   const normalizedOptions = normalizeMokupOptions(options)
-  const runtime = normalizedOptions.runtime ?? 'vite'
+  const runtime = normalizedOptions.runtime ?? 'node'
   const enableViteMiddleware = runtime !== 'worker'
   const optionList = normalizeOptions(normalizedOptions)
   const logEnabled = optionList.every(entry => entry.log !== false)
