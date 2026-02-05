@@ -166,25 +166,25 @@ function isSelectedIgnored(route: PlaygroundIgnoredRoute) {
       >
         {{ t('states.emptyConfigFiles') }}
       </div>
-      <div v-else-if="props.routeMode === 'disabled' && props.disabledMode === 'api'" class="flex flex-col gap-2">
+      <div v-else-if="props.routeMode === 'disabled' && props.disabledMode === 'api'" class="flex flex-col gap-0.5">
         <button
           v-for="route in props.disabledFiltered"
           :key="`${route.file}-${route.reason}-${route.method ?? ''}-${route.url ?? ''}`"
-          class="rounded-2xl border px-4 py-3 text-left text-xs transition border-pg-border bg-pg-surface-soft text-pg-text-soft hover:bg-pg-hover-strong"
+          class="rounded-2xl border px-3 py-1 text-left text-xs transition border-pg-border bg-pg-surface-soft text-pg-text-soft hover:bg-pg-hover-strong hover:text-pg-text"
           :class="isSelectedDisabled(route) ? selectedRowClass : ''"
           type="button"
           @click="emit('select-disabled-route', route)"
         >
           <div class="flex flex-wrap items-center justify-between gap-2">
             <div class="flex flex-col gap-1">
-              <span class="text-[0.7rem] uppercase tracking-[0.18em] text-pg-text-muted">
+              <span class="text-[0.78rem] font-medium text-pg-text-strong">
                 <template v-for="(part, index) in highlightParts(resolveRouteLabel(route))" :key="`${route.file}-label-${index}`">
                   <span :class="part.highlight ? 'pg-highlight' : ''">{{ part.text }}</span>
                 </template>
               </span>
               <span
                 v-if="route.method && route.url"
-                class="text-[0.75rem] text-pg-text-subtle"
+                class="text-[0.7rem] text-pg-text-muted"
               >
                 <template v-for="(part, index) in highlightParts(route.file)" :key="`${route.file}-file-${index}`">
                   <span :class="part.highlight ? 'pg-highlight' : ''">{{ part.text }}</span>
@@ -199,7 +199,7 @@ function isSelectedIgnored(route: PlaygroundIgnoredRoute) {
               >
                 <span class="i-[carbon--checkmark] h-3.5 w-3.5" />
               </span>
-              <UiPill tone="strong" size="sm" tracking="tight">
+              <UiPill tone="card" size="sm" :caps="false" tracking="none">
                 {{ reasonLabel(route.reason) }}
               </UiPill>
               <button
@@ -222,18 +222,18 @@ function isSelectedIgnored(route: PlaygroundIgnoredRoute) {
       >
         {{ t('states.emptyDisabledConfigFiles') }}
       </div>
-      <div v-else-if="props.routeMode === 'disabled' && props.disabledMode === 'config'" class="flex flex-col gap-2">
+      <div v-else-if="props.routeMode === 'disabled' && props.disabledMode === 'config'" class="flex flex-col gap-0.5">
         <button
           v-for="entry in props.disabledConfigFiltered"
           :key="entry.file"
-          class="rounded-2xl border px-4 py-3 text-left text-xs transition border-pg-border bg-pg-surface-soft text-pg-text-soft hover:bg-pg-hover-strong"
+          class="rounded-2xl border px-3 py-1 text-left text-xs transition border-pg-border bg-pg-surface-soft text-pg-text-soft hover:bg-pg-hover-strong hover:text-pg-text"
           :class="isSelectedConfig(entry) ? selectedRowClass : ''"
           type="button"
           @click="emit('select-config', entry)"
         >
           <div class="flex flex-wrap items-center justify-between gap-2">
             <div class="flex flex-col gap-1">
-              <span class="text-[0.7rem] uppercase tracking-[0.18em] text-pg-text-muted">
+              <span class="text-[0.75rem] font-medium text-pg-text-strong">
                 <template v-for="(part, index) in highlightParts(formatConfigLabel(entry.file))" :key="`${entry.file}-disabled-${index}`">
                   <span :class="part.highlight ? 'pg-highlight' : ''">{{ part.text }}</span>
                 </template>
@@ -247,7 +247,7 @@ function isSelectedIgnored(route: PlaygroundIgnoredRoute) {
               >
                 <span class="i-[carbon--checkmark] h-3.5 w-3.5" />
               </span>
-              <UiPill tone="strong" size="sm" tracking="tight">
+              <UiPill tone="card" size="sm" :caps="false" tracking="none">
                 {{ t('enabled.configLabel') }}
               </UiPill>
               <button
@@ -264,18 +264,18 @@ function isSelectedIgnored(route: PlaygroundIgnoredRoute) {
           </div>
         </button>
       </div>
-      <div v-else-if="props.routeMode === 'ignored'" class="flex flex-col gap-2">
+      <div v-else-if="props.routeMode === 'ignored'" class="flex flex-col gap-0.5">
         <button
           v-for="route in props.ignoredFiltered"
           :key="`${route.file}-${route.reason}`"
-          class="rounded-2xl border px-4 py-3 text-left text-xs transition border-pg-border bg-pg-surface-soft text-pg-text-soft hover:bg-pg-hover-strong"
+          class="rounded-2xl border px-3 py-1 text-left text-xs transition border-pg-border bg-pg-surface-soft text-pg-text-soft hover:bg-pg-hover-strong hover:text-pg-text"
           :class="isSelectedIgnored(route) ? selectedRowClass : ''"
           type="button"
           @click="emit('select-ignored-route', route)"
         >
           <div class="flex flex-wrap items-center justify-between gap-2">
             <div class="flex flex-col gap-1">
-              <span class="text-[0.7rem] uppercase tracking-[0.18em] text-pg-text-muted">
+              <span class="text-[0.75rem] font-medium text-pg-text-strong">
                 <template v-for="(part, index) in highlightParts(route.file)" :key="`${route.file}-ignored-${index}`">
                   <span :class="part.highlight ? 'pg-highlight' : ''">{{ part.text }}</span>
                 </template>
@@ -289,7 +289,7 @@ function isSelectedIgnored(route: PlaygroundIgnoredRoute) {
               >
                 <span class="i-[carbon--checkmark] h-3.5 w-3.5" />
               </span>
-              <UiPill tone="strong" size="sm" tracking="tight">
+              <UiPill tone="card" size="sm" :caps="false" tracking="none">
                 {{ ignoredReasonLabel(route.reason) }}
               </UiPill>
               <button
@@ -306,18 +306,18 @@ function isSelectedIgnored(route: PlaygroundIgnoredRoute) {
           </div>
         </button>
       </div>
-      <div v-else-if="props.routeMode === 'active' && props.enabledMode === 'config'" class="flex flex-col gap-2">
+      <div v-else-if="props.routeMode === 'active' && props.enabledMode === 'config'" class="flex flex-col gap-0.5">
         <button
           v-for="entry in props.configFiltered"
           :key="entry.file"
-          class="rounded-2xl border px-4 py-3 text-left text-xs transition border-pg-border bg-pg-surface-soft text-pg-text-soft hover:bg-pg-hover-strong"
+          class="rounded-2xl border px-3 py-1 text-left text-xs transition border-pg-border bg-pg-surface-soft text-pg-text-soft hover:bg-pg-hover-strong hover:text-pg-text"
           :class="isSelectedConfig(entry) ? selectedRowClass : ''"
           type="button"
           @click="emit('select-config', entry)"
         >
           <div class="flex flex-wrap items-center justify-between gap-2">
             <div class="flex flex-col gap-1">
-              <span class="text-[0.7rem] tracking-[0.18em] text-pg-text-muted">
+              <span class="text-[0.75rem] font-medium text-pg-text-strong">
                 <template v-for="(part, index) in highlightParts(formatConfigLabel(entry.file))" :key="`${entry.file}-config-${index}`">
                   <span :class="part.highlight ? 'pg-highlight' : ''">{{ part.text }}</span>
                 </template>
@@ -331,7 +331,7 @@ function isSelectedIgnored(route: PlaygroundIgnoredRoute) {
               >
                 <span class="i-[carbon--checkmark] h-3.5 w-3.5" />
               </span>
-              <UiPill tone="strong" size="sm" tracking="tight">
+              <UiPill tone="card" size="sm" :caps="false" tracking="none">
                 {{ t('enabled.configLabel') }}
               </UiPill>
               <button

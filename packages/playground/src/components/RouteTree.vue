@@ -16,7 +16,10 @@ const emit = defineEmits<{
   (event: 'select', row: TreeRow): void
 }>()
 
-const methodBadge = (method: string) => `method-${method.toLowerCase()}`
+function methodBadge(method: string, selected: boolean) {
+  const base = `method-${method.toLowerCase()}`
+  return selected ? `${base} ${base}-strong` : base
+}
 
 function resolveEditorUrlForRoute(route: PlaygroundRoute) {
   return resolveEditorUrl(route.file, props.workspaceRoot)
@@ -48,12 +51,12 @@ function highlightParts(text: string) {
 </script>
 
 <template>
-  <div class="flex flex-col gap-1" data-testid="playground-tree">
+  <div class="flex flex-col gap-0" data-testid="playground-tree">
     <div
       v-for="row in rows"
       :key="row.id"
-      class="group flex items-center gap-2 rounded-lg border border-transparent px-2 py-1 text-left transition text-pg-text hover:bg-pg-hover"
-      :class="row.selected ? 'bg-pg-accent text-pg-on-accent border-pg-accent shadow-sm' : ''"
+      class="group flex min-h-[28px] items-center gap-2 rounded-lg border border-transparent px-2 py-0.5 text-left transition text-pg-text-soft hover:bg-pg-hover-strong"
+      :class="row.selected ? 'bg-pg-accent/16 text-pg-text-strong border-pg-accent/50 font-semibold shadow-[inset_3px_0_0_0_var(--color-pg-accent)]' : ''"
       data-testid="playground-tree-row"
     >
       <button
@@ -66,7 +69,7 @@ function highlightParts(text: string) {
           <div class="flex items-center gap-2" :style="{ paddingLeft: resolveIndent(row.depth) }">
             <span
               class="flex h-3.5 w-3.5 items-center justify-center"
-              :class="row.selected ? 'text-pg-on-accent-soft' : 'text-pg-text-muted'"
+              :class="row.selected ? 'text-pg-accent' : 'text-pg-text-subtle'"
             >
               <span
                 v-if="row.kind === 'folder'"
@@ -77,12 +80,15 @@ function highlightParts(text: string) {
             </span>
             <span
               v-if="row.kind === 'route' && row.route"
-              class="rounded-full px-1.5 py-0.5 text-[0.5rem] uppercase tracking-[0.2em]"
-              :class="methodBadge(row.route.method)"
+              class="rounded-full border px-1.5 py-0.5 text-[0.5rem] uppercase tracking-[0.12em] leading-none transition group-hover:brightness-105"
+              :class="methodBadge(row.route.method, row.selected)"
             >
               {{ row.route.method }}
             </span>
-            <span class="text-[0.78rem]" :class="row.kind === 'folder' ? 'font-semibold' : 'font-medium'">
+            <span
+              class="text-[0.8rem] text-pg-text-strong"
+              :class="row.kind === 'folder' ? 'font-semibold' : 'font-medium'"
+            >
               <template v-for="(part, index) in highlightParts(row.label)" :key="`${row.id}-label-${index}`">
                 <span :class="part.highlight ? 'pg-highlight' : ''">{{ part.text }}</span>
               </template>
