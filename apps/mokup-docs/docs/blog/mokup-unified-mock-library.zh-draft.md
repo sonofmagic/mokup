@@ -1,6 +1,6 @@
 # Mokup：统一运行时的 Mock 库（草稿）
 
-![Mokup Logo](/brand/mokup-logo.svg)
+![Mokup Logo](../public/brand/mokup-logo.svg)
 
 大家好，我是 icebreaker，一名前端开发者兼开源爱好者。这是我的 [GitHub](https://github.com/sonofmagic)。
 
@@ -55,7 +55,7 @@ Mokup 是一个基于文件路由的 HTTP mock 库，强调“统一运行时”
 
 这意味着：路由规则一致、响应逻辑一致、部署方式可选。
 
-![统一运行时流程图](/blog/mokup-unified-mock-library/unified-runtime-flow.svg)
+![统一运行时流程图](../public/blog/mokup-unified-mock-library/unified-runtime-flow.svg)
 
 ## 快速开始（Vite）
 
@@ -94,7 +94,7 @@ export default defineHandler({
 
 启动 Vite 并访问 `/api/users`，你会得到一份真实可用的响应。之后这套路由还能直接迁移到 Node 或 Worker，无需重写。
 
-![mock 目录结构示例](/blog/mokup-unified-mock-library/mock-folder-tree.svg)
+![mock 目录结构示例](../public/blog/mokup-unified-mock-library/mock-folder-tree.svg)
 
 ## 可视化 Playground（重点）
 
@@ -106,11 +106,11 @@ Mokup 内置了一个可视化 Playground，用来浏览与调试当前扫描到
 http://localhost:5173/__mokup
 ```
 
-![Playground 入口（终端提示）](/blog/mokup-unified-mock-library/playground-entry.png)
+![Playground 入口（终端提示）](../public/blog/mokup-unified-mock-library/playground-entry.png)
 
 你会看到分组后的路由列表、方法/路径信息、以及每个路由的目录配置链。
 
-![Playground 路由详情与配置链](/blog/mokup-unified-mock-library/playground-detail.png)
+![Playground 路由详情与配置链](../public/blog/mokup-unified-mock-library/playground-detail.png)
 
 作用很简单：不用翻文件，就能确认这个接口到底有没有被扫到、是不是被禁了。
 当你新增或修改 mock 文件时，Playground 会自动刷新路由列表，调试成本会明显降低。
@@ -155,7 +155,7 @@ const handler = createFetchHandler(mokupBundle)
 export default { fetch: request => handler(request) }
 ```
 
-![Worker 构建或运行示意](/blog/mokup-unified-mock-library/cli.png)
+![Worker 构建或运行示意](../public/blog/mokup-unified-mock-library/cli.png)
 
 这样你就能在边缘环境复用本地的 mock 逻辑，避免多套实现。
 

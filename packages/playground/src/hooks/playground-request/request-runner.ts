@@ -1,10 +1,9 @@
 import type { RouteToken } from '@mokup/runtime'
 import type { Ref } from 'vue'
-import type { BodyType, MultipartFileEntry, PlaygroundRoute } from '../../types'
+import type { BodyType, MultipartFileEntry, PlaygroundRoute, RawBodyType } from '../../types'
 import type { RouteCounts } from './websocket'
 import { parseRouteTemplate } from '@mokup/runtime'
 import { applyQuery, parseJsonInput } from '../../utils/request'
-import { decodeBase64 } from './base64'
 import { buildResolvedPath } from './params'
 import { parseKeyValueInput } from './query'
 
@@ -17,7 +16,10 @@ function createRequestRunner(params: {
   headersText: Ref<string>
   bodyText: Ref<string>
   bodyType: Ref<BodyType>
+  rawType: Ref<RawBodyType>
+  rawValidate: Ref<boolean>
   multipartFiles?: Ref<MultipartFileEntry[]>
+  binaryFile?: Ref<File | null>
   responseText: Ref<string>
   responseStatus: Ref<string>
   responseTime: Ref<string>
@@ -27,6 +29,20 @@ function createRequestRunner(params: {
   getRouteKey: (route: PlaygroundRoute) => string
   onMissingParams?: (missing: string[]) => void
 }) {
+  const resolveRawContentType = (rawType: RawBodyType) => {
+    switch (rawType) {
+      case 'javascript':
+        return 'application/javascript; charset=utf-8'
+      case 'json':
+        return 'application/json; charset=utf-8'
+      case 'html':
+        return 'text/html; charset=utf-8'
+      case 'wxml':
+        return 'text/xml; charset=utf-8'
+      default:
+        return 'text/plain; charset=utf-8'
+    }
+  }
   const resetResponse = () => {
     params.responseText.value = params.t('response.empty')
     params.responseStatus.value = params.t('response.idle')
@@ -80,29 +96,23 @@ function createRequestRunner(params: {
     const upperMethod = params.selected.value.method.toUpperCase()
     if (upperMethod !== 'GET' && upperMethod !== 'HEAD') {
       const rawBody = params.bodyText.value
-      if (params.bodyType.value === 'json') {
-        const parsedBody = parseJsonInput(rawBody)
-        if (parsedBody.error) {
-          params.responseText.value = params.t('errors.bodyJson', { message: parsedBody.error })
-          return
-        }
-        if (parsedBody.value) {
-          init.body = JSON.stringify(parsedBody.value)
-          if (!headers['Content-Type']) {
-            headers['Content-Type'] = 'application/json'
+      if (params.bodyType.value === 'raw') {
+        const trimmed = rawBody.trim()
+        if (params.rawType.value === 'json' && params.rawValidate.value) {
+          const parsedBody = parseJsonInput(rawBody)
+          if (parsedBody.error) {
+            params.responseText.value = params.t('errors.bodyJson', { message: parsedBody.error })
+            return
           }
         }
-      }
-      else if (params.bodyType.value === 'text') {
-        const trimmed = rawBody.trim()
         if (trimmed) {
           init.body = rawBody
           if (!headers['Content-Type']) {
-            headers['Content-Type'] = 'text/plain; charset=utf-8'
+            headers['Content-Type'] = resolveRawContentType(params.rawType.value)
           }
         }
       }
-      else if (params.bodyType.value === 'form') {
+      else if (params.bodyType.value === 'form-urlencoded') {
         const entries = parseKeyValueInput(rawBody)
         if (entries.length > 0) {
           const paramsBody = new URLSearchParams()
@@ -115,7 +125,7 @@ function createRequestRunner(params: {
           }
         }
       }
-      else if (params.bodyType.value === 'multipart') {
+      else if (params.bodyType.value === 'form-data') {
         const entries = parseKeyValueInput(rawBody)
         const fileEntries = (params.multipartFiles?.value ?? [])
           .map(entry => ({
@@ -136,16 +146,12 @@ function createRequestRunner(params: {
           init.body = formData
         }
       }
-      else if (params.bodyType.value === 'base64') {
-        const parsed = decodeBase64(rawBody)
-        if (parsed.error) {
-          params.responseText.value = params.t('errors.bodyBase64', { message: parsed.error })
-          return
-        }
-        if (parsed.value) {
-          init.body = parsed.value
+      else if (params.bodyType.value === 'binary') {
+        const file = params.binaryFile?.value ?? null
+        if (file) {
+          init.body = file
           if (!headers['Content-Type']) {
-            headers['Content-Type'] = 'application/octet-stream'
+            headers['Content-Type'] = file.type || 'application/octet-stream'
           }
         }
       }

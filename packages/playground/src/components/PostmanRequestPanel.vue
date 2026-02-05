@@ -2,20 +2,15 @@
 import type { BodyType, MultipartFileEntry, PlaygroundRoute, RawBodyType, RouteParamField } from '../types'
 import { computed, nextTick, onBeforeUnmount, ref, toRefs, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
-import RouteDetailConfigChain from './RouteDetailConfigChain.vue'
-import RouteDetailMiddlewares from './RouteDetailMiddlewares.vue'
-import RouteDetailRequestHeader from './RouteDetailRequestHeader.vue'
-import UiChipButton from './ui/UiChipButton.vue'
 import UiField from './ui/UiField.vue'
 import UiPill from './ui/UiPill.vue'
 import UiTextarea from './ui/UiTextarea.vue'
 import UiTextInput from './ui/UiTextInput.vue'
 
-type RequestTab = 'params' | 'query' | 'headers' | 'body'
+type RequestTab = 'params' | 'auth' | 'headers' | 'body'
 const props = defineProps<{
   selected: PlaygroundRoute
   requestUrl: string
-  workspaceRoot: string
   routeParams: RouteParamField[]
   paramValues: Record<string, string>
   missingParams: string[]
@@ -29,7 +24,6 @@ const props = defineProps<{
   multipartFiles: MultipartFileEntry[]
   binaryFile: File | null
   isSwRegistering: boolean
-  configStatusMap: Map<string, 'enabled' | 'disabled'>
 }>()
 const emit = defineEmits<{
   (event: 'update:queryText', value: string): void
@@ -42,15 +36,13 @@ const emit = defineEmits<{
   (event: 'update:binaryFile', value: File | null): void
   (event: 'update:param-value', name: string, value: string): void
   (event: 'run'): void
+  (event: 'toggle-info'): void
 }>()
 const { t } = useI18n()
 const { bodyType } = toRefs(props)
-function paramPlaceholder(param: RouteParamField) {
-  return param.kind === 'param'
-    ? t('detail.paramPlaceholder')
-    : t('detail.paramPlaceholderCatchall')
-}
-const activeTab = ref<RequestTab>('query')
+
+const methodBadge = computed(() => `method-${props.selected.method.toLowerCase()}`)
+const activeTab = ref<RequestTab>('params')
 const missingPulseActive = ref(false)
 const missingParamRefs = new Map<string, HTMLElement>()
 let missingPulseTimeout: ReturnType<typeof setTimeout> | null = null
@@ -89,6 +81,12 @@ const bodyTypeLabel = computed(() => {
       return t('detail.bodyTypeNone')
   }
 })
+
+function paramPlaceholder(param: RouteParamField) {
+  return param.kind === 'param'
+    ? t('detail.paramPlaceholder')
+    : t('detail.paramPlaceholderCatchall')
+}
 
 function registerMissingParamRef(name: string, el: HTMLElement | null) {
   if (!el) {
@@ -130,30 +128,12 @@ function focusFirstMissingParam() {
   input?.focus()
 }
 
-function resolveDefaultTab() {
-  return props.routeParams.length > 0 ? 'params' : 'query'
-}
 watch(
   () => props.selected?.url ?? '',
   () => {
-    activeTab.value = resolveDefaultTab()
+    activeTab.value = 'params'
   },
   { immediate: true },
-)
-watch(
-  () => props.routeParams.length,
-  (length, prev) => {
-    if (!props.selected) {
-      activeTab.value = 'query'
-      return
-    }
-    if (length > 0 && prev === 0 && activeTab.value === 'query') {
-      activeTab.value = 'params'
-    }
-    if (length === 0 && activeTab.value === 'params') {
-      activeTab.value = 'query'
-    }
-  },
 )
 watch(
   () => props.missingPulse,
@@ -182,6 +162,7 @@ onBeforeUnmount(() => {
     missingPulseTimeout = null
   }
 })
+
 const queryExample = '{ "q": "alpha", "page": 1 }'
 const headersExample = '{ "x-mokup": "playground" }'
 const bodyExample = '{ "name": "Ada" }'
@@ -213,8 +194,6 @@ function resolveBodyPlaceholder() {
       return ''
   }
 }
-
-const configChain = computed(() => props.selected.configChain ?? [])
 
 function createMultipartRow(): MultipartFileEntry {
   multipartRowId += 1
@@ -282,30 +261,55 @@ function formatBytes(size: number) {
 
 <template>
   <section class="rounded-2xl border shadow-sm border-pg-border bg-pg-surface-card">
-    <RouteDetailRequestHeader
-      :method="props.selected.method"
-      :request-url="props.requestUrl"
-      :file="props.selected.file"
-      :is-sw-registering="props.isSwRegistering"
-      @run="emit('run')"
-    />
-    <RouteDetailConfigChain
-      :config-chain="configChain"
-      :config-status-map="props.configStatusMap"
-    />
-    <RouteDetailMiddlewares
-      :selected="props.selected"
-      :workspace-root="props.workspaceRoot"
-    />
-    <div class="border-t p-4 border-pg-border">
-      <div class="flex flex-wrap gap-2">
-        <UiChipButton
-          size="md"
-          :active="activeTab === 'params'"
-          :class="[
-            hasMissingParams ? 'pg-tab-missing' : '',
-            missingPulseActive && hasMissingParams ? 'pg-pulse' : '',
-          ]"
+    <div class="flex flex-col gap-3 px-4 py-4">
+      <div class="flex flex-wrap items-center gap-2">
+        <span
+          class="rounded-md px-2.5 py-1 text-[0.6rem] uppercase tracking-[0.2em]"
+          :class="methodBadge"
+        >
+          {{ props.selected.method }}
+        </span>
+        <UiTextInput
+          :value="props.requestUrl"
+          readonly
+          class="min-w-[220px] flex-1"
+        />
+        <button
+          class="inline-flex items-center gap-2 rounded-lg px-4 py-2 text-[0.65rem] uppercase tracking-[0.25em] shadow-sm transition hover:-translate-y-0.5 disabled:cursor-not-allowed disabled:opacity-70 disabled:hover:translate-y-0 bg-pg-accent text-pg-on-accent"
+          data-testid="playground-run"
+          :disabled="props.isSwRegistering"
+          :aria-busy="props.isSwRegistering"
+          @click="emit('run')"
+        >
+          <span
+            v-if="props.isSwRegistering"
+            class="i-[carbon--circle-dash] h-3.5 w-3.5 animate-spin"
+            aria-hidden="true"
+          />
+          {{ t('detail.run') }}
+        </button>
+        <button
+          class="inline-flex items-center gap-2 rounded-lg border px-3 py-2 text-[0.6rem] uppercase tracking-[0.25em] transition border-pg-border bg-pg-surface-strong text-pg-text-muted hover:text-pg-text-soft"
+          type="button"
+          @click="emit('toggle-info')"
+        >
+          <span class="i-[carbon--information] h-3.5 w-3.5" aria-hidden="true" />
+          {{ t('detail.info') }}
+        </button>
+      </div>
+      <div class="text-[0.65rem] text-pg-text-subtle">
+        {{ props.selected.file }}
+      </div>
+    </div>
+
+    <div class="border-t border-pg-border">
+      <div class="flex flex-wrap items-center gap-5 px-4 pt-2 text-[0.65rem] uppercase tracking-[0.25em]">
+        <button
+          type="button"
+          class="border-b-2 pb-2 transition"
+          :class="activeTab === 'params'
+            ? 'border-pg-accent text-pg-text-strong'
+            : 'border-transparent text-pg-text-muted hover:text-pg-text-soft'"
           @click="activeTab = 'params'"
         >
           <span>{{ t('detail.params') }}</span>
@@ -314,76 +318,83 @@ function formatBytes(size: number) {
             size="xxs"
             tone="chip"
             :caps="false"
-            class="pg-tab-badge"
+            class="ml-2"
           >
             {{ t('detail.badgeRequired') }}
           </UiPill>
-        </UiChipButton>
-        <UiChipButton
-          size="md"
-          :active="activeTab === 'query'"
-          @click="activeTab = 'query'"
+        </button>
+        <button
+          type="button"
+          class="border-b-2 pb-2 transition"
+          :class="activeTab === 'auth'
+            ? 'border-pg-accent text-pg-text-strong'
+            : 'border-transparent text-pg-text-muted hover:text-pg-text-soft'"
+          @click="activeTab = 'auth'"
         >
-          <span>{{ t('detail.query') }}</span>
-          <UiPill size="xxs" tone="chip" :caps="false" class="pg-tab-badge">
-            {{ t('detail.badgeJson') }}
-          </UiPill>
-        </UiChipButton>
-        <UiChipButton
-          size="md"
-          :active="activeTab === 'headers'"
+          {{ t('detail.auth') }}
+        </button>
+        <button
+          type="button"
+          class="border-b-2 pb-2 transition"
+          :class="activeTab === 'headers'
+            ? 'border-pg-accent text-pg-text-strong'
+            : 'border-transparent text-pg-text-muted hover:text-pg-text-soft'"
           @click="activeTab = 'headers'"
         >
-          <span>{{ t('detail.headers') }}</span>
-          <UiPill size="xxs" tone="chip" :caps="false" class="pg-tab-badge">
-            {{ t('detail.badgeJson') }}
-          </UiPill>
-        </UiChipButton>
-        <UiChipButton
-          size="md"
-          :active="activeTab === 'body'"
+          {{ t('detail.headers') }}
+        </button>
+        <button
+          type="button"
+          class="border-b-2 pb-2 transition"
+          :class="activeTab === 'body'
+            ? 'border-pg-accent text-pg-text-strong'
+            : 'border-transparent text-pg-text-muted hover:text-pg-text-soft'"
           @click="activeTab = 'body'"
         >
-          <span>{{ t('detail.body') }}</span>
-          <UiPill size="xxs" tone="chip" :caps="false" class="pg-tab-badge">
+          {{ t('detail.body') }}
+          <UiPill size="xxs" tone="chip" :caps="false" class="ml-2">
             {{ bodyTypeLabel }}
           </UiPill>
-        </UiChipButton>
+        </button>
       </div>
-      <div class="mt-4">
-        <div v-show="activeTab === 'params'">
-          <div
-            v-if="props.routeParams.length === 0"
-            class="rounded-xl border px-4 py-3 text-sm border-pg-border bg-pg-surface-strong text-pg-text-muted"
-          >
-            {{ t('detail.emptyParams') }}
-          </div>
-          <div v-else class="grid gap-3 lg:grid-cols-2">
-            <label
-              v-for="param in props.routeParams"
-              :key="param.id"
-              :ref="(el) => registerMissingParamRef(param.name, el as HTMLElement | null)"
-              class="flex flex-col gap-1.5 text-[0.65rem] uppercase tracking-[0.2em] text-pg-text-muted"
+
+      <div class="border-t px-4 py-4 border-pg-border">
+        <div v-show="activeTab === 'params'" class="flex flex-col gap-4">
+          <div>
+            <div class="mb-2 text-[0.55rem] uppercase tracking-[0.25em] text-pg-text-muted">
+              {{ t('detail.params') }}
+            </div>
+            <div
+              v-if="props.routeParams.length === 0"
+              class="rounded-xl border px-4 py-3 text-sm border-pg-border bg-pg-surface-strong text-pg-text-muted"
             >
-              <span class="flex items-center gap-2 text-[0.55rem] uppercase tracking-[0.2em] text-pg-text-muted">
-                <span>{{ param.name }}</span>
-                <span class="rounded-full border px-2 py-0.5 text-[0.5rem] uppercase tracking-[0.2em] border-pg-border bg-pg-surface-strong text-pg-text-soft">
-                  {{ param.token }}
+              {{ t('detail.emptyParams') }}
+            </div>
+            <div v-else class="grid gap-3 lg:grid-cols-2">
+              <label
+                v-for="param in props.routeParams"
+                :key="param.id"
+                :ref="(el) => registerMissingParamRef(param.name, el as HTMLElement | null)"
+                class="flex flex-col gap-1.5 text-[0.65rem] uppercase tracking-[0.2em] text-pg-text-muted"
+              >
+                <span class="flex items-center gap-2 text-[0.55rem] uppercase tracking-[0.2em] text-pg-text-muted">
+                  <span>{{ param.name }}</span>
+                  <span class="rounded-full border px-2 py-0.5 text-[0.5rem] uppercase tracking-[0.2em] border-pg-border bg-pg-surface-strong text-pg-text-soft">
+                    {{ param.token }}
+                  </span>
                 </span>
-              </span>
-              <UiTextInput
-                :value="props.paramValues[param.name] ?? ''"
-                :placeholder="paramPlaceholder(param)"
-                :class="[
-                  missingParamsSet.has(param.name) ? 'pg-input-missing' : '',
-                  missingPulseActive && missingParamsSet.has(param.name) ? 'pg-pulse' : '',
-                ]"
-                @input="emit('update:param-value', param.name, ($event.target as HTMLInputElement | null)?.value ?? '')"
-              />
-            </label>
+                <UiTextInput
+                  :value="props.paramValues[param.name] ?? ''"
+                  :placeholder="paramPlaceholder(param)"
+                  :class="[
+                    missingParamsSet.has(param.name) ? 'pg-input-missing' : '',
+                    missingPulseActive && missingParamsSet.has(param.name) ? 'pg-pulse' : '',
+                  ]"
+                  @input="emit('update:param-value', param.name, ($event.target as HTMLInputElement | null)?.value ?? '')"
+                />
+              </label>
+            </div>
           </div>
-        </div>
-        <div v-show="activeTab === 'query'">
           <UiField :label="t('detail.query')">
             <UiTextarea
               :value="props.queryText"
@@ -393,6 +404,13 @@ function formatBytes(size: number) {
             />
           </UiField>
         </div>
+
+        <div v-show="activeTab === 'auth'">
+          <div class="rounded-xl border px-4 py-3 text-sm border-pg-border bg-pg-surface-strong text-pg-text-muted">
+            {{ t('detail.authPlaceholder') }}
+          </div>
+        </div>
+
         <div v-show="activeTab === 'headers'">
           <UiField :label="t('detail.headers')">
             <UiTextarea
@@ -403,6 +421,7 @@ function formatBytes(size: number) {
             />
           </UiField>
         </div>
+
         <div v-show="activeTab === 'body'">
           <UiField :label="t('detail.bodyType')">
             <div class="relative">
@@ -506,7 +525,10 @@ function formatBytes(size: number) {
               </div>
             </UiField>
           </div>
-          <UiField v-else :label="t('detail.body')">
+          <UiField
+            v-else
+            :label="t('detail.body')"
+          >
             <UiTextarea
               :value="props.bodyText"
               rows="6"

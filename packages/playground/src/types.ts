@@ -216,9 +216,19 @@ export interface PlaygroundResponse {
  * @example
  * import type { BodyType } from '@mokup/playground'
  *
- * const mode: BodyType = 'json'
+ * const mode: BodyType = 'raw'
  */
-export type BodyType = 'json' | 'text' | 'form' | 'multipart' | 'base64'
+export type BodyType = 'none' | 'form-data' | 'form-urlencoded' | 'raw' | 'binary'
+
+/**
+ * Raw body language selections.
+ *
+ * @example
+ * import type { RawBodyType } from '@mokup/playground'
+ *
+ * const raw: RawBodyType = 'json'
+ */
+export type RawBodyType = 'text' | 'javascript' | 'json' | 'html' | 'wxml'
 
 /**
  * Multipart file field row for playground requests.

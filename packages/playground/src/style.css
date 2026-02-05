@@ -230,4 +230,27 @@
     opacity: 0;
     transform: translateY(-6px) scale(0.98);
   }
+
+  .pg-info-enter-active .pg-info-panel,
+  .pg-info-leave-active .pg-info-panel {
+    transition:
+      transform 220ms ease,
+      opacity 220ms ease;
+  }
+
+  .pg-info-enter-from .pg-info-panel,
+  .pg-info-leave-to .pg-info-panel {
+    opacity: 0;
+    transform: translateX(12px);
+  }
+
+  .pg-info-enter-active .pg-info-backdrop,
+  .pg-info-leave-active .pg-info-backdrop {
+    transition: opacity 200ms ease;
+  }
+
+  .pg-info-enter-from .pg-info-backdrop,
+  .pg-info-leave-to .pg-info-backdrop {
+    opacity: 0;
+  }
 }

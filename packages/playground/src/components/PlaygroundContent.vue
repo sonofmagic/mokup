@@ -7,6 +7,7 @@ import type {
   PlaygroundDisabledRoute,
   PlaygroundIgnoredRoute,
   PlaygroundRoute,
+  RawBodyType,
   RouteParamField,
 } from '../types'
 import { computed } from 'vue'
@@ -30,7 +31,10 @@ const props = defineProps<{
   headersText: string
   bodyText: string
   bodyType: BodyType
+  rawType: RawBodyType
+  rawValidate: boolean
   multipartFiles: MultipartFileEntry[]
+  binaryFile: File | null
   responseText: string
   responseStatus: string
   responseTime: string
@@ -47,7 +51,10 @@ const emit = defineEmits<{
   (event: 'update:headersText', value: string): void
   (event: 'update:bodyText', value: string): void
   (event: 'update:bodyType', value: BodyType): void
+  (event: 'update:rawType', value: RawBodyType): void
+  (event: 'update:rawValidate', value: boolean): void
   (event: 'update:multipartFiles', value: MultipartFileEntry[]): void
+  (event: 'update:binaryFile', value: File | null): void
   (event: 'update:param-value', name: string, value: string): void
   (event: 'run'): void
 }>()
@@ -99,9 +106,21 @@ const bodyTypeModel = computed({
   get: () => props.bodyType,
   set: value => emit('update:bodyType', value),
 })
+const rawTypeModel = computed({
+  get: () => props.rawType,
+  set: value => emit('update:rawType', value),
+})
+const rawValidateModel = computed({
+  get: () => props.rawValidate,
+  set: value => emit('update:rawValidate', value),
+})
 const multipartFilesModel = computed({
   get: () => props.multipartFiles,
   set: value => emit('update:multipartFiles', value),
+})
+const binaryFileModel = computed({
+  get: () => props.binaryFile,
+  set: value => emit('update:binaryFile', value),
 })
 const resolvedWorkspaceRoot = computed(() => props.workspaceRoot ?? '')
 
@@ -121,7 +140,10 @@ function handleRun() {
     v-model:headersText="headersModel"
     v-model:bodyText="bodyModel"
     v-model:bodyType="bodyTypeModel"
+    v-model:rawType="rawTypeModel"
+    v-model:rawValidate="rawValidateModel"
     v-model:multipartFiles="multipartFilesModel"
+    v-model:binaryFile="binaryFileModel"
     :selected="props.selected"
     :request-url="props.requestUrl"
     :workspace-root="resolvedWorkspaceRoot"

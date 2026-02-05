@@ -61,7 +61,10 @@ const {
   headersText,
   bodyText,
   bodyType,
+  rawType,
+  rawValidate,
   multipartFiles,
+  binaryFile,
   responseText,
   responseStatus,
   responseTime,
@@ -284,7 +287,10 @@ onBeforeUnmount(() => {
                   v-model:headersText="headersText"
                   v-model:bodyText="bodyText"
                   v-model:bodyType="bodyType"
+                  v-model:rawType="rawType"
+                  v-model:rawValidate="rawValidate"
                   v-model:multipartFiles="multipartFiles"
+                  v-model:binaryFile="binaryFile"
                   :selected="selected"
                   :selected-disabled="selectedDisabled"
                   :selected-ignored="selectedIgnored"
