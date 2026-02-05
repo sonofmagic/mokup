@@ -48,7 +48,9 @@ export type WebpackPluginOptionsInput = MokupPluginOptions
  */
 export { createMokupWebpackPlugin, createMokupWebpackPlugin as createWebpackPlugin }
 
-export type WebpackConfig = Configuration
+export type WebpackConfig = Configuration & {
+  devServer?: Record<string, unknown>
+}
 
 type WebpackConfigFactory = (...args: unknown[]) => WebpackConfig | WebpackConfig[] | Promise<WebpackConfig | WebpackConfig[]>
 

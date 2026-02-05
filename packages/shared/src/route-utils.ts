@@ -15,14 +15,18 @@ export type RouteParser<TToken = unknown> = (template: string) => RouteParserRes
 
 export type RouteScoreComparator = (a: number[], b: number[]) => number
 
-export interface DerivedRoute<TToken = unknown> {
+export interface DerivedRoute<TToken = unknown, TMethod extends string = string> {
   template: string
-  method: string
+  method: TMethod
   tokens: TToken[]
   score: number[]
 }
 
-export function createRouteUtils<TToken = unknown, TRule extends { handler: unknown } = { handler: unknown }>(params: {
+export function createRouteUtils<
+  TToken = unknown,
+  TRule extends { handler: unknown } = { handler: unknown },
+  TMethod extends string = string,
+>(params: {
   parseRouteTemplate: RouteParser<TToken>
   compareRouteScore: RouteScoreComparator
 }) {
@@ -69,14 +73,16 @@ export function createRouteUtils<TToken = unknown, TRule extends { handler: unkn
     file: string,
     rootDir: string,
     warn?: (message: string) => void,
-  ): DerivedRoute<TToken> | null {
+  ): DerivedRoute<TToken, TMethod> | null {
     const rel = toPosix(relative(rootDir, file))
     const ext = extname(rel)
     const withoutExt = rel.slice(0, rel.length - ext.length)
     const dir = dirname(withoutExt)
     const base = basename(withoutExt)
     const { name, method } = stripMethodSuffix(base)
-    const resolvedMethod = method ?? (jsonExtensions.has(ext) ? 'GET' : undefined)
+    const resolvedMethod = (method ?? (jsonExtensions.has(ext) ? 'GET' : undefined)) as
+      | TMethod
+      | undefined
     if (!resolvedMethod) {
       warn?.(`Skip mock without method suffix: ${file}`)
       return null
@@ -109,14 +115,14 @@ export function createRouteUtils<TToken = unknown, TRule extends { handler: unkn
     }
   }
 
-  function resolveRule<TOutput = DerivedRoute<TToken>>(input: {
+  function resolveRule<TOutput = DerivedRoute<TToken, TMethod>>(input: {
     rule: TRule
     derivedTemplate: string
-    derivedMethod?: string
+    derivedMethod?: TMethod | undefined
     prefix: string
     file: string
     warn?: (message: string) => void
-    build?: (base: DerivedRoute<TToken>, rule: TRule) => TOutput
+    build?: (base: DerivedRoute<TToken, TMethod>, rule: TRule) => TOutput
   }): TOutput | null {
     const method = input.derivedMethod
     if (!method) {
@@ -134,7 +140,7 @@ export function createRouteUtils<TToken = unknown, TRule extends { handler: unkn
     for (const warning of parsed.warnings) {
       input.warn?.(`${warning} in ${input.file}`)
     }
-    const base: DerivedRoute<TToken> = {
+    const base: DerivedRoute<TToken, TMethod> = {
       template: parsed.template,
       method,
       tokens: parsed.tokens,

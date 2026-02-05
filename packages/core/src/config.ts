@@ -70,16 +70,5 @@ export async function resolveDirectoryConfig(params: {
     }),
   })
 
-  return {
-    headers: resolved.headers,
-    status: resolved.status,
-    delay: resolved.delay,
-    enabled: resolved.enabled,
-    ignorePrefix: resolved.ignorePrefix,
-    include: resolved.include,
-    exclude: resolved.exclude,
-    middlewares: resolved.middlewares,
-    configChain: resolved.configChain,
-    configSources: resolved.configSources,
-  }
+  return resolved
 }

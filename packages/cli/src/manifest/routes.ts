@@ -18,9 +18,9 @@ import { createRouteUtils } from '@mokup/shared/route-utils'
  *   score: [4],
  * }
  */
-export type DerivedRoute = SharedDerivedRoute<RouteToken>
+export type DerivedRoute = SharedDerivedRoute<RouteToken, HttpMethod>
 
-const routeUtils = createRouteUtils<RouteToken, RouteRule>({
+const routeUtils = createRouteUtils<RouteToken, RouteRule, HttpMethod>({
   parseRouteTemplate,
   compareRouteScore,
 })
@@ -90,9 +90,9 @@ export function resolveRule(params: {
     derivedMethod: params.derivedMethod,
     prefix: params.prefix,
     file: params.file,
-    warn: params.log,
+    ...(params.log ? { warn: params.log } : {}),
     build: base => ({
-      method: base.method as HttpMethod,
+      method: base.method,
       template: base.template,
       tokens: base.tokens,
       score: base.score,

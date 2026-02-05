@@ -199,7 +199,10 @@ export function createDefineConfig<
         }
         return attachMetadata(config, { pre, normal, post })
       }
-      if (isPromise(result)) {
+      const isConfigPromise = (
+        value: TConfig | void | Promise<TConfig | void>,
+      ): value is Promise<TConfig | void> => isPromise<TConfig | void>(value)
+      if (isConfigPromise(result)) {
         return result.then(finalize)
       }
       return finalize(result)

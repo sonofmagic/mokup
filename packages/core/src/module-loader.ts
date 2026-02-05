@@ -73,7 +73,7 @@ function toTsxConfigPath(file: string) {
 function buildTsxConfigPath() {
   const paths: Record<string, string[]> = {}
   if (mokupSourceEntry) {
-    paths.mokup = [toTsxConfigPath(mokupSourceEntry)]
+    paths['mokup'] = [toTsxConfigPath(mokupSourceEntry)]
   }
   if (mokupViteSourceEntry) {
     paths['mokup/vite'] = [toTsxConfigPath(mokupViteSourceEntry)]

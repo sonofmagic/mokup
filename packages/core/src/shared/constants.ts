@@ -2,6 +2,7 @@ import type { HttpMethod } from './types'
 
 import {
   configExtensions as sharedConfigExtensions,
+  jsonExtensions as sharedJsonExtensions,
   methodSet as sharedMethodSet,
   methodSuffixSet as sharedMethodSuffixSet,
   supportedExtensions as sharedSupportedExtensions,
@@ -11,3 +12,4 @@ export const methodSet = sharedMethodSet as Set<HttpMethod>
 export const methodSuffixSet = sharedMethodSuffixSet
 export const supportedExtensions = sharedSupportedExtensions
 export const configExtensions = sharedConfigExtensions
+export const jsonExtensions = sharedJsonExtensions

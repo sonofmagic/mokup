@@ -37,10 +37,10 @@ export function readMiddlewareMeta(config: Record<symbol, unknown>): MiddlewareM
 export { isPromise, middlewareSymbol }
 
 export function normalizeMiddlewareList<T>(params: {
-  value: unknown
+  value?: unknown
   source: string
   position: MiddlewarePosition
-  warn?: (message: string) => void
+  warn?: ((message: string) => void) | undefined
   map: (handler: (...args: unknown[]) => unknown, index: number, position: MiddlewarePosition) => T
 }): T[] {
   const { value, source, position, warn, map } = params
@@ -191,7 +191,7 @@ export async function resolveDirectoryConfig<TConfig extends {
     }
     const meta = readMiddlewareMeta(config as unknown as Record<symbol, unknown>)
     preMiddlewares.push(
-      ...normalizeMiddlewareList({
+      ...normalizeMiddlewareList<TMiddleware>({
         value: meta?.pre,
         source: configPath,
         position: 'pre',
@@ -200,7 +200,7 @@ export async function resolveDirectoryConfig<TConfig extends {
       }),
     )
     normalMiddlewares.push(
-      ...normalizeMiddlewareList({
+      ...normalizeMiddlewareList<TMiddleware>({
         value: meta?.normal,
         source: configPath,
         position: 'normal',
@@ -209,7 +209,7 @@ export async function resolveDirectoryConfig<TConfig extends {
       }),
     )
     normalMiddlewares.push(
-      ...normalizeMiddlewareList({
+      ...normalizeMiddlewareList<TMiddleware>({
         value: config.middleware,
         source: configPath,
         position: 'normal',
@@ -218,7 +218,7 @@ export async function resolveDirectoryConfig<TConfig extends {
       }),
     )
     postMiddlewares.push(
-      ...normalizeMiddlewareList({
+      ...normalizeMiddlewareList<TMiddleware>({
         value: meta?.post,
         source: configPath,
         position: 'post',

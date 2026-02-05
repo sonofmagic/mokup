@@ -1,3 +1,4 @@
+import type { RouteToken } from '@mokup/runtime'
 import type { HttpMethod, ResolvedRoute, RouteRule } from './shared/types'
 
 import { compareRouteScore, parseRouteTemplate } from '@mokup/runtime'
@@ -17,7 +18,7 @@ import { createRouteUtils } from '@mokup/shared/route-utils'
  *
  * const route = deriveRouteFromFile('/project/mock/ping.get.ts', '/project/mock', console)
  */
-const routeUtils = createRouteUtils({
+const routeUtils = createRouteUtils<RouteToken, RouteRule, HttpMethod>({
   parseRouteTemplate,
   compareRouteScore,
 })

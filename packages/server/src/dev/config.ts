@@ -57,14 +57,36 @@ export async function resolveDirectoryConfig(params: {
     }),
   })
 
-  return {
-    headers: resolved.headers,
-    status: resolved.status,
-    delay: resolved.delay,
-    enabled: resolved.enabled,
-    ignorePrefix: resolved.ignorePrefix,
-    include: resolved.include,
-    exclude: resolved.exclude,
-    middlewares: resolved.middlewares,
+  const result: {
+    headers?: Record<string, string>
+    status?: number
+    delay?: number
+    enabled?: boolean
+    ignorePrefix?: string | string[]
+    include?: RegExp | RegExp[]
+    exclude?: RegExp | RegExp[]
+    middlewares: ResolvedMiddleware[]
+  } = { middlewares: resolved.middlewares }
+  if (resolved.headers) {
+    result.headers = resolved.headers
   }
+  if (typeof resolved.status === 'number') {
+    result.status = resolved.status
+  }
+  if (typeof resolved.delay === 'number') {
+    result.delay = resolved.delay
+  }
+  if (typeof resolved.enabled === 'boolean') {
+    result.enabled = resolved.enabled
+  }
+  if (typeof resolved.ignorePrefix !== 'undefined') {
+    result.ignorePrefix = resolved.ignorePrefix
+  }
+  if (typeof resolved.include !== 'undefined') {
+    result.include = resolved.include
+  }
+  if (typeof resolved.exclude !== 'undefined') {
+    result.exclude = resolved.exclude
+  }
+  return result
 }
