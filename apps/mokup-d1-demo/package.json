@@ -21,8 +21,8 @@
     "vue": "catalog:"
   },
   "devDependencies": {
-    "@cloudflare/vite-plugin": "^1.23.0",
-    "@cloudflare/workers-types": "^4.20260205.0",
+    "@cloudflare/vite-plugin": "^1.23.1",
+    "@cloudflare/workers-types": "^4.20260206.0",
     "@tailwindcss/vite": "catalog:",
     "@vitejs/plugin-vue": "catalog:",
     "drizzle-kit": "^0.31.5",
