@@ -23,6 +23,7 @@ const props = defineProps<{
   selectedIgnored?: PlaygroundIgnoredRoute | null
   error?: string
   loading: boolean
+  hasCachedData: boolean
   filtered: PlaygroundRoute[]
   disabledFiltered: PlaygroundDisabledRoute[]
   ignoredFiltered: PlaygroundIgnoredRoute[]
@@ -138,10 +139,17 @@ function isSelectedIgnored(route: PlaygroundIgnoredRoute) {
     <div v-if="props.error" class="rounded-2xl border px-4 py-3 text-sm border-pg-danger-border bg-pg-danger-bg text-pg-danger-text">
       {{ props.error }}
     </div>
-    <div v-else-if="props.loading" class="rounded-2xl border px-4 py-6 text-sm border-pg-border bg-pg-surface-soft text-pg-text-muted">
+    <div v-else-if="props.loading && !props.hasCachedData" class="rounded-2xl border px-4 py-6 text-sm border-pg-border bg-pg-surface-soft text-pg-text-muted">
       {{ t('states.loadingRoutes') }}
     </div>
     <template v-else>
+      <div
+        v-if="props.loading && props.hasCachedData"
+        class="mb-2 inline-flex items-center gap-2 rounded-full border px-2.5 py-1 text-xs border-pg-border bg-pg-surface-soft text-pg-text-muted"
+      >
+        <span class="i-[carbon--renew] h-3 w-3 animate-spin" aria-hidden="true" />
+        <span>{{ t('states.loadingRoutes') }}</span>
+      </div>
       <div
         v-if="props.routeMode === 'disabled' && props.disabledMode === 'api' && !props.disabledFiltered.length"
         class="rounded-2xl border px-4 py-6 text-sm border-pg-border bg-pg-surface-soft text-pg-text-muted"

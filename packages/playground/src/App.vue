@@ -21,6 +21,10 @@ declare global {
 
 const {
   routes,
+  disabledRoutes,
+  ignoredRoutes,
+  configFiles,
+  disabledConfigFiles,
   filtered,
   disabledFiltered,
   ignoredFiltered,
@@ -85,6 +89,13 @@ const {
 } = usePlaygroundRequest(selected, { basePath })
 
 const selectedKey = computed(() => (selected.value ? routeKey(selected.value) : ''))
+const hasCachedData = computed(() => {
+  return routes.value.length > 0
+    || disabledRoutes.value.length > 0
+    || ignoredRoutes.value.length > 0
+    || configFiles.value.length > 0
+    || disabledConfigFiles.value.length > 0
+})
 const requestMode = computed<'server' | 'sw' | 'sw-registering'>(() => {
   if (isSwMode.value) {
     return isSwRegistering.value ? 'sw-registering' : 'sw'
@@ -269,6 +280,7 @@ onBeforeUnmount(() => {
               :disabled-config-total="disabledConfigTotal"
               :error="error"
               :loading="loading"
+              :has-cached-data="hasCachedData"
               :filtered="filtered"
               :disabled-filtered="disabledFiltered"
               :ignored-filtered="ignoredFiltered"

@@ -424,4 +424,71 @@ describe('usePlaygroundRoutes', () => {
     await nextTick()
     expect(routesState.disabledFiltered.value).toHaveLength(1)
   })
+
+  it('keeps existing lists while reloading and preserves selection', async () => {
+    localStorage.setItem(LAST_SELECTED_ROUTE_KEY, 'GET /api/ping')
+    const routesState = usePlaygroundRoutes()
+    routesState.setBasePath('/__mokup/')
+
+    const firstPayload = {
+      routes: [
+        { method: 'GET', url: '/api/ping', file: 'ping.get.ts', type: 'handler' },
+      ],
+      disabled: [],
+      ignored: [],
+      configs: [],
+      disabledConfigs: [],
+      groups: [],
+      root: '/root',
+    }
+    const secondPayload = {
+      routes: [
+        { method: 'GET', url: '/api/ping', file: 'ping.get.ts', type: 'handler' },
+        { method: 'GET', url: '/api/new', file: 'new.get.ts', type: 'handler' },
+      ],
+      disabled: [],
+      ignored: [],
+      configs: [],
+      disabledConfigs: [],
+      groups: [],
+      root: '/root',
+    }
+
+    let resolveSecond: ((value: { ok: boolean, status: number, json: () => Promise<typeof secondPayload> }) => void) | null = null
+    const secondResponse = new Promise<{ ok: boolean, status: number, json: () => Promise<typeof secondPayload> }>((resolve) => {
+      resolveSecond = resolve
+    })
+
+    const fetchMock = vi.fn()
+      .mockResolvedValueOnce({
+        ok: true,
+        status: 200,
+        json: async () => firstPayload,
+      })
+      .mockImplementationOnce(() => secondResponse)
+    vi.stubGlobal('fetch', fetchMock)
+
+    await routesState.loadRoutes()
+    expect(routesState.filtered.value).toHaveLength(1)
+    expect(routesState.selected.value?.url).toBe('/api/ping')
+
+    const pending = routesState.loadRoutes()
+    await Promise.resolve()
+
+    expect(routesState.loading.value).toBe(true)
+    expect(routesState.filtered.value).toHaveLength(1)
+    expect(routesState.selected.value?.url).toBe('/api/ping')
+
+    resolveSecond?.({
+      ok: true,
+      status: 200,
+      json: async () => secondPayload,
+    })
+
+    await pending
+
+    expect(routesState.loading.value).toBe(false)
+    expect(routesState.filtered.value).toHaveLength(2)
+    expect(routesState.selected.value?.url).toBe('/api/ping')
+  })
 })

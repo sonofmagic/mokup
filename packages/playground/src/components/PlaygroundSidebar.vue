@@ -35,6 +35,7 @@ const props = defineProps<{
   disabledConfigTotal: number
   error?: string
   loading: boolean
+  hasCachedData: boolean
   filtered: PlaygroundRoute[]
   disabledFiltered: PlaygroundDisabledRoute[]
   ignoredFiltered: PlaygroundIgnoredRoute[]
@@ -109,6 +110,7 @@ const sidebarBodyProps = computed(() => {
     enabledMode: props.enabledMode,
     disabledMode: props.disabledMode,
     loading: props.loading,
+    hasCachedData: props.hasCachedData,
     filtered: props.filtered,
     disabledFiltered: props.disabledFiltered,
     ignoredFiltered: props.ignoredFiltered,
