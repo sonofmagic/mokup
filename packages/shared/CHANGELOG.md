@@ -1,5 +1,11 @@
 # @mokup/shared
 
+## 1.1.4
+
+### Patch Changes
+
+- 🐛 **chore: upgrade hono and esbuild** [`e97e70d`](https://github.com/sonofmagic/mokup/commit/e97e70df5c8cf67f910b1869ce4cc803a716ec94) by @sonofmagic
+
 ## 1.1.3
 
 ### Patch Changes

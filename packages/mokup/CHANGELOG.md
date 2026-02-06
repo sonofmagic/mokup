@@ -1,5 +1,16 @@
 # mokup
 
+## 2.3.5
+
+### Patch Changes
+
+- 🐛 **Fix playground SW hot reload for JSON mocks by forcing service worker update on route changes and sending requests with `cache: 'no-store'`.** [`6d7601b`](https://github.com/sonofmagic/mokup/commit/6d7601b55663d7b82c9f3a726463fccaea5295a8) by @sonofmagic
+
+  - Add docs E2E coverage for `mock/example-auth/session.get.json` hot reload, including service worker control checks.
+
+- 🐛 **Fix TS mock hot-reload behavior in SW mode by improving Vite module invalidation and SW module refresh versioning.** [`5b21830`](https://github.com/sonofmagic/mokup/commit/5b218301aa7882752145f121a872612d591945ec) by @sonofmagic
+- 📦 Updated 6 dependencies [`e97e70d`](https://github.com/sonofmagic/mokup/commit/e97e70df5c8cf67f910b1869ce4cc803a716ec94)
+
 ## 2.3.4
 
 ### Patch Changes
