@@ -1,5 +1,29 @@
 # @mokup/playground
 
+## 0.2.1
+
+### Patch Changes
+
+- 🐛 **Improve playground hot-reload UX by keeping the existing sidebar tree visible while routes refresh, and showing a lightweight in-place loading indicator instead of replacing the tree with a full loading state.** [`246f8ad`](https://github.com/sonofmagic/mokup/commit/246f8ad521c1f425f84109aab2c7a52014645374) by @sonofmagic
+
+  - Add route-state tests to ensure reloads preserve existing list and selection until new data arrives.
+
+- 🐛 **Fix playground SW hot reload for JSON mocks by forcing service worker update on route changes and sending requests with `cache: 'no-store'`.** [`6d7601b`](https://github.com/sonofmagic/mokup/commit/6d7601b55663d7b82c9f3a726463fccaea5295a8) by @sonofmagic
+
+  - Add docs E2E coverage for `mock/example-auth/session.get.json` hot reload, including service worker control checks.
+
+- 🐛 **Improve request editing in playground with a CodeMirror-based editor for query, headers, and body fields.** [`153ff7b`](https://github.com/sonofmagic/mokup/commit/153ff7b9a229c341f44527ea787b336227dc1ab8) by @sonofmagic
+
+  - Load the editor lazily via async component and tab-gated mounting so initial bundle load remains lightweight.
+
+- 🐛 **fix request runner and detail panel backward compatibility for existing responseText and panel storage behavior** [`a86b805`](https://github.com/sonofmagic/mokup/commit/a86b805ee33ded17c097db92b0ae43bbdea9d253) by @sonofmagic
+
+- 🐛 **Improve playground JSON editor UX with a format button and inline parse error line highlighting.** [`4e92362`](https://github.com/sonofmagic/mokup/commit/4e923621068d0eb1d93b1ad7c7860eff306592f6) by @sonofmagic
+
+- 🐛 **Fix TypeScript type issues in playground UI components.** [`b31db52`](https://github.com/sonofmagic/mokup/commit/b31db5289b976b63e20e159b16ab4ca28a2931ba) by @sonofmagic
+- 📦 **Dependencies**
+  → `@mokup/runtime@1.0.9`
+
 ## 0.2.0
 
 ### Minor Changes
