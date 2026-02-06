@@ -348,6 +348,7 @@ async function waitForViteStable({
   const deadline = Date.now() + timeoutMs
   let baseURL = defaultBaseURL
   let lastError
+  let hasViteUrl = false
   let hasLocalViteUrl = false
   const observedHosts = new Set()
 
@@ -367,7 +368,10 @@ async function waitForViteStable({
 
   const getHostCandidates = (host) => {
     const normalized = normalizeAccessHost(host)
-    const candidates = [normalized, ACCESS_HOST, '127.0.0.1', 'localhost', '::1']
+    const isIpv6Host = normalized.includes(':')
+    const candidates = isIpv6Host
+      ? [normalized, '::1', ACCESS_HOST, 'localhost', '127.0.0.1']
+      : [normalized, ACCESS_HOST, '127.0.0.1', 'localhost']
     return [...new Set(candidates.filter(Boolean))]
   }
 
@@ -396,6 +400,7 @@ async function waitForViteStable({
   const initialWait = Math.min(10_000, timeoutMs)
   try {
     await waitForViteReady(child, initialWait, updateBaseURL)
+    hasViteUrl = true
   }
   catch (error) {
     lastError = error
@@ -434,6 +439,22 @@ async function waitForViteStable({
     }
 
     await new Promise(resolve => setTimeout(resolve, 250))
+  }
+
+  if (hasLocalViteUrl) {
+    const fallbackReadyUrl = new URL(readyPath, baseURL).toString()
+    process.stderr.write(
+      `Warning: Vite readiness probe timed out, proceeding with local URL ${fallbackReadyUrl}.\n`,
+    )
+    return { baseURL, readyUrl: fallbackReadyUrl }
+  }
+
+  if (hasViteUrl) {
+    const fallbackReadyUrl = new URL(readyPath, baseURL).toString()
+    process.stderr.write(
+      `Warning: Vite readiness probe timed out, proceeding with reported URL ${fallbackReadyUrl}.\n`,
+    )
+    return { baseURL, readyUrl: fallbackReadyUrl }
   }
 
   throw new Error(

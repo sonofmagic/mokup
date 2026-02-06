@@ -5,7 +5,7 @@ import { expect, test } from '@playwright/test'
 test.describe.configure({ mode: 'serial' })
 
 test('docs home and quick start render', async ({ page }) => {
-  await page.goto('/')
+  await page.goto('/', { waitUntil: 'domcontentloaded' })
 
   await expect(page.getByRole('heading', { name: 'Mokup' })).toBeVisible()
   await page.getByRole('link', { name: 'Quick Start' }).click()
@@ -59,7 +59,7 @@ test('reloads ts mock response after file change', async ({ page }) => {
   ].join('\n')
 
   try {
-    await page.goto('/__mokup/')
+    await page.goto('/__mokup/', { waitUntil: 'domcontentloaded' })
 
     await expect
       .poll(async () => {
@@ -121,7 +121,7 @@ test('reloads json mock response after file change in playground sw mode', async
   }, null, 2)
 
   try {
-    await page.goto('/__mokup/')
+    await page.goto('/__mokup/', { waitUntil: 'domcontentloaded' })
 
     await expect
       .poll(async () => {

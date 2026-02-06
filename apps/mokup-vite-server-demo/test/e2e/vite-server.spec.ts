@@ -2,7 +2,7 @@ import { Buffer } from 'node:buffer'
 import { expect, test } from '@playwright/test'
 
 test('vite server demo runs core mock flows', async ({ page }) => {
-  await page.goto('/')
+  await page.goto('/', { waitUntil: 'domcontentloaded' })
 
   await expect(page.getByTestId('page-title')).toHaveText('Mock Vite Server')
 

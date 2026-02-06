@@ -1,7 +1,7 @@
 import { expect, test } from '@playwright/test'
 
 test('d1 demo shows validation errors without bindings', async ({ page }) => {
-  await page.goto('/')
+  await page.goto('/', { waitUntil: 'domcontentloaded' })
 
   await expect(page.getByTestId('page-title')).toContainText('D1 auth playground')
 

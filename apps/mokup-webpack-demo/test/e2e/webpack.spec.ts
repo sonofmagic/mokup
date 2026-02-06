@@ -1,7 +1,7 @@
 import { expect, test } from '@playwright/test'
 
 test('webpack demo executes all mock requests', async ({ page }) => {
-  await page.goto('/')
+  await page.goto('/', { waitUntil: 'domcontentloaded' })
 
   await expect(page.getByRole('heading', { name: 'Webpack Mock Playground' })).toBeVisible()
 

@@ -1,7 +1,7 @@
 import { expect, test } from '@playwright/test'
 
 test('mokup-vite-server-demo endpoints respond', async ({ page, request }) => {
-  await page.goto('/')
+  await page.goto('/', { waitUntil: 'domcontentloaded' })
   await expect(page.getByRole('heading', { name: 'Mock Vite Server' })).toBeVisible()
 
   const profileResponse = await request.get('/api/profile')

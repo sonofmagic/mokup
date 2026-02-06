@@ -1,7 +1,7 @@
 import { expect, test } from '@playwright/test'
 
 test('overview shows stats and route inventory', async ({ page }) => {
-  await page.goto('/')
+  await page.goto('/', { waitUntil: 'domcontentloaded' })
 
   await expect(page.getByTestId('overview-active-count')).toHaveText(/\d+/)
   await expect(page.getByTestId('overview-capability-count')).toHaveText(/\d+/)
@@ -9,7 +9,7 @@ test('overview shows stats and route inventory', async ({ page }) => {
 })
 
 test('navigation switches between overview and playground', async ({ page }) => {
-  await page.goto('/')
+  await page.goto('/', { waitUntil: 'domcontentloaded' })
 
   await page.getByRole('link', { name: 'Playground', exact: true }).click()
   await expect(page).toHaveURL(/\/playground/)

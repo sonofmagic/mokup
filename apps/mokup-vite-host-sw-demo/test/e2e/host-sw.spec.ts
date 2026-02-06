@@ -1,7 +1,7 @@
 import { expect, test } from '@playwright/test'
 
 test('host service worker demo responds to mock routes', async ({ page }) => {
-  await page.goto('/')
+  await page.goto('/', { waitUntil: 'domcontentloaded' })
 
   await expect(page.getByRole('heading', { name: 'Mokup Host Service Worker Demo' })).toBeVisible()
   await expect(page.getByTestId('host-status')).not.toHaveText(/not supported/i)

@@ -1,7 +1,7 @@
 import { expect, test } from '@playwright/test'
 
 test('middleware demo runs express and mokup routes', async ({ page }) => {
-  await page.goto('/')
+  await page.goto('/', { waitUntil: 'domcontentloaded' })
 
   await expect(page.getByRole('heading', { name: 'Middleware Demo' })).toBeVisible()
 

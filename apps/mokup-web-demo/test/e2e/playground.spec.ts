@@ -1,7 +1,7 @@
 import { expect, test } from '@playwright/test'
 
 test('playground cards run mock requests', async ({ page }) => {
-  await page.goto('/')
+  await page.goto('/', { waitUntil: 'domcontentloaded' })
   await page.getByRole('link', { name: 'Playground', exact: true }).click()
   await expect(page).toHaveURL(/\/playground/)
 
