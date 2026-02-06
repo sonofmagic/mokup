@@ -1,18 +1,12 @@
 <script setup lang="ts">
 import type { BodyType, MultipartFileEntry, PlaygroundRoute, RawBodyType, RouteParamField } from '../types'
-import { computed, nextTick, onBeforeUnmount, ref, toRefs, watch } from 'vue'
+import { computed, defineAsyncComponent, nextTick, onBeforeUnmount, ref, toRefs, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 import RouteDetailConfigChain from './RouteDetailConfigChain.vue'
 import RouteDetailMiddlewares from './RouteDetailMiddlewares.vue'
 import UiField from './ui/UiField.vue'
 import UiPill from './ui/UiPill.vue'
-import UiTextarea from './ui/UiTextarea.vue'
 import UiTextInput from './ui/UiTextInput.vue'
-
-type RequestTab = 'params' | 'auth' | 'headers' | 'body' | 'config' | 'middlewares'
-type BodyOption
-  = | { value: BodyType, label: string, disabled?: false }
-    | { value: 'graphql', label: string, disabled: true }
 
 const props = defineProps<{
   selected: PlaygroundRoute
@@ -46,6 +40,16 @@ const emit = defineEmits<{
   (event: 'update:param-value', name: string, value: string): void
   (event: 'run'): void
 }>()
+
+const UiCodeEditor = defineAsyncComponent({
+  loader: () => import('./ui/UiCodeEditor.vue'),
+  suspensible: false,
+})
+
+type RequestTab = 'params' | 'auth' | 'headers' | 'body' | 'config' | 'middlewares'
+type BodyOption
+  = | { value: BodyType, label: string, disabled?: false }
+    | { value: 'graphql', label: string, disabled: true }
 
 const { t } = useI18n()
 const { bodyType } = toRefs(props)
@@ -226,6 +230,13 @@ function resolveBodyPlaceholder() {
       return ''
   }
 }
+
+const bodyEditorLanguage = computed<'text' | 'json'>(() => {
+  if (props.bodyType === 'raw' && props.rawType === 'json') {
+    return 'json'
+  }
+  return 'text'
+})
 
 function createMultipartRow(): MultipartFileEntry {
   multipartRowId += 1
@@ -444,33 +455,35 @@ function formatBytes(size: number) {
             </div>
           </div>
           <UiField :label="t('detail.query')">
-            <UiTextarea
-              :value="props.queryText"
-              rows="4"
+            <UiCodeEditor
+              :model-value="props.queryText"
+              language="json"
+              :rows="4"
               :placeholder="t('detail.queryPlaceholder', { json: queryExample })"
-              @input="emit('update:queryText', ($event.target as HTMLTextAreaElement | null)?.value ?? '')"
+              @update:model-value="emit('update:queryText', $event)"
             />
           </UiField>
         </div>
 
-        <div v-show="activeTab === 'auth'">
+        <div v-if="activeTab === 'auth'">
           <div class="rounded-xl border px-4 py-3 text-sm border-pg-border bg-pg-surface-strong text-pg-text-muted">
             {{ t('detail.authPlaceholder') }}
           </div>
         </div>
 
-        <div v-show="activeTab === 'headers'">
+        <div v-else-if="activeTab === 'headers'">
           <UiField :label="t('detail.headers')">
-            <UiTextarea
-              :value="props.headersText"
-              rows="4"
+            <UiCodeEditor
+              :model-value="props.headersText"
+              language="json"
+              :rows="4"
               :placeholder="t('detail.headersPlaceholder', { json: headersExample })"
-              @input="emit('update:headersText', ($event.target as HTMLTextAreaElement | null)?.value ?? '')"
+              @update:model-value="emit('update:headersText', $event)"
             />
           </UiField>
         </div>
 
-        <div v-show="activeTab === 'body'">
+        <div v-else-if="activeTab === 'body'">
           <UiField :label="t('detail.bodyType')">
             <div class="flex flex-wrap items-center gap-4 text-[0.65rem] uppercase tracking-[0.2em] text-pg-text-muted">
               <label
@@ -555,11 +568,12 @@ function formatBytes(size: number) {
             v-else
             :label="t('detail.body')"
           >
-            <UiTextarea
-              :value="props.bodyText"
-              rows="6"
+            <UiCodeEditor
+              :model-value="props.bodyText"
+              :language="bodyEditorLanguage"
+              :rows="6"
               :placeholder="resolveBodyPlaceholder()"
-              @input="emit('update:bodyText', ($event.target as HTMLTextAreaElement | null)?.value ?? '')"
+              @update:model-value="emit('update:bodyText', $event)"
             />
           </UiField>
           <div v-if="props.bodyType === 'form-data'" class="mt-4">
