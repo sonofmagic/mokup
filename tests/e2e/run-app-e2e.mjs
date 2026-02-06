@@ -124,6 +124,7 @@ function getAppConfig(appName, repoRoot, appRoot) {
     'mokup-vite-host-sw-demo': {
       readyPath: '/',
       server: { command: viteBin, args: [] },
+      cleanupPaths: ['dev-dist'],
     },
     'mokup-d1-demo': {
       readyPath: '/',
@@ -469,6 +470,24 @@ async function stopProcess(child) {
   }
 }
 
+async function cleanupAppArtifacts(appRoot, cleanupPaths) {
+  if (!Array.isArray(cleanupPaths) || cleanupPaths.length === 0) {
+    return
+  }
+
+  for (const cleanupPath of cleanupPaths) {
+    if (!cleanupPath) {
+      continue
+    }
+    try {
+      await fs.rm(join(appRoot, cleanupPath), { recursive: true, force: true })
+    }
+    catch {
+      // ignore cleanup errors for generated artifacts
+    }
+  }
+}
+
 async function main() {
   const cwd = process.cwd()
   const repoRoot = findRepoRoot(cwd)
@@ -537,15 +556,9 @@ async function main() {
   const isVite
     = appConfig.server.command.includes('vite')
       && !appConfig.server.command.includes('vitepress')
-  let hasViteLock = false
   const maxViteStartAttempts = isVite ? 2 : 1
 
   try {
-    if (isVite) {
-      await acquireLock(viteLockPath, DEFAULT_TIMEOUT_MS)
-      hasViteLock = true
-    }
-
     for (let attempt = 1; attempt <= maxViteStartAttempts; attempt++) {
       if (attempt > 1) {
         port = await getFreePort(BIND_HOST)
@@ -572,9 +585,15 @@ async function main() {
         preCommandsDone = true
       }
 
-      devProcess = startDevProcess(env, port)
+      let hasViteLock = false
+      if (isVite) {
+        await acquireLock(viteLockPath, DEFAULT_TIMEOUT_MS)
+        hasViteLock = true
+      }
 
       try {
+        devProcess = startDevProcess(env, port)
+
         if (isVite) {
           const result = await waitForViteStable({
             child: devProcess,
@@ -606,6 +625,11 @@ async function main() {
           `Warning: Vite startup failed on attempt ${attempt}, retrying once: ${error instanceof Error ? error.message : String(error)}\n`,
         )
       }
+      finally {
+        if (hasViteLock) {
+          await releaseLock(viteLockPath)
+        }
+      }
     }
 
     const playwrightArgs = ['exec', 'playwright', 'test', ...extraArgs]
@@ -624,9 +648,7 @@ async function main() {
     process.off('SIGINT', onExit)
     process.off('SIGTERM', onExit)
     await stopProcess(devProcess)
-    if (hasViteLock) {
-      await releaseLock(viteLockPath)
-    }
+    await cleanupAppArtifacts(appRoot, appConfig.cleanupPaths)
   }
 }
 
