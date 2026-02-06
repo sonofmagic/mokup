@@ -348,7 +348,6 @@ async function waitForViteStable({
   const deadline = Date.now() + timeoutMs
   let baseURL = defaultBaseURL
   let lastError
-  let hasViteUrl = false
   let hasLocalViteUrl = false
   const observedHosts = new Set()
 
@@ -400,13 +399,16 @@ async function waitForViteStable({
   const initialWait = Math.min(10_000, timeoutMs)
   try {
     await waitForViteReady(child, initialWait, updateBaseURL)
-    hasViteUrl = true
   }
   catch (error) {
     lastError = error
   }
 
   while (Date.now() < deadline) {
+    if (child.exitCode !== null) {
+      throw new Error(`Dev server exited while waiting for Vite to stabilize (code: ${child.exitCode}).`)
+    }
+
     const remaining = deadline - Date.now()
     const parsed = new URL(baseURL)
     const host = parsed.hostname
@@ -439,22 +441,6 @@ async function waitForViteStable({
     }
 
     await new Promise(resolve => setTimeout(resolve, 250))
-  }
-
-  if (hasLocalViteUrl) {
-    const fallbackReadyUrl = new URL(readyPath, baseURL).toString()
-    process.stderr.write(
-      `Warning: Vite readiness probe timed out, proceeding with local URL ${fallbackReadyUrl}.\n`,
-    )
-    return { baseURL, readyUrl: fallbackReadyUrl }
-  }
-
-  if (hasViteUrl) {
-    const fallbackReadyUrl = new URL(readyPath, baseURL).toString()
-    process.stderr.write(
-      `Warning: Vite readiness probe timed out, proceeding with reported URL ${fallbackReadyUrl}.\n`,
-    )
-    return { baseURL, readyUrl: fallbackReadyUrl }
   }
 
   throw new Error(
@@ -498,50 +484,49 @@ async function main() {
   const appConfig = getAppConfig(appName, repoRoot, appRoot)
   const viteLockPath = join(repoRoot, VITE_LOCK_NAME)
 
-  const port = await getFreePort(BIND_HOST)
+  let port = await getFreePort(BIND_HOST)
   let host = ACCESS_HOST
   let baseURL = `http://${host}:${port}`
   let readyUrl = new URL(appConfig.readyPath, baseURL).toString()
-
-  const env = {
+  let env = {
     ...process.env,
     ...appConfig.server.env,
     E2E: '1',
     PORT: String(port),
   }
+  let devProcess
 
-  if (appConfig.preCommands?.length) {
-    for (const command of appConfig.preCommands) {
-      await execa(command.command, command.args, {
-        cwd: appRoot,
-        env,
-        stdio: 'inherit',
-      })
+  const buildDevArgs = (targetPort) => {
+    const devArgs = [
+      ...appConfig.server.args,
+      ...(appConfig.server.command.includes('vitepress')
+        ? ['--host', BIND_HOST, '--port', String(targetPort)]
+        : []),
+    ]
+
+    if (appConfig.server.command.includes('vite') && !appConfig.server.command.includes('vitepress')) {
+      devArgs.push('--host', BIND_HOST, '--port', String(targetPort))
     }
+
+    if (appName === 'mokup-webpack-demo') {
+      devArgs.push('--port', String(targetPort))
+    }
+
+    return devArgs
   }
 
-  const devArgs = [
-    ...appConfig.server.args,
-    ...(appConfig.server.command.includes('vitepress')
-      ? ['--host', BIND_HOST, '--port', String(port)]
-      : []),
-  ]
-
-  if (appConfig.server.command.includes('vite') && !appConfig.server.command.includes('vitepress')) {
-    devArgs.push('--host', BIND_HOST, '--port', String(port))
+  const startDevProcess = (runtimeEnv, targetPort) => {
+    const nextProcess = execa(appConfig.server.command, buildDevArgs(targetPort), {
+      cwd: appRoot,
+      env: runtimeEnv,
+      stdio: ['inherit', 'pipe', 'pipe'],
+    })
+    nextProcess.stdout?.pipe(process.stdout)
+    nextProcess.stderr?.pipe(process.stderr)
+    return nextProcess
   }
 
-  if (appName === 'mokup-webpack-demo') {
-    devArgs.push('--port', String(port))
-  }
-
-  const devProcess = execa(appConfig.server.command, devArgs, {
-    cwd: appRoot,
-    env,
-    stdio: ['inherit', 'pipe', 'pipe'],
-  })
-  devProcess.stdout?.pipe(process.stdout)
-  devProcess.stderr?.pipe(process.stderr)
+  let preCommandsDone = false
 
   const onExit = async () => {
     await stopProcess(devProcess)
@@ -553,6 +538,7 @@ async function main() {
     = appConfig.server.command.includes('vite')
       && !appConfig.server.command.includes('vitepress')
   let hasViteLock = false
+  const maxViteStartAttempts = isVite ? 2 : 1
 
   try {
     if (isVite) {
@@ -560,25 +546,66 @@ async function main() {
       hasViteLock = true
     }
 
-    if (isVite) {
-      const result = await waitForViteStable({
-        child: devProcess,
-        readyPath: appConfig.readyPath,
-        timeoutMs: DEFAULT_TIMEOUT_MS,
-        defaultBaseURL: baseURL,
-      })
-      baseURL = result.baseURL
-      readyUrl = result.readyUrl
-      const parsed = new URL(baseURL)
-      host = parsed.hostname
-    }
-    else {
-      await waitForReady({
-        host,
-        port,
-        url: readyUrl,
-        timeoutMs: DEFAULT_TIMEOUT_MS,
-      })
+    for (let attempt = 1; attempt <= maxViteStartAttempts; attempt++) {
+      if (attempt > 1) {
+        port = await getFreePort(BIND_HOST)
+        host = ACCESS_HOST
+        baseURL = `http://${host}:${port}`
+        readyUrl = new URL(appConfig.readyPath, baseURL).toString()
+      }
+
+      env = {
+        ...process.env,
+        ...appConfig.server.env,
+        E2E: '1',
+        PORT: String(port),
+      }
+
+      if (!preCommandsDone && appConfig.preCommands?.length) {
+        for (const command of appConfig.preCommands) {
+          await execa(command.command, command.args, {
+            cwd: appRoot,
+            env,
+            stdio: 'inherit',
+          })
+        }
+        preCommandsDone = true
+      }
+
+      devProcess = startDevProcess(env, port)
+
+      try {
+        if (isVite) {
+          const result = await waitForViteStable({
+            child: devProcess,
+            readyPath: appConfig.readyPath,
+            timeoutMs: DEFAULT_TIMEOUT_MS,
+            defaultBaseURL: baseURL,
+          })
+          baseURL = result.baseURL
+          readyUrl = result.readyUrl
+          const parsed = new URL(baseURL)
+          host = parsed.hostname
+        }
+        else {
+          await waitForReady({
+            host,
+            port,
+            url: readyUrl,
+            timeoutMs: DEFAULT_TIMEOUT_MS,
+          })
+        }
+        break
+      }
+      catch (error) {
+        await stopProcess(devProcess)
+        if (attempt >= maxViteStartAttempts) {
+          throw error
+        }
+        process.stderr.write(
+          `Warning: Vite startup failed on attempt ${attempt}, retrying once: ${error instanceof Error ? error.message : String(error)}\n`,
+        )
+      }
     }
 
     const playwrightArgs = ['exec', 'playwright', 'test', ...extraArgs]
