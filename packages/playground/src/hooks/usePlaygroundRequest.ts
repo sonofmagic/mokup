@@ -42,6 +42,7 @@ export function usePlaygroundRequest(
   const multipartFiles = ref<MultipartFileEntry[]>([])
   const responseRaw = ref('')
   const responsePretty = ref(t('response.empty'))
+  const responseText = responsePretty
   const responseHeaders = ref<Record<string, string>>({})
   const responseContentType = ref('')
   const responseStatus = ref(t('response.idle'))
@@ -247,6 +248,7 @@ export function usePlaygroundRequest(
     binaryFile,
     responseRaw,
     responsePretty,
+    responseText,
     responseHeaders,
     responseContentType,
     responseStatus,
@@ -277,6 +279,7 @@ export function usePlaygroundRequest(
     binaryFile,
     responseRaw,
     responsePretty,
+    responseText,
     responseHeaders,
     responseContentType,
     responseStatus,

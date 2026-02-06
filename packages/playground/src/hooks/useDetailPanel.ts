@@ -4,9 +4,10 @@ type DetailPanelKey = 'configChain' | 'middlewares'
 type DetailPanelState = Record<DetailPanelKey, boolean>
 
 const STORAGE_KEY = 'mokup.playground.detailPanels.v2'
+const LEGACY_STORAGE_KEY = 'mokup.playground.detailPanels'
 const defaultState: DetailPanelState = {
-  configChain: true,
-  middlewares: true,
+  configChain: false,
+  middlewares: false,
 }
 
 const panelState = ref<DetailPanelState>(defaultState)
@@ -16,16 +17,27 @@ function readPanelState(): DetailPanelState {
   if (typeof window === 'undefined') {
     return defaultState
   }
-  try {
-    const raw = localStorage.getItem(STORAGE_KEY)
+
+  const parseState = (raw: string | null): DetailPanelState | null => {
     if (!raw) {
-      return defaultState
+      return null
     }
-    const parsed = JSON.parse(raw) as Partial<DetailPanelState>
-    return {
-      ...defaultState,
-      ...parsed,
+    try {
+      const parsed = JSON.parse(raw) as Partial<DetailPanelState>
+      return {
+        ...defaultState,
+        ...parsed,
+      }
     }
+    catch {
+      return null
+    }
+  }
+
+  try {
+    return parseState(localStorage.getItem(STORAGE_KEY))
+      ?? parseState(localStorage.getItem(LEGACY_STORAGE_KEY))
+      ?? defaultState
   }
   catch {
     return defaultState
@@ -38,6 +50,7 @@ function persistPanelState(state: DetailPanelState) {
   }
   try {
     localStorage.setItem(STORAGE_KEY, JSON.stringify(state))
+    localStorage.setItem(LEGACY_STORAGE_KEY, JSON.stringify(state))
   }
   catch {
     // ignore storage errors
