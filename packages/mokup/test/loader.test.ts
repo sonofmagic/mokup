@@ -89,7 +89,7 @@ describe('loadRules with Vite server', () => {
       const rules = await loadRules(file, server as never, logger)
       expect(rules).toEqual([{ handler: { ok: true } }])
       expect(server.moduleGraph.invalidateModule).toHaveBeenCalledWith(moduleNode)
-      expect(server.ssrLoadModule).toHaveBeenCalledWith(file)
+      expect(server.ssrLoadModule).toHaveBeenCalledWith(expect.stringMatching(/rules\.js\?mokupv=\d+$/))
     }
     finally {
       await fs.rm(root, { recursive: true, force: true })
