@@ -142,6 +142,29 @@ describe('mokup SW', () => {
     expect(code).toContain('import * as module0 from \'/abs/mock/users.get.ts\'')
   })
 
+  it('appends module version query for SW hot updates', () => {
+    const root = path.join('/tmp', 'mokup-sw')
+    const file = path.join(root, 'mock', 'users.get.ts')
+    const parsed = parseRouteTemplate('/users')
+    const route: ResolvedRoute = {
+      file,
+      template: parsed.template,
+      method: 'GET',
+      tokens: parsed.tokens,
+      score: parsed.score,
+      handler: () => ({ ok: true }),
+    }
+
+    const code = buildSwScript({
+      routes: [route],
+      root,
+      moduleVersion: 7,
+      resolveModulePath: () => '/abs/mock/users.get.ts',
+    })
+
+    expect(code).toContain('import * as module0 from \'/abs/mock/users.get.ts?mokupv=7\'')
+  })
+
   it('uses defaults when SW config is missing overrides', () => {
     const warnings: string[] = []
     const logger = createLogger(warnings)

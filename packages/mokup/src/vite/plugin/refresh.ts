@@ -89,10 +89,14 @@ function createRouteRefresher(params: {
       state.configFiles,
       state.disabledConfigFiles,
     )
+    const changed = signature !== state.lastSignature || options?.force
+    if (changed && state.swRoutes.length > 0) {
+      state.swModuleVersion = (state.swModuleVersion ?? 0) + 1
+    }
     if (isViteDevServer(server) && server.ws) {
       const shouldNotify = !options?.silent
         && state.lastSignature
-        && (signature !== state.lastSignature || options?.force)
+        && changed
       if (shouldNotify) {
         server.ws.send({
           type: 'custom',

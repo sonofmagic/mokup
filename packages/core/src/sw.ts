@@ -73,6 +73,17 @@ function normalizeBasePath(value: string) {
   return normalized
 }
 
+function appendModuleVersion(modulePath: string, moduleVersion?: string | number) {
+  if (typeof moduleVersion === 'undefined') {
+    return modulePath
+  }
+  const hashIndex = modulePath.indexOf('#')
+  const hash = hashIndex >= 0 ? modulePath.slice(hashIndex) : ''
+  const basePath = hashIndex >= 0 ? modulePath.slice(0, hashIndex) : modulePath
+  const separator = basePath.includes('?') ? '&' : '?'
+  return `${basePath}${separator}mokupv=${encodeURIComponent(String(moduleVersion))}${hash}`
+}
+
 function resolveSwConfigFromEntries(
   entries: VitePluginOptions[],
   logger: Logger,
@@ -221,6 +232,7 @@ export function buildSwScript(params: {
   runtimeImportPath?: string
   loggerImportPath?: string
   basePaths?: string[]
+  moduleVersion?: string | number
   resolveModulePath?: (file: string, root: string) => string
 }) {
   const { routes, root } = params
@@ -228,10 +240,15 @@ export function buildSwScript(params: {
   const loggerImportPath = params.loggerImportPath ?? '@mokup/shared/logger'
   const basePaths = params.basePaths ?? []
   const resolveModulePath = params.resolveModulePath ?? toViteImportPath
+  const moduleVersion = params.moduleVersion
+  const resolveVersionedModulePath = (file: string, routeRoot: string) => {
+    const modulePath = resolveModulePath(file, routeRoot)
+    return appendModuleVersion(modulePath, moduleVersion)
+  }
   const { manifest, modules } = buildManifestData({
     routes,
     root,
-    resolveModulePath,
+    resolveModulePath: resolveVersionedModulePath,
   })
 
   const imports: string[] = [

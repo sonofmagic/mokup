@@ -48,6 +48,7 @@ export function createMokupPlugin(options: MokupPluginOptions = {}): Plugin {
     disabledConfigFiles: [],
     app: null,
     lastSignature: null,
+    swModuleVersion: 0,
   }
   type PreviewWatcher = Awaited<ReturnType<typeof configurePreviewServer>>
   let previewWatcher: PreviewWatcher | null = null
@@ -181,6 +182,7 @@ export function createMokupPlugin(options: MokupPluginOptions = {}): Plugin {
         routes: state.swRoutes,
         root,
         basePaths: swConfig?.basePaths ?? [],
+        moduleVersion: state.swModuleVersion,
       })
     },
     async buildStart() {

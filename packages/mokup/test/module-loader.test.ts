@@ -41,6 +41,7 @@ describe('module loader', () => {
     const server = {
       moduleGraph: {
         getModuleById: vi.fn().mockReturnValue({ id: 'mock' }),
+        getModulesByFile: vi.fn().mockReturnValue(undefined),
         invalidateModule: vi.fn(),
       },
       ssrLoadModule: vi.fn().mockResolvedValue({ value: 'ssr' }),
@@ -49,7 +50,28 @@ describe('module loader', () => {
     const mod = await loadModuleWithVite(server as never, '/mock.ts')
     expect(mod).toEqual({ value: 'ssr' })
     expect(server.moduleGraph.invalidateModule).toHaveBeenCalled()
-    expect(server.ssrLoadModule).toHaveBeenCalledWith('/mock.ts')
+    expect(server.ssrLoadModule).toHaveBeenCalledWith(expect.stringMatching(/^\/mock\.ts\?mokupv=\d+$/))
+  })
+
+  it('invalidates all module nodes resolved by file', async () => {
+    const nodeA = { id: '/mock.ts?import' }
+    const nodeB = { id: '/mock.ts?ssr' }
+    const server = {
+      moduleGraph: {
+        getModuleById: vi.fn().mockReturnValue(null),
+        getModulesByFile: vi.fn().mockReturnValue(new Set([nodeA, nodeB])),
+        invalidateModule: vi.fn(),
+      },
+      ssrLoadModule: vi.fn().mockResolvedValue({ value: 'ssr' }),
+    }
+
+    const mod = await loadModuleWithVite(server as never, '/mock.ts')
+    expect(mod).toEqual({ value: 'ssr' })
+    expect(server.moduleGraph.getModulesByFile).toHaveBeenCalledWith('/mock.ts')
+    expect(server.moduleGraph.invalidateModule).toHaveBeenCalledWith(nodeA)
+    expect(server.moduleGraph.invalidateModule).toHaveBeenCalledWith(nodeB)
+    expect(server.moduleGraph.invalidateModule).toHaveBeenCalledTimes(2)
+    expect(server.ssrLoadModule).toHaveBeenCalledWith(expect.stringMatching(/^\/mock\.ts\?mokupv=\d+$/))
   })
 
   it('falls back to loadModule without Vite', async () => {

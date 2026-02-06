@@ -61,6 +61,7 @@ describe('vite server hooks', () => {
       disabledConfigFiles: [],
       app: new Hono(),
       lastSignature: null,
+      swModuleVersion: 0,
     }
     const logger = { warn: vi.fn(), info: vi.fn(), error: vi.fn(), log: vi.fn() }
     const swConfig = resolveSwConfig([{ dir: '/root/mock', prefix: '/api', mode: 'sw' }], logger)
@@ -108,6 +109,7 @@ describe('vite server hooks', () => {
       disabledConfigFiles: [],
       app: new Hono(),
       lastSignature: null,
+      swModuleVersion: 0,
     }
     const logger = { warn: vi.fn(), info: vi.fn(), error: vi.fn(), log: vi.fn() }
     const swConfig = resolveSwConfig([{ dir: '/root/mock', prefix: '/api', mode: 'sw' }], logger)
@@ -149,6 +151,7 @@ describe('vite server hooks', () => {
       disabledConfigFiles: [],
       app: new Hono(),
       lastSignature: null,
+      swModuleVersion: 0,
     }
     const logger = { warn: vi.fn(), info: vi.fn(), error: vi.fn(), log: vi.fn() }
     const swConfig = resolveSwConfig([{ dir: '/root/mock', prefix: '/api', mode: 'sw' }], logger)

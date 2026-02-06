@@ -12,6 +12,7 @@ interface PluginState {
   disabledConfigFiles: RouteConfigInfo[]
   app: Hono | null
   lastSignature: string | null
+  swModuleVersion?: number
 }
 
 export type { PluginState }

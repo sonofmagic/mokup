@@ -46,6 +46,7 @@ describe('vite plugin route refresh', () => {
       disabledConfigFiles: [],
       app: null,
       lastSignature: 'old',
+      swModuleVersion: 0,
     }
 
     const refresher = createRouteRefresher({
@@ -82,6 +83,7 @@ describe('vite plugin route refresh', () => {
     expect(state.configFiles).toHaveLength(0)
     expect(state.disabledConfigFiles).toHaveLength(1)
     expect(state.app).not.toBeNull()
+    expect(state.swModuleVersion).toBe(1)
     expect(server.ws.send).toHaveBeenCalled()
 
     const firstCall = mocks.scanRoutes.mock.calls[0]?.[0]
@@ -113,6 +115,7 @@ describe('vite plugin route refresh', () => {
       disabledConfigFiles: [],
       app: null,
       lastSignature: 'old',
+      swModuleVersion: 0,
     }
 
     const moduleNode = { id: '\0virtual:mokup-bundle' }
@@ -163,6 +166,7 @@ describe('vite plugin route refresh', () => {
       disabledConfigFiles: [],
       app: null,
       lastSignature: buildRouteSignature([route], [], [], [], []),
+      swModuleVersion: 0,
     }
 
     const moduleNode = { id: '\0virtual:mokup-bundle' }
@@ -186,6 +190,7 @@ describe('vite plugin route refresh', () => {
     await refresher(server as never, { force: true })
 
     expect(server.ws.send).toHaveBeenCalled()
+    expect(state.swModuleVersion).toBe(0)
     expect(server.moduleGraph.invalidateModule).toHaveBeenCalledWith(moduleNode)
   })
 
@@ -212,6 +217,7 @@ describe('vite plugin route refresh', () => {
       disabledConfigFiles: [],
       app: null,
       lastSignature: 'old',
+      swModuleVersion: 0,
     }
 
     const server = {
