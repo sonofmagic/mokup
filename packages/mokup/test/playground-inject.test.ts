@@ -6,6 +6,7 @@ describe('playground html injection', () => {
     const html = '<html><body>ok</body></html>'
     const withHmr = injectPlaygroundHmr(html, '/')
     expect(withHmr).toContain('mokup-playground-hmr')
+    expect(withHmr).toContain('registration.update()')
     expect(injectPlaygroundHmr(withHmr, '/')).toBe(withHmr)
 
     const noBody = injectPlaygroundHmr('<html>ok</html>', '/base')

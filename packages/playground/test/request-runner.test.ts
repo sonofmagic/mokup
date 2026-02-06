@@ -124,6 +124,7 @@ describe('request runner', () => {
     expect(fetchMock).toHaveBeenCalledWith(
       'http://localhost/upload/1',
       expect.objectContaining({
+        cache: 'no-store',
         headers: expect.objectContaining({ 'Content-Type': 'text/plain; charset=utf-8' }),
         body: 'hello',
       }),

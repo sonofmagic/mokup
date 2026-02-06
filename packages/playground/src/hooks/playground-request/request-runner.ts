@@ -136,6 +136,7 @@ function createRequestRunner(params: {
     const init: RequestInit = {
       method: params.selected.value.method,
       headers,
+      cache: 'no-store',
     }
 
     const upperMethod = params.selected.value.method.toUpperCase()
