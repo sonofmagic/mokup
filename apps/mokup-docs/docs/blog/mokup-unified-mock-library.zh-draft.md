@@ -106,11 +106,11 @@ Mokup 内置了一个可视化 Playground，用来浏览与调试当前扫描到
 http://localhost:5173/__mokup
 ```
 
-![Playground 入口（终端提示）](../public/blog/mokup-unified-mock-library/playground-entry.png)
+![Playground 入口（终端提示）](../public/blog/mokup-unified-mock-library/playground.png)
 
 你会看到分组后的路由列表、方法/路径信息、以及每个路由的目录配置链。
 
-![Playground 路由详情与配置链](../public/blog/mokup-unified-mock-library/playground-detail.png)
+![Playground 路由详情与配置链](../public/blog/mokup-unified-mock-library/playground-route-detail.svg)
 
 作用很简单：不用翻文件，就能确认这个接口到底有没有被扫到、是不是被禁了。
 当你新增或修改 mock 文件时，Playground 会自动刷新路由列表，调试成本会明显降低。
