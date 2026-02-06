@@ -25,6 +25,18 @@ const bodyText = ref(
 const showQuery = computed(() => typeof props.route.request?.query !== 'undefined')
 const showBody = computed(() => typeof props.route.request?.body !== 'undefined')
 
+const routePrefixByGroup: Record<string, string> = {
+  'mock': '/api',
+  'mock-extra': '/api-extra',
+  'mock-ignored': '/api-ignored',
+}
+
+const requestPath = computed(() => {
+  const path = props.route.path.startsWith('/') ? props.route.path : `/${props.route.path}`
+  const prefix = props.route.group ? routePrefixByGroup[props.route.group] ?? '' : ''
+  return `${prefix}${path}`
+})
+
 function formatData(value: unknown) {
   if (typeof value === 'string') {
     return value
@@ -66,7 +78,7 @@ async function runRequest() {
   try {
     result.value = await useRequest({
       method: props.route.method,
-      url: props.route.path,
+      url: requestPath.value,
       params: parsedQuery.value,
       data: parsedBody.value,
       headers: props.route.request?.headers,

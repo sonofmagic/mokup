@@ -4,8 +4,8 @@ import { dirname, join, relative, resolve } from 'node:path'
 import process from 'node:process'
 import { execa } from 'execa'
 
-const ACCESS_HOST = 'localhost'
-const BIND_HOST = '0.0.0.0'
+const ACCESS_HOST = process.env.E2E_ACCESS_HOST || '127.0.0.1'
+const BIND_HOST = process.env.E2E_BIND_HOST || '127.0.0.1'
 const DEFAULT_TIMEOUT_MS = 60_000
 const VITE_LOCK_NAME = '.e2e-vite.lock'
 const VITE_LOCK_STALE_MS = 10 * 60 * 1000
@@ -348,7 +348,7 @@ async function waitForViteStable({
   const deadline = Date.now() + timeoutMs
   let baseURL = defaultBaseURL
   let lastError
-  let hasViteUrl = false
+  let hasLocalViteUrl = false
   const observedHosts = new Set()
 
   const normalizeAccessHost = (host) => {
@@ -359,12 +359,15 @@ async function waitForViteStable({
     if (lowered === '0.0.0.0' || lowered === '::') {
       return ACCESS_HOST
     }
+    if (lowered === 'localhost') {
+      return ACCESS_HOST
+    }
     return host
   }
 
   const getHostCandidates = (host) => {
     const normalized = normalizeAccessHost(host)
-    const candidates = [normalized, ACCESS_HOST, '127.0.0.1', '::1']
+    const candidates = [normalized, ACCESS_HOST, '127.0.0.1', 'localhost', '::1']
     return [...new Set(candidates.filter(Boolean))]
   }
 
@@ -376,7 +379,12 @@ async function waitForViteStable({
       if (hostname) {
         observedHosts.add(hostname)
       }
-      if (kind === 'local' || !hasViteUrl) {
+      if (kind === 'local') {
+        hasLocalViteUrl = true
+        baseURL = `${parsed.protocol}//${hostForUrl}:${parsed.port}`
+        return
+      }
+      if (!hasLocalViteUrl) {
         baseURL = `${parsed.protocol}//${hostForUrl}:${parsed.port}`
       }
     }
@@ -388,7 +396,6 @@ async function waitForViteStable({
   const initialWait = Math.min(10_000, timeoutMs)
   try {
     await waitForViteReady(child, initialWait, updateBaseURL)
-    hasViteUrl = true
   }
   catch (error) {
     lastError = error
@@ -427,14 +434,6 @@ async function waitForViteStable({
     }
 
     await new Promise(resolve => setTimeout(resolve, 250))
-  }
-
-  if (hasViteUrl) {
-    const fallbackReadyUrl = new URL(readyPath, baseURL).toString()
-    process.stderr.write(
-      `Warning: Vite readiness probe failed, proceeding with ${fallbackReadyUrl}.\n`,
-    )
-    return { baseURL, readyUrl: fallbackReadyUrl }
   }
 
   throw new Error(
