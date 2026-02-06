@@ -3,8 +3,18 @@ import type { Extension } from '@codemirror/state'
 import type { StyleValue } from 'vue'
 import { json } from '@codemirror/lang-json'
 import { defaultHighlightStyle, syntaxHighlighting } from '@codemirror/language'
-import { Compartment, EditorSelection, EditorState } from '@codemirror/state'
-import { EditorView, placeholder as placeholderExtension } from '@codemirror/view'
+import {
+  Compartment,
+  EditorSelection,
+  EditorState,
+  StateEffect,
+  StateField,
+} from '@codemirror/state'
+import {
+  Decoration,
+  EditorView,
+  placeholder as placeholderExtension,
+} from '@codemirror/view'
 import { computed, onBeforeUnmount, onMounted, ref, useAttrs, watch } from 'vue'
 import { cn } from './utils'
 
@@ -16,6 +26,14 @@ interface UiCodeEditorProps {
   rows?: number
   language?: EditorLanguage
   disabled?: boolean
+  showJsonFormat?: boolean
+}
+
+interface JsonParseErrorDetail {
+  message: string
+  index: number | null
+  line: number | null
+  column: number | null
 }
 
 const props = withDefaults(defineProps<UiCodeEditorProps>(), {
@@ -23,6 +41,7 @@ const props = withDefaults(defineProps<UiCodeEditorProps>(), {
   rows: 4,
   language: 'text',
   disabled: false,
+  showJsonFormat: true,
 })
 
 const emit = defineEmits<{
@@ -33,13 +52,57 @@ const attrs = useAttrs()
 const host = ref<HTMLDivElement | null>(null)
 const editor = ref<EditorView | null>(null)
 const isApplyingExternal = ref(false)
+const jsonError = ref<JsonParseErrorDetail | null>(null)
 
 const languageCompartment = new Compartment()
 const placeholderCompartment = new Compartment()
 const editableCompartment = new Compartment()
 
+const setErrorIndexEffect = StateEffect.define<number | null>()
+
+const errorLineField = StateField.define({
+  create() {
+    return Decoration.none
+  },
+  update(value, transaction) {
+    for (const effect of transaction.effects) {
+      if (effect.is(setErrorIndexEffect)) {
+        const index = effect.value
+        if (index === null) {
+          return Decoration.none
+        }
+        const safeIndex = Math.min(
+          Math.max(index, 0),
+          Math.max(transaction.state.doc.length - 1, 0),
+        )
+        const line = transaction.state.doc.lineAt(safeIndex)
+        return Decoration.set([
+          Decoration.line({ class: 'pg-cm-error-line' }).range(line.from),
+        ])
+      }
+    }
+    return value.map(transaction.changes)
+  },
+  provide: field => EditorView.decorations.from(field),
+})
+
+const isJsonLanguage = computed(() => props.language === 'json')
+const canFormatJson = computed(() => isJsonLanguage.value && props.showJsonFormat && !props.disabled)
+const hasJsonError = computed(() => !!jsonError.value && isJsonLanguage.value)
+const jsonErrorText = computed(() => {
+  const error = jsonError.value
+  if (!error) {
+    return ''
+  }
+  if (typeof error.line === 'number' && typeof error.column === 'number') {
+    return `${error.message} (Ln ${error.line}, Col ${error.column})`
+  }
+  return error.message
+})
+
 const classes = computed(() => cn(
   'overflow-hidden rounded-lg border border-pg-border bg-pg-surface-strong text-pg-text transition focus-within:border-pg-accent',
+  hasJsonError.value ? 'border-pg-danger-border' : '',
   props.disabled ? 'cursor-not-allowed opacity-80' : '',
   attrs.class,
 ))
@@ -59,11 +122,159 @@ const wrapperAttrs = computed(() => {
 })
 
 function resolveLanguageExtension(language: EditorLanguage): Extension {
-  switch (language) {
-    case 'json':
-      return json()
-    default:
-      return []
+  if (language === 'json') {
+    return json()
+  }
+  return []
+}
+
+function resolveRangeFromIndex(docLength: number, index: number) {
+  if (docLength <= 0) {
+    return { from: 0, to: 0 }
+  }
+  const safeIndex = Math.max(0, Math.min(index, docLength - 1))
+  const from = safeIndex
+  const to = Math.min(safeIndex + 1, docLength)
+  return { from, to }
+}
+
+function resolveLineColumn(text: string, index: number) {
+  let line = 1
+  let column = 1
+  const boundary = Math.max(0, Math.min(index, text.length))
+  for (let pointer = 0; pointer < boundary; pointer += 1) {
+    if (text[pointer] === '\n') {
+      line += 1
+      column = 1
+    }
+    else {
+      column += 1
+    }
+  }
+  return { line, column }
+}
+
+function resolveJsonErrorIndex(message: string, text: string) {
+  const match = message.match(/position\s+(\d+)/i)
+  if (match) {
+    const value = Number(match[1])
+    if (Number.isFinite(value)) {
+      return Math.max(0, value)
+    }
+  }
+  if (/end of json input/i.test(message)) {
+    return Math.max(text.length - 1, 0)
+  }
+  return null
+}
+
+function parseJsonError(text: string, error: unknown): JsonParseErrorDetail {
+  const message = error instanceof Error ? error.message : String(error)
+  const index = resolveJsonErrorIndex(message, text)
+  if (index === null) {
+    return {
+      message,
+      index: null,
+      line: null,
+      column: null,
+    }
+  }
+  const { line, column } = resolveLineColumn(text, index)
+  return {
+    message,
+    index,
+    line,
+    column,
+  }
+}
+
+function setEditorErrorIndex(index: number | null) {
+  const view = editor.value
+  if (!view) {
+    return
+  }
+  view.dispatch({
+    effects: setErrorIndexEffect.of(index),
+  })
+}
+
+function validateJsonDoc(text: string, options: { focusError?: boolean } = {}) {
+  if (!isJsonLanguage.value) {
+    jsonError.value = null
+    setEditorErrorIndex(null)
+    return true
+  }
+  const trimmed = text.trim()
+  if (!trimmed) {
+    jsonError.value = null
+    setEditorErrorIndex(null)
+    return true
+  }
+
+  try {
+    JSON.parse(text)
+    jsonError.value = null
+    setEditorErrorIndex(null)
+    return true
+  }
+  catch (error) {
+    const detail = parseJsonError(text, error)
+    jsonError.value = detail
+    setEditorErrorIndex(detail.index)
+    if (options.focusError && typeof detail.index === 'number') {
+      const view = editor.value
+      if (view) {
+        const range = resolveRangeFromIndex(view.state.doc.length, detail.index)
+        view.dispatch({
+          selection: EditorSelection.range(range.from, range.to),
+          effects: EditorView.scrollIntoView(range.from, { y: 'center' }),
+        })
+      }
+    }
+    return false
+  }
+}
+
+function formatJson() {
+  if (!canFormatJson.value) {
+    return
+  }
+  const view = editor.value
+  if (!view) {
+    return
+  }
+  const text = view.state.doc.toString()
+  const trimmed = text.trim()
+  if (!trimmed) {
+    jsonError.value = null
+    setEditorErrorIndex(null)
+    return
+  }
+
+  try {
+    const parsed = JSON.parse(text)
+    const formatted = JSON.stringify(parsed, null, 2)
+    const current = view.state.doc.toString()
+    if (formatted === current) {
+      jsonError.value = null
+      setEditorErrorIndex(null)
+      return
+    }
+    isApplyingExternal.value = true
+    view.dispatch({
+      changes: { from: 0, to: current.length, insert: formatted },
+      selection: EditorSelection.cursor(formatted.length),
+    })
+    isApplyingExternal.value = false
+    emit('update:modelValue', formatted)
+    jsonError.value = null
+    setEditorErrorIndex(null)
+  }
+  catch (error) {
+    const detail = parseJsonError(text, error)
+    jsonError.value = detail
+    setEditorErrorIndex(detail.index)
+    validateJsonDoc(text, { focusError: true })
   }
 }
 
@@ -72,6 +283,7 @@ function createState() {
     doc: props.modelValue,
     extensions: [
       syntaxHighlighting(defaultHighlightStyle, { fallback: true }),
+      errorLineField,
       EditorView.lineWrapping,
       languageCompartment.of(resolveLanguageExtension(props.language)),
       placeholderCompartment.of(
@@ -84,7 +296,9 @@ function createState() {
         if (!update.docChanged || isApplyingExternal.value) {
           return
         }
-        emit('update:modelValue', update.state.doc.toString())
+        const next = update.state.doc.toString()
+        emit('update:modelValue', next)
+        validateJsonDoc(next)
       }),
     ],
   })
@@ -98,6 +312,7 @@ onMounted(() => {
     state: createState(),
     parent: host.value,
   })
+  validateJsonDoc(props.modelValue)
 })
 
 watch(
@@ -118,6 +333,7 @@ watch(
       selection: EditorSelection.cursor(anchor),
     })
     isApplyingExternal.value = false
+    validateJsonDoc(value)
   },
 )
 
@@ -131,6 +347,7 @@ watch(
     view.dispatch({
       effects: languageCompartment.reconfigure(resolveLanguageExtension(value)),
     })
+    validateJsonDoc(view.state.doc.toString())
   },
 )
 
@@ -174,7 +391,26 @@ onBeforeUnmount(() => {
     :class="classes"
     :style="editorStyle"
   >
+    <div
+      v-if="canFormatJson"
+      class="flex items-center justify-end border-b px-2 py-1 border-pg-border bg-pg-surface-soft"
+    >
+      <button
+        class="rounded-md border px-2 py-1 text-[0.62rem] font-medium uppercase tracking-[0.16em] transition border-pg-border bg-pg-surface-card text-pg-text-muted hover:text-pg-text-soft"
+        type="button"
+        @click="formatJson"
+      >
+        Format JSON
+      </button>
+    </div>
     <div ref="host" class="h-full" />
+    <div
+      v-if="hasJsonError"
+      class="border-t px-2 py-1 text-[0.68rem] border-pg-danger-border bg-pg-danger-bg text-pg-danger-text"
+      aria-live="polite"
+    >
+      {{ jsonErrorText }}
+    </div>
   </div>
 </template>
 
@@ -218,5 +454,9 @@ onBeforeUnmount(() => {
 
 :deep(.cm-cursor) {
   border-left-color: var(--color-pg-accent);
+}
+
+:deep(.pg-cm-error-line) {
+  background-color: color-mix(in srgb, var(--color-pg-danger-bg) 65%, transparent);
 }
 </style>
