@@ -66,6 +66,25 @@ async function acquireLock(lockPath, timeoutMs) {
         throw error
       }
       try {
+        const lockRaw = await fs.readFile(lockPath, 'utf8')
+        const lockInfo = JSON.parse(lockRaw)
+        const lockPid = Number(lockInfo?.pid)
+        if (Number.isInteger(lockPid) && lockPid > 0 && lockPid !== process.pid) {
+          try {
+            process.kill(lockPid, 0)
+          }
+          catch (pidError) {
+            if (pidError?.code === 'ESRCH') {
+              await fs.unlink(lockPath)
+              continue
+            }
+          }
+        }
+      }
+      catch {
+        // ignore parse/read errors and continue to stale-time checks
+      }
+      try {
         const stat = await fs.stat(lockPath)
         if (Date.now() - stat.mtimeMs > VITE_LOCK_STALE_MS) {
           await fs.unlink(lockPath)
@@ -330,14 +349,7 @@ async function waitForViteReady(child, timeoutMs, onServerUrl) {
 async function waitForReady({ host, port, url, timeoutMs }) {
   await waitForPort(host, port, timeoutMs)
   const httpTimeoutMs = Math.min(10_000, timeoutMs)
-  try {
-    await waitForHttp(url, httpTimeoutMs)
-  }
-  catch (error) {
-    process.stderr.write(
-      `Warning: HTTP readiness check failed for ${url}: ${error instanceof Error ? error.message : String(error)}\n`,
-    )
-  }
+  await waitForHttp(url, httpTimeoutMs)
 }
 
 async function waitForViteStable({
