@@ -25,7 +25,7 @@
     "@codemirror/lang-json": "^6.0.2",
     "@codemirror/language": "^6.11.3",
     "@codemirror/state": "^6.5.2",
-    "@codemirror/view": "^6.38.6",
+    "@codemirror/view": "^6.39.13",
     "@mokup/runtime": "workspace:*"
   },
   "devDependencies": {
