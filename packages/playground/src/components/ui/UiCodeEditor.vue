@@ -36,6 +36,8 @@ interface JsonParseErrorDetail {
   column: number | null
 }
 
+defineOptions({ inheritAttrs: false })
+
 const props = withDefaults(defineProps<UiCodeEditorProps>(), {
   placeholder: '',
   rows: 4,
@@ -101,7 +103,7 @@ const jsonErrorText = computed(() => {
 })
 
 const classes = computed(() => cn(
-  'overflow-hidden rounded border border-pg-border bg-pg-surface-strong text-pg-text transition focus-within:border-pg-accent',
+  'flex flex-col overflow-hidden rounded border border-pg-border bg-pg-surface-strong text-pg-text transition focus-within:border-pg-accent',
   hasJsonError.value ? 'border-pg-danger-border' : '',
   props.disabled ? 'cursor-not-allowed opacity-80' : '',
   attrs.class,
@@ -298,7 +300,10 @@ function createState() {
         }
         const next = update.state.doc.toString()
         emit('update:modelValue', next)
-        validateJsonDoc(next)
+        // Defer validation so we don't dispatch back into the editor
+        // synchronously from within the updateListener, which can
+        // trigger Vue DOM patches that steal focus.
+        queueMicrotask(() => validateJsonDoc(next))
       }),
     ],
   })
@@ -403,9 +408,9 @@ onBeforeUnmount(() => {
         Format JSON
       </button>
     </div>
-    <div ref="host" class="h-full" />
+    <div ref="host" class="min-h-0 flex-1" />
     <div
-      v-if="hasJsonError"
+      v-show="hasJsonError"
       class="border-t px-2 py-1 text-[0.68rem] border-pg-danger-border bg-pg-danger-bg text-pg-danger-text"
       aria-live="polite"
     >
@@ -416,12 +421,12 @@ onBeforeUnmount(() => {
 
 <style scoped>
 :deep(.cm-editor) {
-  height: 100%;
+  min-height: 100%;
   background-color: transparent;
 }
 
 :deep(.cm-scroller) {
-  font-family: 'JetBrains Mono', 'SFMono-Regular', Menlo, Monaco, Consolas, 'Liberation Mono', 'Courier New', monospace;
+  font-family: 'JetBrains Mono', SFMono-Regular, Menlo, Monaco, Consolas, 'Liberation Mono', 'Courier New', monospace;
   font-size: 0.8rem;
   line-height: 1.45;
 }

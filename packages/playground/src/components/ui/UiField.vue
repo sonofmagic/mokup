@@ -36,8 +36,8 @@ const labelStyle = computed(() => attrs.style as StyleValue | undefined)
 </script>
 
 <template>
-  <label v-bind="labelAttrs" :class="classes" :style="labelStyle">
+  <div v-bind="labelAttrs" :class="classes" :style="labelStyle">
     <span>{{ props.label }}</span>
     <slot />
-  </label>
+  </div>
 </template>
