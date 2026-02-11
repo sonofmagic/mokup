@@ -1,13 +1,13 @@
 <script setup lang="ts">
-import type { ComponentPublicInstance } from 'vue'
 import type { PlaygroundGroup, TreeMode } from '../types'
-import { computed, onBeforeUnmount, onMounted, ref } from 'vue'
+import { computed } from 'vue'
 import { useI18n } from 'vue-i18n'
 import PlaygroundFilters from './PlaygroundFilters.vue'
 import PlaygroundTabs from './PlaygroundTabs.vue'
 import TreeModeToggle from './TreeModeToggle.vue'
 import UiChipButton from './ui/UiChipButton.vue'
 import UiField from './ui/UiField.vue'
+import UiFloatingMenu from './ui/UiFloatingMenu.vue'
 import UiTextInput from './ui/UiTextInput.vue'
 
 const props = defineProps<{
@@ -44,37 +44,6 @@ const searchModel = computed({
   set: value => emit('update:search', value),
 })
 const resolvedBasePath = computed(() => props.basePath || '/')
-
-const showMore = ref(false)
-const moreButtonRef = ref<ComponentPublicInstance | null>(null)
-const morePanelRef = ref<HTMLDivElement | null>(null)
-
-function toggleMore() {
-  showMore.value = !showMore.value
-}
-
-function handleOutsideMoreClick(event: PointerEvent) {
-  if (!showMore.value) {
-    return
-  }
-  const target = event.target as Node | null
-  if (!target) {
-    return
-  }
-  const buttonEl = moreButtonRef.value?.$el as HTMLElement | null | undefined
-  if (morePanelRef.value?.contains(target) || buttonEl?.contains(target)) {
-    return
-  }
-  showMore.value = false
-}
-
-onMounted(() => {
-  document.addEventListener('pointerdown', handleOutsideMoreClick)
-})
-
-onBeforeUnmount(() => {
-  document.removeEventListener('pointerdown', handleOutsideMoreClick)
-})
 </script>
 
 <template>
@@ -88,18 +57,37 @@ onBeforeUnmount(() => {
         class="flex-1"
       />
       <div class="flex items-center gap-2">
-        <UiChipButton
-          ref="moreButtonRef"
-          size="sm"
-          class="h-[34px]"
-          :aria-expanded="showMore"
-          aria-haspopup="true"
-          aria-controls="playground-more-panel"
-          @click="toggleMore"
+        <UiFloatingMenu
+          placement="bottom-start"
+          :offset="8"
+          panel-class="z-30 mt-1 w-[min(420px,calc(100vw-2rem))] rounded border p-2 border-pg-border bg-pg-surface-panel shadow-md"
         >
-          <span class="i-[carbon--settings-adjust] h-3.5 w-3.5" aria-hidden="true" />
-          <span>{{ t('controls.more') }}</span>
-        </UiChipButton>
+          <template #trigger="{ isOpen, panelId, toggle, setReference }">
+            <UiChipButton
+              :ref="setReference"
+              size="sm"
+              class="h-[34px]"
+              :aria-expanded="isOpen"
+              aria-haspopup="menu"
+              :aria-controls="panelId"
+              @click="toggle"
+            >
+              <span class="i-[carbon--settings-adjust] h-3.5 w-3.5" aria-hidden="true" />
+              <span>{{ t('controls.more') }}</span>
+            </UiChipButton>
+          </template>
+          <div class="grid gap-3">
+            <UiField :label="t('filters.base')" dense>
+              <UiTextInput
+                :value="resolvedBasePath"
+                readonly
+                dense
+              />
+            </UiField>
+            <PlaygroundTabs :groups="props.groups" :active-group="props.activeGroup" @select="emit('select-group', $event)" />
+            <TreeModeToggle :tree-mode="props.treeMode" @update:treeMode="emit('update:treeMode', $event)" />
+          </div>
+        </UiFloatingMenu>
         <slot name="actions" />
       </div>
     </div>
@@ -184,24 +172,6 @@ onBeforeUnmount(() => {
       >
         {{ t('enabled.config', { count: props.disabledConfigTotal }) }}
       </button>
-    </div>
-    <div
-      v-if="showMore"
-      id="playground-more-panel"
-      ref="morePanelRef"
-      class="absolute left-0 right-0 z-30 mt-1 rounded border p-2 border-pg-border bg-pg-surface-panel shadow-md"
-    >
-      <div class="grid gap-3">
-        <UiField :label="t('filters.base')" dense>
-          <UiTextInput
-            :value="resolvedBasePath"
-            readonly
-            dense
-          />
-        </UiField>
-        <PlaygroundTabs :groups="props.groups" :active-group="props.activeGroup" @select="emit('select-group', $event)" />
-        <TreeModeToggle :tree-mode="props.treeMode" @update:treeMode="emit('update:treeMode', $event)" />
-      </div>
     </div>
   </div>
 </template>
