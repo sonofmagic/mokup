@@ -80,6 +80,8 @@ const enMessages = {
     requestLabel: 'Request',
     responseLabel: 'Response',
     run: 'Send',
+    copyCurl: 'Copy cURL',
+    copyCurlDone: 'Copied',
     info: 'Info',
     infoTitle: 'Route info',
     infoMethod: 'Method',

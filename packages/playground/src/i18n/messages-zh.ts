@@ -79,6 +79,8 @@ const zhMessages = {
     requestLabel: '请求',
     responseLabel: '响应',
     run: '发送',
+    copyCurl: '复制 cURL',
+    copyCurlDone: '已复制',
     info: '信息',
     infoTitle: '路由信息',
     infoMethod: '方法',

@@ -2,6 +2,8 @@
 import type { ApiKeyLocation, AuthType, BodyType, MultipartFileEntry, PlaygroundRoute, RawBodyType, RouteParamField } from '../types'
 import { computed, defineAsyncComponent, nextTick, onBeforeUnmount, ref, toRefs, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
+import { buildCurl } from '../utils/curl'
+import { parseJsonInput } from '../utils/request'
 import RouteDetailConfigChain from './RouteDetailConfigChain.vue'
 import RouteDetailMiddlewares from './RouteDetailMiddlewares.vue'
 import UiField from './ui/UiField.vue'
@@ -222,7 +224,50 @@ onBeforeUnmount(() => {
     clearTimeout(missingPulseTimeout)
     missingPulseTimeout = null
   }
+  if (copiedCurlTimeout) {
+    clearTimeout(copiedCurlTimeout)
+    copiedCurlTimeout = null
+  }
 })
+
+const copiedCurl = ref(false)
+let copiedCurlTimeout: ReturnType<typeof setTimeout> | null = null
+
+function handleCopyCurl() {
+  const parsedHeaders = parseJsonInput(props.headersText)
+  const headers: Record<string, string> = {}
+  if (parsedHeaders.value && typeof parsedHeaders.value === 'object') {
+    for (const [k, v] of Object.entries(parsedHeaders.value)) {
+      headers[k] = String(v)
+    }
+  }
+  const curl = buildCurl({
+    method: props.selected.method,
+    url: props.requestUrl,
+    headers,
+    bodyType: props.bodyType,
+    rawType: props.rawType,
+    bodyText: props.bodyText,
+    authType: props.authType,
+    authToken: props.authToken,
+    authUsername: props.authUsername,
+    authPassword: props.authPassword,
+    authKeyName: props.authKeyName,
+    authKeyValue: props.authKeyValue,
+    authKeyLocation: props.authKeyLocation,
+    authCustomName: props.authCustomName,
+    authCustomValue: props.authCustomValue,
+  })
+  navigator.clipboard.writeText(curl)
+  copiedCurl.value = true
+  if (copiedCurlTimeout) {
+    clearTimeout(copiedCurlTimeout)
+  }
+  copiedCurlTimeout = setTimeout(() => {
+    copiedCurl.value = false
+    copiedCurlTimeout = null
+  }, 2000)
+}
 
 const queryExample = '{ "q": "alpha", "page": 1 }'
 const headersExample = '{ "x-mokup": "playground" }'
@@ -343,6 +388,18 @@ function formatBytes(size: number) {
           readonly
           class="min-w-[220px] flex-1"
         />
+        <button
+          class="inline-flex items-center gap-2 rounded px-4 py-2 text-[0.65rem] uppercase tracking-[0.25em] transition border border-pg-border bg-pg-surface-strong text-pg-text-muted hover:text-pg-text-soft"
+          type="button"
+          @click="handleCopyCurl"
+        >
+          <span
+            class="h-3.5 w-3.5"
+            :class="copiedCurl ? 'i-[carbon--checkmark]' : 'i-[carbon--copy]'"
+            aria-hidden="true"
+          />
+          {{ copiedCurl ? t('detail.copyCurlDone') : t('detail.copyCurl') }}
+        </button>
         <button
           class="inline-flex items-center gap-2 rounded px-4 py-2 text-[0.65rem] uppercase tracking-[0.25em] transition disabled:cursor-not-allowed disabled:opacity-70 bg-pg-accent text-pg-on-accent"
           data-testid="playground-run"
