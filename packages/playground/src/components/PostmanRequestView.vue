@@ -520,7 +520,7 @@ function formatBytes(size: number) {
     <div class="flex flex-col gap-3 px-4 py-4">
       <div class="flex flex-wrap items-center gap-2">
         <span
-          class="inline-flex h-[34px] w-[96px] flex-none items-center justify-center rounded border px-3 py-2 text-[0.65rem] tracking-[0.1em] border-pg-border bg-pg-surface-strong text-pg-text"
+          class="inline-flex h-9 w-[96px] flex-none items-center justify-center rounded border px-3 text-[0.65rem] tracking-[0.1em] border-pg-border bg-pg-surface-strong text-pg-text"
           :class="methodBadge"
         >
           {{ props.selected.method.toUpperCase() }}
@@ -528,12 +528,12 @@ function formatBytes(size: number) {
         <UiTextInput
           :value="props.requestUrl"
           readonly
-          class="min-w-[220px] flex-1"
+          class="h-9 min-w-[220px] flex-1"
         />
         <div class="relative">
           <button
             ref="copyMenuButtonRef"
-            class="inline-flex items-center gap-2 rounded px-4 py-2 text-[0.65rem] tracking-[0.1em] transition border border-pg-border bg-pg-surface-strong text-pg-text-muted hover:text-pg-text-soft"
+            class="inline-flex h-9 items-center gap-2 rounded px-4 text-[0.65rem] tracking-[0.1em] transition border border-pg-border bg-pg-surface-strong text-pg-text-muted hover:text-pg-text-soft"
             type="button"
             :aria-expanded="copyMenuOpen ? 'true' : 'false'"
             :aria-controls="copyMenuId"
@@ -592,7 +592,7 @@ function formatBytes(size: number) {
           </div>
         </div>
         <button
-          class="inline-flex items-center gap-2 rounded px-4 py-2 text-[0.65rem] tracking-[0.1em] transition disabled:cursor-not-allowed disabled:opacity-70 bg-pg-accent text-pg-on-accent"
+          class="inline-flex h-9 items-center gap-2 rounded px-4 text-[0.65rem] tracking-[0.1em] transition disabled:cursor-not-allowed disabled:opacity-70 bg-pg-accent text-pg-on-accent"
           data-testid="playground-run"
           :disabled="props.isSwRegistering"
           :aria-busy="props.isSwRegistering"
