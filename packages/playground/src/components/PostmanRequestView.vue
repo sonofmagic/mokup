@@ -364,9 +364,11 @@ function formatBytes(size: number) {
     </div>
 
     <div class="border-t border-pg-border">
-      <div class="flex flex-wrap items-center gap-5 px-4 pt-2 text-[0.65rem] uppercase tracking-[0.25em]">
+      <div class="flex flex-wrap items-center gap-5 px-4 pt-2 text-[0.65rem] uppercase tracking-[0.25em]" role="tablist">
         <button
           type="button"
+          role="tab"
+          :aria-selected="activeTab === 'params'"
           class="border-b-2 pb-2 transition"
           :class="[
             activeTab === 'params'
@@ -390,6 +392,8 @@ function formatBytes(size: number) {
         </button>
         <button
           type="button"
+          role="tab"
+          :aria-selected="activeTab === 'auth'"
           class="border-b-2 pb-2 transition"
           :class="activeTab === 'auth'
             ? 'border-pg-accent text-pg-text-strong'
@@ -400,6 +404,8 @@ function formatBytes(size: number) {
         </button>
         <button
           type="button"
+          role="tab"
+          :aria-selected="activeTab === 'headers'"
           class="border-b-2 pb-2 transition"
           :class="activeTab === 'headers'
             ? 'border-pg-accent text-pg-text-strong'
@@ -410,6 +416,8 @@ function formatBytes(size: number) {
         </button>
         <button
           type="button"
+          role="tab"
+          :aria-selected="activeTab === 'body'"
           class="border-b-2 pb-2 transition"
           :class="activeTab === 'body'
             ? 'border-pg-accent text-pg-text-strong'
@@ -423,6 +431,8 @@ function formatBytes(size: number) {
         </button>
         <button
           type="button"
+          role="tab"
+          :aria-selected="activeTab === 'config'"
           class="border-b-2 pb-2 transition"
           :class="activeTab === 'config'
             ? 'border-pg-accent text-pg-text-strong'
@@ -433,6 +443,8 @@ function formatBytes(size: number) {
         </button>
         <button
           type="button"
+          role="tab"
+          :aria-selected="activeTab === 'middlewares'"
           class="border-b-2 pb-2 transition"
           :class="activeTab === 'middlewares'
             ? 'border-pg-accent text-pg-text-strong'
@@ -485,6 +497,7 @@ function formatBytes(size: number) {
               :model-value="props.queryText"
               language="json"
               :rows="4"
+              :format-label="t('detail.formatJson')"
               :placeholder="t('detail.queryPlaceholder', { json: queryExample })"
               @update:model-value="emit('update:queryText', $event)"
             />
@@ -602,6 +615,7 @@ function formatBytes(size: number) {
               :model-value="props.headersText"
               language="json"
               :rows="4"
+              :format-label="t('detail.formatJson')"
               :placeholder="t('detail.headersPlaceholder', { json: headersExample })"
               @update:model-value="emit('update:headersText', $event)"
             />
@@ -697,6 +711,7 @@ function formatBytes(size: number) {
               :model-value="props.bodyText"
               :language="bodyEditorLanguage"
               :rows="6"
+              :format-label="t('detail.formatJson')"
               :placeholder="resolveBodyPlaceholder()"
               @update:model-value="emit('update:bodyText', $event)"
             />

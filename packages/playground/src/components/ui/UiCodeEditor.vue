@@ -27,6 +27,7 @@ interface UiCodeEditorProps {
   language?: EditorLanguage
   disabled?: boolean
   showJsonFormat?: boolean
+  formatLabel?: string
 }
 
 interface JsonParseErrorDetail {
@@ -44,6 +45,7 @@ const props = withDefaults(defineProps<UiCodeEditorProps>(), {
   language: 'text',
   disabled: false,
   showJsonFormat: true,
+  formatLabel: 'Format JSON',
 })
 
 const emit = defineEmits<{
@@ -405,7 +407,7 @@ onBeforeUnmount(() => {
         type="button"
         @click="formatJson"
       >
-        Format JSON
+        {{ props.formatLabel }}
       </button>
     </div>
     <div ref="host" class="min-h-0 flex-1" />

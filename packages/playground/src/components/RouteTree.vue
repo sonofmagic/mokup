@@ -60,10 +60,13 @@ function highlightParts(text: string) {
 </script>
 
 <template>
-  <div class="flex flex-col gap-0" data-testid="playground-tree">
+  <div class="flex flex-col gap-0" data-testid="playground-tree" role="tree">
     <div
       v-for="row in rows"
       :key="row.id"
+      role="treeitem"
+      :aria-expanded="row.kind === 'folder' ? row.expanded : undefined"
+      :aria-selected="row.selected"
       class="group flex min-h-[28px] items-center gap-2 rounded border border-transparent px-2 py-0.5 text-left transition text-pg-text-soft hover:bg-pg-hover-strong"
       :class="row.selected ? 'bg-pg-accent/16 text-pg-text-strong border-pg-accent/50 font-semibold shadow-[inset_3px_0_0_0_var(--color-pg-accent)]' : ''"
       data-testid="playground-tree-row"

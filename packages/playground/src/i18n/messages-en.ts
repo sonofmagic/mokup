@@ -104,6 +104,7 @@ const enMessages = {
     rawTypeXml: 'xml',
     rawTypeWxml: 'wxml',
     rawValidate: 'Validate JSON',
+    formatJson: 'Format JSON',
     badgeRequired: 'Required',
     badgeJson: 'JSON',
     emptyParams: 'No params for this route.',

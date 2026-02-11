@@ -59,9 +59,11 @@ watch(hasPreview, (value) => {
       </span>
     </div>
 
-    <div class="flex flex-wrap items-center gap-4 border-b px-4 pt-2 text-[0.65rem] uppercase tracking-[0.25em] border-pg-border">
+    <div class="flex flex-wrap items-center gap-4 border-b px-4 pt-2 text-[0.65rem] uppercase tracking-[0.25em] border-pg-border" role="tablist">
       <button
         type="button"
+        role="tab"
+        :aria-selected="activeTab === 'body'"
         class="border-b-2 pb-2 transition"
         :class="activeTab === 'body'
           ? 'border-pg-accent text-pg-text-strong'
@@ -72,6 +74,8 @@ watch(hasPreview, (value) => {
       </button>
       <button
         type="button"
+        role="tab"
+        :aria-selected="activeTab === 'headers'"
         class="border-b-2 pb-2 transition"
         :class="activeTab === 'headers'
           ? 'border-pg-accent text-pg-text-strong'
@@ -82,6 +86,8 @@ watch(hasPreview, (value) => {
       </button>
       <button
         type="button"
+        role="tab"
+        :aria-selected="activeTab === 'cookies'"
         class="border-b-2 pb-2 transition"
         :class="activeTab === 'cookies'
           ? 'border-pg-accent text-pg-text-strong'

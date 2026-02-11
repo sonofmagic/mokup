@@ -103,6 +103,7 @@ const zhMessages = {
     rawTypeXml: 'xml',
     rawTypeWxml: 'wxml',
     rawValidate: '校验 JSON',
+    formatJson: '格式化 JSON',
     badgeRequired: '必填',
     badgeJson: 'JSON',
     emptyParams: '该接口没有路径参数。',

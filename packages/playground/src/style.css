@@ -238,7 +238,7 @@
   }
 
   .pg-hot-toast {
-    animation: p g-hot-toast-pulse 0 0.9s ease-out 2;
+    animation: pg-hot-toast-pulse 0.9s ease-out 2;
   }
 
   /* VS Code-style sash (resize handle) */
