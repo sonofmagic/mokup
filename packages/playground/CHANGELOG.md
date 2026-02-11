@@ -1,5 +1,14 @@
 # @mokup/playground
 
+## 0.2.3
+
+### Patch Changes
+
+- 🐛 **Improve playground interactions and visual consistency.** [`b5ed3d5`](https://github.com/sonofmagic/mokup/commit/b5ed3d5e579db90651f4eecdd18c5eba052f8e93) by @sonofmagic
+  - Use `@floating-ui/dom` for the request "Copy" dropdown and sidebar "More" menu with stable positioning.
+  - Keep request header controls at a consistent height for method, URL, copy, and send.
+  - Reduce excessive uppercase/tracking styles and fix active chip hover contrast for better readability.
+
 ## 0.2.2
 
 ### Patch Changes

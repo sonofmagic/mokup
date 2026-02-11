@@ -1,5 +1,12 @@
 # mokup-node-demo
 
+## 0.0.27
+
+### Patch Changes
+
+- 📦 **Dependencies**
+  → `mokup@2.3.7`
+
 ## 0.0.26
 
 ### Patch Changes

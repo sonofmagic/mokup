@@ -1,5 +1,12 @@
 # mokup-vite-server-demo
 
+## 0.0.9
+
+### Patch Changes
+
+- 📦 **Dependencies**
+  → `mokup@2.3.7`
+
 ## 0.0.8
 
 ### Patch Changes
