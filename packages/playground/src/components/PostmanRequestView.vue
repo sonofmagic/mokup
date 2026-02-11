@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import type { ApiKeyLocation, AuthType, BodyType, MultipartFileEntry, PlaygroundRoute, RawBodyType, RouteParamField } from '../types'
+import { autoUpdate, computePosition, flip, offset, shift } from '@floating-ui/dom'
 import { computed, defineAsyncComponent, nextTick, onBeforeUnmount, ref, toRefs, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { buildCurl } from '../utils/curl'
@@ -225,6 +226,10 @@ onBeforeUnmount(() => {
     clearTimeout(missingPulseTimeout)
     missingPulseTimeout = null
   }
+  clearCopyMenuCloseTimeout()
+  clearCopyMenuAutoUpdate()
+  document.removeEventListener('pointerdown', handleDocumentPointerDown)
+  document.removeEventListener('keydown', handleDocumentKeydown)
   if (copiedTimeout) {
     clearTimeout(copiedTimeout)
     copiedTimeout = null
@@ -232,8 +237,127 @@ onBeforeUnmount(() => {
 })
 
 const copyMenuOpen = ref(false)
+const copyMenuId = 'playground-copy-menu'
+const copyMenuButtonRef = ref<HTMLElement | null>(null)
+const copyMenuPanelRef = ref<HTMLElement | null>(null)
+const copyMenuPositionStyle = ref<{ left: string, top: string }>({ left: '0px', top: '0px' })
 const copiedLabel = ref('')
 let copiedTimeout: ReturnType<typeof setTimeout> | null = null
+let copyMenuCloseTimeout: ReturnType<typeof setTimeout> | null = null
+let copyMenuAutoUpdateCleanup: ReturnType<typeof autoUpdate> | null = null
+
+function clearCopyMenuCloseTimeout() {
+  if (copyMenuCloseTimeout) {
+    clearTimeout(copyMenuCloseTimeout)
+    copyMenuCloseTimeout = null
+  }
+}
+
+function clearCopyMenuAutoUpdate() {
+  if (copyMenuAutoUpdateCleanup) {
+    copyMenuAutoUpdateCleanup()
+    copyMenuAutoUpdateCleanup = null
+  }
+}
+
+async function updateCopyMenuPosition() {
+  const reference = copyMenuButtonRef.value
+  const floating = copyMenuPanelRef.value
+  if (!reference || !floating) {
+    return
+  }
+  const { x, y } = await computePosition(reference, floating, {
+    placement: 'bottom-end',
+    strategy: 'fixed',
+    middleware: [offset(6), flip({ padding: 8 }), shift({ padding: 8 })],
+  })
+  copyMenuPositionStyle.value = {
+    left: `${Math.round(x)}px`,
+    top: `${Math.round(y)}px`,
+  }
+}
+
+function openCopyMenu() {
+  clearCopyMenuCloseTimeout()
+  copyMenuOpen.value = true
+}
+
+function closeCopyMenu(options: { focusButton?: boolean } = {}) {
+  clearCopyMenuCloseTimeout()
+  copyMenuOpen.value = false
+  if (options.focusButton) {
+    nextTick(() => {
+      copyMenuButtonRef.value?.focus()
+    })
+  }
+}
+
+function toggleCopyMenu() {
+  if (copyMenuOpen.value) {
+    closeCopyMenu()
+    return
+  }
+  openCopyMenu()
+}
+
+function scheduleCopyMenuClose() {
+  clearCopyMenuCloseTimeout()
+  copyMenuCloseTimeout = setTimeout(() => {
+    copyMenuCloseTimeout = null
+    closeCopyMenu()
+  }, 120)
+}
+
+function keepCopyMenuOpen() {
+  clearCopyMenuCloseTimeout()
+  copyMenuOpen.value = true
+}
+
+function handleDocumentPointerDown(event: PointerEvent) {
+  const target = event.target as Node | null
+  if (!target) {
+    return
+  }
+  const button = copyMenuButtonRef.value
+  const panel = copyMenuPanelRef.value
+  if (button?.contains(target) || panel?.contains(target)) {
+    return
+  }
+  closeCopyMenu()
+}
+
+function handleDocumentKeydown(event: KeyboardEvent) {
+  if (event.key !== 'Escape') {
+    return
+  }
+  closeCopyMenu({ focusButton: true })
+}
+
+watch(copyMenuOpen, (open) => {
+  if (open) {
+    document.addEventListener('pointerdown', handleDocumentPointerDown)
+    document.addEventListener('keydown', handleDocumentKeydown)
+    void nextTick().then(() => {
+      if (!copyMenuOpen.value) {
+        return
+      }
+      const reference = copyMenuButtonRef.value
+      const floating = copyMenuPanelRef.value
+      if (!reference || !floating) {
+        return
+      }
+      void updateCopyMenuPosition()
+      clearCopyMenuAutoUpdate()
+      copyMenuAutoUpdateCleanup = autoUpdate(reference, floating, () => {
+        void updateCopyMenuPosition()
+      })
+    })
+    return
+  }
+  clearCopyMenuAutoUpdate()
+  document.removeEventListener('pointerdown', handleDocumentPointerDown)
+  document.removeEventListener('keydown', handleDocumentKeydown)
+})
 
 function resolveBuildOptions() {
   const parsedHeaders = parseJsonInput(props.headersText)
@@ -265,7 +389,7 @@ function resolveBuildOptions() {
 function copyToClipboard(text: string, label: string) {
   navigator.clipboard.writeText(text)
   copiedLabel.value = label
-  copyMenuOpen.value = false
+  closeCopyMenu()
   if (copiedTimeout) {
     clearTimeout(copiedTimeout)
   }
@@ -396,7 +520,7 @@ function formatBytes(size: number) {
     <div class="flex flex-col gap-3 px-4 py-4">
       <div class="flex flex-wrap items-center gap-2">
         <span
-          class="inline-flex h-[34px] w-[96px] flex-none items-center justify-center rounded border px-3 py-2 text-[0.65rem] uppercase tracking-[0.25em] border-pg-border bg-pg-surface-strong text-pg-text"
+          class="inline-flex h-[34px] w-[96px] flex-none items-center justify-center rounded border px-3 py-2 text-[0.65rem] tracking-[0.1em] border-pg-border bg-pg-surface-strong text-pg-text"
           :class="methodBadge"
         >
           {{ props.selected.method.toUpperCase() }}
@@ -406,14 +530,18 @@ function formatBytes(size: number) {
           readonly
           class="min-w-[220px] flex-1"
         />
-        <div
-          class="relative"
-          @mouseenter="copyMenuOpen = true"
-          @mouseleave="copyMenuOpen = false"
-        >
+        <div class="relative">
           <button
-            class="inline-flex items-center gap-2 rounded px-4 py-2 text-[0.65rem] uppercase tracking-[0.25em] transition border border-pg-border bg-pg-surface-strong text-pg-text-muted hover:text-pg-text-soft"
+            ref="copyMenuButtonRef"
+            class="inline-flex items-center gap-2 rounded px-4 py-2 text-[0.65rem] tracking-[0.1em] transition border border-pg-border bg-pg-surface-strong text-pg-text-muted hover:text-pg-text-soft"
             type="button"
+            :aria-expanded="copyMenuOpen ? 'true' : 'false'"
+            :aria-controls="copyMenuId"
+            aria-haspopup="menu"
+            @mouseenter="keepCopyMenuOpen"
+            @mouseleave="scheduleCopyMenuClose"
+            @click="toggleCopyMenu"
+            @keydown.down.prevent="openCopyMenu"
           >
             <span
               class="h-3.5 w-3.5"
@@ -424,28 +552,38 @@ function formatBytes(size: number) {
             <span class="i-[carbon--chevron-down] h-3 w-3" aria-hidden="true" />
           </button>
           <div
-            v-show="copyMenuOpen"
-            class="absolute right-0 top-full z-10 mt-1 min-w-[160px] rounded border py-1 border-pg-border bg-pg-surface-card shadow-sm"
+            v-if="copyMenuOpen"
+            :id="copyMenuId"
+            ref="copyMenuPanelRef"
+            class="z-20 min-w-[160px] rounded border py-1 border-pg-border bg-pg-surface-card shadow-sm"
+            style="position: fixed;"
+            :style="copyMenuPositionStyle"
+            role="menu"
+            @mouseenter="keepCopyMenuOpen"
+            @mouseleave="scheduleCopyMenuClose"
           >
             <button
-              class="flex w-full items-center gap-2 px-3 py-1.5 text-left text-[0.65rem] uppercase tracking-[0.2em] transition text-pg-text-soft hover:bg-pg-hover-strong"
+              class="flex w-full items-center gap-2 px-3 py-1.5 text-left text-[0.65rem] tracking-[0.08em] transition text-pg-text-soft hover:bg-pg-hover-strong"
               type="button"
+              role="menuitem"
               @click="handleCopyUrl"
             >
               <span class="i-[carbon--link] h-3.5 w-3.5" aria-hidden="true" />
               {{ t('detail.copyUrl') }}
             </button>
             <button
-              class="flex w-full items-center gap-2 px-3 py-1.5 text-left text-[0.65rem] uppercase tracking-[0.2em] transition text-pg-text-soft hover:bg-pg-hover-strong"
+              class="flex w-full items-center gap-2 px-3 py-1.5 text-left text-[0.65rem] tracking-[0.08em] transition text-pg-text-soft hover:bg-pg-hover-strong"
               type="button"
+              role="menuitem"
               @click="handleCopyCurl"
             >
               <span class="i-[carbon--terminal] h-3.5 w-3.5" aria-hidden="true" />
               {{ t('detail.copyCurl') }}
             </button>
             <button
-              class="flex w-full items-center gap-2 px-3 py-1.5 text-left text-[0.65rem] uppercase tracking-[0.2em] transition text-pg-text-soft hover:bg-pg-hover-strong"
+              class="flex w-full items-center gap-2 px-3 py-1.5 text-left text-[0.65rem] tracking-[0.08em] transition text-pg-text-soft hover:bg-pg-hover-strong"
               type="button"
+              role="menuitem"
               @click="handleCopyFetch"
             >
               <span class="i-[carbon--code] h-3.5 w-3.5" aria-hidden="true" />
@@ -454,7 +592,7 @@ function formatBytes(size: number) {
           </div>
         </div>
         <button
-          class="inline-flex items-center gap-2 rounded px-4 py-2 text-[0.65rem] uppercase tracking-[0.25em] transition disabled:cursor-not-allowed disabled:opacity-70 bg-pg-accent text-pg-on-accent"
+          class="inline-flex items-center gap-2 rounded px-4 py-2 text-[0.65rem] tracking-[0.1em] transition disabled:cursor-not-allowed disabled:opacity-70 bg-pg-accent text-pg-on-accent"
           data-testid="playground-run"
           :disabled="props.isSwRegistering"
           :aria-busy="props.isSwRegistering"
@@ -474,7 +612,7 @@ function formatBytes(size: number) {
     </div>
 
     <div class="border-t border-pg-border">
-      <div class="flex flex-wrap items-center gap-5 px-4 pt-2 text-[0.65rem] uppercase tracking-[0.25em]" role="tablist">
+      <div class="flex flex-wrap items-center gap-5 px-4 pt-2 text-[0.65rem] tracking-[0.1em]" role="tablist">
         <button
           type="button"
           role="tab"
@@ -568,7 +706,7 @@ function formatBytes(size: number) {
       <div class="border-t px-4 py-4 border-pg-border">
         <div v-show="activeTab === 'params'" class="flex flex-col gap-4">
           <div>
-            <div class="mb-1.5 text-[0.55rem] uppercase tracking-[0.25em] text-pg-text-muted">
+            <div class="mb-1.5 text-[0.55rem] tracking-[0.1em] text-pg-text-muted">
               {{ t('detail.params') }}
             </div>
             <div
@@ -582,11 +720,11 @@ function formatBytes(size: number) {
                 v-for="param in props.routeParams"
                 :key="param.id"
                 :ref="(el) => registerMissingParamRef(param.name, el as HTMLElement | null)"
-                class="flex flex-col gap-1.5 text-[0.65rem] uppercase tracking-[0.2em] text-pg-text-muted"
+                class="flex flex-col gap-1.5 text-[0.65rem] tracking-[0.08em] text-pg-text-muted"
               >
-                <span class="flex items-center gap-2 text-[0.55rem] uppercase tracking-[0.2em] text-pg-text-muted">
+                <span class="flex items-center gap-2 text-[0.55rem] tracking-[0.08em] text-pg-text-muted">
                   <span>{{ param.name }}</span>
-                  <span class="rounded border px-2 py-0.5 text-[0.5rem] uppercase tracking-[0.2em] border-pg-border bg-pg-surface-strong text-pg-text-soft">
+                  <span class="rounded border px-2 py-0.5 text-[0.5rem] tracking-[0.08em] border-pg-border bg-pg-surface-strong text-pg-text-soft">
                     {{ param.token }}
                   </span>
                 </span>
@@ -616,7 +754,7 @@ function formatBytes(size: number) {
 
         <div v-if="activeTab === 'auth'" class="flex flex-col gap-4">
           <UiField :label="t('detail.authType')">
-            <div class="flex flex-wrap items-center gap-4 text-[0.65rem] uppercase tracking-[0.2em] text-pg-text-muted">
+            <div class="flex flex-wrap items-center gap-4 text-[0.65rem] tracking-[0.08em] text-pg-text-muted">
               <label
                 v-for="option in authTypeOptions"
                 :key="option.value"
@@ -680,7 +818,7 @@ function formatBytes(size: number) {
             <UiField :label="t('detail.authTypeApiKeyLocation')">
               <div class="relative">
                 <select
-                  class="w-full appearance-none rounded border px-3 py-2 text-[0.7rem] uppercase tracking-[0.2em] outline-none transition border-pg-border bg-pg-surface-strong text-pg-text focus:border-pg-accent"
+                  class="w-full appearance-none rounded border px-3 py-2 text-[0.7rem] tracking-[0.08em] outline-none transition border-pg-border bg-pg-surface-strong text-pg-text focus:border-pg-accent"
                   :value="props.authKeyLocation"
                   @change="emit('update:authKeyLocation', ($event.target as HTMLSelectElement | null)?.value as ApiKeyLocation)"
                 >
@@ -734,7 +872,7 @@ function formatBytes(size: number) {
 
         <div v-else-if="activeTab === 'body'">
           <UiField :label="t('detail.bodyType')">
-            <div class="flex flex-wrap items-center gap-4 text-[0.65rem] uppercase tracking-[0.2em] text-pg-text-muted">
+            <div class="flex flex-wrap items-center gap-4 text-[0.65rem] tracking-[0.08em] text-pg-text-muted">
               <label
                 v-for="option in bodyTypeOptions"
                 :key="option.value"
@@ -758,7 +896,7 @@ function formatBytes(size: number) {
             <UiField :label="t('detail.rawType')" class="flex-1 min-w-[200px]">
               <div class="relative">
                 <select
-                  class="w-full appearance-none rounded border px-3 py-2 text-[0.7rem] uppercase tracking-[0.2em] outline-none transition border-pg-border bg-pg-surface-strong text-pg-text focus:border-pg-accent"
+                  class="w-full appearance-none rounded border px-3 py-2 text-[0.7rem] tracking-[0.08em] outline-none transition border-pg-border bg-pg-surface-strong text-pg-text focus:border-pg-accent"
                   :value="props.rawType"
                   @change="emit('update:rawType', ($event.target as HTMLSelectElement | null)?.value as RawBodyType)"
                 >
@@ -776,7 +914,7 @@ function formatBytes(size: number) {
             </UiField>
             <label
               v-if="props.rawType === 'json'"
-              class="flex items-center gap-2 rounded border px-3 py-2 text-[0.7rem] uppercase tracking-[0.2em] border-pg-border bg-pg-surface-strong text-pg-text-muted"
+              class="flex items-center gap-2 rounded border px-3 py-2 text-[0.7rem] tracking-[0.08em] border-pg-border bg-pg-surface-strong text-pg-text-muted"
             >
               <input
                 type="checkbox"
@@ -794,7 +932,7 @@ function formatBytes(size: number) {
           <div v-else-if="props.bodyType === 'binary'" class="mt-2">
             <UiField :label="t('detail.bodyBinaryFile')">
               <div class="flex flex-wrap items-center gap-3">
-                <label class="flex items-center gap-2 rounded border px-3 py-2 text-[0.7rem] uppercase tracking-[0.2em] border-pg-border bg-pg-surface-card text-pg-text-muted">
+                <label class="flex items-center gap-2 rounded border px-3 py-2 text-[0.7rem] tracking-[0.08em] border-pg-border bg-pg-surface-card text-pg-text-muted">
                   <input
                     class="sr-only"
                     type="file"
@@ -804,7 +942,7 @@ function formatBytes(size: number) {
                 </label>
                 <button
                   v-if="props.binaryFile"
-                  class="rounded border px-3 py-2 text-[0.7rem] uppercase tracking-[0.2em] transition border-pg-border bg-pg-surface-card text-pg-text-muted hover:text-pg-text-soft"
+                  class="rounded border px-3 py-2 text-[0.7rem] tracking-[0.08em] transition border-pg-border bg-pg-surface-card text-pg-text-muted hover:text-pg-text-soft"
                   type="button"
                   @click="clearBinaryFile"
                 >
@@ -841,7 +979,7 @@ function formatBytes(size: number) {
                       :placeholder="t('detail.bodyMultipartField')"
                       @input="updateMultipartName(row.id, ($event.target as HTMLInputElement | null)?.value ?? '')"
                     />
-                    <label class="flex items-center gap-2 rounded border px-3 py-2 text-[0.7rem] uppercase tracking-[0.2em] border-pg-border bg-pg-surface-card text-pg-text-muted">
+                    <label class="flex items-center gap-2 rounded border px-3 py-2 text-[0.7rem] tracking-[0.08em] border-pg-border bg-pg-surface-card text-pg-text-muted">
                       <input
                         class="sr-only"
                         type="file"
@@ -851,7 +989,7 @@ function formatBytes(size: number) {
                       <span>{{ resolveMultipartLabel(row) }}</span>
                     </label>
                     <button
-                      class="rounded border px-3 py-2 text-[0.7rem] uppercase tracking-[0.2em] transition border-pg-border bg-pg-surface-card text-pg-text-muted hover:text-pg-text-soft"
+                      class="rounded border px-3 py-2 text-[0.7rem] tracking-[0.08em] transition border-pg-border bg-pg-surface-card text-pg-text-muted hover:text-pg-text-soft"
                       type="button"
                       @click="removeMultipartRow(row.id)"
                     >
@@ -860,7 +998,7 @@ function formatBytes(size: number) {
                   </div>
                 </div>
                 <button
-                  class="w-full rounded border px-3 py-2 text-[0.7rem] uppercase tracking-[0.2em] transition border-dashed border-pg-border bg-pg-surface-card text-pg-text-muted hover:text-pg-text-soft"
+                  class="w-full rounded border px-3 py-2 text-[0.7rem] tracking-[0.08em] transition border-dashed border-pg-border bg-pg-surface-card text-pg-text-muted hover:text-pg-text-soft"
                   type="button"
                   @click="addMultipartRow"
                 >

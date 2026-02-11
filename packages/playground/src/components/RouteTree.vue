@@ -92,7 +92,7 @@ function highlightParts(text: string) {
             </span>
             <span
               v-if="row.kind === 'route' && row.route"
-              class="rounded border px-1.5 py-0.5 text-[0.5rem] uppercase tracking-[0.12em] leading-none transition group-hover:brightness-105"
+              class="rounded border px-1.5 py-0.5 text-[0.5rem] tracking-[0.08em] leading-none transition group-hover:brightness-105"
               :class="methodBadge(row.route.method, row.selected)"
             >
               {{ row.route.method }}

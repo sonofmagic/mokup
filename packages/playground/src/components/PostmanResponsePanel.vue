@@ -35,7 +35,7 @@ const responseBody = computed(() => props.responseText || t('response.empty'))
 
 <template>
   <section class="flex min-h-[240px] flex-1 flex-col rounded border border-pg-border bg-pg-surface-card">
-    <div class="flex flex-wrap items-center justify-between gap-2 border-b px-4 py-3 text-[0.65rem] uppercase tracking-[0.3em] border-pg-border text-pg-text-muted">
+    <div class="flex flex-wrap items-center justify-between gap-2 border-b px-4 py-3 text-[0.65rem] tracking-[0.08em] border-pg-border text-pg-text-muted">
       <span>{{ t('detail.responseLabel') }}</span>
       <span class="flex flex-wrap items-center gap-3 text-[0.65rem] normal-case tracking-normal text-pg-text-subtle">
         <span>{{ responseStatusLabel }}</span>
@@ -44,7 +44,7 @@ const responseBody = computed(() => props.responseText || t('response.empty'))
       </span>
     </div>
 
-    <div class="flex flex-wrap items-center gap-4 border-b px-4 pt-2 text-[0.65rem] uppercase tracking-[0.25em] border-pg-border">
+    <div class="flex flex-wrap items-center gap-4 border-b px-4 pt-2 text-[0.65rem] tracking-[0.1em] border-pg-border">
       <button
         type="button"
         class="border-b-2 pb-2 transition"

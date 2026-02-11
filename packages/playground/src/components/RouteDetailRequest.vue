@@ -364,11 +364,11 @@ function formatBytes(size: number) {
               v-for="param in props.routeParams"
               :key="param.id"
               :ref="(el) => registerMissingParamRef(param.name, el as HTMLElement | null)"
-              class="flex flex-col gap-1.5 text-[0.65rem] uppercase tracking-[0.2em] text-pg-text-muted"
+              class="flex flex-col gap-1.5 text-[0.65rem] tracking-[0.08em] text-pg-text-muted"
             >
-              <span class="flex items-center gap-2 text-[0.55rem] uppercase tracking-[0.2em] text-pg-text-muted">
+              <span class="flex items-center gap-2 text-[0.55rem] tracking-[0.08em] text-pg-text-muted">
                 <span>{{ param.name }}</span>
-                <span class="rounded border px-2 py-0.5 text-[0.5rem] uppercase tracking-[0.2em] border-pg-border bg-pg-surface-strong text-pg-text-soft">
+                <span class="rounded border px-2 py-0.5 text-[0.5rem] tracking-[0.08em] border-pg-border bg-pg-surface-strong text-pg-text-soft">
                   {{ param.token }}
                 </span>
               </span>
@@ -408,7 +408,7 @@ function formatBytes(size: number) {
           <UiField :label="t('detail.bodyType')">
             <div class="relative">
               <select
-                class="w-full appearance-none rounded border px-3 py-2 text-[0.7rem] uppercase tracking-[0.2em] outline-none transition border-pg-border bg-pg-surface-strong text-pg-text focus:border-pg-accent"
+                class="w-full appearance-none rounded border px-3 py-2 text-[0.7rem] tracking-[0.08em] outline-none transition border-pg-border bg-pg-surface-strong text-pg-text focus:border-pg-accent"
                 :value="bodyType"
                 @change="emit('update:bodyType', ($event.target as HTMLSelectElement | null)?.value as BodyType)"
               >
@@ -440,7 +440,7 @@ function formatBytes(size: number) {
             <UiField :label="t('detail.rawType')" class="flex-1 min-w-[200px]">
               <div class="relative">
                 <select
-                  class="w-full appearance-none rounded border px-3 py-2 text-[0.7rem] uppercase tracking-[0.2em] outline-none transition border-pg-border bg-pg-surface-strong text-pg-text focus:border-pg-accent"
+                  class="w-full appearance-none rounded border px-3 py-2 text-[0.7rem] tracking-[0.08em] outline-none transition border-pg-border bg-pg-surface-strong text-pg-text focus:border-pg-accent"
                   :value="props.rawType"
                   @change="emit('update:rawType', ($event.target as HTMLSelectElement | null)?.value as RawBodyType)"
                 >
@@ -470,7 +470,7 @@ function formatBytes(size: number) {
             </UiField>
             <label
               v-if="props.rawType === 'json'"
-              class="flex items-center gap-2 rounded border px-3 py-2 text-[0.7rem] uppercase tracking-[0.2em] border-pg-border bg-pg-surface-strong text-pg-text-muted"
+              class="flex items-center gap-2 rounded border px-3 py-2 text-[0.7rem] tracking-[0.08em] border-pg-border bg-pg-surface-strong text-pg-text-muted"
             >
               <input
                 type="checkbox"
@@ -488,7 +488,7 @@ function formatBytes(size: number) {
           <div v-else-if="props.bodyType === 'binary'" class="mt-2">
             <UiField :label="t('detail.bodyBinaryFile')">
               <div class="flex flex-wrap items-center gap-3">
-                <label class="flex items-center gap-2 rounded border px-3 py-2 text-[0.7rem] uppercase tracking-[0.2em] border-pg-border bg-pg-surface-card text-pg-text-muted">
+                <label class="flex items-center gap-2 rounded border px-3 py-2 text-[0.7rem] tracking-[0.08em] border-pg-border bg-pg-surface-card text-pg-text-muted">
                   <input
                     class="sr-only"
                     type="file"
@@ -498,7 +498,7 @@ function formatBytes(size: number) {
                 </label>
                 <button
                   v-if="props.binaryFile"
-                  class="rounded border px-3 py-2 text-[0.7rem] uppercase tracking-[0.2em] transition border-pg-border bg-pg-surface-card text-pg-text-muted hover:text-pg-text-soft"
+                  class="rounded border px-3 py-2 text-[0.7rem] tracking-[0.08em] transition border-pg-border bg-pg-surface-card text-pg-text-muted hover:text-pg-text-soft"
                   type="button"
                   @click="clearBinaryFile"
                 >
@@ -530,7 +530,7 @@ function formatBytes(size: number) {
                       :placeholder="t('detail.bodyMultipartField')"
                       @input="updateMultipartName(row.id, ($event.target as HTMLInputElement | null)?.value ?? '')"
                     />
-                    <label class="flex items-center gap-2 rounded border px-3 py-2 text-[0.7rem] uppercase tracking-[0.2em] border-pg-border bg-pg-surface-card text-pg-text-muted">
+                    <label class="flex items-center gap-2 rounded border px-3 py-2 text-[0.7rem] tracking-[0.08em] border-pg-border bg-pg-surface-card text-pg-text-muted">
                       <input
                         class="sr-only"
                         type="file"
@@ -540,7 +540,7 @@ function formatBytes(size: number) {
                       <span>{{ resolveMultipartLabel(row) }}</span>
                     </label>
                     <button
-                      class="rounded border px-3 py-2 text-[0.7rem] uppercase tracking-[0.2em] transition border-pg-border bg-pg-surface-card text-pg-text-muted hover:text-pg-text-soft"
+                      class="rounded border px-3 py-2 text-[0.7rem] tracking-[0.08em] transition border-pg-border bg-pg-surface-card text-pg-text-muted hover:text-pg-text-soft"
                       type="button"
                       @click="removeMultipartRow(row.id)"
                     >
@@ -549,7 +549,7 @@ function formatBytes(size: number) {
                   </div>
                 </div>
                 <button
-                  class="w-full rounded border px-3 py-2 text-[0.7rem] uppercase tracking-[0.2em] transition border-dashed border-pg-border bg-pg-surface-card text-pg-text-muted hover:text-pg-text-soft"
+                  class="w-full rounded border px-3 py-2 text-[0.7rem] tracking-[0.08em] transition border-dashed border-pg-border bg-pg-surface-card text-pg-text-muted hover:text-pg-text-soft"
                   type="button"
                   @click="addMultipartRow"
                 >

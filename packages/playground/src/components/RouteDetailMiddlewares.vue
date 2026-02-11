@@ -65,7 +65,7 @@ const totalCount = computed(() => {
   <div>
     <button
       type="button"
-      class="group flex w-full items-center justify-between px-4 py-3 text-[0.6rem] uppercase tracking-[0.2em] transition text-pg-text-muted hover:text-pg-text-soft"
+      class="group flex w-full items-center justify-between px-4 py-3 text-[0.6rem] tracking-[0.08em] transition text-pg-text-muted hover:text-pg-text-soft"
       :aria-expanded="isOpen"
       :aria-controls="contentId"
       @click="toggle"
@@ -88,7 +88,7 @@ const totalCount = computed(() => {
       class="flex flex-col gap-3 border-t px-4 py-3 text-xs border-pg-border text-pg-text-soft"
     >
       <div v-if="preMiddlewares.length > 0" class="flex flex-col gap-2">
-        <div class="flex flex-wrap items-center gap-2 text-[0.6rem] uppercase tracking-[0.2em] text-pg-text-muted">
+        <div class="flex flex-wrap items-center gap-2 text-[0.6rem] tracking-[0.08em] text-pg-text-muted">
           <span>{{ t('detail.middlewarePre') }}</span>
           <UiPill tone="chip" size="xxs" :caps="false">
             {{ preCount }}
@@ -113,7 +113,7 @@ const totalCount = computed(() => {
         </div>
       </div>
       <div v-if="normalMiddlewares.length > 0" class="flex flex-col gap-2">
-        <div class="flex flex-wrap items-center gap-2 text-[0.6rem] uppercase tracking-[0.2em] text-pg-text-muted">
+        <div class="flex flex-wrap items-center gap-2 text-[0.6rem] tracking-[0.08em] text-pg-text-muted">
           <span>{{ t('detail.middlewareNormal') }}</span>
           <UiPill tone="chip" size="xxs" :caps="false">
             {{ normalCount }}
@@ -138,7 +138,7 @@ const totalCount = computed(() => {
         </div>
       </div>
       <div v-if="postMiddlewares.length > 0" class="flex flex-col gap-2">
-        <div class="flex flex-wrap items-center gap-2 text-[0.6rem] uppercase tracking-[0.2em] text-pg-text-muted">
+        <div class="flex flex-wrap items-center gap-2 text-[0.6rem] tracking-[0.08em] text-pg-text-muted">
           <span>{{ t('detail.middlewarePost') }}</span>
           <UiPill tone="chip" size="xxs" :caps="false">
             {{ postCount }}

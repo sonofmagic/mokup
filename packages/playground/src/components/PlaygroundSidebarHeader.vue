@@ -103,7 +103,7 @@ onBeforeUnmount(() => {
         <slot name="actions" />
       </div>
     </div>
-    <div class="mt-2 flex items-center gap-5 border-b border-pg-border text-[0.65rem] uppercase tracking-[0.25em]">
+    <div class="mt-2 flex items-center gap-5 border-b border-pg-border text-[0.65rem] tracking-[0.1em]">
       <button
         type="button"
         class="border-b-2 pb-1.5 transition"
@@ -137,7 +137,7 @@ onBeforeUnmount(() => {
     </div>
     <div
       v-if="props.routeMode === 'active'"
-      class="mt-1.5 flex items-center gap-4 text-[0.6rem] uppercase tracking-[0.2em]"
+      class="mt-1.5 flex items-center gap-4 text-[0.6rem] tracking-[0.08em]"
     >
       <button
         type="button"
@@ -162,7 +162,7 @@ onBeforeUnmount(() => {
     </div>
     <div
       v-else-if="props.routeMode === 'disabled'"
-      class="mt-1.5 flex items-center gap-4 text-[0.6rem] uppercase tracking-[0.2em]"
+      class="mt-1.5 flex items-center gap-4 text-[0.6rem] tracking-[0.08em]"
     >
       <button
         type="button"

@@ -272,7 +272,7 @@ function handleSubMode(mode: 'api' | 'config') {
       <div class="h-px w-8 bg-pg-border" />
 
       <div class="flex flex-col items-center gap-1 text-pg-text-muted">
-        <span class="rounded border px-1.5 py-0.5 text-[0.6rem] uppercase tracking-wide border-pg-border bg-pg-surface-strong">
+        <span class="rounded border px-1.5 py-0.5 text-[0.6rem] tracking-[0.08em] border-pg-border bg-pg-surface-strong">
           {{ collapsedGroupLabel }}
         </span>
         <span v-if="hasSearch" class="flex h-7 w-7 items-center justify-center rounded border border-pg-accent/40 bg-pg-accent/10 text-pg-accent">

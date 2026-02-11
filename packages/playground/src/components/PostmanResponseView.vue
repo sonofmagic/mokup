@@ -50,7 +50,7 @@ watch(hasPreview, (value) => {
 
 <template>
   <section class="flex min-h-[240px] flex-1 flex-col rounded border border-pg-border bg-pg-surface-card">
-    <div class="flex flex-wrap items-center justify-between gap-2 border-b px-4 py-3 text-[0.65rem] uppercase tracking-[0.3em] border-pg-border text-pg-text-muted">
+    <div class="flex flex-wrap items-center justify-between gap-2 border-b px-4 py-3 text-[0.65rem] tracking-[0.08em] border-pg-border text-pg-text-muted">
       <span>{{ t('detail.responseLabel') }}</span>
       <span class="flex flex-wrap items-center gap-3 text-[0.65rem] normal-case tracking-normal text-pg-text-subtle">
         <span>{{ responseStatusLabel }}</span>
@@ -59,7 +59,7 @@ watch(hasPreview, (value) => {
       </span>
     </div>
 
-    <div class="flex flex-wrap items-center gap-4 border-b px-4 pt-2 text-[0.65rem] uppercase tracking-[0.25em] border-pg-border" role="tablist">
+    <div class="flex flex-wrap items-center gap-4 border-b px-4 pt-2 text-[0.65rem] tracking-[0.1em] border-pg-border" role="tablist">
       <button
         type="button"
         role="tab"
@@ -100,7 +100,7 @@ watch(hasPreview, (value) => {
 
     <div class="flex-1 min-h-0 overflow-auto p-4">
       <div v-if="activeTab === 'body'" class="flex h-full flex-col gap-3">
-        <div class="flex flex-wrap items-center gap-3 text-[0.6rem] uppercase tracking-[0.25em] text-pg-text-muted">
+        <div class="flex flex-wrap items-center gap-3 text-[0.6rem] tracking-[0.1em] text-pg-text-muted">
           <button
             type="button"
             class="rounded border px-3 py-1 transition border-pg-border"
@@ -166,7 +166,7 @@ watch(hasPreview, (value) => {
             :key="key"
             class="flex flex-wrap items-center gap-2"
           >
-            <span class="rounded border px-2 py-0.5 text-[0.55rem] uppercase tracking-[0.2em] border-pg-border bg-pg-surface-card text-pg-text-soft">
+            <span class="rounded border px-2 py-0.5 text-[0.55rem] tracking-[0.08em] border-pg-border bg-pg-surface-card text-pg-text-soft">
               {{ key }}
             </span>
             <span class="text-pg-text">

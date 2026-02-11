@@ -127,13 +127,13 @@ function openInEditorForFile(file: string) {
     <div class="rounded border p-5 border-pg-border bg-pg-surface-card">
       <div class="flex flex-wrap items-center justify-between gap-3">
         <div class="flex flex-col gap-1">
-          <span class="text-[0.6rem] uppercase tracking-[0.3em] text-pg-text-muted">
+          <span class="text-[0.6rem] tracking-[0.08em] text-pg-text-muted">
             {{ title }}
           </span>
           <div class="flex flex-wrap items-center gap-2">
             <span
               v-if="selectedMethod"
-              class="rounded border px-3 py-1 text-[0.6rem] uppercase tracking-[0.2em]"
+              class="rounded border px-3 py-1 text-[0.6rem] tracking-[0.08em]"
               :class="methodBadge(selectedMethod)"
             >
               {{ selectedMethod }}
@@ -165,7 +165,7 @@ function openInEditorForFile(file: string) {
     </div>
 
     <div class="rounded border p-4 border-pg-border bg-pg-surface-soft">
-      <div class="flex items-center gap-2 text-[0.6rem] uppercase tracking-[0.3em] text-pg-text-muted">
+      <div class="flex items-center gap-2 text-[0.6rem] tracking-[0.08em] text-pg-text-muted">
         <span>{{ t('inactive.decisionChain') }}</span>
         <UiPill tone="chip" size="xxs" :caps="false">
           {{ decisionChain.length }}
@@ -181,7 +181,7 @@ function openInEditorForFile(file: string) {
             <div class="flex flex-col gap-1">
               <div class="flex flex-wrap items-center gap-2">
                 <span
-                  class="rounded border px-2 py-0.5 text-[0.55rem] uppercase tracking-[0.2em]"
+                  class="rounded border px-2 py-0.5 text-[0.55rem] tracking-[0.08em]"
                   :class="step.result === 'pass'
                     ? 'border-pg-border bg-pg-surface-strong text-pg-text-soft'
                     : 'border-pg-danger-border bg-pg-danger-bg text-pg-danger-text'"
@@ -218,7 +218,7 @@ function openInEditorForFile(file: string) {
     </div>
 
     <div class="rounded border p-4 border-pg-border bg-pg-surface-soft">
-      <div class="flex items-center gap-2 text-[0.6rem] uppercase tracking-[0.3em] text-pg-text-muted">
+      <div class="flex items-center gap-2 text-[0.6rem] tracking-[0.08em] text-pg-text-muted">
         <span>{{ t('detail.configChain') }}</span>
         <UiPill tone="chip" size="xxs" :caps="false">
           {{ configItems.length }}
@@ -230,7 +230,7 @@ function openInEditorForFile(file: string) {
           :key="`config-${item.order}-${item.file}`"
           class="flex flex-wrap items-center gap-2"
         >
-          <span class="rounded border px-2 py-0.5 text-[0.55rem] uppercase tracking-[0.2em] border-pg-border bg-pg-surface-strong text-pg-text-soft">
+          <span class="rounded border px-2 py-0.5 text-[0.55rem] tracking-[0.08em] border-pg-border bg-pg-surface-strong text-pg-text-soft">
             {{ item.order }}
           </span>
           <span class="text-[0.7rem] text-pg-text-subtle">
@@ -247,7 +247,7 @@ function openInEditorForFile(file: string) {
     </div>
 
     <div class="rounded border p-4 border-pg-border bg-pg-surface-soft">
-      <div class="flex items-center gap-2 text-[0.6rem] uppercase tracking-[0.3em] text-pg-text-muted">
+      <div class="flex items-center gap-2 text-[0.6rem] tracking-[0.08em] text-pg-text-muted">
         <span>{{ t('inactive.effectiveConfig') }}</span>
         <UiPill tone="chip" size="xxs" :caps="false">
           {{ configEntries.length }}
@@ -259,7 +259,7 @@ function openInEditorForFile(file: string) {
           :key="`config-entry-${entry.key}`"
           class="rounded border px-3 py-2 border-pg-border bg-pg-surface-card"
         >
-          <div class="text-[0.6rem] uppercase tracking-[0.3em] text-pg-text-muted">
+          <div class="text-[0.6rem] tracking-[0.08em] text-pg-text-muted">
             {{ entry.label }}
           </div>
           <div class="mt-1 text-[0.75rem] text-pg-text-soft">
@@ -273,24 +273,24 @@ function openInEditorForFile(file: string) {
     </div>
 
     <div class="rounded border p-4 border-pg-border bg-pg-surface-soft">
-      <div class="text-[0.6rem] uppercase tracking-[0.3em] text-pg-text-muted">
+      <div class="text-[0.6rem] tracking-[0.08em] text-pg-text-muted">
         {{ t('inactive.routeSummary') }}
       </div>
       <div class="mt-3 grid gap-2 text-sm text-pg-text-soft">
         <div v-if="selectedMethod" class="flex items-center gap-2">
-          <span class="text-[0.6rem] uppercase tracking-[0.3em] text-pg-text-muted">
+          <span class="text-[0.6rem] tracking-[0.08em] text-pg-text-muted">
             {{ t('inactive.summaryMethod') }}
           </span>
           <span>{{ selectedMethod }}</span>
         </div>
         <div v-if="selectedUrl" class="flex items-center gap-2">
-          <span class="text-[0.6rem] uppercase tracking-[0.3em] text-pg-text-muted">
+          <span class="text-[0.6rem] tracking-[0.08em] text-pg-text-muted">
             {{ t('inactive.summaryPath') }}
           </span>
           <span>{{ selectedUrl }}</span>
         </div>
         <div class="flex items-center gap-2">
-          <span class="text-[0.6rem] uppercase tracking-[0.3em] text-pg-text-muted">
+          <span class="text-[0.6rem] tracking-[0.08em] text-pg-text-muted">
             {{ t('inactive.summaryFile') }}
           </span>
           <span class="text-pg-text-subtle">

@@ -73,7 +73,7 @@ function openInEditorForFile(file: string) {
     <div class="rounded border p-5 border-pg-border bg-pg-surface-card">
       <div class="flex flex-wrap items-center justify-between gap-3">
         <div class="flex flex-col gap-1">
-          <span class="text-[0.6rem] uppercase tracking-[0.3em] text-pg-text-muted">
+          <span class="text-[0.6rem] tracking-[0.08em] text-pg-text-muted">
             {{ t('configPanel.title') }}
           </span>
           <span class="text-lg font-display text-pg-text-strong">
@@ -86,13 +86,13 @@ function openInEditorForFile(file: string) {
       </div>
       <div class="mt-4 grid gap-3 text-sm text-pg-text-soft">
         <div class="flex items-center gap-2">
-          <span class="text-[0.6rem] uppercase tracking-[0.3em] text-pg-text-muted">
+          <span class="text-[0.6rem] tracking-[0.08em] text-pg-text-muted">
             {{ t('configPanel.scope') }}
           </span>
           <span>{{ scopeLabel }}</span>
         </div>
         <div class="flex items-center gap-2">
-          <span class="text-[0.6rem] uppercase tracking-[0.3em] text-pg-text-muted">
+          <span class="text-[0.6rem] tracking-[0.08em] text-pg-text-muted">
             {{ t('configPanel.impacted') }}
           </span>
           <UiPill tone="chip" size="sm" :caps="false">
@@ -108,7 +108,7 @@ function openInEditorForFile(file: string) {
       </div>
       <template v-else>
         <div v-if="grouped.active.length > 0" class="rounded border p-4 border-pg-border bg-pg-surface-soft">
-          <div class="flex items-center gap-2 text-[0.6rem] uppercase tracking-[0.3em] text-pg-text-muted">
+          <div class="flex items-center gap-2 text-[0.6rem] tracking-[0.08em] text-pg-text-muted">
             <span>{{ t('configPanel.active') }}</span>
             <UiPill tone="chip" size="xxs" :caps="false">
               {{ grouped.active.length }}
@@ -120,7 +120,7 @@ function openInEditorForFile(file: string) {
                 <div class="flex flex-wrap items-center gap-2">
                   <span
                     v-if="entry.method"
-                    class="rounded border px-2 py-1 text-[0.55rem] uppercase tracking-[0.2em]"
+                    class="rounded border px-2 py-1 text-[0.55rem] tracking-[0.08em]"
                     :class="methodBadge(entry.method)"
                   >
                     {{ entry.method }}
@@ -147,7 +147,7 @@ function openInEditorForFile(file: string) {
           </div>
         </div>
         <div v-if="grouped.disabled.length > 0" class="rounded border p-4 border-pg-border bg-pg-surface-soft">
-          <div class="flex items-center gap-2 text-[0.6rem] uppercase tracking-[0.3em] text-pg-text-muted">
+          <div class="flex items-center gap-2 text-[0.6rem] tracking-[0.08em] text-pg-text-muted">
             <span>{{ t('configPanel.disabled') }}</span>
             <UiPill tone="chip" size="xxs" :caps="false">
               {{ grouped.disabled.length }}
@@ -159,7 +159,7 @@ function openInEditorForFile(file: string) {
                 <div class="flex flex-wrap items-center gap-2">
                   <span
                     v-if="entry.method"
-                    class="rounded border px-2 py-1 text-[0.55rem] uppercase tracking-[0.2em]"
+                    class="rounded border px-2 py-1 text-[0.55rem] tracking-[0.08em]"
                     :class="methodBadge(entry.method)"
                   >
                     {{ entry.method }}
@@ -186,7 +186,7 @@ function openInEditorForFile(file: string) {
           </div>
         </div>
         <div v-if="grouped.ignored.length > 0" class="rounded border p-4 border-pg-border bg-pg-surface-soft">
-          <div class="flex items-center gap-2 text-[0.6rem] uppercase tracking-[0.3em] text-pg-text-muted">
+          <div class="flex items-center gap-2 text-[0.6rem] tracking-[0.08em] text-pg-text-muted">
             <span>{{ t('configPanel.ignored') }}</span>
             <UiPill tone="chip" size="xxs" :caps="false">
               {{ grouped.ignored.length }}

@@ -34,7 +34,7 @@ function handleOpenInEditor(file: string) {
   <div>
     <button
       type="button"
-      class="group flex w-full items-center justify-between px-4 py-3 text-[0.6rem] uppercase tracking-[0.2em] transition text-pg-text-muted hover:text-pg-text-soft"
+      class="group flex w-full items-center justify-between px-4 py-3 text-[0.6rem] tracking-[0.08em] transition text-pg-text-muted hover:text-pg-text-soft"
       :aria-expanded="isOpen"
       :aria-controls="contentId"
       @click="toggle"
@@ -61,7 +61,7 @@ function handleOpenInEditor(file: string) {
           :key="`config-${item.order}-${item.file}`"
           class="flex flex-wrap items-center gap-2"
         >
-          <span class="rounded border px-2 py-0.5 text-[0.55rem] uppercase tracking-[0.2em] border-pg-border bg-pg-surface-strong text-pg-text-soft">
+          <span class="rounded border px-2 py-0.5 text-[0.55rem] tracking-[0.08em] border-pg-border bg-pg-surface-strong text-pg-text-soft">
             {{ item.order }}
           </span>
           <span class="text-[0.7rem] text-pg-text-subtle">
@@ -70,7 +70,7 @@ function handleOpenInEditor(file: string) {
           <button
             v-if="item.editorUrl"
             type="button"
-            class="inline-flex items-center rounded border px-1.5 py-0.5 text-[0.55rem] uppercase tracking-[0.15em] transition border-pg-border bg-pg-surface-card text-pg-text-muted hover:text-pg-text-soft"
+            class="inline-flex items-center rounded border px-1.5 py-0.5 text-[0.55rem] tracking-[0.08em] transition border-pg-border bg-pg-surface-card text-pg-text-muted hover:text-pg-text-soft"
             :title="t('detail.openInVscode')"
             @click="handleOpenInEditor(item.file)"
           >

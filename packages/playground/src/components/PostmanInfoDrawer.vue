@@ -38,7 +38,7 @@ const configChainProps = computed(() => {
       >
         <div class="flex items-center justify-between border-b px-4 py-3 border-pg-border">
           <div class="flex flex-col gap-1">
-            <span class="text-[0.6rem] uppercase tracking-[0.25em] text-pg-text-muted">
+            <span class="text-[0.6rem] tracking-[0.1em] text-pg-text-muted">
               {{ t('detail.infoTitle') }}
             </span>
             <span class="text-xs text-pg-text-subtle">
