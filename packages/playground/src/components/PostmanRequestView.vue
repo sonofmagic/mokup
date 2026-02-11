@@ -750,6 +750,7 @@ function formatBytes(size: number) {
           <RouteDetailConfigChain
             v-bind="configChainProps"
             :config-status-map="props.configStatusMap"
+            :workspace-root="props.workspaceRoot"
           />
         </div>
 

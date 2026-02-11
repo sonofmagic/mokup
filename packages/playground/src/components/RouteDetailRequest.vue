@@ -292,6 +292,7 @@ function formatBytes(size: number) {
     <RouteDetailConfigChain
       :config-chain="configChain"
       :config-status-map="props.configStatusMap"
+      :workspace-root="props.workspaceRoot"
     />
     <RouteDetailMiddlewares
       :selected="props.selected"

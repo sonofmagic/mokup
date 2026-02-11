@@ -2,11 +2,13 @@
 import { computed } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useDetailPanel } from '../hooks/useDetailPanel'
+import { openInEditor, resolveEditorUrl } from '../utils/editor'
 import UiPill from './ui/UiPill.vue'
 
 const props = defineProps<{
   configChain?: string[]
   configStatusMap: Map<string, 'enabled' | 'disabled'>
+  workspaceRoot?: string
 }>()
 
 const { t } = useI18n()
@@ -19,8 +21,13 @@ const configItems = computed(() => {
     file,
     order: index + 1,
     disabled: props.configStatusMap.get(file) === 'disabled',
+    editorUrl: resolveEditorUrl(file, props.workspaceRoot),
   }))
 })
+
+function handleOpenInEditor(file: string) {
+  openInEditor(file, props.workspaceRoot)
+}
 </script>
 
 <template>
@@ -60,6 +67,15 @@ const configItems = computed(() => {
           <span class="text-[0.7rem] text-pg-text-subtle">
             {{ item.file }}
           </span>
+          <button
+            v-if="item.editorUrl"
+            type="button"
+            class="inline-flex items-center rounded border px-1.5 py-0.5 text-[0.55rem] uppercase tracking-[0.15em] transition border-pg-border bg-pg-surface-card text-pg-text-muted hover:text-pg-text-soft"
+            :title="t('detail.openInVscode')"
+            @click="handleOpenInEditor(item.file)"
+          >
+            <span class="i-[carbon--launch] h-3 w-3" aria-hidden="true" />
+          </button>
           <UiPill v-if="item.disabled" tone="strong" size="xxs" :caps="false">
             {{ t('configPanel.statusDisabled') }}
           </UiPill>
