@@ -3,6 +3,7 @@ import type { ApiKeyLocation, AuthType, BodyType, MultipartFileEntry, Playground
 import { computed, defineAsyncComponent, nextTick, onBeforeUnmount, ref, toRefs, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { buildCurl } from '../utils/curl'
+import { buildFetch } from '../utils/fetch'
 import { parseJsonInput } from '../utils/request'
 import RouteDetailConfigChain from './RouteDetailConfigChain.vue'
 import RouteDetailMiddlewares from './RouteDetailMiddlewares.vue'
@@ -224,16 +225,17 @@ onBeforeUnmount(() => {
     clearTimeout(missingPulseTimeout)
     missingPulseTimeout = null
   }
-  if (copiedCurlTimeout) {
-    clearTimeout(copiedCurlTimeout)
-    copiedCurlTimeout = null
+  if (copiedTimeout) {
+    clearTimeout(copiedTimeout)
+    copiedTimeout = null
   }
 })
 
-const copiedCurl = ref(false)
-let copiedCurlTimeout: ReturnType<typeof setTimeout> | null = null
+const copyMenuOpen = ref(false)
+const copiedLabel = ref('')
+let copiedTimeout: ReturnType<typeof setTimeout> | null = null
 
-function handleCopyCurl() {
+function resolveBuildOptions() {
   const parsedHeaders = parseJsonInput(props.headersText)
   const headers: Record<string, string> = {}
   if (parsedHeaders.value && typeof parsedHeaders.value === 'object') {
@@ -241,7 +243,7 @@ function handleCopyCurl() {
       headers[k] = String(v)
     }
   }
-  const curl = buildCurl({
+  return {
     method: props.selected.method,
     url: props.requestUrl,
     headers,
@@ -257,16 +259,32 @@ function handleCopyCurl() {
     authKeyLocation: props.authKeyLocation,
     authCustomName: props.authCustomName,
     authCustomValue: props.authCustomValue,
-  })
-  navigator.clipboard.writeText(curl)
-  copiedCurl.value = true
-  if (copiedCurlTimeout) {
-    clearTimeout(copiedCurlTimeout)
   }
-  copiedCurlTimeout = setTimeout(() => {
-    copiedCurl.value = false
-    copiedCurlTimeout = null
+}
+
+function copyToClipboard(text: string, label: string) {
+  navigator.clipboard.writeText(text)
+  copiedLabel.value = label
+  copyMenuOpen.value = false
+  if (copiedTimeout) {
+    clearTimeout(copiedTimeout)
+  }
+  copiedTimeout = setTimeout(() => {
+    copiedLabel.value = ''
+    copiedTimeout = null
   }, 2000)
+}
+
+function handleCopyUrl() {
+  copyToClipboard(props.requestUrl, 'url')
+}
+
+function handleCopyCurl() {
+  copyToClipboard(buildCurl(resolveBuildOptions()), 'curl')
+}
+
+function handleCopyFetch() {
+  copyToClipboard(buildFetch(resolveBuildOptions()), 'fetch')
 }
 
 const queryExample = '{ "q": "alpha", "page": 1 }'
@@ -388,18 +406,53 @@ function formatBytes(size: number) {
           readonly
           class="min-w-[220px] flex-1"
         />
-        <button
-          class="inline-flex items-center gap-2 rounded px-4 py-2 text-[0.65rem] uppercase tracking-[0.25em] transition border border-pg-border bg-pg-surface-strong text-pg-text-muted hover:text-pg-text-soft"
-          type="button"
-          @click="handleCopyCurl"
+        <div
+          class="relative"
+          @mouseenter="copyMenuOpen = true"
+          @mouseleave="copyMenuOpen = false"
         >
-          <span
-            class="h-3.5 w-3.5"
-            :class="copiedCurl ? 'i-[carbon--checkmark]' : 'i-[carbon--copy]'"
-            aria-hidden="true"
-          />
-          {{ copiedCurl ? t('detail.copyCurlDone') : t('detail.copyCurl') }}
-        </button>
+          <button
+            class="inline-flex items-center gap-2 rounded px-4 py-2 text-[0.65rem] uppercase tracking-[0.25em] transition border border-pg-border bg-pg-surface-strong text-pg-text-muted hover:text-pg-text-soft"
+            type="button"
+          >
+            <span
+              class="h-3.5 w-3.5"
+              :class="copiedLabel ? 'i-[carbon--checkmark]' : 'i-[carbon--copy]'"
+              aria-hidden="true"
+            />
+            {{ copiedLabel ? t('detail.copyMenuDone') : t('detail.copyMenu') }}
+            <span class="i-[carbon--chevron-down] h-3 w-3" aria-hidden="true" />
+          </button>
+          <div
+            v-show="copyMenuOpen"
+            class="absolute right-0 top-full z-10 mt-1 min-w-[160px] rounded border py-1 border-pg-border bg-pg-surface-card shadow-sm"
+          >
+            <button
+              class="flex w-full items-center gap-2 px-3 py-1.5 text-left text-[0.65rem] uppercase tracking-[0.2em] transition text-pg-text-soft hover:bg-pg-hover-strong"
+              type="button"
+              @click="handleCopyUrl"
+            >
+              <span class="i-[carbon--link] h-3.5 w-3.5" aria-hidden="true" />
+              {{ t('detail.copyUrl') }}
+            </button>
+            <button
+              class="flex w-full items-center gap-2 px-3 py-1.5 text-left text-[0.65rem] uppercase tracking-[0.2em] transition text-pg-text-soft hover:bg-pg-hover-strong"
+              type="button"
+              @click="handleCopyCurl"
+            >
+              <span class="i-[carbon--terminal] h-3.5 w-3.5" aria-hidden="true" />
+              {{ t('detail.copyCurl') }}
+            </button>
+            <button
+              class="flex w-full items-center gap-2 px-3 py-1.5 text-left text-[0.65rem] uppercase tracking-[0.2em] transition text-pg-text-soft hover:bg-pg-hover-strong"
+              type="button"
+              @click="handleCopyFetch"
+            >
+              <span class="i-[carbon--code] h-3.5 w-3.5" aria-hidden="true" />
+              {{ t('detail.copyFetch') }}
+            </button>
+          </div>
+        </div>
         <button
           class="inline-flex items-center gap-2 rounded px-4 py-2 text-[0.65rem] uppercase tracking-[0.25em] transition disabled:cursor-not-allowed disabled:opacity-70 bg-pg-accent text-pg-on-accent"
           data-testid="playground-run"
