@@ -35,7 +35,7 @@ const chipButton = tv({
       card: 'border-pg-border bg-pg-surface-card text-pg-text-soft hover:bg-pg-hover-strong',
     },
     active: {
-      true: 'bg-pg-accent text-pg-on-accent border-pg-accent',
+      true: 'border-pg-accent bg-pg-accent text-pg-on-accent hover:border-pg-accent hover:bg-pg-accent hover:text-pg-on-accent',
     },
   },
   defaultVariants: {
