@@ -91,7 +91,7 @@ onBeforeUnmount(() => {
         <UiChipButton
           ref="moreButtonRef"
           size="sm"
-          class="h-9"
+          class="h-[34px]"
           :aria-expanded="showMore"
           aria-haspopup="true"
           aria-controls="playground-more-panel"

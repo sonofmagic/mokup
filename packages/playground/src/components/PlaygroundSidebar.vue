@@ -170,7 +170,7 @@ function handleSubMode(mode: 'api' | 'config') {
       >
         <template #actions>
           <button
-            class="flex h-7 w-7 items-center justify-center rounded border transition border-pg-border bg-pg-surface-strong text-pg-text-muted hover:bg-pg-hover-strong hover:text-pg-text-soft"
+            class="flex h-[34px] w-[34px] items-center justify-center rounded border transition border-pg-border bg-pg-surface-strong text-pg-text-muted hover:bg-pg-hover-strong hover:text-pg-text-soft"
             type="button"
             :aria-label="t('controls.collapseSidebar')"
             :title="t('controls.collapseSidebar')"

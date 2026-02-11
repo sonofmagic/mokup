@@ -37,6 +37,7 @@ const { t } = useI18n()
         :dense="props.compact"
         :placeholder="t('filters.searchPlaceholder')"
         data-testid="playground-search"
+        :class="props.compact ? 'h-[34px]' : ''"
         @input="handleInput"
       />
     </UiField>
