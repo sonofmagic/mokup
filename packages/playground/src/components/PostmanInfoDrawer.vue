@@ -34,7 +34,7 @@ const configChainProps = computed(() => {
         @click="emit('close')"
       />
       <aside
-        class="pg-info-panel absolute right-0 top-0 flex h-full w-full max-w-sm flex-col border-l shadow-xl border-pg-border bg-pg-surface-panel"
+        class="pg-info-panel absolute right-0 top-0 flex h-full w-full max-w-sm flex-col border-l border-pg-border bg-pg-surface-panel"
       >
         <div class="flex items-center justify-between border-b px-4 py-3 border-pg-border">
           <div class="flex flex-col gap-1">
@@ -46,7 +46,7 @@ const configChainProps = computed(() => {
             </span>
           </div>
           <button
-            class="rounded-full border p-2 transition border-pg-border bg-pg-surface-strong text-pg-text-muted hover:text-pg-text-soft"
+            class="rounded border p-2 transition border-pg-border bg-pg-surface-strong text-pg-text-muted hover:text-pg-text-soft"
             type="button"
             @click="emit('close')"
           >

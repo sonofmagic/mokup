@@ -29,7 +29,7 @@ const methodBadge = computed(() => `method-${props.method.toLowerCase()}`)
     </div>
     <div class="flex flex-wrap items-center gap-3 px-4 py-3">
       <span
-        class="rounded-full px-3 py-1 text-[0.6rem] uppercase tracking-[0.2em]"
+        class="rounded border px-3 py-1 text-[0.6rem] uppercase tracking-[0.2em]"
         :class="methodBadge"
       >
         {{ props.method }}
@@ -40,7 +40,7 @@ const methodBadge = computed(() => `method-${props.method.toLowerCase()}`)
         class="min-w-[220px] flex-1"
       />
       <button
-        class="flex items-center gap-2 rounded-full px-4 py-2 text-[0.65rem] uppercase tracking-[0.3em] shadow-sm transition hover:-translate-y-0.5 disabled:cursor-not-allowed disabled:opacity-70 disabled:hover:translate-y-0 bg-pg-accent text-pg-on-accent"
+        class="flex items-center gap-2 rounded px-4 py-2 text-[0.65rem] uppercase tracking-[0.3em] transition disabled:cursor-not-allowed disabled:opacity-70 bg-pg-accent text-pg-on-accent"
         data-testid="playground-run"
         :disabled="props.isSwRegistering"
         :aria-busy="props.isSwRegistering"

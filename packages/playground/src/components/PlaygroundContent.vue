@@ -187,7 +187,7 @@ function handleRun() {
   />
   <div
     v-else
-    class="flex h-full flex-col items-center justify-center gap-3 rounded-3xl border p-6 text-center shadow-xl border-pg-border bg-pg-surface-card text-pg-text-muted"
+    class="flex h-full flex-col items-center justify-center gap-3 rounded border p-6 text-center border-pg-border bg-pg-surface-card text-pg-text-muted"
   >
     <p class="text-xl font-display text-pg-text-strong">
       {{ modeTitle }}

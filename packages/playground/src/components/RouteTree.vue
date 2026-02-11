@@ -64,7 +64,7 @@ function highlightParts(text: string) {
     <div
       v-for="row in rows"
       :key="row.id"
-      class="group flex min-h-[28px] items-center gap-2 rounded-lg border border-transparent px-2 py-0.5 text-left transition text-pg-text-soft hover:bg-pg-hover-strong"
+      class="group flex min-h-[28px] items-center gap-2 rounded border border-transparent px-2 py-0.5 text-left transition text-pg-text-soft hover:bg-pg-hover-strong"
       :class="row.selected ? 'bg-pg-accent/16 text-pg-text-strong border-pg-accent/50 font-semibold shadow-[inset_3px_0_0_0_var(--color-pg-accent)]' : ''"
       data-testid="playground-tree-row"
     >
@@ -89,7 +89,7 @@ function highlightParts(text: string) {
             </span>
             <span
               v-if="row.kind === 'route' && row.route"
-              class="rounded-full border px-1.5 py-0.5 text-[0.5rem] uppercase tracking-[0.12em] leading-none transition group-hover:brightness-105"
+              class="rounded border px-1.5 py-0.5 text-[0.5rem] uppercase tracking-[0.12em] leading-none transition group-hover:brightness-105"
               :class="methodBadge(row.route.method, row.selected)"
             >
               {{ row.route.method }}

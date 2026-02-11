@@ -54,7 +54,7 @@ const configItems = computed(() => {
           :key="`config-${item.order}-${item.file}`"
           class="flex flex-wrap items-center gap-2"
         >
-          <span class="rounded-full border px-2 py-0.5 text-[0.55rem] uppercase tracking-[0.2em] border-pg-border bg-pg-surface-strong text-pg-text-soft">
+          <span class="rounded border px-2 py-0.5 text-[0.55rem] uppercase tracking-[0.2em] border-pg-border bg-pg-surface-strong text-pg-text-soft">
             {{ item.order }}
           </span>
           <span class="text-[0.7rem] text-pg-text-subtle">

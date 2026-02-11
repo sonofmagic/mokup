@@ -22,20 +22,20 @@ const props = withDefaults(defineProps<UiChipButtonProps>(), {
 })
 
 const chipButton = tv({
-  base: 'inline-flex items-center gap-2 rounded-full border uppercase tracking-[0.25em] transition hover:-translate-y-0.5',
+  base: 'inline-flex items-center gap-1.5 rounded border text-[0.75rem] transition',
   variants: {
     size: {
-      xs: 'px-2.5 py-1 text-[0.55rem]',
-      sm: 'px-3 py-1 text-[0.55rem]',
-      md: 'px-3 py-1.5 text-[0.6rem]',
-      lg: 'px-3 py-1.5 text-[0.65rem]',
+      xs: 'px-2 py-0.5',
+      sm: 'px-2 py-1',
+      md: 'px-2.5 py-1',
+      lg: 'px-3 py-1.5',
     },
     tone: {
-      strong: 'border-pg-border bg-pg-surface-strong text-pg-text-soft',
-      card: 'border-pg-border bg-pg-surface-card text-pg-text-soft',
+      strong: 'border-pg-border bg-pg-surface-strong text-pg-text-soft hover:bg-pg-hover-strong',
+      card: 'border-pg-border bg-pg-surface-card text-pg-text-soft hover:bg-pg-hover-strong',
     },
     active: {
-      true: 'bg-pg-accent text-pg-on-accent border-pg-accent shadow-sm ring-1 ring-pg-accent-ring',
+      true: 'bg-pg-accent text-pg-on-accent border-pg-accent',
     },
   },
   defaultVariants: {

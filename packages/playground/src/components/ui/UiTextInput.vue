@@ -13,7 +13,7 @@ const props = withDefaults(defineProps<UiTextInputProps>(), {
 })
 
 const textInput = tv({
-  base: 'rounded-lg border outline-none transition border-pg-border bg-pg-surface-strong text-pg-text focus:border-pg-accent',
+  base: 'rounded border outline-none transition border-pg-border bg-pg-surface-strong text-pg-text focus:border-pg-accent',
   variants: {
     dense: {
       true: 'px-2.5 py-1.5 text-[0.8rem]',

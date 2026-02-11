@@ -136,41 +136,41 @@ function isSelectedIgnored(route: PlaygroundIgnoredRoute) {
 
 <template>
   <div class="flex-1 min-h-0 overflow-auto">
-    <div v-if="props.error" class="rounded-2xl border px-4 py-3 text-sm border-pg-danger-border bg-pg-danger-bg text-pg-danger-text">
+    <div v-if="props.error" class="rounded border px-4 py-3 text-sm border-pg-danger-border bg-pg-danger-bg text-pg-danger-text">
       {{ props.error }}
     </div>
-    <div v-else-if="props.loading && !props.hasCachedData" class="rounded-2xl border px-4 py-6 text-sm border-pg-border bg-pg-surface-soft text-pg-text-muted">
+    <div v-else-if="props.loading && !props.hasCachedData" class="rounded border px-4 py-6 text-sm border-pg-border bg-pg-surface-soft text-pg-text-muted">
       {{ t('states.loadingRoutes') }}
     </div>
     <template v-else>
       <div
         v-if="props.loading && props.hasCachedData"
-        class="mb-2 inline-flex items-center gap-2 rounded-full border px-2.5 py-1 text-xs border-pg-border bg-pg-surface-soft text-pg-text-muted"
+        class="mb-2 inline-flex items-center gap-2 rounded border px-2.5 py-1 text-xs border-pg-border bg-pg-surface-soft text-pg-text-muted"
       >
         <span class="i-[carbon--renew] h-3 w-3 animate-spin" aria-hidden="true" />
         <span>{{ t('states.loadingRoutes') }}</span>
       </div>
       <div
         v-if="props.routeMode === 'disabled' && props.disabledMode === 'api' && !props.disabledFiltered.length"
-        class="rounded-2xl border px-4 py-6 text-sm border-pg-border bg-pg-surface-soft text-pg-text-muted"
+        class="rounded border px-4 py-6 text-sm border-pg-border bg-pg-surface-soft text-pg-text-muted"
       >
         {{ t('states.emptyDisabledRoutes') }}
       </div>
       <div
         v-else-if="props.routeMode === 'ignored' && !props.ignoredFiltered.length"
-        class="rounded-2xl border px-4 py-6 text-sm border-pg-border bg-pg-surface-soft text-pg-text-muted"
+        class="rounded border px-4 py-6 text-sm border-pg-border bg-pg-surface-soft text-pg-text-muted"
       >
         {{ t('states.emptyIgnoredRoutes') }}
       </div>
       <div
         v-else-if="props.routeMode === 'active' && props.enabledMode === 'api' && !props.filtered.length"
-        class="rounded-2xl border px-4 py-6 text-sm border-pg-border bg-pg-surface-soft text-pg-text-muted"
+        class="rounded border px-4 py-6 text-sm border-pg-border bg-pg-surface-soft text-pg-text-muted"
       >
         {{ t('states.emptyRoutes') }}
       </div>
       <div
         v-else-if="props.routeMode === 'active' && props.enabledMode === 'config' && !props.configFiltered.length"
-        class="rounded-2xl border px-4 py-6 text-sm border-pg-border bg-pg-surface-soft text-pg-text-muted"
+        class="rounded border px-4 py-6 text-sm border-pg-border bg-pg-surface-soft text-pg-text-muted"
       >
         {{ t('states.emptyConfigFiles') }}
       </div>
@@ -178,7 +178,7 @@ function isSelectedIgnored(route: PlaygroundIgnoredRoute) {
         <button
           v-for="route in props.disabledFiltered"
           :key="`${route.file}-${route.reason}-${route.method ?? ''}-${route.url ?? ''}`"
-          class="rounded-2xl border px-3 py-1 text-left text-xs transition border-pg-border bg-pg-surface-soft text-pg-text-soft hover:bg-pg-hover-strong hover:text-pg-text"
+          class="rounded border px-3 py-1 text-left text-xs transition border-pg-border bg-pg-surface-soft text-pg-text-soft hover:bg-pg-hover-strong hover:text-pg-text"
           :class="isSelectedDisabled(route) ? selectedRowClass : ''"
           type="button"
           @click="emit('select-disabled-route', route)"
@@ -202,7 +202,7 @@ function isSelectedIgnored(route: PlaygroundIgnoredRoute) {
             <div class="flex items-center gap-2">
               <span
                 v-if="isSelectedDisabled(route)"
-                class="flex h-6 w-6 items-center justify-center rounded-full border border-pg-accent/40 bg-pg-accent/10 text-pg-accent"
+                class="flex h-6 w-6 items-center justify-center rounded border border-pg-accent/40 bg-pg-accent/10 text-pg-accent"
                 aria-hidden="true"
               >
                 <span class="i-[carbon--checkmark] h-3.5 w-3.5" />
@@ -226,7 +226,7 @@ function isSelectedIgnored(route: PlaygroundIgnoredRoute) {
       </div>
       <div
         v-else-if="props.routeMode === 'disabled' && props.disabledMode === 'config' && !props.disabledConfigFiltered.length"
-        class="rounded-2xl border px-4 py-6 text-sm border-pg-border bg-pg-surface-soft text-pg-text-muted"
+        class="rounded border px-4 py-6 text-sm border-pg-border bg-pg-surface-soft text-pg-text-muted"
       >
         {{ t('states.emptyDisabledConfigFiles') }}
       </div>
@@ -234,7 +234,7 @@ function isSelectedIgnored(route: PlaygroundIgnoredRoute) {
         <button
           v-for="entry in props.disabledConfigFiltered"
           :key="entry.file"
-          class="rounded-2xl border px-3 py-1 text-left text-xs transition border-pg-border bg-pg-surface-soft text-pg-text-soft hover:bg-pg-hover-strong hover:text-pg-text"
+          class="rounded border px-3 py-1 text-left text-xs transition border-pg-border bg-pg-surface-soft text-pg-text-soft hover:bg-pg-hover-strong hover:text-pg-text"
           :class="isSelectedConfig(entry) ? selectedRowClass : ''"
           type="button"
           @click="emit('select-config', entry)"
@@ -250,7 +250,7 @@ function isSelectedIgnored(route: PlaygroundIgnoredRoute) {
             <div class="flex items-center gap-2">
               <span
                 v-if="isSelectedConfig(entry)"
-                class="flex h-6 w-6 items-center justify-center rounded-full border border-pg-accent/40 bg-pg-accent/10 text-pg-accent"
+                class="flex h-6 w-6 items-center justify-center rounded border border-pg-accent/40 bg-pg-accent/10 text-pg-accent"
                 aria-hidden="true"
               >
                 <span class="i-[carbon--checkmark] h-3.5 w-3.5" />
@@ -276,7 +276,7 @@ function isSelectedIgnored(route: PlaygroundIgnoredRoute) {
         <button
           v-for="route in props.ignoredFiltered"
           :key="`${route.file}-${route.reason}`"
-          class="rounded-2xl border px-3 py-1 text-left text-xs transition border-pg-border bg-pg-surface-soft text-pg-text-soft hover:bg-pg-hover-strong hover:text-pg-text"
+          class="rounded border px-3 py-1 text-left text-xs transition border-pg-border bg-pg-surface-soft text-pg-text-soft hover:bg-pg-hover-strong hover:text-pg-text"
           :class="isSelectedIgnored(route) ? selectedRowClass : ''"
           type="button"
           @click="emit('select-ignored-route', route)"
@@ -292,7 +292,7 @@ function isSelectedIgnored(route: PlaygroundIgnoredRoute) {
             <div class="flex items-center gap-2">
               <span
                 v-if="isSelectedIgnored(route)"
-                class="flex h-6 w-6 items-center justify-center rounded-full border border-pg-accent/40 bg-pg-accent/10 text-pg-accent"
+                class="flex h-6 w-6 items-center justify-center rounded border border-pg-accent/40 bg-pg-accent/10 text-pg-accent"
                 aria-hidden="true"
               >
                 <span class="i-[carbon--checkmark] h-3.5 w-3.5" />
@@ -318,7 +318,7 @@ function isSelectedIgnored(route: PlaygroundIgnoredRoute) {
         <button
           v-for="entry in props.configFiltered"
           :key="entry.file"
-          class="rounded-2xl border px-3 py-1 text-left text-xs transition border-pg-border bg-pg-surface-soft text-pg-text-soft hover:bg-pg-hover-strong hover:text-pg-text"
+          class="rounded border px-3 py-1 text-left text-xs transition border-pg-border bg-pg-surface-soft text-pg-text-soft hover:bg-pg-hover-strong hover:text-pg-text"
           :class="isSelectedConfig(entry) ? selectedRowClass : ''"
           type="button"
           @click="emit('select-config', entry)"
@@ -334,7 +334,7 @@ function isSelectedIgnored(route: PlaygroundIgnoredRoute) {
             <div class="flex items-center gap-2">
               <span
                 v-if="isSelectedConfig(entry)"
-                class="flex h-6 w-6 items-center justify-center rounded-full border border-pg-accent/40 bg-pg-accent/10 text-pg-accent"
+                class="flex h-6 w-6 items-center justify-center rounded border border-pg-accent/40 bg-pg-accent/10 text-pg-accent"
                 aria-hidden="true"
               >
                 <span class="i-[carbon--checkmark] h-3.5 w-3.5" />

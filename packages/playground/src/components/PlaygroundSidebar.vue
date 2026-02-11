@@ -64,11 +64,11 @@ const emit = defineEmits<{
 const { t } = useI18n()
 
 const sidebarClass = computed(() => {
-  const base = 'flex min-h-0 w-full max-w-none flex-col overflow-hidden border-b border-pg-border lg:flex-none lg:border-b-0 lg:border-r'
+  const base = 'flex min-h-0 w-full max-w-none flex-col overflow-hidden border-b border-pg-border bg-pg-surface-soft lg:flex-none lg:border-b-0 lg:border-r'
   if (props.collapsed) {
-    return `${base} p-2 lg:w-[72px] lg:min-w-[72px] lg:max-w-[72px]`
+    return `${base} p-1 lg:w-[72px] lg:min-w-[72px] lg:max-w-[72px]`
   }
-  return `${base} gap-3 p-3 lg:w-[var(--left-width)] lg:min-w-[240px] lg:max-w-[560px]`
+  return `${base} gap-1 p-2 lg:w-[var(--left-width)] lg:min-w-[240px] lg:max-w-[560px]`
 })
 
 const collapsedGroupLabel = computed(() => {
@@ -158,7 +158,7 @@ function handleSubMode(mode: 'api' | 'config') {
 
 <template>
   <aside :class="sidebarClass">
-    <div v-if="!props.collapsed" class="flex min-h-0 flex-1 flex-col gap-3">
+    <div v-if="!props.collapsed" class="flex min-h-0 flex-1 flex-col gap-1">
       <PlaygroundSidebarHeader
         v-bind="sidebarHeaderProps"
         @update:search="emit('update:search', $event)"
@@ -170,7 +170,7 @@ function handleSubMode(mode: 'api' | 'config') {
       >
         <template #actions>
           <button
-            class="flex h-8 w-8 items-center justify-center rounded-full border shadow-sm transition border-pg-border bg-pg-surface-strong text-pg-text-muted hover:text-pg-text-soft"
+            class="flex h-7 w-7 items-center justify-center rounded border transition border-pg-border bg-pg-surface-strong text-pg-text-muted hover:bg-pg-hover-strong hover:text-pg-text-soft"
             type="button"
             :aria-label="t('controls.collapseSidebar')"
             :title="t('controls.collapseSidebar')"
@@ -189,9 +189,9 @@ function handleSubMode(mode: 'api' | 'config') {
         @select-config="emit('select-config', $event)"
       />
     </div>
-    <div v-else class="flex min-h-0 flex-1 flex-col items-center gap-2 py-2">
+    <div v-else class="flex min-h-0 flex-1 flex-col items-center gap-1 py-1">
       <button
-        class="flex h-8 w-8 items-center justify-center rounded-full border shadow-sm transition border-pg-border bg-pg-surface-strong text-pg-text-muted hover:text-pg-text-soft"
+        class="flex h-7 w-7 items-center justify-center rounded border transition border-pg-border bg-pg-surface-strong text-pg-text-muted hover:bg-pg-hover-strong hover:text-pg-text-soft"
         type="button"
         :aria-label="t('controls.expandSidebar')"
         :title="t('controls.expandSidebar')"
@@ -199,11 +199,11 @@ function handleSubMode(mode: 'api' | 'config') {
       >
         <span class="i-[carbon--chevron-right] h-4 w-4" aria-hidden="true" />
       </button>
-      <div class="flex flex-col items-center gap-2">
+      <div class="flex flex-col items-center gap-1">
         <button
-          class="flex h-9 w-9 items-center justify-center rounded-full border transition"
+          class="flex h-8 w-8 items-center justify-center rounded border transition"
           :class="props.routeMode === 'active'
-            ? 'border-pg-accent/60 bg-pg-accent/15 text-pg-accent shadow-[0_0_0_1px_var(--color-pg-accent-ring)]'
+            ? 'border-pg-accent bg-pg-accent/15 text-pg-accent'
             : 'border-pg-border bg-pg-surface-strong text-pg-text-muted hover:bg-pg-hover-strong hover:text-pg-text-soft'"
           type="button"
           :title="t('disabled.active', { count: props.activeTotal })"
@@ -212,9 +212,9 @@ function handleSubMode(mode: 'api' | 'config') {
           <span class="i-[carbon--checkmark-filled] h-4 w-4" aria-hidden="true" />
         </button>
         <button
-          class="flex h-9 w-9 items-center justify-center rounded-full border transition"
+          class="flex h-8 w-8 items-center justify-center rounded border transition"
           :class="props.routeMode === 'disabled'
-            ? 'border-pg-accent/60 bg-pg-accent/15 text-pg-accent shadow-[0_0_0_1px_var(--color-pg-accent-ring)]'
+            ? 'border-pg-accent bg-pg-accent/15 text-pg-accent'
             : 'border-pg-border bg-pg-surface-strong text-pg-text-muted hover:bg-pg-hover-strong hover:text-pg-text-soft'"
           type="button"
           :title="t('disabled.disabled', { count: props.disabledTotal })"
@@ -223,9 +223,9 @@ function handleSubMode(mode: 'api' | 'config') {
           <span class="i-[carbon--close-filled] h-4 w-4" aria-hidden="true" />
         </button>
         <button
-          class="flex h-9 w-9 items-center justify-center rounded-full border transition"
+          class="flex h-8 w-8 items-center justify-center rounded border transition"
           :class="props.routeMode === 'ignored'
-            ? 'border-pg-accent/60 bg-pg-accent/15 text-pg-accent shadow-[0_0_0_1px_var(--color-pg-accent-ring)]'
+            ? 'border-pg-accent bg-pg-accent/15 text-pg-accent'
             : 'border-pg-border bg-pg-surface-strong text-pg-text-muted hover:bg-pg-hover-strong hover:text-pg-text-soft'"
           type="button"
           :title="t('disabled.ignored', { count: props.ignoredTotal })"
@@ -235,16 +235,16 @@ function handleSubMode(mode: 'api' | 'config') {
         </button>
       </div>
 
-      <div class="h-px w-8 bg-pg-border/70" />
+      <div class="h-px w-8 bg-pg-border" />
 
       <div
         v-if="props.routeMode !== 'ignored'"
-        class="flex flex-col items-center gap-2"
+        class="flex flex-col items-center gap-1"
       >
         <button
-          class="flex h-9 w-9 items-center justify-center rounded-full border transition"
+          class="flex h-8 w-8 items-center justify-center rounded border transition"
           :class="isApiMode
-            ? 'border-pg-accent/60 bg-pg-accent/15 text-pg-accent shadow-[0_0_0_1px_var(--color-pg-accent-ring)]'
+            ? 'border-pg-accent bg-pg-accent/15 text-pg-accent'
             : 'border-pg-border bg-pg-surface-strong text-pg-text-muted hover:bg-pg-hover-strong hover:text-pg-text-soft'"
           type="button"
           :title="props.routeMode === 'disabled'
@@ -255,9 +255,9 @@ function handleSubMode(mode: 'api' | 'config') {
           <span class="i-[carbon--api] h-4 w-4" aria-hidden="true" />
         </button>
         <button
-          class="flex h-9 w-9 items-center justify-center rounded-full border transition"
+          class="flex h-8 w-8 items-center justify-center rounded border transition"
           :class="isConfigMode
-            ? 'border-pg-accent/60 bg-pg-accent/15 text-pg-accent shadow-[0_0_0_1px_var(--color-pg-accent-ring)]'
+            ? 'border-pg-accent bg-pg-accent/15 text-pg-accent'
             : 'border-pg-border bg-pg-surface-strong text-pg-text-muted hover:bg-pg-hover-strong hover:text-pg-text-soft'"
           type="button"
           :title="props.routeMode === 'disabled'
@@ -269,13 +269,13 @@ function handleSubMode(mode: 'api' | 'config') {
         </button>
       </div>
 
-      <div class="h-px w-8 bg-pg-border/70" />
+      <div class="h-px w-8 bg-pg-border" />
 
-      <div class="flex flex-col items-center gap-2 text-pg-text-muted">
-        <span class="rounded-full border px-2 py-0.5 text-[0.55rem] uppercase tracking-[0.2em] border-pg-border bg-pg-surface-strong">
+      <div class="flex flex-col items-center gap-1 text-pg-text-muted">
+        <span class="rounded border px-1.5 py-0.5 text-[0.6rem] uppercase tracking-wide border-pg-border bg-pg-surface-strong">
           {{ collapsedGroupLabel }}
         </span>
-        <span v-if="hasSearch" class="flex h-8 w-8 items-center justify-center rounded-full border border-pg-accent/40 bg-pg-accent/10 text-pg-accent">
+        <span v-if="hasSearch" class="flex h-7 w-7 items-center justify-center rounded border border-pg-accent/40 bg-pg-accent/10 text-pg-accent">
           <span class="i-[carbon--search] h-4 w-4" aria-hidden="true" />
         </span>
       </div>

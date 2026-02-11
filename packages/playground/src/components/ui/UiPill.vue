@@ -22,14 +22,14 @@ const props = withDefaults(defineProps<UiPillProps>(), {
 })
 
 const pill = tv({
-  base: 'inline-flex items-center gap-2 rounded-full',
+  base: 'inline-flex items-center gap-1.5 rounded',
   variants: {
     size: {
-      xxs: 'px-2 py-0.5 text-[0.55rem]',
-      xs: 'px-2.5 py-1 text-[0.55rem]',
-      sm: 'px-3 py-1 text-[0.55rem]',
-      md: 'px-3 py-1.5 text-[0.6rem]',
-      lg: 'px-3 py-1.5 text-[0.65rem]',
+      xxs: 'px-1.5 py-0.5 text-[0.7rem]',
+      xs: 'px-2 py-0.5 text-[0.7rem]',
+      sm: 'px-2 py-0.5 text-[0.7rem]',
+      md: 'px-2.5 py-1 text-[0.75rem]',
+      lg: 'px-3 py-1 text-[0.8rem]',
     },
     tone: {
       strong: 'border border-pg-border bg-pg-surface-strong text-pg-text-soft',
@@ -37,20 +37,20 @@ const pill = tv({
       chip: 'bg-pg-chip text-pg-chip-text',
     },
     caps: {
-      true: 'uppercase',
+      true: '',
       false: '',
     },
     tracking: {
-      wide: 'tracking-[0.25em]',
-      tight: 'tracking-[0.2em]',
+      wide: '',
+      tight: '',
       none: '',
     },
   },
   defaultVariants: {
     size: 'md',
     tone: 'strong',
-    caps: true,
-    tracking: 'wide',
+    caps: false,
+    tracking: 'none',
   },
 })
 

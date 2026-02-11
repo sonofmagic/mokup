@@ -242,7 +242,7 @@ onBeforeUnmount(() => {
         class="pointer-events-none fixed inset-x-0 top-5 z-50 flex justify-center px-4"
       >
         <div
-          class="pg-hot-toast inline-flex items-center gap-2 rounded-full border border-pg-border bg-pg-surface-panel px-4 py-2 text-sm font-medium text-pg-text shadow-lg"
+          class="pg-hot-toast inline-flex items-center gap-2 rounded border border-pg-border bg-pg-surface-panel px-4 py-2 text-sm font-medium text-pg-text"
         >
           <span class="i-[carbon--checkmark-filled] h-4 w-4 text-pg-accent" aria-hidden="true" />
           Hot reload complete
@@ -304,17 +304,11 @@ onBeforeUnmount(() => {
 
             <div
               v-if="!sidebarCollapsed"
-              class="relative hidden w-4 flex-none items-center justify-center lg:flex"
+              class="pg-sash-zone relative hidden w-0 flex-none lg:flex"
+              :class="isDragging ? 'pg-sash-active' : ''"
+              @pointerdown="handleDragStart"
             >
-              <div class="h-full w-px bg-pg-divider" />
-              <button
-                class="group absolute flex h-10 w-10 cursor-col-resize items-center justify-center rounded-full border shadow-sm transition hover:-translate-y-0.5 border-pg-border bg-pg-surface-strong text-pg-text-muted hover:text-pg-text-soft"
-                type="button"
-                aria-label="Resize panels"
-                @pointerdown="handleDragStart"
-              >
-                <span class="i-[carbon--drag-horizontal] h-5 w-5" aria-hidden="true" />
-              </button>
+              <div class="pg-sash" role="separator" aria-label="Resize panels" />
             </div>
 
             <section class="flex min-h-0 flex-1 flex-col overflow-hidden p-4 lg:p-6">

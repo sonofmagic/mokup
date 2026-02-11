@@ -49,7 +49,7 @@ watch(hasPreview, (value) => {
 </script>
 
 <template>
-  <section class="flex min-h-[240px] flex-1 flex-col rounded-2xl border shadow-sm border-pg-border bg-pg-surface-card">
+  <section class="flex min-h-[240px] flex-1 flex-col rounded border border-pg-border bg-pg-surface-card">
     <div class="flex flex-wrap items-center justify-between gap-2 border-b px-4 py-3 text-[0.65rem] uppercase tracking-[0.3em] border-pg-border text-pg-text-muted">
       <span>{{ t('detail.responseLabel') }}</span>
       <span class="flex flex-wrap items-center gap-3 text-[0.65rem] normal-case tracking-normal text-pg-text-subtle">
@@ -97,7 +97,7 @@ watch(hasPreview, (value) => {
         <div class="flex flex-wrap items-center gap-3 text-[0.6rem] uppercase tracking-[0.25em] text-pg-text-muted">
           <button
             type="button"
-            class="rounded-full border px-3 py-1 transition border-pg-border"
+            class="rounded border px-3 py-1 transition border-pg-border"
             :class="bodyView === 'pretty' ? 'bg-pg-hover text-pg-text-strong' : 'text-pg-text-muted hover:text-pg-text-soft'"
             @click="bodyView = 'pretty'"
           >
@@ -105,7 +105,7 @@ watch(hasPreview, (value) => {
           </button>
           <button
             type="button"
-            class="rounded-full border px-3 py-1 transition border-pg-border"
+            class="rounded border px-3 py-1 transition border-pg-border"
             :class="bodyView === 'raw' ? 'bg-pg-hover text-pg-text-strong' : 'text-pg-text-muted hover:text-pg-text-soft'"
             @click="bodyView = 'raw'"
           >
@@ -113,7 +113,7 @@ watch(hasPreview, (value) => {
           </button>
           <button
             type="button"
-            class="rounded-full border px-3 py-1 transition border-pg-border disabled:cursor-not-allowed disabled:opacity-60"
+            class="rounded border px-3 py-1 transition border-pg-border disabled:cursor-not-allowed disabled:opacity-60"
             :class="bodyView === 'preview' ? 'bg-pg-hover text-pg-text-strong' : 'text-pg-text-muted hover:text-pg-text-soft'"
             :disabled="!hasPreview"
             @click="bodyView = 'preview'"
@@ -124,22 +124,22 @@ watch(hasPreview, (value) => {
         <div class="flex-1">
           <pre
             v-if="bodyView === 'pretty'"
-            class="min-h-[160px] rounded-xl border p-4 text-xs border-pg-border bg-pg-surface-strong text-pg-text"
+            class="min-h-[160px] rounded border p-4 text-xs border-pg-border bg-pg-surface-strong text-pg-text"
             data-testid="playground-response"
           >{{ responsePretty }}</pre>
           <pre
             v-else-if="bodyView === 'raw'"
-            class="min-h-[160px] rounded-xl border p-4 text-xs border-pg-border bg-pg-surface-strong text-pg-text"
+            class="min-h-[160px] rounded border p-4 text-xs border-pg-border bg-pg-surface-strong text-pg-text"
           >{{ responseRaw }}</pre>
           <div
             v-else-if="bodyView === 'preview' && !hasPreview"
-            class="min-h-[160px] rounded-xl border p-4 text-sm border-pg-border bg-pg-surface-strong text-pg-text-muted"
+            class="min-h-[160px] rounded border p-4 text-sm border-pg-border bg-pg-surface-strong text-pg-text-muted"
           >
             {{ t('response.previewEmpty') }}
           </div>
           <iframe
             v-else
-            class="min-h-[160px] w-full rounded-xl border bg-white"
+            class="min-h-[160px] w-full rounded border bg-white"
             :srcdoc="previewContent"
             sandbox=""
             :title="t('response.previewTab')"
@@ -149,7 +149,7 @@ watch(hasPreview, (value) => {
 
       <div
         v-else-if="activeTab === 'headers'"
-        class="min-h-[160px] rounded-xl border p-4 text-sm border-pg-border bg-pg-surface-strong text-pg-text-muted"
+        class="min-h-[160px] rounded border p-4 text-sm border-pg-border bg-pg-surface-strong text-pg-text-muted"
       >
         <div v-if="headerEntries.length === 0">
           {{ t('response.headersEmpty') }}
@@ -160,7 +160,7 @@ watch(hasPreview, (value) => {
             :key="key"
             class="flex flex-wrap items-center gap-2"
           >
-            <span class="rounded-full border px-2 py-0.5 text-[0.55rem] uppercase tracking-[0.2em] border-pg-border bg-pg-surface-card text-pg-text-soft">
+            <span class="rounded border px-2 py-0.5 text-[0.55rem] uppercase tracking-[0.2em] border-pg-border bg-pg-surface-card text-pg-text-soft">
               {{ key }}
             </span>
             <span class="text-pg-text">
@@ -172,7 +172,7 @@ watch(hasPreview, (value) => {
 
       <div
         v-else
-        class="min-h-[160px] rounded-xl border p-4 text-sm border-pg-border bg-pg-surface-strong text-pg-text-muted"
+        class="min-h-[160px] rounded border p-4 text-sm border-pg-border bg-pg-surface-strong text-pg-text-muted"
       >
         {{ t('response.cookiesEmpty') }}
       </div>

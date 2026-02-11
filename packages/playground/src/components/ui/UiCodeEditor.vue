@@ -101,7 +101,7 @@ const jsonErrorText = computed(() => {
 })
 
 const classes = computed(() => cn(
-  'overflow-hidden rounded-lg border border-pg-border bg-pg-surface-strong text-pg-text transition focus-within:border-pg-accent',
+  'overflow-hidden rounded border border-pg-border bg-pg-surface-strong text-pg-text transition focus-within:border-pg-accent',
   hasJsonError.value ? 'border-pg-danger-border' : '',
   props.disabled ? 'cursor-not-allowed opacity-80' : '',
   attrs.class,

@@ -4,30 +4,31 @@
 @custom-variant dark (&:where([data-theme='dark'], [data-theme='dark'] *));
 
 @theme {
-  --color-pg-text: rgb(30 41 59);
-  --color-pg-text-strong: rgb(15 23 42);
-  --color-pg-text-soft: rgb(51 65 85);
-  --color-pg-text-muted: rgb(100 116 139 / 70%);
-  --color-pg-text-subtle: rgb(100 116 139 / 60%);
-  --color-pg-on-accent: rgb(255 255 255);
-  --color-pg-on-accent-soft: rgb(255 255 255 / 90%);
-  --color-pg-accent: rgb(14 165 233);
-  --color-pg-accent-ring: rgb(125 211 252 / 60%);
-  --color-pg-border: rgb(226 232 240 / 70%);
-  --color-pg-divider: rgb(226 232 240 / 70%);
-  --color-pg-surface-shell: rgb(255 255 255 / 60%);
-  --color-pg-surface-card: rgb(255 255 255 / 70%);
-  --color-pg-surface-strong: rgb(255 255 255 / 80%);
-  --color-pg-surface-panel: rgb(255 255 255 / 95%);
-  --color-pg-surface-soft: rgb(255 255 255 / 60%);
-  --color-pg-surface-muted: rgb(241 245 249);
-  --color-pg-hover: rgb(224 242 254 / 70%);
-  --color-pg-hover-strong: rgb(226 232 240 / 60%);
-  --color-pg-danger-bg: rgb(254 242 242 / 80%);
-  --color-pg-danger-border: rgb(244 63 94 / 40%);
-  --color-pg-danger-text: rgb(190 18 60);
-  --color-pg-chip: rgb(241 245 249);
-  --color-pg-chip-text: rgb(51 65 85);
+  /* VS Code Light+ inspired palette (oklch) */
+  --color-pg-text: oklch(32.11% 0 0deg);
+  --color-pg-text-strong: oklch(24.78% 0 0deg);
+  --color-pg-text-soft: oklch(49.26% 0 0deg);
+  --color-pg-text-muted: oklch(62.68% 0 0deg);
+  --color-pg-text-subtle: oklch(70.58% 0 0deg);
+  --color-pg-on-accent: oklch(100% 0 0deg);
+  --color-pg-on-accent-soft: oklch(100% 0 0deg / 90%);
+  --color-pg-accent: oklch(56.7% 0.1546 248.52deg);
+  --color-pg-accent-ring: oklch(56.7% 0.1546 248.52deg / 40%);
+  --color-pg-border: oklch(85.14% 0 0deg);
+  --color-pg-divider: oklch(85.14% 0 0deg);
+  --color-pg-surface-shell: oklch(96.42% 0 0deg);
+  --color-pg-surface-card: oklch(100% 0 0deg);
+  --color-pg-surface-strong: oklch(100% 0 0deg);
+  --color-pg-surface-panel: oklch(100% 0 0deg);
+  --color-pg-surface-soft: oklch(96.42% 0 0deg);
+  --color-pg-surface-muted: oklch(96.42% 0 0deg);
+  --color-pg-hover: oklch(56.7% 0.1546 248.52deg / 10%);
+  --color-pg-hover-strong: oklch(0% 0 0deg / 6%);
+  --color-pg-danger-bg: oklch(95.6% 0.0218 17.54deg);
+  --color-pg-danger-border: oklch(55.92% 0.1927 26.08deg / 50%);
+  --color-pg-danger-text: oklch(55.92% 0.1927 26.08deg);
+  --color-pg-chip: oklch(94.31% 0 0deg);
+  --color-pg-chip-text: oklch(32.11% 0 0deg);
 }
 
 @layer base {
@@ -35,49 +36,45 @@
     color-scheme: light;
 
     --scrollbar-size: 8px;
-    --scrollbar-track: rgb(214 226 238 / 60%);
-    --scrollbar-thumb: rgb(120 150 185 / 55%);
-    --scrollbar-thumb-hover: rgb(96 128 165 / 75%);
-    --pg-app-bg:
-      radial-gradient(circle at top, rgb(209 226 245 / 45%), transparent 55%),
-      radial-gradient(circle at 85% 20%, rgb(200 230 222 / 35%), transparent 50%),
-      radial-gradient(circle at 12% 80%, rgb(245 238 226 / 40%), transparent 55%);
+    --scrollbar-track: oklch(96.42% 0 0deg);
+    --scrollbar-thumb: oklch(80.47% 0 0deg);
+    --scrollbar-thumb-hover: oklch(50.32% 0 0deg);
+    --pg-app-bg: oklch(96.42% 0 0deg);
   }
 
   :root[data-theme='dark'] {
     color-scheme: dark;
 
-    --scrollbar-track: rgb(24 32 44 / 80%);
-    --scrollbar-thumb: rgb(110 140 176 / 50%);
-    --scrollbar-thumb-hover: rgb(140 170 205 / 70%);
-    --pg-app-bg:
-      radial-gradient(circle at top, rgb(38 60 92 / 55%), transparent 55%),
-      radial-gradient(circle at 85% 20%, rgb(24 78 96 / 40%), transparent 50%),
-      radial-gradient(circle at 12% 80%, rgb(70 58 44 / 45%), transparent 55%);
-    --color-pg-text: rgb(248 250 252);
-    --color-pg-text-strong: rgb(248 250 252);
-    --color-pg-text-soft: rgb(241 245 249);
-    --color-pg-text-muted: rgb(226 232 240 / 70%);
-    --color-pg-text-subtle: rgb(226 232 240 / 60%);
-    --color-pg-on-accent: rgb(255 255 255);
-    --color-pg-on-accent-soft: rgb(255 255 255 / 90%);
-    --color-pg-accent: rgb(56 189 248);
-    --color-pg-accent-ring: rgb(56 189 248 / 45%);
-    --color-pg-border: rgb(51 65 85 / 50%);
-    --color-pg-divider: rgb(51 65 85 / 50%);
-    --color-pg-surface-shell: rgb(2 6 23 / 70%);
-    --color-pg-surface-card: rgb(15 23 42 / 70%);
-    --color-pg-surface-strong: rgb(15 23 42 / 80%);
-    --color-pg-surface-panel: rgb(2 6 23 / 95%);
-    --color-pg-surface-soft: rgb(15 23 42 / 60%);
-    --color-pg-surface-muted: rgb(30 41 59);
-    --color-pg-hover: rgb(15 23 42 / 70%);
-    --color-pg-hover-strong: rgb(30 41 59 / 70%);
-    --color-pg-danger-bg: rgb(76 5 25 / 40%);
-    --color-pg-danger-border: rgb(253 164 175 / 40%);
-    --color-pg-danger-text: rgb(255 228 230 / 80%);
-    --color-pg-chip: rgb(30 41 59);
-    --color-pg-chip-text: rgb(226 232 240);
+    --scrollbar-track: oklch(23.5% 0 0deg);
+    --scrollbar-thumb: oklch(42.76% 0 0deg);
+    --scrollbar-thumb-hover: oklch(53.82% 0 0deg);
+    --pg-app-bg: oklch(23.5% 0 0deg);
+
+    /* VS Code Dark+ inspired palette (oklch) */
+    --color-pg-text: oklch(84.52% 0 0deg);
+    --color-pg-text-strong: oklch(92.19% 0 0deg);
+    --color-pg-text-soft: oklch(84.52% 0 0deg);
+    --color-pg-text-muted: oklch(62.68% 0 0deg);
+    --color-pg-text-subtle: oklch(53.82% 0 0deg);
+    --color-pg-on-accent: oklch(100% 0 0deg);
+    --color-pg-on-accent-soft: oklch(100% 0 0deg / 90%);
+    --color-pg-accent: oklch(56.7% 0.1546 248.52deg);
+    --color-pg-accent-ring: oklch(56.7% 0.1546 248.52deg / 45%);
+    --color-pg-border: oklch(32.11% 0 0deg);
+    --color-pg-divider: oklch(32.11% 0 0deg);
+    --color-pg-surface-shell: oklch(23.5% 0 0deg);
+    --color-pg-surface-card: oklch(26.49% 0 0deg);
+    --color-pg-surface-strong: oklch(26.49% 0 0deg);
+    --color-pg-surface-panel: oklch(23.5% 0 0deg);
+    --color-pg-surface-soft: oklch(26.49% 0 0deg);
+    --color-pg-surface-muted: oklch(29.31% 0 0deg);
+    --color-pg-hover: oklch(56.7% 0.1546 248.52deg / 15%);
+    --color-pg-hover-strong: oklch(100% 0 0deg / 8%);
+    --color-pg-danger-bg: oklch(55.92% 0.1927 26.08deg / 15%);
+    --color-pg-danger-border: oklch(55.92% 0.1927 26.08deg / 50%);
+    --color-pg-danger-text: oklch(74.22% 0.1332 20.76deg);
+    --color-pg-chip: oklch(32.11% 0 0deg);
+    --color-pg-chip-text: oklch(84.52% 0 0deg);
   }
 
   html,
@@ -242,6 +239,44 @@
 
   .pg-hot-toast {
     animation: p g-hot-toast-pulse 0 0.9s ease-out 2;
+  }
+
+  /* VS Code-style sash (resize handle) */
+  .pg-sash-zone {
+    position: relative;
+    z-index: 10;
+    align-items: stretch;
+    cursor: col-resize;
+  }
+
+  .pg-sash {
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    left: -1px;
+    width: 1px;
+    pointer-events: none;
+    background: var(--color-pg-divider);
+    transition: none;
+  }
+
+  .pg-sash-zone::before {
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    left: -3px;
+    z-index: 1;
+    width: 7px;
+    content: '';
+  }
+
+  .pg-sash-zone:hover .pg-sash,
+  .pg-sash-active .pg-sash {
+    left: -2px;
+    width: 4px;
+    background: var(--color-pg-accent);
+    border-radius: 2px;
+    transition: background 0.1s ease;
   }
 
   .pg-hot-toast-enter-active,

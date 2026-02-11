@@ -48,7 +48,7 @@ const { t } = useI18n()
 
 <template>
   <section class="flex min-h-0 flex-col gap-4">
-    <div v-if="!props.selected" class="flex h-full flex-col items-center justify-center gap-3 rounded-3xl border p-6 text-center shadow-xl border-pg-border bg-pg-surface-card text-pg-text-muted">
+    <div v-if="!props.selected" class="flex h-full flex-col items-center justify-center gap-3 rounded border p-6 text-center border-pg-border bg-pg-surface-card text-pg-text-muted">
       <p class="text-xl font-display text-pg-text-strong">
         {{ t('detail.selectTitle') }}
       </p>

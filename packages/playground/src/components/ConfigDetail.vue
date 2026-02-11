@@ -70,7 +70,7 @@ function openInEditorForFile(file: string) {
 
 <template>
   <section class="flex min-h-0 flex-col gap-4">
-    <div class="rounded-3xl border p-5 shadow-xl border-pg-border bg-pg-surface-card">
+    <div class="rounded border p-5 border-pg-border bg-pg-surface-card">
       <div class="flex flex-wrap items-center justify-between gap-3">
         <div class="flex flex-col gap-1">
           <span class="text-[0.6rem] uppercase tracking-[0.3em] text-pg-text-muted">
@@ -103,11 +103,11 @@ function openInEditorForFile(file: string) {
     </div>
 
     <div class="flex min-h-0 flex-1 flex-col gap-3">
-      <div v-if="totalCount === 0" class="rounded-2xl border px-4 py-6 text-sm border-pg-border bg-pg-surface-soft text-pg-text-muted">
+      <div v-if="totalCount === 0" class="rounded border px-4 py-6 text-sm border-pg-border bg-pg-surface-soft text-pg-text-muted">
         {{ t('configPanel.emptyImpacts') }}
       </div>
       <template v-else>
-        <div v-if="grouped.active.length > 0" class="rounded-2xl border p-4 border-pg-border bg-pg-surface-soft">
+        <div v-if="grouped.active.length > 0" class="rounded border p-4 border-pg-border bg-pg-surface-soft">
           <div class="flex items-center gap-2 text-[0.6rem] uppercase tracking-[0.3em] text-pg-text-muted">
             <span>{{ t('configPanel.active') }}</span>
             <UiPill tone="chip" size="xxs" :caps="false">
@@ -115,12 +115,12 @@ function openInEditorForFile(file: string) {
             </UiPill>
           </div>
           <div class="mt-3 flex flex-col gap-2 text-sm text-pg-text-soft">
-            <div v-for="entry in grouped.active" :key="`active-${entry.file}-${entry.method ?? ''}-${entry.url ?? ''}`" class="rounded-xl border px-3 py-2 border-pg-border bg-pg-surface-card">
+            <div v-for="entry in grouped.active" :key="`active-${entry.file}-${entry.method ?? ''}-${entry.url ?? ''}`" class="rounded border px-3 py-2 border-pg-border bg-pg-surface-card">
               <div class="flex flex-wrap items-center justify-between gap-2">
                 <div class="flex flex-wrap items-center gap-2">
                   <span
                     v-if="entry.method"
-                    class="rounded-full px-2 py-1 text-[0.55rem] uppercase tracking-[0.2em]"
+                    class="rounded border px-2 py-1 text-[0.55rem] uppercase tracking-[0.2em]"
                     :class="methodBadge(entry.method)"
                   >
                     {{ entry.method }}
@@ -146,7 +146,7 @@ function openInEditorForFile(file: string) {
             </div>
           </div>
         </div>
-        <div v-if="grouped.disabled.length > 0" class="rounded-2xl border p-4 border-pg-border bg-pg-surface-soft">
+        <div v-if="grouped.disabled.length > 0" class="rounded border p-4 border-pg-border bg-pg-surface-soft">
           <div class="flex items-center gap-2 text-[0.6rem] uppercase tracking-[0.3em] text-pg-text-muted">
             <span>{{ t('configPanel.disabled') }}</span>
             <UiPill tone="chip" size="xxs" :caps="false">
@@ -154,12 +154,12 @@ function openInEditorForFile(file: string) {
             </UiPill>
           </div>
           <div class="mt-3 flex flex-col gap-2 text-sm text-pg-text-soft">
-            <div v-for="entry in grouped.disabled" :key="`disabled-${entry.file}-${entry.method ?? ''}-${entry.url ?? ''}`" class="rounded-xl border px-3 py-2 border-pg-border bg-pg-surface-card">
+            <div v-for="entry in grouped.disabled" :key="`disabled-${entry.file}-${entry.method ?? ''}-${entry.url ?? ''}`" class="rounded border px-3 py-2 border-pg-border bg-pg-surface-card">
               <div class="flex flex-wrap items-center justify-between gap-2">
                 <div class="flex flex-wrap items-center gap-2">
                   <span
                     v-if="entry.method"
-                    class="rounded-full px-2 py-1 text-[0.55rem] uppercase tracking-[0.2em]"
+                    class="rounded border px-2 py-1 text-[0.55rem] uppercase tracking-[0.2em]"
                     :class="methodBadge(entry.method)"
                   >
                     {{ entry.method }}
@@ -185,7 +185,7 @@ function openInEditorForFile(file: string) {
             </div>
           </div>
         </div>
-        <div v-if="grouped.ignored.length > 0" class="rounded-2xl border p-4 border-pg-border bg-pg-surface-soft">
+        <div v-if="grouped.ignored.length > 0" class="rounded border p-4 border-pg-border bg-pg-surface-soft">
           <div class="flex items-center gap-2 text-[0.6rem] uppercase tracking-[0.3em] text-pg-text-muted">
             <span>{{ t('configPanel.ignored') }}</span>
             <UiPill tone="chip" size="xxs" :caps="false">
@@ -193,7 +193,7 @@ function openInEditorForFile(file: string) {
             </UiPill>
           </div>
           <div class="mt-3 flex flex-col gap-2 text-sm text-pg-text-soft">
-            <div v-for="entry in grouped.ignored" :key="`ignored-${entry.file}`" class="rounded-xl border px-3 py-2 border-pg-border bg-pg-surface-card">
+            <div v-for="entry in grouped.ignored" :key="`ignored-${entry.file}`" class="rounded border px-3 py-2 border-pg-border bg-pg-surface-card">
               <div class="flex flex-wrap items-center justify-between gap-2">
                 <span class="text-[0.75rem] font-semibold text-pg-text">
                   {{ formatRouteTitle(entry) }}

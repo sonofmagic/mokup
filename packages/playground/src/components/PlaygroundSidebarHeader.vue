@@ -168,7 +168,7 @@ onBeforeUnmount(() => {
       v-if="showMore"
       id="playground-more-panel"
       ref="morePanelRef"
-      class="absolute left-0 right-0 z-30 mt-2 rounded-2xl border p-3 shadow-xl border-pg-border bg-pg-surface-panel"
+      class="absolute left-0 right-0 z-30 mt-1 rounded border p-2 border-pg-border bg-pg-surface-panel shadow-md"
     >
       <div class="grid gap-3">
         <UiField :label="t('filters.base')" dense>

@@ -56,7 +56,7 @@ function handleRefresh() {
 </script>
 
 <template>
-  <div class="flex flex-none flex-wrap items-center justify-between gap-2 rounded-2xl border px-3 py-2 text-[0.55rem] uppercase tracking-[0.25em] shadow-sm border-pg-border bg-pg-surface-card text-pg-text-soft">
+  <div class="flex flex-none flex-wrap items-center justify-between gap-2 border-b px-3 py-1.5 text-xs border-pg-border bg-pg-surface-card text-pg-text-soft">
     <div class="flex flex-wrap items-center gap-2">
       <UiPill tone="strong" size="xs">
         <span class="i-[carbon--map] h-3.5 w-3.5" aria-hidden="true" />

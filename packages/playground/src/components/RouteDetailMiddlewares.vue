@@ -98,7 +98,7 @@ const totalCount = computed(() => {
           <span
             v-for="middleware in preMiddlewares"
             :key="`pre-${middleware}`"
-            class="inline-flex items-center gap-2 rounded-full border px-3 py-1 text-[0.6rem] border-pg-border bg-pg-surface-strong"
+            class="inline-flex items-center gap-2 rounded border px-3 py-1 text-[0.6rem] border-pg-border bg-pg-surface-strong"
           >
             {{ middleware }}
             <a
@@ -123,7 +123,7 @@ const totalCount = computed(() => {
           <span
             v-for="middleware in normalMiddlewares"
             :key="`normal-${middleware}`"
-            class="inline-flex items-center gap-2 rounded-full border px-3 py-1 text-[0.6rem] border-pg-border bg-pg-surface-strong"
+            class="inline-flex items-center gap-2 rounded border px-3 py-1 text-[0.6rem] border-pg-border bg-pg-surface-strong"
           >
             {{ middleware }}
             <a
@@ -148,7 +148,7 @@ const totalCount = computed(() => {
           <span
             v-for="middleware in postMiddlewares"
             :key="`post-${middleware}`"
-            class="inline-flex items-center gap-2 rounded-full border px-3 py-1 text-[0.6rem] border-pg-border bg-pg-surface-strong"
+            class="inline-flex items-center gap-2 rounded border px-3 py-1 text-[0.6rem] border-pg-border bg-pg-surface-strong"
           >
             {{ middleware }}
             <a
