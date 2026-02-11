@@ -103,66 +103,87 @@ onBeforeUnmount(() => {
         <slot name="actions" />
       </div>
     </div>
-    <div class="mt-2 flex flex-wrap items-center gap-2">
-      <UiChipButton
-        size="md"
-        :active="props.routeMode === 'active'"
+    <div class="mt-2 flex items-center gap-5 border-b border-pg-border text-[0.65rem] uppercase tracking-[0.25em]">
+      <button
+        type="button"
+        class="border-b-2 pb-1.5 transition"
+        :class="props.routeMode === 'active'
+          ? 'border-pg-accent text-pg-text-strong'
+          : 'border-transparent text-pg-text-muted hover:text-pg-text-soft'"
         @click="emit('set-route-mode', 'active')"
       >
         {{ t('disabled.active', { count: props.activeTotal }) }}
-      </UiChipButton>
-      <UiChipButton
-        size="md"
-        :active="props.routeMode === 'disabled'"
+      </button>
+      <button
+        type="button"
+        class="border-b-2 pb-1.5 transition"
+        :class="props.routeMode === 'disabled'
+          ? 'border-pg-accent text-pg-text-strong'
+          : 'border-transparent text-pg-text-muted hover:text-pg-text-soft'"
         @click="emit('set-route-mode', 'disabled')"
       >
         {{ t('disabled.disabled', { count: props.disabledTotal }) }}
-      </UiChipButton>
-      <UiChipButton
-        size="md"
-        :active="props.routeMode === 'ignored'"
+      </button>
+      <button
+        type="button"
+        class="border-b-2 pb-1.5 transition"
+        :class="props.routeMode === 'ignored'
+          ? 'border-pg-accent text-pg-text-strong'
+          : 'border-transparent text-pg-text-muted hover:text-pg-text-soft'"
         @click="emit('set-route-mode', 'ignored')"
       >
         {{ t('disabled.ignored', { count: props.ignoredTotal }) }}
-      </UiChipButton>
+      </button>
     </div>
     <div
       v-if="props.routeMode === 'active'"
-      class="mt-2 flex flex-wrap items-center gap-2"
+      class="mt-1.5 flex items-center gap-4 text-[0.6rem] uppercase tracking-[0.2em]"
     >
-      <UiChipButton
-        size="sm"
-        :active="props.enabledMode === 'api'"
+      <button
+        type="button"
+        class="border-b pb-1 transition"
+        :class="props.enabledMode === 'api'
+          ? 'border-pg-accent text-pg-text-strong'
+          : 'border-transparent text-pg-text-muted hover:text-pg-text-soft'"
         @click="emit('set-enabled-mode', 'api')"
       >
         {{ t('enabled.api', { count: props.apiTotal }) }}
-      </UiChipButton>
-      <UiChipButton
-        size="sm"
-        :active="props.enabledMode === 'config'"
+      </button>
+      <button
+        type="button"
+        class="border-b pb-1 transition"
+        :class="props.enabledMode === 'config'
+          ? 'border-pg-accent text-pg-text-strong'
+          : 'border-transparent text-pg-text-muted hover:text-pg-text-soft'"
         @click="emit('set-enabled-mode', 'config')"
       >
         {{ t('enabled.config', { count: props.configTotal }) }}
-      </UiChipButton>
+      </button>
     </div>
     <div
       v-else-if="props.routeMode === 'disabled'"
-      class="mt-2 flex flex-wrap items-center gap-2"
+      class="mt-1.5 flex items-center gap-4 text-[0.6rem] uppercase tracking-[0.2em]"
     >
-      <UiChipButton
-        size="sm"
-        :active="props.disabledMode === 'api'"
+      <button
+        type="button"
+        class="border-b pb-1 transition"
+        :class="props.disabledMode === 'api'
+          ? 'border-pg-accent text-pg-text-strong'
+          : 'border-transparent text-pg-text-muted hover:text-pg-text-soft'"
         @click="emit('set-disabled-mode', 'api')"
       >
         {{ t('enabled.api', { count: props.disabledApiTotal }) }}
-      </UiChipButton>
-      <UiChipButton
-        size="sm"
-        :active="props.disabledMode === 'config'"
+      </button>
+      <button
+        type="button"
+        class="border-b pb-1 transition"
+        :class="props.disabledMode === 'config'
+          ? 'border-pg-accent text-pg-text-strong'
+          : 'border-transparent text-pg-text-muted hover:text-pg-text-soft'"
         @click="emit('set-disabled-mode', 'config')"
       >
         {{ t('enabled.config', { count: props.disabledConfigTotal }) }}
-      </UiChipButton>
+      </button>
     </div>
     <div
       v-if="showMore"
