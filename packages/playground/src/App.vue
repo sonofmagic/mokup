@@ -69,6 +69,15 @@ const {
   rawValidate,
   multipartFiles,
   binaryFile,
+  authType,
+  authToken,
+  authUsername,
+  authPassword,
+  authKeyName,
+  authKeyValue,
+  authKeyLocation,
+  authCustomName,
+  authCustomValue,
   responseRaw,
   responsePretty,
   responseHeaders,
@@ -329,6 +338,15 @@ onBeforeUnmount(() => {
                   v-model:rawValidate="rawValidate"
                   v-model:multipartFiles="multipartFiles"
                   v-model:binaryFile="binaryFile"
+                  v-model:authType="authType"
+                  v-model:authToken="authToken"
+                  v-model:authUsername="authUsername"
+                  v-model:authPassword="authPassword"
+                  v-model:authKeyName="authKeyName"
+                  v-model:authKeyValue="authKeyValue"
+                  v-model:authKeyLocation="authKeyLocation"
+                  v-model:authCustomName="authCustomName"
+                  v-model:authCustomValue="authCustomValue"
                   :selected="selected"
                   :selected-disabled="selectedDisabled"
                   :selected-ignored="selectedIgnored"

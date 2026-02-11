@@ -1,6 +1,6 @@
 import type { RouteToken } from '@mokup/runtime'
 import type { Ref } from 'vue'
-import type { BodyType, MultipartFileEntry, PlaygroundRoute, RawBodyType, RouteParamField } from '../types'
+import type { ApiKeyLocation, AuthType, BodyType, MultipartFileEntry, PlaygroundRoute, RawBodyType, RouteParamField } from '../types'
 import type { RouteCounts } from './playground-request/websocket'
 import { parseRouteTemplate } from '@mokup/runtime'
 import { computed, getCurrentInstance, onBeforeUnmount, ref, watch } from 'vue'
@@ -40,6 +40,15 @@ export function usePlaygroundRequest(
   const rawValidate = ref(true)
   const binaryFile = ref<File | null>(null)
   const multipartFiles = ref<MultipartFileEntry[]>([])
+  const authType = ref<AuthType>('none')
+  const authToken = ref('')
+  const authUsername = ref('')
+  const authPassword = ref('')
+  const authKeyName = ref('')
+  const authKeyValue = ref('')
+  const authKeyLocation = ref<ApiKeyLocation>('header')
+  const authCustomName = ref('')
+  const authCustomValue = ref('')
   const responseRaw = ref('')
   const responsePretty = ref(t('response.empty'))
   const responseText = responsePretty
@@ -246,6 +255,15 @@ export function usePlaygroundRequest(
     rawValidate,
     multipartFiles,
     binaryFile,
+    authType,
+    authToken,
+    authUsername,
+    authPassword,
+    authKeyName,
+    authKeyValue,
+    authKeyLocation,
+    authCustomName,
+    authCustomValue,
     responseRaw,
     responsePretty,
     responseText,
@@ -277,6 +295,15 @@ export function usePlaygroundRequest(
     rawValidate,
     multipartFiles,
     binaryFile,
+    authType,
+    authToken,
+    authUsername,
+    authPassword,
+    authKeyName,
+    authKeyValue,
+    authKeyLocation,
+    authCustomName,
+    authCustomValue,
     responseRaw,
     responsePretty,
     responseText,

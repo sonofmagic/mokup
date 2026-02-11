@@ -219,6 +219,25 @@ export interface PlaygroundResponse {
  * const mode: BodyType = 'raw'
  */
 export type BodyType = 'none' | 'form-data' | 'form-urlencoded' | 'raw' | 'binary'
+/**
+ * Auth modes supported by the playground UI.
+ *
+ * @example
+ * import type { AuthType } from '@mokup/playground'
+ *
+ * const mode: AuthType = 'bearer'
+ */
+export type AuthType = 'none' | 'bearer' | 'basic' | 'apikey' | 'custom'
+
+/**
+ * Where an API key is sent.
+ *
+ * @example
+ * import type { ApiKeyLocation } from '@mokup/playground'
+ *
+ * const loc: ApiKeyLocation = 'header'
+ */
+export type ApiKeyLocation = 'header' | 'query'
 
 /**
  * Raw body language selections.

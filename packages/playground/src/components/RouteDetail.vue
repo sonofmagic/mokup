@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import type { BodyType, MultipartFileEntry, PlaygroundRoute, RawBodyType, RouteParamField } from '../types'
+import type { ApiKeyLocation, AuthType, BodyType, MultipartFileEntry, PlaygroundRoute, RawBodyType, RouteParamField } from '../types'
 import { useI18n } from 'vue-i18n'
 import PostmanRequestView from './PostmanRequestView.vue'
 import PostmanResponseView from './PostmanResponseView.vue'
@@ -20,6 +20,15 @@ const props = defineProps<{
   rawValidate: boolean
   multipartFiles: MultipartFileEntry[]
   binaryFile: File | null
+  authType: AuthType
+  authToken: string
+  authUsername: string
+  authPassword: string
+  authKeyName: string
+  authKeyValue: string
+  authKeyLocation: ApiKeyLocation
+  authCustomName: string
+  authCustomValue: string
   responseRaw: string
   responsePretty: string
   responseHeaders: Record<string, string>
@@ -39,6 +48,15 @@ const emit = defineEmits<{
   (event: 'update:rawValidate', value: boolean): void
   (event: 'update:multipartFiles', value: MultipartFileEntry[]): void
   (event: 'update:binaryFile', value: File | null): void
+  (event: 'update:authType', value: AuthType): void
+  (event: 'update:authToken', value: string): void
+  (event: 'update:authUsername', value: string): void
+  (event: 'update:authPassword', value: string): void
+  (event: 'update:authKeyName', value: string): void
+  (event: 'update:authKeyValue', value: string): void
+  (event: 'update:authKeyLocation', value: ApiKeyLocation): void
+  (event: 'update:authCustomName', value: string): void
+  (event: 'update:authCustomValue', value: string): void
   (event: 'update:param-value', name: string, value: string): void
   (event: 'run'): void
 }>()
@@ -73,6 +91,15 @@ const { t } = useI18n()
         :raw-validate="props.rawValidate"
         :multipart-files="props.multipartFiles"
         :binary-file="props.binaryFile"
+        :auth-type="props.authType"
+        :auth-token="props.authToken"
+        :auth-username="props.authUsername"
+        :auth-password="props.authPassword"
+        :auth-key-name="props.authKeyName"
+        :auth-key-value="props.authKeyValue"
+        :auth-key-location="props.authKeyLocation"
+        :auth-custom-name="props.authCustomName"
+        :auth-custom-value="props.authCustomValue"
         :is-sw-registering="props.isSwRegistering"
         :config-status-map="props.configStatusMap"
         @update:queryText="emit('update:queryText', $event)"
@@ -83,6 +110,15 @@ const { t } = useI18n()
         @update:rawValidate="emit('update:rawValidate', $event)"
         @update:multipartFiles="emit('update:multipartFiles', $event)"
         @update:binaryFile="emit('update:binaryFile', $event)"
+        @update:authType="emit('update:authType', $event)"
+        @update:authToken="emit('update:authToken', $event)"
+        @update:authUsername="emit('update:authUsername', $event)"
+        @update:authPassword="emit('update:authPassword', $event)"
+        @update:authKeyName="emit('update:authKeyName', $event)"
+        @update:authKeyValue="emit('update:authKeyValue', $event)"
+        @update:authKeyLocation="emit('update:authKeyLocation', $event)"
+        @update:authCustomName="emit('update:authCustomName', $event)"
+        @update:authCustomValue="emit('update:authCustomValue', $event)"
         @update:param-value="(name, value) => emit('update:param-value', name, value)"
         @run="emit('run')"
       />

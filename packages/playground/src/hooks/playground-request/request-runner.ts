@@ -1,6 +1,6 @@
 import type { RouteToken } from '@mokup/runtime'
 import type { Ref } from 'vue'
-import type { BodyType, MultipartFileEntry, PlaygroundRoute, RawBodyType } from '../../types'
+import type { ApiKeyLocation, AuthType, BodyType, MultipartFileEntry, PlaygroundRoute, RawBodyType } from '../../types'
 import type { RouteCounts } from './websocket'
 import { parseRouteTemplate } from '@mokup/runtime'
 import { applyQuery, parseJsonInput } from '../../utils/request'
@@ -20,6 +20,15 @@ function createRequestRunner(params: {
   rawValidate: Ref<boolean>
   multipartFiles?: Ref<MultipartFileEntry[]>
   binaryFile?: Ref<File | null>
+  authType?: Ref<AuthType>
+  authToken?: Ref<string>
+  authUsername?: Ref<string>
+  authPassword?: Ref<string>
+  authKeyName?: Ref<string>
+  authKeyValue?: Ref<string>
+  authKeyLocation?: Ref<ApiKeyLocation>
+  authCustomName?: Ref<string>
+  authCustomValue?: Ref<string>
   responseText?: Ref<string>
   responseRaw?: Ref<string>
   responsePretty?: Ref<string>
@@ -130,6 +139,41 @@ function createRequestRunner(params: {
           continue
         }
         headers[key] = Array.isArray(value) ? value.join(',') : String(value)
+      }
+    }
+
+    const authMode = params.authType?.value ?? 'none'
+    if (authMode === 'bearer') {
+      const token = params.authToken?.value ?? ''
+      if (token) {
+        headers['Authorization'] = `Bearer ${token}`
+      }
+    }
+    else if (authMode === 'basic') {
+      const user = params.authUsername?.value ?? ''
+      const pass = params.authPassword?.value ?? ''
+      if (user || pass) {
+        headers['Authorization'] = `Basic ${btoa(`${user}:${pass}`)}`
+      }
+    }
+    else if (authMode === 'apikey') {
+      const keyName = params.authKeyName?.value ?? ''
+      const keyValue = params.authKeyValue?.value ?? ''
+      const keyLocation = params.authKeyLocation?.value ?? 'header'
+      if (keyName && keyValue) {
+        if (keyLocation === 'query') {
+          url.searchParams.set(keyName, keyValue)
+        }
+        else {
+          headers[keyName] = keyValue
+        }
+      }
+    }
+    else if (authMode === 'custom') {
+      const name = params.authCustomName?.value ?? ''
+      const value = params.authCustomValue?.value ?? ''
+      if (name) {
+        headers[name] = value
       }
     }
 

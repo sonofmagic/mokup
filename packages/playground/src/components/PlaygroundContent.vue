@@ -1,5 +1,7 @@
 <script setup lang="ts">
 import type {
+  ApiKeyLocation,
+  AuthType,
   BodyType,
   MultipartFileEntry,
   PlaygroundConfigFile,
@@ -35,6 +37,15 @@ const props = defineProps<{
   rawValidate: boolean
   multipartFiles: MultipartFileEntry[]
   binaryFile: File | null
+  authType: AuthType
+  authToken: string
+  authUsername: string
+  authPassword: string
+  authKeyName: string
+  authKeyValue: string
+  authKeyLocation: ApiKeyLocation
+  authCustomName: string
+  authCustomValue: string
   responseRaw: string
   responsePretty: string
   responseHeaders: Record<string, string>
@@ -58,6 +69,15 @@ const emit = defineEmits<{
   (event: 'update:rawValidate', value: boolean): void
   (event: 'update:multipartFiles', value: MultipartFileEntry[]): void
   (event: 'update:binaryFile', value: File | null): void
+  (event: 'update:authType', value: AuthType): void
+  (event: 'update:authToken', value: string): void
+  (event: 'update:authUsername', value: string): void
+  (event: 'update:authPassword', value: string): void
+  (event: 'update:authKeyName', value: string): void
+  (event: 'update:authKeyValue', value: string): void
+  (event: 'update:authKeyLocation', value: ApiKeyLocation): void
+  (event: 'update:authCustomName', value: string): void
+  (event: 'update:authCustomValue', value: string): void
   (event: 'update:param-value', name: string, value: string): void
   (event: 'run'): void
 }>()
@@ -124,6 +144,42 @@ const binaryFileModel = computed({
   get: () => props.binaryFile,
   set: value => emit('update:binaryFile', value),
 })
+const authTypeModel = computed({
+  get: () => props.authType,
+  set: value => emit('update:authType', value),
+})
+const authTokenModel = computed({
+  get: () => props.authToken,
+  set: value => emit('update:authToken', value),
+})
+const authUsernameModel = computed({
+  get: () => props.authUsername,
+  set: value => emit('update:authUsername', value),
+})
+const authPasswordModel = computed({
+  get: () => props.authPassword,
+  set: value => emit('update:authPassword', value),
+})
+const authKeyNameModel = computed({
+  get: () => props.authKeyName,
+  set: value => emit('update:authKeyName', value),
+})
+const authKeyValueModel = computed({
+  get: () => props.authKeyValue,
+  set: value => emit('update:authKeyValue', value),
+})
+const authKeyLocationModel = computed({
+  get: () => props.authKeyLocation,
+  set: value => emit('update:authKeyLocation', value),
+})
+const authCustomNameModel = computed({
+  get: () => props.authCustomName,
+  set: value => emit('update:authCustomName', value),
+})
+const authCustomValueModel = computed({
+  get: () => props.authCustomValue,
+  set: value => emit('update:authCustomValue', value),
+})
 const resolvedWorkspaceRoot = computed(() => props.workspaceRoot ?? '')
 
 function handleParamUpdate(name: string, value: string) {
@@ -146,6 +202,15 @@ function handleRun() {
     v-model:rawValidate="rawValidateModel"
     v-model:multipartFiles="multipartFilesModel"
     v-model:binaryFile="binaryFileModel"
+    v-model:authType="authTypeModel"
+    v-model:authToken="authTokenModel"
+    v-model:authUsername="authUsernameModel"
+    v-model:authPassword="authPasswordModel"
+    v-model:authKeyName="authKeyNameModel"
+    v-model:authKeyValue="authKeyValueModel"
+    v-model:authKeyLocation="authKeyLocationModel"
+    v-model:authCustomName="authCustomNameModel"
+    v-model:authCustomValue="authCustomValueModel"
     :selected="props.selected"
     :request-url="props.requestUrl"
     :workspace-root="resolvedWorkspaceRoot"
