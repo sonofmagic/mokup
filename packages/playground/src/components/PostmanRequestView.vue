@@ -420,7 +420,7 @@ function formatBytes(size: number) {
       <div class="border-t px-4 py-4 border-pg-border">
         <div v-show="activeTab === 'params'" class="flex flex-col gap-4">
           <div>
-            <div class="mb-2 text-[0.55rem] uppercase tracking-[0.25em] text-pg-text-muted">
+            <div class="mb-1.5 text-[0.55rem] uppercase tracking-[0.25em] text-pg-text-muted">
               {{ t('detail.params') }}
             </div>
             <div
@@ -539,7 +539,7 @@ function formatBytes(size: number) {
             </label>
           </div>
 
-          <div v-if="props.bodyType === 'none'" class="rounded border px-4 py-3 text-sm border-pg-border bg-pg-surface-strong text-pg-text-muted">
+          <div v-if="props.bodyType === 'none'" class="mt-3 rounded border px-4 py-3 text-sm border-pg-border bg-pg-surface-strong text-pg-text-muted">
             {{ t('detail.bodyNoneHint') }}
           </div>
           <div v-else-if="props.bodyType === 'binary'" class="mt-2">

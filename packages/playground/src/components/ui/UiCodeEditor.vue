@@ -401,7 +401,7 @@ onBeforeUnmount(() => {
       class="flex items-center justify-end border-b px-2 py-1 border-pg-border bg-pg-surface-soft"
     >
       <button
-        class="rounded-md border px-2 py-1 text-[0.62rem] font-medium uppercase tracking-[0.16em] transition border-pg-border bg-pg-surface-card text-pg-text-muted hover:text-pg-text-soft"
+        class="rounded border px-2 py-1 text-[0.62rem] font-medium uppercase tracking-[0.16em] transition border-pg-border bg-pg-surface-card text-pg-text-muted hover:text-pg-text-soft"
         type="button"
         @click="formatJson"
       >

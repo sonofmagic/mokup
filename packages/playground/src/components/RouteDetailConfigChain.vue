@@ -27,7 +27,7 @@ const configItems = computed(() => {
   <div>
     <button
       type="button"
-      class="group flex w-full items-center justify-between border-t px-4 py-3 text-[0.6rem] uppercase tracking-[0.2em] transition border-pg-border text-pg-text-muted hover:text-pg-text-soft"
+      class="group flex w-full items-center justify-between px-4 py-3 text-[0.6rem] uppercase tracking-[0.2em] transition text-pg-text-muted hover:text-pg-text-soft"
       :aria-expanded="isOpen"
       :aria-controls="contentId"
       @click="toggle"
