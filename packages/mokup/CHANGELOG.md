@@ -1,5 +1,15 @@
 # mokup
 
+## 2.3.6
+
+### Patch Changes
+
+- 🐛 **Improve e2e stability by hardening Vite readiness checks in `tests/e2e/run-app-e2e.mjs`.** [`45007f6`](https://github.com/sonofmagic/mokup/commit/45007f66158c08455f539dc3b8fb13b70212d2b5) by @sonofmagic
+  - Require HTTP readiness to succeed instead of only warning when checks fail.
+  - Recover stale Vite lock files when the recorded lock owner process no longer exists.
+- 📦 **Dependencies** [`4ac0ea6`](https://github.com/sonofmagic/mokup/commit/4ac0ea67da45620c19616b3fc7b5aa24a2bd3431)
+  → `@mokup/playground@0.2.2`, `@mokup/server@1.2.5`, `@mokup/cli@1.1.5`
+
 ## 2.3.5
 
 ### Patch Changes
