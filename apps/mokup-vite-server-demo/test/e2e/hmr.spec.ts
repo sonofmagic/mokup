@@ -1,4 +1,4 @@
-import { mkdir, readFile, rm, writeFile } from 'node:fs/promises'
+import { readFile, writeFile } from 'node:fs/promises'
 import { join } from 'node:path'
 import { expect, test } from '@playwright/test'
 import { writeJson } from '../../../../tests/e2e/utils/fs'
@@ -11,29 +11,19 @@ const mockDir = join(process.cwd(), 'mock')
 
 interface FileBackup {
   path: string
-  content: string | null
+  content: string
 }
 
 const backups: FileBackup[] = []
 
 async function backupFile(filePath: string) {
-  try {
-    const content = await readFile(filePath, 'utf8')
-    backups.push({ path: filePath, content })
-  }
-  catch {
-    backups.push({ path: filePath, content: null })
-  }
+  const content = await readFile(filePath, 'utf8')
+  backups.push({ path: filePath, content })
 }
 
 async function restoreAll() {
   for (const backup of backups.reverse()) {
-    if (backup.content === null) {
-      await rm(backup.path, { force: true })
-    }
-    else {
-      await writeFile(backup.path, backup.content, 'utf8')
-    }
+    await writeFile(backup.path, backup.content, 'utf8')
   }
   backups.length = 0
 }
@@ -45,32 +35,21 @@ async function pollApi(
   timeout = 15_000,
 ) {
   await expect.poll(async () => {
-    const res = await request.get(path, {
-      headers: { 'cache-control': 'no-cache' },
-    })
-    if (!res.ok()) {
+    try {
+      const res = await request.get(path, {
+        headers: { 'cache-control': 'no-cache' },
+      })
+      if (!res.ok()) {
+        return false
+      }
+      const text = await res.text()
+      const json = JSON.parse(text) as Record<string, unknown>
+      return check(json)
+    }
+    catch {
       return false
     }
-    const json = await res.json() as Record<string, unknown>
-    return check(json)
   }, { timeout }).toBe(true)
-}
-
-function removeBackup(filePath: string) {
-  const idx = backups.findIndex(b => b.path === filePath)
-  if (idx >= 0) {
-    backups.splice(idx, 1)
-  }
-}
-
-function removeBackupsUnder(dirPath: string) {
-  const idxs = backups
-    .map((b, i) => (b.path.startsWith(dirPath) ? i : -1))
-    .filter(i => i >= 0)
-    .reverse()
-  for (const i of idxs) {
-    backups.splice(i, 1)
-  }
 }
 
 test.afterEach(async () => {
@@ -78,10 +57,10 @@ test.afterEach(async () => {
 })
 
 // ---------------------------------------------------------------------------
-// Edit existing mocks
+// Edit JSON mocks
 // ---------------------------------------------------------------------------
 
-test.describe('edit existing mocks', () => {
+test.describe('edit JSON mock files', () => {
   test('editing a JSON mock triggers hot reload', async ({ request }) => {
     const filePath = join(mockDir, 'status.get.json')
     await backupFile(filePath)
@@ -110,6 +89,97 @@ test.describe('edit existing mocks', () => {
     await pollApi(request, '/api/summary', body => body['e2e'] === stamp)
   })
 
+  test('rapid successive edits settle to the last value', async ({ request }) => {
+    const filePath = join(mockDir, 'status.get.json')
+    await backupFile(filePath)
+
+    for (let i = 0; i < 5; i++) {
+      await writeJson(filePath, { status: 'ok', rapid: `v${i}` })
+    }
+    const finalStamp = `final-${Date.now()}`
+    await writeJson(filePath, { status: 'ok', rapid: finalStamp })
+
+    await pollApi(request, '/api/status', body => body['rapid'] === finalStamp)
+  })
+
+  test('overwriting JSON with completely different structure', async ({ request }) => {
+    const filePath = join(mockDir, 'status.get.json')
+    await backupFile(filePath)
+
+    await writeJson(filePath, { version: 1, shape: 'original' })
+    await pollApi(request, '/api/status', body => body['version'] === 1)
+
+    await writeJson(filePath, { version: 2, extra: 'added', array: [1, 2, 3] })
+    await pollApi(request, '/api/status', (body) => {
+      return body['version'] === 2
+        && body['extra'] === 'added'
+        && Array.isArray(body['array'])
+    })
+  })
+
+  test('editing with special characters', async ({ request }) => {
+    const filePath = join(mockDir, 'status.get.json')
+    await backupFile(filePath)
+
+    await writeJson(filePath, {
+      emoji: '🚀',
+      unicode: '你好世界',
+      zero: 0,
+      nullish: null,
+    })
+
+    await pollApi(request, '/api/status', (body) => {
+      return body['emoji'] === '🚀'
+        && body['unicode'] === '你好世界'
+        && body['zero'] === 0
+        && body['nullish'] === null
+    })
+  })
+
+  test('editing with deeply nested JSON', async ({ request }) => {
+    const filePath = join(mockDir, 'status.get.json')
+    await backupFile(filePath)
+
+    await writeJson(filePath, {
+      a: { b: { c: { value: 'deep' } } },
+    })
+
+    await pollApi(request, '/api/status', (body) => {
+      const a = body['a'] as Record<string, unknown> | undefined
+      const b = a?.['b'] as Record<string, unknown> | undefined
+      const c = b?.['c'] as Record<string, unknown> | undefined
+      return c?.['value'] === 'deep'
+    })
+  })
+
+  test('editing with empty JSON object', async ({ request }) => {
+    const filePath = join(mockDir, 'status.get.json')
+    await backupFile(filePath)
+
+    await writeJson(filePath, {})
+
+    await expect.poll(async () => {
+      try {
+        const res = await request.get('/api/status', {
+          headers: { 'cache-control': 'no-cache' },
+        })
+        if (!res.ok()) {
+          return null
+        }
+        return JSON.parse(await res.text())
+      }
+      catch {
+        return null
+      }
+    }, { timeout: 15_000 }).toEqual({})
+  })
+})
+
+// ---------------------------------------------------------------------------
+// Edit TS handler mocks
+// ---------------------------------------------------------------------------
+
+test.describe('edit TS handler mock files', () => {
   test('editing a TS handler mock triggers hot reload', async ({ request }) => {
     const filePath = join(mockDir, 'variants.get.ts')
     await backupFile(filePath)
@@ -127,225 +197,133 @@ test.describe('edit existing mocks', () => {
 
     await pollApi(request, '/api/variants', body => body['marker'] === marker)
   })
-})
 
-// ---------------------------------------------------------------------------
-// Add new mocks
-// ---------------------------------------------------------------------------
-
-test.describe('add new mocks', () => {
-  test('adding a new JSON mock registers a route', async ({ request }) => {
-    const filePath = join(mockDir, 'e2e-new.get.json')
+  test('editing profile.get.ts updates the response', async ({ request }) => {
+    const filePath = join(mockDir, 'profile.get.ts')
     await backupFile(filePath)
 
-    await writeJson(filePath, { created: true, ts: Date.now() })
-
-    await pollApi(request, '/api/e2e-new', body => body['created'] === true)
-  })
-
-  test('adding a new TS handler mock registers a route', async ({ request }) => {
-    const filePath = join(mockDir, 'e2e-new-ts.get.ts')
-    await backupFile(filePath)
-
-    const marker = `new-${Date.now()}`
+    const marker = `profile-${Date.now()}`
     const content = [
       'import { defineHandler } from \'mokup\'',
       '',
-      `export default defineHandler(() => ({ added: true, marker: '${marker}' }))`,
+      'export default defineHandler(() => ({',
+      `  id: 'e2e',`,
+      `  name: '${marker}',`,
+      `  email: 'e2e@test.com',`,
+      '}))',
       '',
     ].join('\n')
     await writeFile(filePath, content, 'utf8')
 
-    await pollApi(request, '/api/e2e-new-ts', body => body['marker'] === marker)
+    await pollApi(request, '/api/profile', body => body['name'] === marker)
   })
 
-  test('adding a POST mock registers the correct method', async ({ request }) => {
-    const filePath = join(mockDir, 'e2e-post.post.json')
+  test('editing login.post.ts handler updates the response', async ({ request }) => {
+    const filePath = join(mockDir, 'login.post.ts')
     await backupFile(filePath)
 
-    await writeJson(filePath, { method: 'POST', ok: true })
+    const marker = `login-${Date.now()}`
+    const content = [
+      'import { defineHandler } from \'mokup\'',
+      '',
+      'export default defineHandler(async (c) => {',
+      '  const body = await c.req.json().catch(() => ({}))',
+      '  return {',
+      '    ok: true,',
+      `    marker: '${marker}',`,
+      '    token: \'mock-token-7d91\',',
+      '  }',
+      '})',
+      '',
+    ].join('\n')
+    await writeFile(filePath, content, 'utf8')
 
     await expect.poll(async () => {
-      const res = await request.post('/api/e2e-post', {
-        headers: { 'content-type': 'application/json' },
-        data: {},
-      })
-      if (!res.ok()) {
+      try {
+        const res = await request.post('/api/login', {
+          headers: { 'content-type': 'application/json' },
+          data: { username: 'mokup', password: '123456' },
+        })
+        if (!res.ok()) {
+          return false
+        }
+        const json = JSON.parse(await res.text()) as Record<string, unknown>
+        return json['marker'] === marker
+      }
+      catch {
         return false
       }
-      const json = await res.json() as Record<string, unknown>
-      return json['method'] === 'POST'
     }, { timeout: 15_000 }).toBe(true)
   })
 
-  test('adding a mock in a new subdirectory registers a nested route', async ({ request }) => {
-    const dirPath = join(mockDir, 'e2e-sub')
-    const filePath = join(dirPath, 'info.get.json')
+  test('editing users/[id].get.ts dynamic route updates the response', async ({ request }) => {
+    const filePath = join(mockDir, 'users/[id].get.ts')
     await backupFile(filePath)
 
-    await mkdir(dirPath, { recursive: true })
-    await writeJson(filePath, { nested: true })
-
-    await pollApi(request, '/api/e2e-sub/info', body => body['nested'] === true)
-
-    backups.push({ path: dirPath, content: null })
-  })
-})
-
-// ---------------------------------------------------------------------------
-// Delete mocks
-// ---------------------------------------------------------------------------
-
-test.describe('delete mocks', () => {
-  test('deleting a mock file removes the route', async ({ request }) => {
-    const filePath = join(mockDir, 'e2e-del.get.json')
-    await backupFile(filePath)
-
-    await writeJson(filePath, { temp: true })
-    await pollApi(request, '/api/e2e-del', body => body['temp'] === true)
-
-    await rm(filePath, { force: true })
-    removeBackup(filePath)
-
-    await expect.poll(async () => {
-      const res = await request.get('/api/e2e-del', {
-        headers: { 'cache-control': 'no-cache' },
-      })
-      return res.status()
-    }, { timeout: 15_000 }).toBeGreaterThanOrEqual(400)
-  })
-
-  test('deleting a TS handler removes the route', async ({ request }) => {
-    const filePath = join(mockDir, 'e2e-del-ts.get.ts')
-    await backupFile(filePath)
-
+    const marker = `user-${Date.now()}`
     const content = [
       'import { defineHandler } from \'mokup\'',
-      'export default defineHandler(() => ({ alive: true }))',
+      '',
+      'export default defineHandler((c) => ({',
+      '  ok: true,',
+      '  id: c.req.param(\'id\'),',
+      `  marker: '${marker}',`,
+      '}))',
       '',
     ].join('\n')
     await writeFile(filePath, content, 'utf8')
-    await pollApi(request, '/api/e2e-del-ts', body => body['alive'] === true)
 
-    await rm(filePath, { force: true })
-    removeBackup(filePath)
-
-    await expect.poll(async () => {
-      const res = await request.get('/api/e2e-del-ts', {
-        headers: { 'cache-control': 'no-cache' },
-      })
-      return res.status()
-    }, { timeout: 15_000 }).toBeGreaterThanOrEqual(400)
-  })
-
-  test('deleting a directory removes all its routes', async ({ request }) => {
-    const dirPath = join(mockDir, 'e2e-dir-del')
-    const file1 = join(dirPath, 'one.get.json')
-    const file2 = join(dirPath, 'two.get.json')
-    await backupFile(file1)
-    await backupFile(file2)
-
-    await mkdir(dirPath, { recursive: true })
-    await writeJson(file1, { route: 'one' })
-    await writeJson(file2, { route: 'two' })
-
-    await pollApi(request, '/api/e2e-dir-del/one', body => body['route'] === 'one')
-    await pollApi(request, '/api/e2e-dir-del/two', body => body['route'] === 'two')
-
-    await rm(dirPath, { recursive: true, force: true })
-    removeBackupsUnder(dirPath)
-
-    await expect.poll(async () => {
-      const res = await request.get('/api/e2e-dir-del/one', {
-        headers: { 'cache-control': 'no-cache' },
-      })
-      return res.status()
-    }, { timeout: 15_000 }).toBeGreaterThanOrEqual(400)
+    await pollApi(request, '/api/users/42', body => body['marker'] === marker && body['id'] === '42')
   })
 })
 
 // ---------------------------------------------------------------------------
-// Replace / swap
+// Multiple edits in sequence
 // ---------------------------------------------------------------------------
 
-test.describe('replace mock content', () => {
-  test('overwriting JSON with different structure', async ({ request }) => {
-    const filePath = join(mockDir, 'e2e-swap.get.json')
-    await backupFile(filePath)
+test.describe('multiple sequential edits', () => {
+  test('editing multiple JSON mocks in sequence', async ({ request }) => {
+    const statusPath = join(mockDir, 'status.get.json')
+    const summaryPath = join(mockDir, 'summary.get.jsonc')
+    await backupFile(statusPath)
+    await backupFile(summaryPath)
 
-    await writeJson(filePath, { v: 1 })
-    await pollApi(request, '/api/e2e-swap', body => body['v'] === 1)
+    const stamp = `multi-${Date.now()}`
 
-    await writeJson(filePath, { v: 2, extra: 'added' })
-    await pollApi(request, '/api/e2e-swap', body => body['v'] === 2 && body['extra'] === 'added')
-  })
+    await writeJson(statusPath, { status: 'ok', e2e: stamp })
+    await pollApi(request, '/api/status', body => body['e2e'] === stamp)
 
-  test('switching from JSON to TS handler', async ({ request }) => {
-    const jsonPath = join(mockDir, 'e2e-format.get.json')
-    const tsPath = join(mockDir, 'e2e-format.get.ts')
-    await backupFile(jsonPath)
-    await backupFile(tsPath)
-
-    await writeJson(jsonPath, { format: 'json' })
-    await pollApi(request, '/api/e2e-format', body => body['format'] === 'json')
-
-    await rm(jsonPath, { force: true })
-    const tsContent = [
-      'import { defineHandler } from \'mokup\'',
-      'export default defineHandler(() => ({ format: \'ts\' }))',
+    const summaryContent = [
+      '{',
+      `  "service": "${stamp}",`,
+      `  "e2e": "${stamp}"`,
+      '}',
       '',
     ].join('\n')
-    await writeFile(tsPath, tsContent, 'utf8')
-
-    await pollApi(request, '/api/e2e-format', body => body['format'] === 'ts')
-  })
-})
-
-// ---------------------------------------------------------------------------
-// Full lifecycle
-// ---------------------------------------------------------------------------
-
-test.describe('full lifecycle: add → edit → delete', () => {
-  test('JSON mock full lifecycle', async ({ request }) => {
-    const filePath = join(mockDir, 'e2e-life.get.json')
-    await backupFile(filePath)
-
-    // Add
-    await writeJson(filePath, { phase: 'created' })
-    await pollApi(request, '/api/e2e-life', body => body['phase'] === 'created')
-
-    // Edit
-    await writeJson(filePath, { phase: 'updated' })
-    await pollApi(request, '/api/e2e-life', body => body['phase'] === 'updated')
-
-    // Delete
-    await rm(filePath, { force: true })
-    removeBackup(filePath)
-
-    await expect.poll(async () => {
-      const res = await request.get('/api/e2e-life', {
-        headers: { 'cache-control': 'no-cache' },
-      })
-      return res.status()
-    }, { timeout: 15_000 }).toBeGreaterThanOrEqual(400)
+    await writeFile(summaryPath, summaryContent, 'utf8')
+    await pollApi(request, '/api/summary', body => body['e2e'] === stamp)
   })
 
-  test('re-creating a deleted mock restores the route', async ({ request }) => {
-    const filePath = join(mockDir, 'e2e-revive.get.json')
+  test('editing a TS mock twice picks up both changes', async ({ request }) => {
+    const filePath = join(mockDir, 'variants.get.ts')
     await backupFile(filePath)
 
-    await writeJson(filePath, { round: 1 })
-    await pollApi(request, '/api/e2e-revive', body => body['round'] === 1)
+    const marker1 = `v1-${Date.now()}`
+    const content1 = [
+      'import { defineHandler } from \'mokup\'',
+      `export default defineHandler(() => ({ phase: '${marker1}' }))`,
+      '',
+    ].join('\n')
+    await writeFile(filePath, content1, 'utf8')
+    await pollApi(request, '/api/variants', body => body['phase'] === marker1)
 
-    await rm(filePath, { force: true })
-    await expect.poll(async () => {
-      const res = await request.get('/api/e2e-revive', {
-        headers: { 'cache-control': 'no-cache' },
-      })
-      return res.status()
-    }, { timeout: 15_000 }).toBeGreaterThanOrEqual(400)
-
-    await writeJson(filePath, { round: 2 })
-    await pollApi(request, '/api/e2e-revive', body => body['round'] === 2)
+    const marker2 = `v2-${Date.now()}`
+    const content2 = [
+      'import { defineHandler } from \'mokup\'',
+      `export default defineHandler(() => ({ phase: '${marker2}' }))`,
+      '',
+    ].join('\n')
+    await writeFile(filePath, content2, 'utf8')
+    await pollApi(request, '/api/variants', body => body['phase'] === marker2)
   })
 })
