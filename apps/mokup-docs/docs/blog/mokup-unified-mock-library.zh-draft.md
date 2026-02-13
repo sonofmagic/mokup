@@ -149,7 +149,18 @@ export default defineHandler((c) => {
 
 ## 可部署到多个环境
 
-如果你需要把这套 mock 带到不同部署环境，Mokup 也提供了对应能力。以 Worker 为例：
+这套 mock 可以运行在多个环境：比如在 Node.js 里直接使用，甚至还能部署到 Cloudflare Worker。
+
+Node.js 直接使用示例：
+
+```ts
+import { createFetchServer, serve } from 'mokup/server/node'
+
+const app = await createFetchServer({ entries: { dir: 'mock' } })
+serve({ fetch: app.fetch, port: 3000 })
+```
+
+部署到 Cloudflare Worker 示例：
 
 ```ts
 import { createMokupWorker } from 'mokup/server/worker'
@@ -158,7 +169,7 @@ import mokupBundle from 'virtual:mokup-bundle'
 export default createMokupWorker(mokupBundle)
 ```
 
-提示：`virtual:mokup-bundle` 仅在 Vite 与 `@cloudflare/vite-plugin` 集成环境可用；其他环境使用对应构建产物即可。
+提示：`virtual:mokup-bundle` 仅在 Vite 与 `@cloudflare/vite-plugin` 集成环境可用；Node.js Dev 模式可直接使用 `createFetchServer`，无需该虚拟模块。
 
 ## 核心架构
 
