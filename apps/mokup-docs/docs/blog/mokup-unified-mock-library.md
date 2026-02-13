@@ -1,36 +1,39 @@
-# Mokup: A Unified Runtime Mock Library
+# Mokup: A Build-Tool-Friendly Visual Mocking Tool
 
-I built a mock library called Mokup because I wanted one set of mock routes to
-run everywhere: local dev, Node servers, Service Workers, and Cloudflare
-Workers. Most mock tools are great in one place but fall apart when you move
-from browser to server to edge. Mokup’s goal is to make that transition boring.
+![Mokup Logo](../public/brand/mokup-logo.svg)
 
-## What Mokup does
+Hi, I am [icebreaker](https://github.com/sonofmagic), a frontend developer and open source enthusiast.
 
-Mokup is a file-based HTTP mock library with a shared runtime. You write mock
-files once, and Mokup runs them across:
+I want to share a project I have been working on recently: Mokup, a file-based HTTP mocking tool.
 
-- Vite dev server middleware
-- Service Worker mode in the browser
-- Node server adapters (Express, Koa, Fastify, Hono, Connect)
-- Worker runtimes via a fetch handler or Worker entry
+Project links: [GitHub](https://github.com/sonofmagic/mokup), docs site: http://mokup.icebreaker.top/
 
-It gives you a consistent request handler, a manifest format, and build outputs
-that can be reused across environments.
+## What is Mokup
 
-## How it works (in one minute)
+Mokup is a file-based HTTP mocking tool. You put mock files in the `mock/` directory, and it automatically scans them, builds matching routes, and returns responses.
 
-1. Mokup scans your `mock/` directory and builds a manifest of routes.
-2. A shared runtime matches requests and produces responses.
-3. Adapters (Vite, Node middleware, Workers) call into the same runtime.
-4. For production or Worker environments, you can build a bundle that contains
-   both the manifest and handler modules.
+Its goal is straightforward: help mocks run quickly inside your existing frontend project, and reduce the cost of building a separate service just for API collaboration.
 
-That’s it: one routing model, one runtime, multiple adapters.
+## Key features
 
-## Quick start
+- Build-tool friendly: works with both Vite and Webpack without forcing a project rewrite.
+- Visual debugging: built-in Playground, so route status is visible at a glance.
+- Great developer experience: mock file and config updates refresh automatically, without frequent restarts.
+- Deployable to multiple environments: local dev, Node.js server, Worker, and Service Worker.
 
-Install and wire the Vite plugin:
+## Why I built it
+
+For many teams, the pain is not writing mocks. The pain is:
+
+- Too many setup steps, and reconfiguration every time the build tool changes.
+- Poor visibility during local debugging, so people guess by reading files.
+- Slow feedback loops when every mock change needs a restart or manual verification.
+
+Mokup is designed to solve these three issues: lighter setup, stronger visualization, and faster feedback.
+
+## Build-tool friendly
+
+### Vite integration
 
 ```ts
 import mokup from 'mokup/vite'
@@ -44,18 +47,61 @@ export default {
 }
 ```
 
-Add a mock handler:
+At this point, you can add files under `mock/`, and Mokup will scan them and generate routes automatically.
+
+You can also open Mokup Playground from your CLI output for visual debugging.
+
+![CLI](../public/blog/mokup-unified-mock-library/cli.png)
+
+### Webpack integration
+
+```js
+const { mokupWebpack } = require('mokup/webpack')
+
+const withMokup = mokupWebpack({
+  entries: { dir: 'mock', prefix: '/api' },
+})
+
+module.exports = withMokup({})
+```
+
+This lets you add mock capability into your existing build pipeline without changing your business code structure.
+
+## Visualization: Playground (highlight)
+
+Mokup includes a built-in Playground to inspect scanned routes, methods, paths, and config chains.
+
+Default entry in Vite dev:
+
+```txt
+http://localhost:5173/__mokup
+```
+
+Online demo: <https://mokup.icebreaker.top/__mokup/>
+
+![Playground entry (terminal output)](../public/blog/mokup-unified-mock-library/playground.png)
+
+It solves a practical problem:
+when an endpoint does not work, you do not need to grep everywhere. Open the page and you can immediately see whether the route was scanned, disabled, and which config matched.
+
+## Developer experience: what supports hot reload
+
+In Vite dev, Mokup watches mock directories and refreshes the route table automatically. Typical changes that trigger hot reload include:
+
+- Add/modify/delete route files, for example:
+  - `mock/users.get.ts`
+  - `mock/messages.get.json`
+  - `mock/orders/[id].patch.ts`
+- Modify directory config files: `mock/**/index.config.ts`
+- Change directory structure (move, rename, create nested folders)
+
+After changes, Playground refreshes route lists automatically, making debugging much faster.
+If you do not need file watching, set `watch: false` in `entries`.
+
+## Quick example: from file to response
 
 ```ts
 // mock/users.get.ts
-export default {
-  handler: c => c.json([{ id: 1, name: 'Ada' }]),
-}
-```
-
-Tip: you can wrap the export with `defineHandler` for better IntelliSense:
-
-```ts
 import { defineHandler } from 'mokup'
 
 export default defineHandler({
@@ -63,13 +109,58 @@ export default defineHandler({
 })
 ```
 
-Start Vite and hit `/api/users` — the same routes can later run in Node or
-Workers without rewriting.
+Start dev and visit `/api/users` (assuming you set `prefix: '/api'`), then you get mock data.
 
-## Deploying the same mocks to Workers
+![Mock directory example](../public/blog/mokup-unified-mock-library/mock-dir.png)
 
-When you build for Workers, you can import a virtual bundle from Vite and use
-the worker helper:
+## Quick integration with @faker-js/faker
+
+Mokup handlers are plain TS/JS functions, so you can integrate with `@faker-js/faker` directly, without any extra adapter layer.
+
+This example returns a user list based on the `size` query parameter:
+
+```ts
+// mock/users.get.ts
+import { faker } from '@faker-js/faker'
+import { defineHandler } from 'mokup'
+
+export default defineHandler((c) => {
+  const size = Number(c.req.query('size') ?? 10)
+  const count = Number.isNaN(size) ? 10 : Math.min(Math.max(size, 1), 50)
+  const list = Array.from({ length: count }, () => ({
+    id: faker.string.uuid(),
+    name: faker.person.fullName(),
+    email: faker.internet.email(),
+    city: faker.location.city(),
+    createdAt: faker.date.recent({ days: 30 }).toISOString(),
+  }))
+
+  return c.json({
+    list,
+    total: 200,
+    page: 1,
+    pageSize: count,
+  })
+})
+```
+
+This is very useful for list, search, and detail page integration.
+If you need reproducible results, add `faker.seed(123)` at the top of the handler.
+
+## Deployable to multiple environments
+
+The same mock setup can run in multiple environments: for example, directly in Node.js, and also deployed to Cloudflare Workers.
+
+Node.js dev mode example:
+
+```ts
+import { createFetchServer, serve } from 'mokup/server/node'
+
+const app = await createFetchServer({ entries: { dir: 'mock' } })
+serve({ fetch: app.fetch, port: 3000 })
+```
+
+Cloudflare Worker example:
 
 ```ts
 import { createMokupWorker } from 'mokup/server/worker'
@@ -78,37 +169,27 @@ import mokupBundle from 'virtual:mokup-bundle'
 export default createMokupWorker(mokupBundle)
 ```
 
-If you prefer a fetch handler:
+Note: `virtual:mokup-bundle` is only available in Vite with `@cloudflare/vite-plugin`. In Node.js dev mode, use `createFetchServer` directly and you do not need that virtual module.
 
-```ts
-import { createFetchHandler } from 'mokup/server/fetch'
-import mokupBundle from 'virtual:mokup-bundle'
+## Core architecture
 
-const handler = createFetchHandler(mokupBundle)
-export default { fetch: request => handler(request) }
-```
+![Core architecture](../public/blog/mokup-unified-mock-library/core-en.png)
 
-## Why it’s useful
+## Use cases and boundaries
 
-- One mock source of truth across dev and deploy
-- Works in browser, Node, and Worker runtimes
-- File-based routing keeps mocks close to the code
-- Service Worker mode lets you mock without a backend proxy
-- Manifest/bundle outputs make CI/CD and deployments predictable
+Good fit:
 
-## Who it’s for
+- Teams with existing Vite/webpack projects that want low-cost mock integration
+- Projects that need visual route diagnostics
+- Workflows that value fast feedback after mock updates
 
-- Frontend teams that want stable mocks across local and preview builds
-- Full-stack teams that run the same mocks in Node and edge
-- Tooling authors who need a runtime-agnostic mock layer
-- QA and DX workflows that need reproducible fixtures
+Less suitable:
 
-## Where to start
+- Scenarios that depend heavily on complex dynamic proxy chains
+- Extremely lightweight setups that do not want build-time or plugin-based integration
 
-- Vite users: `mokup/vite` for local dev and SW mode
-- Node servers: `mokup/server/node` adapters
-- Workers: `mokup/server/worker` or `mokup/server/fetch`
-- CLI: `mokup build` to produce bundle outputs
+Mokup is not trying to replace every mock solution. It is designed to make mocks easier to adopt, easier to debug, and better aligned with everyday development workflows.
 
-If you want a single set of mocks that can move with your app—from local dev to
-edge—Mokup is built for that.
+## Closing
+
+Mokup is still evolving quickly. Feedback is very welcome, including feature requests, DX feedback, and documentation improvements.
