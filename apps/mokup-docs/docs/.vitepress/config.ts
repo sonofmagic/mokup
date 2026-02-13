@@ -1,4 +1,5 @@
 import type { DefaultTheme } from 'vitepress'
+import process from 'node:process'
 import tailwindcss from '@tailwindcss/vite'
 import mokup from 'mokup/vite'
 import { defineConfig } from 'vitepress'
@@ -13,6 +14,10 @@ const siteDescription
   = 'Build file-driven HTTP routes with a unified runtime, serving mock or real APIs across dev and deployment.'
 const siteUrl = 'https://mokup.icebreaker.top'
 const ogImage = `${siteUrl}/brand/mokup-logo.svg`
+const isProductionBuild = process.env.NODE_ENV === 'production' || process.argv.includes('build')
+const zhNavWithDraftPreview: DefaultTheme.NavItem[] = isProductionBuild
+  ? zhNav
+  : [...zhNav, { text: '草稿预览', link: '/zh/blog/drafts' }]
 
 const themeConfig: DefaultTheme.Config = {
   socialLinks: [
@@ -71,6 +76,7 @@ export default defineConfig({
   lang: 'en-US',
   cleanUrls: true,
   lastUpdated: true,
+  srcExclude: isProductionBuild ? ['**/*.zh-draft.md', 'zh/blog/drafts.md'] : undefined,
   head: [
     ['link', { rel: 'icon', href: '/favicon.ico' }],
     [
@@ -115,7 +121,7 @@ export default defineConfig({
       description:
         '面向 Vite、Node 与 Worker 的文件式 HTTP 框架，统一运行时，覆盖 Mock 到真实 API 的完整流程。',
       themeConfig: {
-        nav: zhNav,
+        nav: zhNavWithDraftPreview,
         sidebar: zhSidebar,
         outlineTitle: '本页目录',
       },
