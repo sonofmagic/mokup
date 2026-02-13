@@ -1,12 +1,18 @@
-# Mokup：构建工具友好的可视化 Mock 工具（草稿）
+# Mokup：构建工具友好的可视化 Mock 工具
 
 ![Mokup Logo](../public/brand/mokup-logo.svg)
 
-大家好，我是 [icebreaker](https://github.com/sonofmagic)，一名前端开发者兼开源爱好者。
+大家好呀，我是 [icebreaker](https://github.com/sonofmagic)，一名前端开发者兼开源爱好者。
 
-这里向大家介绍一下我最近在做的一个项目：Mokup，一个基于文件路由的 HTTP Mock 工具。
+马上就过年了，在这个特别的时间点，我先祝大家：新年快乐！身体健康！工作顺利！来年发大财！
 
-项目地址：[GitHub](https://github.com/sonofmagic/mokup) , 官网与文档：http://mokup.icebreaker.top/
+---
+
+当然，回归正题，这里也向大家介绍一下我最近做的一个开源项目：`Mokup`，一个基于文件路由的 HTTP Mock 工具。
+
+我做这个当时的目的，主要是给我团队里的同学用的，想让大家最低成本地在现有前端工程里接入服务端的能力，让大家循序渐进的成为全栈，这样才能在AI时代立足。
+
+项目地址：[GitHub](https://github.com/sonofmagic/mokup) , [官网与文档](http://mokup.icebreaker.top/)
 
 ## Mokup 是什么
 
@@ -14,16 +20,16 @@ Mokup 是一个基于文件路由的 HTTP Mock 工具。你把 mock 文件放在
 
 它的目标很直接：让 mock 在你已有的前端工程里尽快跑起来，减少“为了联调再造一套服务”的成本。
 
-## 它的特性
+## 有什么特性
 
-- 构建工具友好：Vite / Webpack 都能接，不需要推翻现有工程。
+- 构建工具友好：Vite / Webpack 都能快速的接入，接入成本极低。
 - 可视化：内置 Playground，路由是否生效一眼可见。
 - 开发体验好：mock 文件和目录配置改完就刷新，不用频繁重启。
 - 能部署到多个环境：本地开发、Node 服务端、Worker、Service Worker 都可用。
 
 ## 为什么要做它
 
-很多团队的痛点不是“不会写 mock”，而是：
+这个实际上也和我自己在我自己的群里，还有公司里的项目组搜集痛点有关，那就是，很多团队的痛点不是“不会写 mock”，而是：
 
 - 接入步骤多，换个构建工具就要重配一次。
 - 本地排查时看不到全局路由状态，只能翻文件猜。
@@ -82,7 +88,7 @@ http://localhost:5173/__mokup
 ![Playground 入口（终端提示）](../public/blog/mokup-unified-mock-library/playground.png)
 
 它解决的是一个非常实际的问题：
-接口不生效时，你不用到处 grep，只要打开页面就能看到“有没有被扫到、有没有被禁用、匹配到了什么配置”。
+接口不生效时，你不用到处去找问题，只要打开页面就能看到“有没有被扫到、有没有被禁用、匹配到了什么配置”。
 
 ## 开发体验：哪些文件会热更新
 
@@ -96,7 +102,8 @@ http://localhost:5173/__mokup
 - 调整目录结构（移动、重命名、创建子目录）
 
 改完后 Playground 会自动刷新路由列表，调试链路更短。
-如果你不需要监听，可以在 `entries` 里配置 `watch: false`。
+
+> 如果你不需要监听，可以在 `entries` 里配置 `watch: false`。
 
 ## 快速示例：从写文件到看到结果
 
@@ -114,6 +121,8 @@ export default defineHandler({
 ![mock 目录结构示例](../public/blog/mokup-unified-mock-library/mock-dir.png)
 
 ## 快速集成 @faker-js/faker
+
+`@faker-js/faker` 是我们造假数据最常使用的库了，这里也可以很好的和它集成
 
 Mokup 的 handler 本质上就是 TS/JS 函数，所以能直接接入 `@faker-js/faker` 这类 mock 数据库，不需要额外适配层。
 
@@ -190,6 +199,18 @@ export default createMokupWorker(mokupBundle)
 
 Mokup 不是为了替代所有 mock 方案，而是让 mock 更快接入、更好调试、更贴近日常开发流程。
 
+## AI 友好性
+
+都已经在这个时代了，怎么能不用 AI 呢， Mokup 当时设计就是考虑到 AI 时代的开发者需求的，所以在设计上也做了一些 AI 友好的考虑，
+
+毕竟时代变了，我们也像纺纱机的工人那样，换到了蒸汽纺纱机，每天奴役 AI 24小时帮我们打工，爽是真的爽，验证问题效率极高。
+
+而且很多开发是懒得写文档的，现在文档什么完全不是问题，就像这篇文章，大部分也是由AI生成的。
+
 ## 结语
 
 Mokup 目前还在快速迭代中，欢迎大家试用并提反馈！无论是功能需求、使用体验还是文档改进都非常欢迎。
+
+如果你也有类似的痛点，或者对 mock 工具有什么想法，也欢迎在评论区交流！我们一起让前端 mock 更好用、更高效！
+
+有志同道合的小伙伴，也可以访问我的 Github 主页联系我一起交流！
