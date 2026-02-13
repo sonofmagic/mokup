@@ -3,7 +3,8 @@
 ![Mokup Logo](../public/brand/mokup-logo.svg)
 
 大家好，我是 [icebreaker](https://github.com/sonofmagic)，一名前端开发者兼开源爱好者。
-这篇文章只讲三件事：**构建工具友好、可视化、开发体验好**。
+
+这里向大家介绍一下我最近在做的一个项目：Mokup，一个基于文件路由的 HTTP Mock 工具。
 
 项目地址：[GitHub](https://github.com/sonofmagic/mokup) , 官网与文档：http://mokup.icebreaker.top/
 
@@ -13,7 +14,7 @@ Mokup 是一个基于文件路由的 HTTP Mock 工具。你把 mock 文件放在
 
 它的目标很直接：让 mock 在你已有的前端工程里尽快跑起来，减少“为了联调再造一套服务”的成本。
 
-## 特性
+## 它的特性
 
 - 构建工具友好：Vite / Webpack 都能接，不需要推翻现有工程。
 - 可视化：内置 Playground，路由是否生效一眼可见。
@@ -76,6 +77,8 @@ Vite 开发时默认入口：
 http://localhost:5173/__mokup
 ```
 
+在线体验 Demo：<https://mokup.icebreaker.top/__mokup/>
+
 ![Playground 入口（终端提示）](../public/blog/mokup-unified-mock-library/playground.png)
 
 它解决的是一个非常实际的问题：
@@ -110,7 +113,7 @@ export default defineHandler({
 
 ![mock 目录结构示例](../public/blog/mokup-unified-mock-library/mock-dir.png)
 
-## 快速集成 mock 数据库（@faker-js/faker）
+## 快速集成 @faker-js/faker
 
 Mokup 的 handler 本质上就是 TS/JS 函数，所以能直接接入 `@faker-js/faker` 这类 mock 数据库，不需要额外适配层。
 
@@ -157,6 +160,10 @@ export default createMokupWorker(mokupBundle)
 
 提示：`virtual:mokup-bundle` 仅在 Vite 与 `@cloudflare/vite-plugin` 集成环境可用；其他环境使用对应构建产物即可。
 
+## 核心架构
+
+![mock 目录结构示例](../public/blog/mokup-unified-mock-library/core-en.png)
+
 ## 适用场景与边界
 
 适合：
@@ -171,3 +178,7 @@ export default createMokupWorker(mokupBundle)
 - 完全不希望引入构建期/插件能力的极轻量脚本方案
 
 Mokup 不是为了替代所有 mock 方案，而是让 mock 更快接入、更好调试、更贴近日常开发流程。
+
+## 结语
+
+Mokup 目前还在快速迭代中，欢迎大家试用并提反馈！无论是功能需求、使用体验还是文档改进都非常欢迎。
