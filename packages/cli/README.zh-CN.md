@@ -6,3 +6,7 @@
 
 本包提供 Mokup CLI 使用的 manifest 构建 API。`mokup` 命令由 `mokup` 包提供。
 完整文档见 https://mokup.icebreaker.top。
+
+## 环境要求
+
+- Node.js `>=20.0.0`

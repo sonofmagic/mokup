@@ -6,6 +6,10 @@ English | [Chinese](./README.zh-CN.md)
 
 Server adapters for Mokup that integrate the runtime with popular Node frameworks and Workers. For detailed usage, see https://mokup.icebreaker.top.
 
+## Requirements
+
+- Node.js `>=20.0.0`
+
 This package is used internally by `mokup`. Prefer the public entrypoints below.
 
 ## Entrypoints

@@ -16,6 +16,10 @@
 - Works in Vite dev, CLI builds (workers), and runtime adapters.
 - Built-in headers, status, delays, and middleware hooks.
 
+## Requirements
+
+- Node.js `>=20.0.0`
+
 ## Quick start
 
 Create `mock/users.get.json`:

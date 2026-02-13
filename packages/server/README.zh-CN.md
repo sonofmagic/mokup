@@ -6,6 +6,10 @@
 
 Mokup 的 Server 适配器集合，用于把运行时接入各类 Node 框架与 Worker。完整文档见 https://mokup.icebreaker.top。
 
+## 环境要求
+
+- Node.js `>=20.0.0`
+
 该包为 `mokup` 内部依赖，建议使用下方公开入口。
 
 ## 入口说明

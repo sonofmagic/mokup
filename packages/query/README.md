@@ -2,6 +2,10 @@
 
 TanStack Query integrations for Mokup request switching.
 
+## Requirements
+
+- Node.js `>=20.0.0`
+
 ## Install
 
 ```bash

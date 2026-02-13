@@ -2,6 +2,10 @@
 
 Client-side request switching utilities and adapters for Mokup.
 
+## Requirements
+
+- Node.js `>=20.0.0`
+
 ## Install
 
 ```bash

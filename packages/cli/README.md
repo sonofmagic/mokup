@@ -7,3 +7,7 @@ English | [Chinese](./README.zh-CN.md)
 This package exposes the manifest builder API used by the Mokup CLI. The `mokup`
 command is now shipped by the `mokup` package. For detailed usage, see
 https://mokup.icebreaker.top.
+
+## Requirements
+
+- Node.js `>=20.0.0`

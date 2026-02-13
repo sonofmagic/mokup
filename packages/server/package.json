@@ -143,6 +143,9 @@
   "files": [
     "dist"
   ],
+  "engines": {
+    "node": ">=20.0.0"
+  },
   "scripts": {
     "build": "unbuild",
     "dev": "unbuild --stub",
