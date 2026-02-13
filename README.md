@@ -60,7 +60,7 @@ Thanks to [all contributors](https://github.com/sonofmagic/mokup/graphs/contribu
 
 ## Authors
 
-ice breaker <1324318532@qq.com>
+ice breaker <hi@sonofmagic.top>
 
 ## License
 
