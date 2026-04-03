@@ -9,3 +9,7 @@ The Mokup runtime evaluates manifests and resolves mock responses at request tim
 ## Requirements
 
 - Node.js `^20.19.0 || >=22.12.0`
+
+## Upgrade notes
+
+- This package now ships ESM-only output.

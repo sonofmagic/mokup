@@ -10,6 +10,10 @@ Server adapters for Mokup that integrate the runtime with popular Node framework
 
 - Node.js `^20.19.0 || >=22.12.0`
 
+## Upgrade notes
+
+- This package now ships ESM-only output.
+
 This package is used internally by `mokup`. Prefer the public entrypoints below.
 
 ## Entrypoints

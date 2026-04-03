@@ -9,3 +9,8 @@ Mokup 提供基于文件的 mock 路由、Vite 插件和 Playground UI，帮助�
 ## 环境要求
 
 - Node.js `^20.19.0 || >=22.12.0`
+
+## 升级提示
+
+- 已发布包现在只提供 ESM 输出。
+- `@mokup/shared/esbuild` 已重命名为 `@mokup/shared/rolldown`。

@@ -6,6 +6,10 @@ Client-side request switching utilities and adapters for Mokup.
 
 - Node.js `^20.19.0 || >=22.12.0`
 
+## Upgrade notes
+
+- This package now ships ESM-only output.
+
 ## Install
 
 ```bash

@@ -9,3 +9,7 @@ Mokup runtime 用于在请求时读取 manifest 并返回 mock 响应，是 Serv
 ## 环境要求
 
 - Node.js `^20.19.0 || >=22.12.0`
+
+## 升级提示
+
+- 该包现在只提供 ESM 输出。
