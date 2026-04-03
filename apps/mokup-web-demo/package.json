@@ -16,14 +16,14 @@
   },
   "dependencies": {
     "@faker-js/faker": "catalog:",
-    "axios": "^1.13.6",
-    "hono": "^4.12.7",
+    "axios": "^1.14.0",
+    "hono": "^4.12.10",
     "mokup": "workspace:*",
     "vue": "catalog:",
-    "vue-router": "^5.0.3"
+    "vue-router": "^5.0.4"
   },
   "devDependencies": {
-    "@cloudflare/vite-plugin": "^1.27.0",
+    "@cloudflare/vite-plugin": "^1.31.0",
     "@tailwindcss/vite": "catalog:",
     "@vitejs/plugin-vue": "catalog:",
     "tailwindcss": "catalog:",

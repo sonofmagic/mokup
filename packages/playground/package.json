@@ -26,14 +26,14 @@
   },
   "dependencies": {
     "@codemirror/lang-json": "^6.0.2",
-    "@codemirror/language": "^6.12.2",
-    "@codemirror/state": "^6.5.2",
-    "@codemirror/view": "^6.39.17",
+    "@codemirror/language": "^6.12.3",
+    "@codemirror/state": "^6.6.0",
+    "@codemirror/view": "^6.41.0",
     "@floating-ui/dom": "^1.7.6",
     "@mokup/runtime": "workspace:*"
   },
   "devDependencies": {
-    "@iconify-json/carbon": "^1.2.19",
+    "@iconify-json/carbon": "^1.2.20",
     "@iconify/tailwind": "^1.2.0",
     "@mokup/core": "workspace:*",
     "@tailwindcss/vite": "catalog:",
