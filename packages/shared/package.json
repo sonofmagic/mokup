@@ -13,85 +13,105 @@
   "exports": {
     ".": {
       "types": "./dist/index.d.ts",
-      "import": "./dist/index.mjs"
+      "import": "./dist/index.mjs",
+      "default": "./dist/index.mjs"
     },
     "./chokidar": {
       "types": "./dist/chokidar.d.ts",
-      "import": "./dist/chokidar.mjs"
+      "import": "./dist/chokidar.mjs",
+      "default": "./dist/chokidar.mjs"
     },
     "./config-utils": {
       "types": "./dist/config-utils.d.ts",
-      "import": "./dist/config-utils.mjs"
+      "import": "./dist/config-utils.mjs",
+      "default": "./dist/config-utils.mjs"
     },
     "./config-core": {
       "types": "./dist/config-core.d.ts",
-      "import": "./dist/config-core.mjs"
+      "import": "./dist/config-core.mjs",
+      "default": "./dist/config-core.mjs"
     },
     "./define-config": {
       "types": "./dist/define-config.d.ts",
-      "import": "./dist/define-config.mjs"
+      "import": "./dist/define-config.mjs",
+      "default": "./dist/define-config.mjs"
     },
     "./esbuild": {
       "types": "./dist/esbuild.d.ts",
-      "import": "./dist/esbuild.mjs"
+      "import": "./dist/esbuild.mjs",
+      "default": "./dist/esbuild.mjs"
     },
     "./hono": {
       "types": "./dist/hono.d.ts",
-      "import": "./dist/hono.mjs"
+      "import": "./dist/hono.mjs",
+      "default": "./dist/hono.mjs"
     },
     "./jsonc-parser": {
       "types": "./dist/jsonc-parser.d.ts",
-      "import": "./dist/jsonc-parser.mjs"
+      "import": "./dist/jsonc-parser.mjs",
+      "default": "./dist/jsonc-parser.mjs"
     },
     "./jsonc-utils": {
       "types": "./dist/jsonc-utils.d.ts",
-      "import": "./dist/jsonc-utils.mjs"
+      "import": "./dist/jsonc-utils.mjs",
+      "default": "./dist/jsonc-utils.mjs"
     },
     "./load-rules": {
       "types": "./dist/load-rules.d.ts",
-      "import": "./dist/load-rules.mjs"
+      "import": "./dist/load-rules.mjs",
+      "default": "./dist/load-rules.mjs"
     },
     "./logger": {
       "types": "./dist/logger.d.ts",
       "browser": "./dist/logger.browser.mjs",
       "worker": "./dist/logger.browser.mjs",
-      "import": "./dist/logger.mjs"
+      "import": "./dist/logger.mjs",
+      "default": "./dist/logger.mjs"
     },
     "./mock-files": {
       "types": "./dist/mock-files.d.ts",
-      "import": "./dist/mock-files.mjs"
+      "import": "./dist/mock-files.mjs",
+      "default": "./dist/mock-files.mjs"
     },
     "./module-loader": {
       "types": "./dist/module-loader.d.ts",
-      "import": "./dist/module-loader.mjs"
+      "import": "./dist/module-loader.mjs",
+      "default": "./dist/module-loader.mjs"
     },
     "./pathe": {
       "types": "./dist/pathe.d.ts",
-      "import": "./dist/pathe.mjs"
+      "import": "./dist/pathe.mjs",
+      "default": "./dist/pathe.mjs"
     },
     "./path-utils": {
       "types": "./dist/path-utils.d.ts",
-      "import": "./dist/path-utils.mjs"
+      "import": "./dist/path-utils.mjs",
+      "default": "./dist/path-utils.mjs"
     },
     "./playground-grouping": {
       "types": "./dist/playground-grouping.d.ts",
-      "import": "./dist/playground-grouping.mjs"
+      "import": "./dist/playground-grouping.mjs",
+      "default": "./dist/playground-grouping.mjs"
     },
     "./route-constants": {
       "types": "./dist/route-constants.d.ts",
-      "import": "./dist/route-constants.mjs"
+      "import": "./dist/route-constants.mjs",
+      "default": "./dist/route-constants.mjs"
     },
     "./route-utils": {
       "types": "./dist/route-utils.d.ts",
-      "import": "./dist/route-utils.mjs"
+      "import": "./dist/route-utils.mjs",
+      "default": "./dist/route-utils.mjs"
     },
     "./scan-utils": {
       "types": "./dist/scan-utils.d.ts",
-      "import": "./dist/scan-utils.mjs"
+      "import": "./dist/scan-utils.mjs",
+      "default": "./dist/scan-utils.mjs"
     },
     "./timing": {
       "types": "./dist/timing.d.ts",
-      "import": "./dist/timing.mjs"
+      "import": "./dist/timing.mjs",
+      "default": "./dist/timing.mjs"
     }
   },
   "publishConfig": {

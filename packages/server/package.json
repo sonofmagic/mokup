@@ -13,47 +13,58 @@
   "exports": {
     ".": {
       "types": "./dist/index.d.ts",
-      "import": "./dist/index.mjs"
+      "import": "./dist/index.mjs",
+      "default": "./dist/index.mjs"
     },
     "./connect": {
       "types": "./dist/connect.d.ts",
-      "import": "./dist/connect.mjs"
+      "import": "./dist/connect.mjs",
+      "default": "./dist/connect.mjs"
     },
     "./express": {
       "types": "./dist/express.d.ts",
-      "import": "./dist/express.mjs"
+      "import": "./dist/express.mjs",
+      "default": "./dist/express.mjs"
     },
     "./fastify": {
       "types": "./dist/fastify.d.ts",
-      "import": "./dist/fastify.mjs"
+      "import": "./dist/fastify.mjs",
+      "default": "./dist/fastify.mjs"
     },
     "./fetch": {
       "types": "./dist/fetch.d.ts",
-      "import": "./dist/fetch.mjs"
+      "import": "./dist/fetch.mjs",
+      "default": "./dist/fetch.mjs"
     },
     "./fetch-server": {
       "types": "./dist/fetch-server.d.ts",
-      "import": "./dist/fetch-server.mjs"
+      "import": "./dist/fetch-server.mjs",
+      "default": "./dist/fetch-server.mjs"
     },
     "./hono": {
       "types": "./dist/hono.d.ts",
-      "import": "./dist/hono.mjs"
+      "import": "./dist/hono.mjs",
+      "default": "./dist/hono.mjs"
     },
     "./koa": {
       "types": "./dist/koa.d.ts",
-      "import": "./dist/koa.mjs"
+      "import": "./dist/koa.mjs",
+      "default": "./dist/koa.mjs"
     },
     "./node": {
       "types": "./dist/node.d.ts",
-      "import": "./dist/node.mjs"
+      "import": "./dist/node.mjs",
+      "default": "./dist/node.mjs"
     },
     "./worker-node": {
       "types": "./dist/worker-node.d.ts",
-      "import": "./dist/worker-node.mjs"
+      "import": "./dist/worker-node.mjs",
+      "default": "./dist/worker-node.mjs"
     },
     "./worker": {
       "types": "./dist/worker.d.ts",
-      "import": "./dist/worker.mjs"
+      "import": "./dist/worker.mjs",
+      "default": "./dist/worker.mjs"
     }
   },
   "publishConfig": {

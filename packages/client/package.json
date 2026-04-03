@@ -13,15 +13,18 @@
   "exports": {
     ".": {
       "types": "./dist/index.d.ts",
-      "import": "./dist/index.mjs"
+      "import": "./dist/index.mjs",
+      "default": "./dist/index.mjs"
     },
     "./axios": {
       "types": "./dist/axios.d.ts",
-      "import": "./dist/axios.mjs"
+      "import": "./dist/axios.mjs",
+      "default": "./dist/axios.mjs"
     },
     "./fetch": {
       "types": "./dist/fetch.d.ts",
-      "import": "./dist/fetch.mjs"
+      "import": "./dist/fetch.mjs",
+      "default": "./dist/fetch.mjs"
     }
   },
   "publishConfig": {

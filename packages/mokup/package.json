@@ -13,47 +13,58 @@
   "exports": {
     ".": {
       "types": "./dist/index.d.ts",
-      "import": "./dist/index.mjs"
+      "import": "./dist/index.mjs",
+      "default": "./dist/index.mjs"
     },
     "./cli": {
       "types": "./dist/cli.d.ts",
-      "import": "./dist/cli.mjs"
+      "import": "./dist/cli.mjs",
+      "default": "./dist/cli.mjs"
     },
     "./bundle": {
       "types": "./dist/bundle.d.ts",
-      "import": "./dist/bundle.mjs"
+      "import": "./dist/bundle.mjs",
+      "default": "./dist/bundle.mjs"
     },
     "./server": {
       "types": "./dist/server.d.ts",
-      "import": "./dist/server.mjs"
+      "import": "./dist/server.mjs",
+      "default": "./dist/server.mjs"
     },
     "./server/fetch": {
       "types": "./dist/server/fetch.d.ts",
-      "import": "./dist/server/fetch.mjs"
+      "import": "./dist/server/fetch.mjs",
+      "default": "./dist/server/fetch.mjs"
     },
     "./server/node": {
       "types": "./dist/server/node.d.ts",
-      "import": "./dist/server/node.mjs"
+      "import": "./dist/server/node.mjs",
+      "default": "./dist/server/node.mjs"
     },
     "./server/worker": {
       "types": "./dist/server/worker.d.ts",
-      "import": "./dist/server/worker.mjs"
+      "import": "./dist/server/worker.mjs",
+      "default": "./dist/server/worker.mjs"
     },
     "./vite": {
       "types": "./dist/vite.d.ts",
-      "import": "./dist/vite.mjs"
+      "import": "./dist/vite.mjs",
+      "default": "./dist/vite.mjs"
     },
     "./webpack": {
       "types": "./dist/webpack.d.ts",
-      "import": "./dist/webpack.mjs"
+      "import": "./dist/webpack.mjs",
+      "default": "./dist/webpack.mjs"
     },
     "./runtime": {
       "types": "./dist/runtime.d.ts",
-      "import": "./dist/runtime.mjs"
+      "import": "./dist/runtime.mjs",
+      "default": "./dist/runtime.mjs"
     },
     "./sw": {
       "types": "./dist/sw.d.ts",
-      "import": "./dist/sw.mjs"
+      "import": "./dist/sw.mjs",
+      "default": "./dist/sw.mjs"
     }
   },
   "publishConfig": {

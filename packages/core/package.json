@@ -13,111 +13,138 @@
   "exports": {
     ".": {
       "types": "./dist/index.d.ts",
-      "import": "./dist/index.mjs"
+      "import": "./dist/index.mjs",
+      "default": "./dist/index.mjs"
     },
     "./bundle": {
       "types": "./dist/bundle.d.ts",
-      "import": "./dist/bundle.mjs"
+      "import": "./dist/bundle.mjs",
+      "default": "./dist/bundle.mjs"
     },
     "./config": {
       "types": "./dist/config.d.ts",
-      "import": "./dist/config.mjs"
+      "import": "./dist/config.mjs",
+      "default": "./dist/config.mjs"
     },
     "./loader": {
       "types": "./dist/loader.d.ts",
-      "import": "./dist/loader.mjs"
+      "import": "./dist/loader.mjs",
+      "default": "./dist/loader.mjs"
     },
     "./manifest": {
       "types": "./dist/manifest.d.ts",
-      "import": "./dist/manifest.mjs"
+      "import": "./dist/manifest.mjs",
+      "default": "./dist/manifest.mjs"
     },
     "./middleware": {
       "types": "./dist/middleware.d.ts",
-      "import": "./dist/middleware.mjs"
+      "import": "./dist/middleware.mjs",
+      "default": "./dist/middleware.mjs"
     },
     "./module-loader": {
       "types": "./dist/module-loader.d.ts",
-      "import": "./dist/module-loader.mjs"
+      "import": "./dist/module-loader.mjs",
+      "default": "./dist/module-loader.mjs"
     },
     "./playground": {
       "types": "./dist/playground.d.ts",
-      "import": "./dist/playground.mjs"
+      "import": "./dist/playground.mjs",
+      "default": "./dist/playground.mjs"
     },
     "./playground/assets": {
       "types": "./dist/playground/assets.d.ts",
-      "import": "./dist/playground/assets.mjs"
+      "import": "./dist/playground/assets.mjs",
+      "default": "./dist/playground/assets.mjs"
     },
     "./playground/build": {
       "types": "./dist/playground/build.d.ts",
-      "import": "./dist/playground/build.mjs"
+      "import": "./dist/playground/build.mjs",
+      "default": "./dist/playground/build.mjs"
     },
     "./playground/config": {
       "types": "./dist/playground/config.d.ts",
-      "import": "./dist/playground/config.mjs"
+      "import": "./dist/playground/config.mjs",
+      "default": "./dist/playground/config.mjs"
     },
     "./playground/grouping": {
       "types": "./dist/playground/grouping.d.ts",
-      "import": "./dist/playground/grouping.mjs"
+      "import": "./dist/playground/grouping.mjs",
+      "default": "./dist/playground/grouping.mjs"
     },
     "./playground/inject": {
       "types": "./dist/playground/inject.d.ts",
-      "import": "./dist/playground/inject.mjs"
+      "import": "./dist/playground/inject.mjs",
+      "default": "./dist/playground/inject.mjs"
     },
     "./playground/middleware": {
       "types": "./dist/playground/middleware.d.ts",
-      "import": "./dist/playground/middleware.mjs"
+      "import": "./dist/playground/middleware.mjs",
+      "default": "./dist/playground/middleware.mjs"
     },
     "./playground/serialize": {
       "types": "./dist/playground/serialize.d.ts",
-      "import": "./dist/playground/serialize.mjs"
+      "import": "./dist/playground/serialize.mjs",
+      "default": "./dist/playground/serialize.mjs"
     },
     "./routes": {
       "types": "./dist/routes.d.ts",
-      "import": "./dist/routes.mjs"
+      "import": "./dist/routes.mjs",
+      "default": "./dist/routes.mjs"
     },
     "./scanner": {
       "types": "./dist/scanner.d.ts",
-      "import": "./dist/scanner.mjs"
+      "import": "./dist/scanner.mjs",
+      "default": "./dist/scanner.mjs"
     },
     "./scanner-precheck": {
       "types": "./dist/scanner-precheck.d.ts",
-      "import": "./dist/scanner-precheck.mjs"
+      "import": "./dist/scanner-precheck.mjs",
+      "default": "./dist/scanner-precheck.mjs"
     },
     "./scanner-types": {
       "types": "./dist/scanner-types.d.ts",
-      "import": "./dist/scanner-types.mjs"
+      "import": "./dist/scanner-types.mjs",
+      "default": "./dist/scanner-types.mjs"
     },
     "./scanner-utils": {
       "types": "./dist/scanner-utils.d.ts",
-      "import": "./dist/scanner-utils.mjs"
+      "import": "./dist/scanner-utils.mjs",
+      "default": "./dist/scanner-utils.mjs"
     },
     "./sw": {
       "types": "./dist/sw.d.ts",
-      "import": "./dist/sw.mjs"
+      "import": "./dist/sw.mjs",
+      "default": "./dist/sw.mjs"
     },
     "./shared/constants": {
       "types": "./dist/shared/constants.d.ts",
-      "import": "./dist/shared/constants.mjs"
+      "import": "./dist/shared/constants.mjs",
+      "default": "./dist/shared/constants.mjs"
     },
     "./shared/files": {
       "types": "./dist/shared/files.d.ts",
-      "import": "./dist/shared/files.mjs"
+      "import": "./dist/shared/files.mjs",
+      "default": "./dist/shared/files.mjs"
     },
     "./shared/logger": {
       "types": "./dist/shared/logger.d.ts",
-      "import": "./dist/shared/logger.mjs"
+      "import": "./dist/shared/logger.mjs",
+      "default": "./dist/shared/logger.mjs"
     },
     "./shared/terminal": {
       "types": "./dist/shared/terminal.d.ts",
-      "import": "./dist/shared/terminal.mjs"
+      "import": "./dist/shared/terminal.mjs",
+      "default": "./dist/shared/terminal.mjs"
     },
     "./shared/types": {
       "types": "./dist/shared/types.d.ts",
-      "import": "./dist/shared/types.mjs"
+      "import": "./dist/shared/types.mjs",
+      "default": "./dist/shared/types.mjs"
     },
     "./shared/utils": {
       "types": "./dist/shared/utils.d.ts",
-      "import": "./dist/shared/utils.mjs"
+      "import": "./dist/shared/utils.mjs",
+      "default": "./dist/shared/utils.mjs"
     }
   },
   "publishConfig": {
