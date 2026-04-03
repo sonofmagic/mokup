@@ -18,7 +18,7 @@
 
 ## Requirements
 
-- Node.js `>=20.0.0`
+- Node.js `^20.19.0 || >=22.12.0`
 
 ## Quick start
 

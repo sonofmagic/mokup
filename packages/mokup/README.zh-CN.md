@@ -8,4 +8,4 @@ Mokup 提供基于文件的 mock 路由、Vite 插件和 Playground UI，帮助�
 
 ## 环境要求
 
-- Node.js `>=20.0.0`
+- Node.js `^20.19.0 || >=22.12.0`

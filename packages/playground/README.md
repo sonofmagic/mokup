@@ -8,4 +8,4 @@ A standalone UI for browsing, testing, and debugging Mokup mock routes. For deta
 
 ## Requirements
 
-- Node.js `>=20.0.0`
+- Node.js `^20.19.0 || >=22.12.0`

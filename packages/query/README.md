@@ -4,7 +4,7 @@ TanStack Query integrations for Mokup request switching.
 
 ## Requirements
 
-- Node.js `>=20.0.0`
+- Node.js `^20.19.0 || >=22.12.0`
 
 ## Install
 

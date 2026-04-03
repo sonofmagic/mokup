@@ -8,4 +8,4 @@ Mokup provides file-based mock routing, a Vite plugin, and a playground UI to he
 
 ## Requirements
 
-- Node.js `>=20.0.0`
+- Node.js `^20.19.0 || >=22.12.0`

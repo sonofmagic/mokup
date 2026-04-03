@@ -8,4 +8,4 @@ The Mokup runtime evaluates manifests and resolves mock responses at request tim
 
 ## Requirements
 
-- Node.js `>=20.0.0`
+- Node.js `^20.19.0 || >=22.12.0`
