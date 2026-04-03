@@ -4,7 +4,7 @@ export default createPackageConfig({
   entries: [
     'src/index',
     'src/chokidar',
-    'src/esbuild',
+    'src/rolldown',
     'src/hono',
     'src/logger',
     'src/logger.browser',

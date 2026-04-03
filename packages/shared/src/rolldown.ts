@@ -120,7 +120,7 @@ function toOutputFiles(output: RolldownOutputItem[], outdir?: string): OutputFil
 }
 
 /**
- * Rolldown-backed compatibility wrapper for the subset of esbuild's `build()`
+ * Rolldown-backed compatibility wrapper for the subset of `build()`
  * API used inside this repository.
  */
 export async function build(options: BuildOptions): Promise<BuildResult> {

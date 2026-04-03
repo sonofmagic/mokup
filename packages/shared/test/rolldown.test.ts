@@ -2,9 +2,9 @@ import { promises as fs } from 'node:fs'
 import { tmpdir } from 'node:os'
 import path from 'node:path'
 import { describe, expect, it } from 'vitest'
-import { build } from '../src/esbuild'
+import { build } from '../src/rolldown'
 
-describe('rolldown-backed esbuild compatibility', () => {
+describe('rolldown build wrapper', () => {
   it('bundles file entry points into the requested output directory', async () => {
     const root = await fs.mkdtemp(path.join(tmpdir(), 'mokup-rolldown-files-'))
     const entryFile = path.join(root, 'mock', 'handler.get.ts')

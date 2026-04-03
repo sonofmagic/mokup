@@ -36,10 +36,10 @@
       "import": "./dist/define-config.mjs",
       "default": "./dist/define-config.mjs"
     },
-    "./esbuild": {
-      "types": "./dist/esbuild.d.ts",
-      "import": "./dist/esbuild.mjs",
-      "default": "./dist/esbuild.mjs"
+    "./rolldown": {
+      "types": "./dist/rolldown.d.ts",
+      "import": "./dist/rolldown.mjs",
+      "default": "./dist/rolldown.mjs"
     },
     "./hono": {
       "types": "./dist/hono.d.ts",
@@ -134,8 +134,8 @@
       "define-config": [
         "dist/define-config.d.ts"
       ],
-      "esbuild": [
-        "dist/esbuild.d.ts"
+      "rolldown": [
+        "dist/rolldown.d.ts"
       ],
       "hono": [
         "dist/hono.d.ts"

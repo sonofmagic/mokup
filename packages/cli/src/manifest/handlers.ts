@@ -3,8 +3,8 @@ import type { ManifestResponse } from '@mokup/runtime'
 import { Buffer } from 'node:buffer'
 import { promises as fs } from 'node:fs'
 
-import { build as esbuild } from '@mokup/shared/esbuild'
 import { dirname, extname, join, relative, resolve } from '@mokup/shared/pathe'
+import { build as rolldown } from '@mokup/shared/rolldown'
 
 import { toPosix } from './utils'
 
@@ -200,7 +200,7 @@ export function buildResponse(
  * await bundleHandlers(['mock/ping.get.ts'], process.cwd(), '.mokup/mokup-handlers')
  */
 export async function bundleHandlers(files: string[], root: string, handlersDir: string) {
-  await esbuild({
+  await rolldown({
     entryPoints: files,
     bundle: true,
     format: 'esm',

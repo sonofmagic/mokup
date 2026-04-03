@@ -1,11 +1,11 @@
-import { build as esbuild } from '@mokup/shared/esbuild'
+import { build as rolldown } from '@mokup/shared/rolldown'
 
 async function bundleScript(params: {
   code: string
   root: string
   sourceName: string
 }) {
-  const result = await esbuild({
+  const result = await rolldown({
     stdin: {
       contents: params.code,
       resolveDir: params.root,
