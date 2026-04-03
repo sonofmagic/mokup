@@ -1,4 +1,10 @@
-import type { MockResolver, MockResolverOptions, RequestDescriptor } from '@mokup/client'
+import type {
+  AxiosRequestConfig,
+  MockResolver,
+  MockResolverOptions,
+  MokupFetchInit,
+  RequestDescriptor,
+} from '@mokup/client'
 import {
   createAxiosRequestInterceptor,
   createFetchAdapter,
@@ -74,7 +80,7 @@ function isRecord(value: unknown): value is Record<string, unknown> {
 }
 
 function isRequestDescriptor(value: unknown): value is RequestDescriptor {
-  return isRecord(value) && typeof value.url === 'string'
+  return isRecord(value) && typeof value['url'] === 'string'
 }
 
 function normalizeMethod(method?: string): string {
@@ -132,17 +138,18 @@ function applyParams(url: string, params?: Record<string, unknown>): string {
 function normalizeRequest(descriptor: RequestDescriptor, meta?: Record<string, unknown>): RequestDescriptor {
   const { params, ...rest } = descriptor
   const url = applyParams(descriptor.url, params as Record<string, unknown> | undefined)
+  const mergedMeta = mergeMeta(descriptor.meta as Record<string, unknown> | undefined, meta)
   return {
     ...rest,
     url,
     method: normalizeMethod(descriptor.method),
-    meta: mergeMeta(descriptor.meta as Record<string, unknown> | undefined, meta),
+    ...(mergedMeta ? { meta: mergedMeta } : {}),
   }
 }
 
 function defaultBuildRequest(queryKey: QueryKey, meta?: Record<string, unknown>): RequestDescriptor | null {
-  if (isRecord(meta) && isRequestDescriptor(meta.request)) {
-    return meta.request
+  if (isRecord(meta) && isRequestDescriptor(meta['request'])) {
+    return meta['request']
   }
   if (isRequestDescriptor(queryKey)) {
     return queryKey
@@ -202,21 +209,22 @@ function defaultTransformResponse(response: Response): Promise<unknown> {
 export function createFetchExecutor(options: FetchExecutorOptions = {}): RequestExecutor {
   const resolver = options.resolver ?? createMockResolver(options.resolverOptions)
   const adapter = createFetchAdapter({
-    fetch: options.fetch,
     resolver,
+    ...(options.fetch ? { fetch: options.fetch } : {}),
   })
   const transform = options.transformResponse ?? defaultTransformResponse
 
   return async (descriptor, context) => {
     const normalized = normalizeRequest(descriptor, descriptor.meta as Record<string, unknown> | undefined)
-    const response = await adapter(normalized.url, {
-      method: normalized.method,
-      headers: normalized.headers as HeadersInit | undefined,
-      body: normalized.body as BodyInit | null | undefined,
-      signal: context?.signal,
-      mock: normalized.mock,
-      meta: normalized.meta as Record<string, unknown> | undefined,
-    })
+    const init: MokupFetchInit = {
+      ...(normalized.headers ? { headers: normalized.headers as HeadersInit } : {}),
+      ...(normalized.method ? { method: normalized.method } : {}),
+      ...(typeof normalized.body !== 'undefined' ? { body: normalized.body as BodyInit | null } : {}),
+      ...(context?.signal ? { signal: context.signal } : {}),
+      ...(typeof normalized.mock === 'boolean' ? { mock: normalized.mock } : {}),
+      ...(normalized.meta ? { meta: normalized.meta as Record<string, unknown> } : {}),
+    }
+    const response = await adapter(normalized.url, init)
     return transform(response)
   }
 }
@@ -226,24 +234,25 @@ export function createAxiosExecutor(options: AxiosExecutorOptions): RequestExecu
   const interceptor = createAxiosRequestInterceptor({ resolver })
   const select = options.selectResponse ?? ((response: unknown) => {
     if (isRecord(response) && 'data' in response) {
-      return response.data
+      return response['data']
     }
     return response
   })
 
   return async (descriptor, context) => {
     const normalized = normalizeRequest(descriptor, descriptor.meta as Record<string, unknown> | undefined)
-    const config = await interceptor({
+    const config: AxiosRequestConfig = {
       url: normalized.url,
-      method: normalized.method,
-      headers: normalized.headers as Record<string, string> | undefined,
-      data: normalized.body,
-      mock: normalized.mock,
-      meta: normalized.meta as Record<string, unknown> | undefined,
-      signal: context?.signal,
-    })
+      ...(normalized.method ? { method: normalized.method } : {}),
+      ...(normalized.headers ? { headers: normalized.headers as Record<string, string> } : {}),
+      ...(typeof normalized.body !== 'undefined' ? { data: normalized.body } : {}),
+      ...(typeof normalized.mock === 'boolean' ? { mock: normalized.mock } : {}),
+      ...(normalized.meta ? { meta: normalized.meta as Record<string, unknown> } : {}),
+      ...(context?.signal ? { signal: context.signal } : {}),
+    }
+    const resolvedConfig = await interceptor(config)
 
-    const response = await options.axios.request(config)
+    const response = await options.axios.request(resolvedConfig)
     return select(response)
   }
 }
@@ -254,8 +263,8 @@ export function createMokupQueryClient(options: MokupQueryOptions = {}) {
   const buildMutationRequest = options.buildMutationRequest ?? defaultBuildMutationRequest
   const executor = options.executor ?? createFetchExecutor({
     resolver,
-    fetch: options.fetch,
-    transformResponse: options.transformResponse,
+    ...(options.fetch ? { fetch: options.fetch } : {}),
+    ...(options.transformResponse ? { transformResponse: options.transformResponse } : {}),
   })
 
   const queryFn: QueryFunction = async (context) => {
@@ -264,7 +273,7 @@ export function createMokupQueryClient(options: MokupQueryOptions = {}) {
       throw new Error('Failed to build request from queryKey. Provide buildRequest to customize.')
     }
     const normalized = normalizeRequest(request, context.meta)
-    return executor(normalized, { signal: context.signal })
+    return executor(normalized, context.signal ? { signal: context.signal } : undefined)
   }
 
   const mutationFn: MutationFunction = async (variables) => {

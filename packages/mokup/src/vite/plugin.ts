@@ -182,7 +182,9 @@ export function createMokupPlugin(options: MokupPluginOptions = {}): Plugin {
         routes: state.swRoutes,
         root,
         basePaths: swConfig?.basePaths ?? [],
-        moduleVersion: state.swModuleVersion,
+        ...(typeof state.swModuleVersion !== 'undefined'
+          ? { moduleVersion: state.swModuleVersion }
+          : {}),
       })
     },
     async buildStart() {

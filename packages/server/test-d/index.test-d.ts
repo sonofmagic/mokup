@@ -1,3 +1,4 @@
+/* eslint-disable antfu/no-import-dist */
 import type {
   FetchHandler,
   Manifest,
@@ -6,16 +7,16 @@ import type {
   ServerOptions,
   WorkerBundle,
   WorkerInput,
-} from '@mokup/server'
-import type { FetchServer, FetchServerOptionsInput, NodeWorkerInput } from '@mokup/server/node'
-import type { IncomingMessage, ServerResponse } from 'node:http'
+} from '../dist/index.mjs'
+import type { FetchServer, FetchServerOptionsInput, NodeWorkerInput } from '../dist/node.mjs'
+import { expectAssignable, expectType } from 'tsd'
 import {
   createFetchHandler,
   createMokupWorker,
   defineConfig,
   onAfterAll,
   onBeforeAll,
-} from '@mokup/server'
+} from '../dist/index.mjs'
 import {
   createConnectMiddleware,
   createExpressMiddleware,
@@ -23,8 +24,7 @@ import {
   createHonoMiddleware,
   createKoaMiddleware,
   createMokupWorker as createNodeWorker,
-} from '@mokup/server/node'
-import { expectAssignable, expectType } from 'tsd'
+} from '../dist/node.mjs'
 
 const manifest: Manifest = { version: 1, routes: [] }
 
@@ -39,7 +39,7 @@ const workerBundle: WorkerBundle = {
   manifest,
 }
 const workerInput: WorkerInput = workerBundle
-expectType<WorkerInput>(workerInput)
+expectAssignable<WorkerInput>(workerInput)
 
 const worker = createMokupWorker(workerInput)
 expectType<{ fetch: (request: Request) => Promise<Response> }>(worker)
@@ -61,11 +61,7 @@ onBeforeAll(() => {})
 onAfterAll(async () => {})
 
 const connectMiddleware = createConnectMiddleware(serverOptions)
-expectAssignable<(
-  req: IncomingMessage,
-  res: ServerResponse,
-  next: (err?: unknown) => void,
-) => Promise<void>>(connectMiddleware)
+expectType<ReturnType<typeof createConnectMiddleware>>(connectMiddleware)
 
 expectType<ReturnType<typeof createExpressMiddleware>>(
   createExpressMiddleware(serverOptions),

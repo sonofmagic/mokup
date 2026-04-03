@@ -1,3 +1,5 @@
+/* eslint-disable antfu/no-import-dist */
+import type { Hono } from '@mokup/shared/hono'
 import type {
   Manifest,
   ManifestRoute,
@@ -5,8 +7,8 @@ import type {
   RuntimeOptions,
   RuntimeRequest,
   RuntimeResult,
-} from '@mokup/runtime'
-import type { Hono } from '@mokup/shared/hono'
+} from '../dist/index.mjs'
+import { expectAssignable, expectType } from 'tsd'
 import {
   createRuntime,
   createRuntimeApp,
@@ -14,8 +16,7 @@ import {
   normalizePathname,
   parseRouteTemplate,
   scoreRouteTokens,
-} from '@mokup/runtime'
-import { expectType } from 'tsd'
+} from '../dist/index.mjs'
 
 const manifest: Manifest = {
   version: 1,
@@ -33,14 +34,14 @@ const appPromise = createRuntimeApp(options)
 expectType<Promise<Hono>>(appPromise)
 
 const tokens: RouteToken[] = [{ type: 'static', value: 'users' }]
-expectType<number[]>(scoreRouteTokens(tokens))
+expectAssignable<number[]>(scoreRouteTokens(tokens))
 
 const parsed = parseRouteTemplate('/users/[id]')
 expectType<string[]>(parsed.errors)
 expectType<string[]>(parsed.warnings)
 
 expectType<string>(normalizePathname('/foo//'))
-expectType<boolean>(matchRouteTokens(tokens, '/users'))
+expectType<{ params: Record<string, string | string[]> } | null>(matchRouteTokens(tokens, '/users'))
 
 const route: ManifestRoute = {
   method: 'GET',

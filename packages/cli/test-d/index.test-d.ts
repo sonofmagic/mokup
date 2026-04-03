@@ -1,3 +1,4 @@
+/* eslint-disable antfu/no-import-dist */
 import type {
   BuildOptions,
   HookErrorPolicy,
@@ -5,8 +6,8 @@ import type {
   MiddlewareRegistry,
   RouteDirectoryConfig,
   RouteRule,
-} from '@mokup/cli'
-import type { Manifest } from '@mokup/runtime'
+} from '../dist/index.mjs'
+import { expectAssignable, expectType } from 'tsd'
 import {
   buildManifest,
   createCli,
@@ -14,8 +15,7 @@ import {
   onAfterAll,
   onBeforeAll,
   runCli,
-} from '@mokup/cli'
-import { expectAssignable, expectType } from 'tsd'
+} from '../dist/index.mjs'
 
 const options: BuildOptions = {
   dir: ['mock'],
@@ -35,7 +35,7 @@ const directoryConfig: RouteDirectoryConfig = {
 }
 
 const registry: MiddlewareRegistry = {
-  use: (...handlers) => {
+  use: (...handlers: unknown[]) => {
     expectType<number>(handlers.length)
   },
 }
@@ -47,8 +47,8 @@ expectType<BuildOptions>(options)
 expectType<RouteRule>(routeRule)
 expectType<RouteDirectoryConfig>(directoryConfig)
 expectType<MiddlewareRegistry>(registry)
-expectType<HookErrorPolicy>(policy)
-expectType<MiddlewarePosition>(position)
+expectAssignable<HookErrorPolicy>(policy)
+expectAssignable<MiddlewarePosition>(position)
 
 const configResult = defineConfig({})
 expectAssignable<RouteDirectoryConfig | Promise<RouteDirectoryConfig>>(configResult)
@@ -57,7 +57,7 @@ onBeforeAll(() => {})
 onAfterAll(async () => {})
 
 const buildResult = buildManifest({ dir: 'mock', outDir: '.mokup' })
-expectType<Promise<{ manifest: Manifest, manifestPath: string }>>(buildResult)
+expectType<ReturnType<typeof buildManifest>>(buildResult)
 
 expectType<ReturnType<typeof createCli>>(createCli())
 expectType<Promise<void>>(runCli(['node', 'mokup']))

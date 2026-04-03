@@ -71,7 +71,9 @@ async function configureDevServer(params: {
           runtimeImportPath: resolveSwRuntimeImportPath(base),
           loggerImportPath: resolveSwLoggerImportPath(base),
           basePaths: swConfig?.basePaths ?? [],
-          moduleVersion: state.swModuleVersion,
+          ...(typeof state.swModuleVersion !== 'undefined'
+            ? { moduleVersion: state.swModuleVersion }
+            : {}),
         })
         res.statusCode = 200
         res.setHeader('Content-Type', 'application/javascript; charset=utf-8')
@@ -149,7 +151,9 @@ async function configurePreviewServer(params: {
           routes: state.swRoutes,
           root,
           basePaths: swConfig?.basePaths ?? [],
-          moduleVersion: state.swModuleVersion,
+          ...(typeof state.swModuleVersion !== 'undefined'
+            ? { moduleVersion: state.swModuleVersion }
+            : {}),
         })
         res.statusCode = 200
         res.setHeader('Content-Type', 'application/javascript; charset=utf-8')

@@ -2,14 +2,6 @@
   "extends": "../../tsconfig.json",
   "compilerOptions": {
     "rootDir": "src",
-    "paths": {
-      "@mokup/client": [
-        "packages/client/src/index.ts"
-      ],
-      "@mokup/client/*": [
-        "packages/client/src/*"
-      ]
-    },
     "outDir": "dist"
   },
   "include": [
