@@ -40,6 +40,8 @@ export interface RuntimeRule {
   delay?: number
 }
 
+const URL_PROTOCOL_RE = /^(?:data|http|https|file):/
+
 /**
  * Resolve a module path relative to a base directory or URL.
  *
@@ -53,14 +55,14 @@ export interface RuntimeRule {
  * const url = resolveModuleUrl('./handlers/ping.mjs', new URL('file:///app/'))
  */
 export function resolveModuleUrl(modulePath: string, moduleBase?: string | URL) {
-  if (/^(?:data|http|https|file):/.test(modulePath)) {
+  if (URL_PROTOCOL_RE.test(modulePath)) {
     return modulePath
   }
   if (!moduleBase) {
     throw new Error('moduleBase is required for relative module paths.')
   }
   const base = typeof moduleBase === 'string' ? moduleBase : moduleBase.href
-  if (/^(?:data|http|https|file):/.test(base)) {
+  if (URL_PROTOCOL_RE.test(base)) {
     return new URL(modulePath, base).href
   }
   const normalizedBase = base.endsWith('/') ? base : `${base}/`
@@ -167,10 +169,8 @@ async function loadModuleExport(
     : resolveModuleUrl(modulePath, moduleBase)
   const resolvedMapValue = resolvedUrl ? moduleMap?.[resolvedUrl] : undefined
   const moduleValue = directMapValue ?? resolvedMapValue
-  const module = moduleValue ?? await import(
-    /* @vite-ignore */
-    (resolvedUrl ?? modulePath),
-  )
+  const target = resolvedUrl ?? modulePath
+  const module = moduleValue ?? await import(/* @vite-ignore */ target)
   return module[exportName] ?? module.default ?? module
 }
 

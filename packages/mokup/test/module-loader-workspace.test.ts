@@ -8,9 +8,9 @@ afterEach(async () => {
   resetModuleLoaderForTests()
   vi.resetModules()
   vi.clearAllMocks()
-  vi.unmock('node:fs')
-  vi.unmock('node:url')
-  vi.unmock('tsx/esm/api')
+  vi.doUnmock('node:fs')
+  vi.doUnmock('node:url')
+  vi.doUnmock('tsx/esm/api')
 })
 
 describe('module loader workspace config', () => {
