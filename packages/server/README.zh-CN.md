@@ -13,6 +13,7 @@ Mokup 的 Server 适配器集合，用于把运行时接入各类 Node 框架与
 ## 升级提示
 
 - 该包现在只提供 ESM 输出。
+- 完整迁移说明见：[../../docs/guide/migration-v1.md](../../docs/guide/migration-v1.md)
 
 该包为 `mokup` 内部依赖，建议使用下方公开入口。
 

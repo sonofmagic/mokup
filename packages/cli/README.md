@@ -15,3 +15,4 @@ https://mokup.icebreaker.top.
 ## Upgrade notes
 
 - This package now ships ESM-only output.
+- Full migration guide: [../../docs/guide/migration-v1.md](../../docs/guide/migration-v1.md)

@@ -14,3 +14,4 @@ Mokup provides file-based mock routing, a Vite plugin, and a playground UI to he
 
 - Published packages now ship ESM-only output.
 - `@mokup/shared/esbuild` has been renamed to `@mokup/shared/rolldown`.
+- Full migration guide: [../../docs/guide/migration-v1.md](../../docs/guide/migration-v1.md)

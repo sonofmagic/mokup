@@ -13,3 +13,4 @@ Mokup runtime 用于在请求时读取 manifest 并返回 mock 响应，是 Serv
 ## 升级提示
 
 - 该包现在只提供 ESM 输出。
+- 完整迁移说明见：[../../docs/guide/migration-v1.md](../../docs/guide/migration-v1.md)

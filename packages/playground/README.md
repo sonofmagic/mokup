@@ -13,3 +13,4 @@ A standalone UI for browsing, testing, and debugging Mokup mock routes. For deta
 ## Upgrade notes
 
 - This package now ships ESM-only output.
+- Full migration guide: [../../docs/guide/migration-v1.md](../../docs/guide/migration-v1.md)

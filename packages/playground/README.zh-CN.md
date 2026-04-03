@@ -13,3 +13,4 @@
 ## 升级提示
 
 - 该包现在只提供 ESM 输出。
+- 完整迁移说明见：[../../docs/guide/migration-v1.md](../../docs/guide/migration-v1.md)
