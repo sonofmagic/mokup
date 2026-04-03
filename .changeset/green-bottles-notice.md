@@ -10,4 +10,4 @@
 '@mokup/shared': major
 ---
 
-Switch all published packages to ESM-only outputs, replace unbuild/tsup-based package builds with tsdown, and raise the minimum supported Node.js versions to `^20.19.0 || >=22.12.0`.
+Switch all published packages to ESM-only outputs, replace unbuild/tsup-based package builds with tsdown, raise the minimum supported Node.js versions to `^20.19.0 || >=22.12.0`, and rename `@mokup/shared/esbuild` to `@mokup/shared/rolldown`.
