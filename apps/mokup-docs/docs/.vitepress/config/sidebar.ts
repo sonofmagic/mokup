@@ -8,6 +8,7 @@ export const zhSidebar: DefaultTheme.Sidebar = {
       items: [
         { text: '项目概览', link: '/zh/getting-started/overview' },
         { text: '安装', link: '/zh/getting-started/installation' },
+        { text: '升级到 v1', link: '/zh/getting-started/upgrade-to-v1' },
         { text: '快速开始', link: '/zh/getting-started/quick-start/' },
         { text: 'Vite 快速开始', link: '/zh/getting-started/quick-start/vite' },
         { text: 'Webpack 快速开始', link: '/zh/getting-started/quick-start/webpack' },
@@ -99,6 +100,7 @@ export const enSidebar: DefaultTheme.Sidebar = {
       items: [
         { text: 'Overview', link: '/getting-started/overview' },
         { text: 'Installation', link: '/getting-started/installation' },
+        { text: 'Upgrade to v1', link: '/getting-started/upgrade-to-v1' },
         { text: 'Quick Start', link: '/getting-started/quick-start/' },
         { text: 'Vite Quick Start', link: '/getting-started/quick-start/vite' },
         { text: 'Webpack Quick Start', link: '/getting-started/quick-start/webpack' },

@@ -1,6 +1,6 @@
 # Mokup：构建工具友好的可视化 Mock 工具
 
-![Mokup Logo](../public/brand/mokup-logo.svg)
+![Mokup Logo](/brand/mokup-logo.svg)
 
 大家好呀，我是 [icebreaker](https://github.com/sonofmagic)，一名前端开发者兼开源爱好者。
 
@@ -57,7 +57,7 @@ export default {
 
 你也可以在你的 CLI 中快速访问 mokup 的 playground 进行可视化调试
 
-![CLI](../public/blog/mokup-unified-mock-library/cli.png)
+![CLI](/blog/mokup-unified-mock-library/cli.png)
 
 ### Webpack 接入
 
@@ -85,7 +85,7 @@ http://localhost:5173/__mokup
 
 在线体验 Demo：<https://mokup.icebreaker.top/__mokup/>
 
-![Playground 入口（终端提示）](../public/blog/mokup-unified-mock-library/playground.png)
+![Playground 入口（终端提示）](/blog/mokup-unified-mock-library/playground.png)
 
 它解决的是一个非常实际的问题：
 接口不生效时，你不用到处去找问题，只要打开页面就能看到“有没有被扫到、有没有被禁用、匹配到了什么配置”。
@@ -118,7 +118,7 @@ export default defineHandler({
 
 启动 dev 后访问 `/api/users` (你设置了 `prefix: '/api'` )，即可拿到 mock 数据。
 
-![mock 目录结构示例](../public/blog/mokup-unified-mock-library/mock-dir.png)
+![mock 目录结构示例](/blog/mokup-unified-mock-library/mock-dir.png)
 
 ## 快速集成 @faker-js/faker
 
@@ -182,7 +182,7 @@ export default createMokupWorker(mokupBundle)
 
 ## 核心架构
 
-![mock 目录结构示例](../public/blog/mokup-unified-mock-library/core-en.png)
+![mock 目录结构示例](/blog/mokup-unified-mock-library/core-en.png)
 
 ## 适用场景与边界
 

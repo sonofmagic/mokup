@@ -1,6 +1,6 @@
 # Mokup: A Build-Tool-Friendly Visual Mocking Tool
 
-![Mokup Logo](../public/brand/mokup-logo.svg)
+![Mokup Logo](/brand/mokup-logo.svg)
 
 Hi, I am [icebreaker](https://github.com/sonofmagic), a frontend developer and open source enthusiast.
 
@@ -51,7 +51,7 @@ At this point, you can add files under `mock/`, and Mokup will scan them and gen
 
 You can also open Mokup Playground from your CLI output for visual debugging.
 
-![CLI](../public/blog/mokup-unified-mock-library/cli.png)
+![CLI](/blog/mokup-unified-mock-library/cli.png)
 
 ### Webpack integration
 
@@ -79,7 +79,7 @@ http://localhost:5173/__mokup
 
 Online demo: <https://mokup.icebreaker.top/__mokup/>
 
-![Playground entry (terminal output)](../public/blog/mokup-unified-mock-library/playground.png)
+![Playground entry (terminal output)](/blog/mokup-unified-mock-library/playground.png)
 
 It solves a practical problem:
 when an endpoint does not work, you do not need to grep everywhere. Open the page and you can immediately see whether the route was scanned, disabled, and which config matched.
@@ -111,7 +111,7 @@ export default defineHandler({
 
 Start dev and visit `/api/users` (assuming you set `prefix: '/api'`), then you get mock data.
 
-![Mock directory example](../public/blog/mokup-unified-mock-library/mock-dir.png)
+![Mock directory example](/blog/mokup-unified-mock-library/mock-dir.png)
 
 ## Quick integration with @faker-js/faker
 
@@ -173,7 +173,7 @@ Note: `virtual:mokup-bundle` is only available in Vite with `@cloudflare/vite-pl
 
 ## Core architecture
 
-![Core architecture](../public/blog/mokup-unified-mock-library/core-en.png)
+![Core architecture](/blog/mokup-unified-mock-library/core-en.png)
 
 ## Use cases and boundaries
 

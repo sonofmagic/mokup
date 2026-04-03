@@ -2,7 +2,7 @@
 
 ## Requirements
 
-- Node.js 20+
+- Node.js `^20.19.0 || >=22.12.0`
 - pnpm (recommended)
 
 ## Packages
@@ -52,3 +52,5 @@ bun add mokup
 :::
 
 If you only need Vite dev mocks, install `mokup` as a dev dependency.
+
+If you are upgrading from an older release, see [Upgrade to v1](/getting-started/upgrade-to-v1).

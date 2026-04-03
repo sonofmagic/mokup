@@ -2,7 +2,7 @@
 
 ## 前置要求
 
-- Node.js 20+
+- Node.js `^20.19.0 || >=22.12.0`
 - pnpm（推荐）
 
 ## 安装依赖
@@ -52,3 +52,5 @@ bun add mokup
 :::
 
 如果你只做本地 Vite 开发，把 `mokup` 装在 devDependencies 即可。
+
+如果你是从旧版本升级，请先阅读[升级到 v1](/zh/getting-started/upgrade-to-v1)。
