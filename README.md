@@ -20,6 +20,12 @@
 
 - Node.js `^20.19.0 || >=22.12.0`
 
+## Upgrade Notes
+
+- Published packages are ESM-only. CommonJS `require()` is no longer supported.
+- Internal build packages now use `tsdown` on top of Rolldown.
+- `@mokup/shared/esbuild` has been renamed to `@mokup/shared/rolldown`.
+
 ## Quick start
 
 Create `mock/users.get.json`:

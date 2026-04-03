@@ -6,6 +6,12 @@
 
 - Node.js `^20.19.0 || >=22.12.0`
 
+## 升级提示
+
+- 已发布包现在只提供 ESM 构建，不再支持 CommonJS `require()`。
+- 内部构建链已经切到 `tsdown + rolldown`。
+- `@mokup/shared/esbuild` 已重命名为 `@mokup/shared/rolldown`。
+
 ## 快速开始
 
 ### 安装
