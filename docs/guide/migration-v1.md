@@ -2,6 +2,11 @@
 
 本文档汇总了本次 breaking change 升级需要关注的点。
 
+相关入口：
+
+- 根说明：[../../README.md](../../README.md)
+- Vite 集成：[./vite-integration.md](./vite-integration.md)
+
 ## 1. Node.js 版本要求
 
 所有公开包现在都要求：

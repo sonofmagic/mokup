@@ -11,6 +11,7 @@
 - 已发布包现在只提供 ESM 构建，不再支持 CommonJS `require()`。
 - 内部构建链已经切到 `tsdown + rolldown`。
 - `@mokup/shared/esbuild` 已重命名为 `@mokup/shared/rolldown`。
+- 如果你是在升级已有项目，先看 [v1 迁移指南](./migration-v1.md)。
 
 ## 快速开始
 
