@@ -1,0 +1,72 @@
+# Mokup v1 迁移指南
+
+本文档汇总了本次 breaking change 升级需要关注的点。
+
+## 1. Node.js 版本要求
+
+所有公开包现在都要求：
+
+```text
+^20.19.0 || >=22.12.0
+```
+
+低于这个范围的 Node.js 版本不再支持。
+
+## 2. 包输出改为 ESM-only
+
+所有已发布包现在只提供 ESM 输出。
+
+受影响示例：
+
+```js
+const mokup = require('mokup')
+```
+
+这类 CommonJS `require()` 用法不再受支持，需要改为 ESM：
+
+```ts
+import mokup from 'mokup'
+```
+
+## 3. `@mokup/shared/esbuild` 改名
+
+原来的内部兼容入口：
+
+```ts
+import { build } from '@mokup/shared/esbuild'
+```
+
+现在应改为：
+
+```ts
+import { build } from '@mokup/shared/rolldown'
+```
+
+这个入口仍然提供仓库内部当前使用的 `build()` 能力，但底层已经切到 Rolldown。
+
+## 4. 构建工具链变更
+
+已发布包的构建链已经从 `unbuild` / `tsup` 切换为 `tsdown`。
+
+如果你在仓库内扩展包配置，应该优先使用：
+
+- `tsdown.config.ts`
+- `tsdown --watch`
+
+而不是旧的 `build.config.ts`、`tsup` 或 `unbuild` 配置。
+
+## 5. 需要优先检查的升级项
+
+- CI / Docker / 部署环境里的 Node.js 版本
+- 是否还有 CommonJS `require()` 引用公开包
+- 是否还有 `@mokup/shared/esbuild` 导入
+- 是否还有旧的包构建脚本或 `build.config.ts`
+
+## 6. 仓库当前状态
+
+当前仓库已经完成以下迁移：
+
+- 发布包统一为 ESM-only
+- 发布包统一使用 `tsdown`
+- `tsdown` 实际构建已固定到 `rolldown@1.0.0-rc.13`
+- 单元测试、类型测试、串行 e2e 测试已通过

@@ -55,6 +55,7 @@ export default defineHandler(async (c) => {
 ```
 
 Follow the docs at http://mokup.icebreaker.top/ for Vite and CLI setup.
+Upgrade details: [docs/guide/migration-v1.md](docs/guide/migration-v1.md)
 
 ## Contributing
 
