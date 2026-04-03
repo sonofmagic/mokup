@@ -12,307 +12,199 @@
   },
   "exports": {
     ".": {
-      "types": {
-        "import": "./dist/index.d.mts",
-        "require": "./dist/index.d.cts"
-      },
-      "import": "./dist/index.mjs",
-      "require": "./dist/index.cjs"
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.mjs"
     },
     "./bundle": {
-      "types": {
-        "import": "./dist/bundle.d.mts",
-        "require": "./dist/bundle.d.cts"
-      },
-      "import": "./dist/bundle.mjs",
-      "require": "./dist/bundle.cjs"
+      "types": "./dist/bundle.d.ts",
+      "import": "./dist/bundle.mjs"
     },
     "./config": {
-      "types": {
-        "import": "./dist/config.d.mts",
-        "require": "./dist/config.d.cts"
-      },
-      "import": "./dist/config.mjs",
-      "require": "./dist/config.cjs"
+      "types": "./dist/config.d.ts",
+      "import": "./dist/config.mjs"
     },
     "./loader": {
-      "types": {
-        "import": "./dist/loader.d.mts",
-        "require": "./dist/loader.d.cts"
-      },
-      "import": "./dist/loader.mjs",
-      "require": "./dist/loader.cjs"
+      "types": "./dist/loader.d.ts",
+      "import": "./dist/loader.mjs"
     },
     "./manifest": {
-      "types": {
-        "import": "./dist/manifest.d.mts",
-        "require": "./dist/manifest.d.cts"
-      },
-      "import": "./dist/manifest.mjs",
-      "require": "./dist/manifest.cjs"
+      "types": "./dist/manifest.d.ts",
+      "import": "./dist/manifest.mjs"
     },
     "./middleware": {
-      "types": {
-        "import": "./dist/middleware.d.mts",
-        "require": "./dist/middleware.d.cts"
-      },
-      "import": "./dist/middleware.mjs",
-      "require": "./dist/middleware.cjs"
+      "types": "./dist/middleware.d.ts",
+      "import": "./dist/middleware.mjs"
     },
     "./module-loader": {
-      "types": {
-        "import": "./dist/module-loader.d.mts",
-        "require": "./dist/module-loader.d.cts"
-      },
-      "import": "./dist/module-loader.mjs",
-      "require": "./dist/module-loader.cjs"
+      "types": "./dist/module-loader.d.ts",
+      "import": "./dist/module-loader.mjs"
     },
     "./playground": {
-      "types": {
-        "import": "./dist/playground.d.mts",
-        "require": "./dist/playground.d.cts"
-      },
-      "import": "./dist/playground.mjs",
-      "require": "./dist/playground.cjs"
+      "types": "./dist/playground.d.ts",
+      "import": "./dist/playground.mjs"
     },
     "./playground/assets": {
-      "types": {
-        "import": "./dist/playground/assets.d.mts",
-        "require": "./dist/playground/assets.d.cts"
-      },
-      "import": "./dist/playground/assets.mjs",
-      "require": "./dist/playground/assets.cjs"
+      "types": "./dist/playground/assets.d.ts",
+      "import": "./dist/playground/assets.mjs"
     },
     "./playground/build": {
-      "types": {
-        "import": "./dist/playground/build.d.mts",
-        "require": "./dist/playground/build.d.cts"
-      },
-      "import": "./dist/playground/build.mjs",
-      "require": "./dist/playground/build.cjs"
+      "types": "./dist/playground/build.d.ts",
+      "import": "./dist/playground/build.mjs"
     },
     "./playground/config": {
-      "types": {
-        "import": "./dist/playground/config.d.mts",
-        "require": "./dist/playground/config.d.cts"
-      },
-      "import": "./dist/playground/config.mjs",
-      "require": "./dist/playground/config.cjs"
+      "types": "./dist/playground/config.d.ts",
+      "import": "./dist/playground/config.mjs"
     },
     "./playground/grouping": {
-      "types": {
-        "import": "./dist/playground/grouping.d.mts",
-        "require": "./dist/playground/grouping.d.cts"
-      },
-      "import": "./dist/playground/grouping.mjs",
-      "require": "./dist/playground/grouping.cjs"
+      "types": "./dist/playground/grouping.d.ts",
+      "import": "./dist/playground/grouping.mjs"
     },
     "./playground/inject": {
-      "types": {
-        "import": "./dist/playground/inject.d.mts",
-        "require": "./dist/playground/inject.d.cts"
-      },
-      "import": "./dist/playground/inject.mjs",
-      "require": "./dist/playground/inject.cjs"
+      "types": "./dist/playground/inject.d.ts",
+      "import": "./dist/playground/inject.mjs"
     },
     "./playground/middleware": {
-      "types": {
-        "import": "./dist/playground/middleware.d.mts",
-        "require": "./dist/playground/middleware.d.cts"
-      },
-      "import": "./dist/playground/middleware.mjs",
-      "require": "./dist/playground/middleware.cjs"
+      "types": "./dist/playground/middleware.d.ts",
+      "import": "./dist/playground/middleware.mjs"
     },
     "./playground/serialize": {
-      "types": {
-        "import": "./dist/playground/serialize.d.mts",
-        "require": "./dist/playground/serialize.d.cts"
-      },
-      "import": "./dist/playground/serialize.mjs",
-      "require": "./dist/playground/serialize.cjs"
+      "types": "./dist/playground/serialize.d.ts",
+      "import": "./dist/playground/serialize.mjs"
     },
     "./routes": {
-      "types": {
-        "import": "./dist/routes.d.mts",
-        "require": "./dist/routes.d.cts"
-      },
-      "import": "./dist/routes.mjs",
-      "require": "./dist/routes.cjs"
+      "types": "./dist/routes.d.ts",
+      "import": "./dist/routes.mjs"
     },
     "./scanner": {
-      "types": {
-        "import": "./dist/scanner.d.mts",
-        "require": "./dist/scanner.d.cts"
-      },
-      "import": "./dist/scanner.mjs",
-      "require": "./dist/scanner.cjs"
+      "types": "./dist/scanner.d.ts",
+      "import": "./dist/scanner.mjs"
     },
     "./scanner-precheck": {
-      "types": {
-        "import": "./dist/scanner-precheck.d.mts",
-        "require": "./dist/scanner-precheck.d.cts"
-      },
-      "import": "./dist/scanner-precheck.mjs",
-      "require": "./dist/scanner-precheck.cjs"
+      "types": "./dist/scanner-precheck.d.ts",
+      "import": "./dist/scanner-precheck.mjs"
     },
     "./scanner-types": {
-      "types": {
-        "import": "./dist/scanner-types.d.mts",
-        "require": "./dist/scanner-types.d.cts"
-      },
-      "import": "./dist/scanner-types.mjs",
-      "require": "./dist/scanner-types.cjs"
+      "types": "./dist/scanner-types.d.ts",
+      "import": "./dist/scanner-types.mjs"
     },
     "./scanner-utils": {
-      "types": {
-        "import": "./dist/scanner-utils.d.mts",
-        "require": "./dist/scanner-utils.d.cts"
-      },
-      "import": "./dist/scanner-utils.mjs",
-      "require": "./dist/scanner-utils.cjs"
+      "types": "./dist/scanner-utils.d.ts",
+      "import": "./dist/scanner-utils.mjs"
     },
     "./sw": {
-      "types": {
-        "import": "./dist/sw.d.mts",
-        "require": "./dist/sw.d.cts"
-      },
-      "import": "./dist/sw.mjs",
-      "require": "./dist/sw.cjs"
+      "types": "./dist/sw.d.ts",
+      "import": "./dist/sw.mjs"
     },
     "./shared/constants": {
-      "types": {
-        "import": "./dist/shared/constants.d.mts",
-        "require": "./dist/shared/constants.d.cts"
-      },
-      "import": "./dist/shared/constants.mjs",
-      "require": "./dist/shared/constants.cjs"
+      "types": "./dist/shared/constants.d.ts",
+      "import": "./dist/shared/constants.mjs"
     },
     "./shared/files": {
-      "types": {
-        "import": "./dist/shared/files.d.mts",
-        "require": "./dist/shared/files.d.cts"
-      },
-      "import": "./dist/shared/files.mjs",
-      "require": "./dist/shared/files.cjs"
+      "types": "./dist/shared/files.d.ts",
+      "import": "./dist/shared/files.mjs"
     },
     "./shared/logger": {
-      "types": {
-        "import": "./dist/shared/logger.d.mts",
-        "require": "./dist/shared/logger.d.cts"
-      },
-      "import": "./dist/shared/logger.mjs",
-      "require": "./dist/shared/logger.cjs"
+      "types": "./dist/shared/logger.d.ts",
+      "import": "./dist/shared/logger.mjs"
     },
     "./shared/terminal": {
-      "types": {
-        "import": "./dist/shared/terminal.d.mts",
-        "require": "./dist/shared/terminal.d.cts"
-      },
-      "import": "./dist/shared/terminal.mjs",
-      "require": "./dist/shared/terminal.cjs"
+      "types": "./dist/shared/terminal.d.ts",
+      "import": "./dist/shared/terminal.mjs"
     },
     "./shared/types": {
-      "types": {
-        "import": "./dist/shared/types.d.mts",
-        "require": "./dist/shared/types.d.cts"
-      },
-      "import": "./dist/shared/types.mjs",
-      "require": "./dist/shared/types.cjs"
+      "types": "./dist/shared/types.d.ts",
+      "import": "./dist/shared/types.mjs"
     },
     "./shared/utils": {
-      "types": {
-        "import": "./dist/shared/utils.d.mts",
-        "require": "./dist/shared/utils.d.cts"
-      },
-      "import": "./dist/shared/utils.mjs",
-      "require": "./dist/shared/utils.cjs"
+      "types": "./dist/shared/utils.d.ts",
+      "import": "./dist/shared/utils.mjs"
     }
   },
   "publishConfig": {
     "access": "public"
   },
-  "main": "./dist/index.cjs",
+  "main": "./dist/index.mjs",
   "module": "./dist/index.mjs",
   "types": "./dist/index.d.ts",
   "typesVersions": {
     "*": {
       "bundle": [
-        "dist/bundle.d.mts"
+        "dist/bundle.d.ts"
       ],
       "config": [
-        "dist/config.d.mts"
+        "dist/config.d.ts"
       ],
       "loader": [
-        "dist/loader.d.mts"
+        "dist/loader.d.ts"
       ],
       "manifest": [
-        "dist/manifest.d.mts"
+        "dist/manifest.d.ts"
       ],
       "middleware": [
-        "dist/middleware.d.mts"
+        "dist/middleware.d.ts"
       ],
       "module-loader": [
-        "dist/module-loader.d.mts"
+        "dist/module-loader.d.ts"
       ],
       "playground": [
-        "dist/playground.d.mts"
+        "dist/playground.d.ts"
       ],
       "playground/assets": [
-        "dist/playground/assets.d.mts"
+        "dist/playground/assets.d.ts"
       ],
       "playground/build": [
-        "dist/playground/build.d.mts"
+        "dist/playground/build.d.ts"
       ],
       "playground/config": [
-        "dist/playground/config.d.mts"
+        "dist/playground/config.d.ts"
       ],
       "playground/grouping": [
-        "dist/playground/grouping.d.mts"
+        "dist/playground/grouping.d.ts"
       ],
       "playground/inject": [
-        "dist/playground/inject.d.mts"
+        "dist/playground/inject.d.ts"
       ],
       "playground/middleware": [
-        "dist/playground/middleware.d.mts"
+        "dist/playground/middleware.d.ts"
       ],
       "playground/serialize": [
-        "dist/playground/serialize.d.mts"
+        "dist/playground/serialize.d.ts"
       ],
       "routes": [
-        "dist/routes.d.mts"
+        "dist/routes.d.ts"
       ],
       "scanner": [
-        "dist/scanner.d.mts"
+        "dist/scanner.d.ts"
       ],
       "scanner-precheck": [
-        "dist/scanner-precheck.d.mts"
+        "dist/scanner-precheck.d.ts"
       ],
       "scanner-types": [
-        "dist/scanner-types.d.mts"
+        "dist/scanner-types.d.ts"
       ],
       "scanner-utils": [
-        "dist/scanner-utils.d.mts"
+        "dist/scanner-utils.d.ts"
       ],
       "sw": [
-        "dist/sw.d.mts"
+        "dist/sw.d.ts"
       ],
       "shared/constants": [
-        "dist/shared/constants.d.mts"
+        "dist/shared/constants.d.ts"
       ],
       "shared/files": [
-        "dist/shared/files.d.mts"
+        "dist/shared/files.d.ts"
       ],
       "shared/logger": [
-        "dist/shared/logger.d.mts"
+        "dist/shared/logger.d.ts"
       ],
       "shared/terminal": [
-        "dist/shared/terminal.d.mts"
+        "dist/shared/terminal.d.ts"
       ],
       "shared/types": [
-        "dist/shared/types.d.mts"
+        "dist/shared/types.d.ts"
       ],
       "shared/utils": [
-        "dist/shared/utils.d.mts"
+        "dist/shared/utils.d.ts"
       ]
     }
   },
@@ -320,11 +212,11 @@
     "dist"
   ],
   "engines": {
-    "node": ">=20.0.0"
+    "node": "^20.19.0 || >=22.12.0"
   },
   "scripts": {
-    "build": "unbuild",
-    "dev": "unbuild --stub",
+    "build": "tsdown",
+    "dev": "tsdown --watch",
     "lint": "eslint .",
     "typecheck": "tsc -p tsconfig.json --noEmit",
     "test:types": "tsd"

@@ -1,8 +1,6 @@
-import { defineBuildConfig } from 'unbuild'
+import { createPackageConfig } from '../../scripts/tsdown-config.ts'
 
-export default defineBuildConfig({
-  clean: true,
-  declaration: true,
+export default createPackageConfig({
   entries: [
     'src/index',
     'src/bundle',
@@ -32,7 +30,4 @@ export default defineBuildConfig({
     'src/shared/types',
     'src/shared/utils',
   ],
-  rollup: {
-    emitCJS: true,
-  },
 })

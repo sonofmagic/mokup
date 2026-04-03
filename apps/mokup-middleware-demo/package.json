@@ -3,6 +3,9 @@
   "type": "module",
   "version": "0.0.19",
   "private": true,
+  "engines": {
+    "node": "^20.19.0 || >=22.12.0"
+  },
   "scripts": {
     "build:mock": "pnpm exec mokup build --dir mock --out .mokup",
     "dev": "pnpm build:mock && tsx src/index.ts",

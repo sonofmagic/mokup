@@ -12,131 +12,87 @@
   },
   "exports": {
     ".": {
-      "types": {
-        "import": "./dist/index.d.mts",
-        "require": "./dist/index.d.cts"
-      },
-      "import": "./dist/index.mjs",
-      "require": "./dist/index.cjs"
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.mjs"
     },
     "./connect": {
-      "types": {
-        "import": "./dist/connect.d.mts",
-        "require": "./dist/connect.d.cts"
-      },
-      "import": "./dist/connect.mjs",
-      "require": "./dist/connect.cjs"
+      "types": "./dist/connect.d.ts",
+      "import": "./dist/connect.mjs"
     },
     "./express": {
-      "types": {
-        "import": "./dist/express.d.mts",
-        "require": "./dist/express.d.cts"
-      },
-      "import": "./dist/express.mjs",
-      "require": "./dist/express.cjs"
+      "types": "./dist/express.d.ts",
+      "import": "./dist/express.mjs"
     },
     "./fastify": {
-      "types": {
-        "import": "./dist/fastify.d.mts",
-        "require": "./dist/fastify.d.cts"
-      },
-      "import": "./dist/fastify.mjs",
-      "require": "./dist/fastify.cjs"
+      "types": "./dist/fastify.d.ts",
+      "import": "./dist/fastify.mjs"
     },
     "./fetch": {
-      "types": {
-        "import": "./dist/fetch.d.mts",
-        "require": "./dist/fetch.d.cts"
-      },
-      "import": "./dist/fetch.mjs",
-      "require": "./dist/fetch.cjs"
+      "types": "./dist/fetch.d.ts",
+      "import": "./dist/fetch.mjs"
     },
     "./fetch-server": {
-      "types": {
-        "import": "./dist/fetch-server.d.mts",
-        "require": "./dist/fetch-server.d.cts"
-      },
-      "import": "./dist/fetch-server.mjs",
-      "require": "./dist/fetch-server.cjs"
+      "types": "./dist/fetch-server.d.ts",
+      "import": "./dist/fetch-server.mjs"
     },
     "./hono": {
-      "types": {
-        "import": "./dist/hono.d.mts",
-        "require": "./dist/hono.d.cts"
-      },
-      "import": "./dist/hono.mjs",
-      "require": "./dist/hono.cjs"
+      "types": "./dist/hono.d.ts",
+      "import": "./dist/hono.mjs"
     },
     "./koa": {
-      "types": {
-        "import": "./dist/koa.d.mts",
-        "require": "./dist/koa.d.cts"
-      },
-      "import": "./dist/koa.mjs",
-      "require": "./dist/koa.cjs"
+      "types": "./dist/koa.d.ts",
+      "import": "./dist/koa.mjs"
     },
     "./node": {
-      "types": {
-        "import": "./dist/node.d.mts",
-        "require": "./dist/node.d.cts"
-      },
-      "import": "./dist/node.mjs",
-      "require": "./dist/node.cjs"
+      "types": "./dist/node.d.ts",
+      "import": "./dist/node.mjs"
     },
     "./worker-node": {
-      "types": {
-        "import": "./dist/worker-node.d.mts",
-        "require": "./dist/worker-node.d.cts"
-      },
-      "import": "./dist/worker-node.mjs",
-      "require": "./dist/worker-node.cjs"
+      "types": "./dist/worker-node.d.ts",
+      "import": "./dist/worker-node.mjs"
     },
     "./worker": {
-      "types": {
-        "import": "./dist/worker.d.mts",
-        "require": "./dist/worker.d.cts"
-      },
-      "import": "./dist/worker.mjs",
-      "require": "./dist/worker.cjs"
+      "types": "./dist/worker.d.ts",
+      "import": "./dist/worker.mjs"
     }
   },
   "publishConfig": {
     "access": "public"
   },
-  "main": "./dist/index.cjs",
+  "main": "./dist/index.mjs",
   "module": "./dist/index.mjs",
   "types": "./dist/index.d.ts",
   "typesVersions": {
     "*": {
       "connect": [
-        "dist/connect.d.mts"
+        "dist/connect.d.ts"
       ],
       "express": [
-        "dist/express.d.mts"
+        "dist/express.d.ts"
       ],
       "fastify": [
-        "dist/fastify.d.mts"
+        "dist/fastify.d.ts"
       ],
       "fetch": [
-        "dist/fetch.d.mts"
+        "dist/fetch.d.ts"
       ],
       "fetch-server": [
-        "dist/fetch-server.d.mts"
+        "dist/fetch-server.d.ts"
       ],
       "hono": [
-        "dist/hono.d.mts"
+        "dist/hono.d.ts"
       ],
       "koa": [
-        "dist/koa.d.mts"
+        "dist/koa.d.ts"
       ],
       "node": [
-        "dist/node.d.mts"
+        "dist/node.d.ts"
       ],
       "worker-node": [
-        "dist/worker-node.d.mts"
+        "dist/worker-node.d.ts"
       ],
       "worker": [
-        "dist/worker.d.mts"
+        "dist/worker.d.ts"
       ]
     }
   },
@@ -144,11 +100,11 @@
     "dist"
   ],
   "engines": {
-    "node": ">=20.0.0"
+    "node": "^20.19.0 || >=22.12.0"
   },
   "scripts": {
-    "build": "unbuild",
-    "dev": "unbuild --stub",
+    "build": "tsdown",
+    "dev": "tsdown --watch",
     "lint": "eslint .",
     "typecheck": "tsc -p tsconfig.json --noEmit",
     "test:types": "tsd"

@@ -1,0 +1,58 @@
+import { promises as fs } from 'node:fs'
+import { tmpdir } from 'node:os'
+import path from 'node:path'
+import { describe, expect, it } from 'vitest'
+import { build } from '../src/esbuild'
+
+describe('rolldown-backed esbuild compatibility', () => {
+  it('bundles file entry points into the requested output directory', async () => {
+    const root = await fs.mkdtemp(path.join(tmpdir(), 'mokup-rolldown-files-'))
+    const entryFile = path.join(root, 'mock', 'handler.get.ts')
+    const handlersDir = path.join(root, '.mokup', 'mokup-handlers')
+
+    try {
+      await fs.mkdir(path.dirname(entryFile), { recursive: true })
+      await fs.writeFile(entryFile, 'export default () => ({ ok: true })\n', 'utf8')
+
+      await build({
+        absWorkingDir: root,
+        bundle: true,
+        entryNames: '[name]',
+        entryPoints: [entryFile],
+        format: 'esm',
+        logLevel: 'silent',
+        outExtension: { '.js': '.mjs' },
+        outbase: root,
+        outdir: handlersDir,
+        platform: 'neutral',
+        target: 'es2020',
+      })
+
+      const bundled = await fs.readFile(path.join(handlersDir, 'mock', 'handler.get.mjs'), 'utf8')
+      expect(bundled).toContain('ok')
+    }
+    finally {
+      await fs.rm(root, { force: true, recursive: true })
+    }
+  })
+
+  it('returns in-memory output files for stdin builds', async () => {
+    const result = await build({
+      absWorkingDir: process.cwd(),
+      bundle: true,
+      format: 'esm',
+      platform: 'browser',
+      stdin: {
+        contents: 'export const answer = 42',
+        loader: 'js',
+        resolveDir: process.cwd(),
+        sourcefile: 'inline.js',
+      },
+      target: 'es2020',
+      write: false,
+    })
+
+    expect(result.outputFiles).toHaveLength(1)
+    expect(result.outputFiles[0]?.text).toContain('42')
+  })
+})

@@ -1,8 +1,6 @@
-import { defineBuildConfig } from 'unbuild'
+import { createPackageConfig } from '../../scripts/tsdown-config.ts'
 
-export default defineBuildConfig({
-  clean: true,
-  declaration: true,
+export default createPackageConfig({
   entries: [
     'src/index',
     'src/chokidar',
@@ -26,7 +24,4 @@ export default defineBuildConfig({
     'src/timing',
     'src/jsonc-parser',
   ],
-  rollup: {
-    emitCJS: true,
-  },
 })

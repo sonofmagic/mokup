@@ -1,8 +1,6 @@
-import { defineBuildConfig } from 'unbuild'
+import { createPackageConfig } from '../../scripts/tsdown-config.ts'
 
-export default defineBuildConfig({
-  clean: true,
-  declaration: true,
+export default createPackageConfig({
   entries: [
     'src/index',
     'src/node',
@@ -16,7 +14,4 @@ export default defineBuildConfig({
     'src/fetch-server',
     'src/hono',
   ],
-  rollup: {
-    emitCJS: true,
-  },
 })

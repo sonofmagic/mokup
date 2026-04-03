@@ -3,6 +3,9 @@
   "type": "module",
   "version": "0.0.19",
   "private": true,
+  "engines": {
+    "node": "^20.19.0 || >=22.12.0"
+  },
   "scripts": {
     "dev": "tsx node_modules/webpack-cli/bin/cli.js serve --config webpack.config.ts --mode development",
     "build": "tsx node_modules/webpack-cli/bin/cli.js --config webpack.config.ts --mode production",

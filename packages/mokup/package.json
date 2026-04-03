@@ -12,131 +12,87 @@
   },
   "exports": {
     ".": {
-      "types": {
-        "import": "./dist/index.d.mts",
-        "require": "./dist/index.d.cts"
-      },
-      "import": "./dist/index.mjs",
-      "require": "./dist/index.cjs"
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.mjs"
     },
     "./cli": {
-      "types": {
-        "import": "./dist/cli.d.mts",
-        "require": "./dist/cli.d.cts"
-      },
-      "import": "./dist/cli.mjs",
-      "require": "./dist/cli.cjs"
+      "types": "./dist/cli.d.ts",
+      "import": "./dist/cli.mjs"
     },
     "./bundle": {
-      "types": {
-        "import": "./dist/bundle.d.mts",
-        "require": "./dist/bundle.d.cts"
-      },
-      "import": "./dist/bundle.mjs",
-      "require": "./dist/bundle.cjs"
+      "types": "./dist/bundle.d.ts",
+      "import": "./dist/bundle.mjs"
     },
     "./server": {
-      "types": {
-        "import": "./dist/server.d.mts",
-        "require": "./dist/server.d.cts"
-      },
-      "import": "./dist/server.mjs",
-      "require": "./dist/server.cjs"
+      "types": "./dist/server.d.ts",
+      "import": "./dist/server.mjs"
     },
     "./server/fetch": {
-      "types": {
-        "import": "./dist/server/fetch.d.mts",
-        "require": "./dist/server/fetch.d.cts"
-      },
-      "import": "./dist/server/fetch.mjs",
-      "require": "./dist/server/fetch.cjs"
+      "types": "./dist/server/fetch.d.ts",
+      "import": "./dist/server/fetch.mjs"
     },
     "./server/node": {
-      "types": {
-        "import": "./dist/server/node.d.mts",
-        "require": "./dist/server/node.d.cts"
-      },
-      "import": "./dist/server/node.mjs",
-      "require": "./dist/server/node.cjs"
+      "types": "./dist/server/node.d.ts",
+      "import": "./dist/server/node.mjs"
     },
     "./server/worker": {
-      "types": {
-        "import": "./dist/server/worker.d.mts",
-        "require": "./dist/server/worker.d.cts"
-      },
-      "import": "./dist/server/worker.mjs",
-      "require": "./dist/server/worker.cjs"
+      "types": "./dist/server/worker.d.ts",
+      "import": "./dist/server/worker.mjs"
     },
     "./vite": {
-      "types": {
-        "import": "./dist/vite.d.mts",
-        "require": "./dist/vite.d.cts"
-      },
-      "import": "./dist/vite.mjs",
-      "require": "./dist/vite.cjs"
+      "types": "./dist/vite.d.ts",
+      "import": "./dist/vite.mjs"
     },
     "./webpack": {
-      "types": {
-        "import": "./dist/webpack.d.mts",
-        "require": "./dist/webpack.d.cts"
-      },
-      "import": "./dist/webpack.mjs",
-      "require": "./dist/webpack.cjs"
+      "types": "./dist/webpack.d.ts",
+      "import": "./dist/webpack.mjs"
     },
     "./runtime": {
-      "types": {
-        "import": "./dist/runtime.d.mts",
-        "require": "./dist/runtime.d.cts"
-      },
-      "import": "./dist/runtime.mjs",
-      "require": "./dist/runtime.cjs"
+      "types": "./dist/runtime.d.ts",
+      "import": "./dist/runtime.mjs"
     },
     "./sw": {
-      "types": {
-        "import": "./dist/sw.d.mts",
-        "require": "./dist/sw.d.cts"
-      },
-      "import": "./dist/sw.mjs",
-      "require": "./dist/sw.cjs"
+      "types": "./dist/sw.d.ts",
+      "import": "./dist/sw.mjs"
     }
   },
   "publishConfig": {
     "access": "public"
   },
-  "main": "./dist/index.cjs",
+  "main": "./dist/index.mjs",
   "module": "./dist/index.mjs",
   "types": "./dist/index.d.ts",
   "typesVersions": {
     "*": {
       "cli": [
-        "dist/cli.d.mts"
+        "dist/cli.d.ts"
       ],
       "bundle": [
-        "dist/bundle.d.mts"
+        "dist/bundle.d.ts"
       ],
       "server": [
-        "dist/server.d.mts"
+        "dist/server.d.ts"
       ],
       "server/fetch": [
-        "dist/server/fetch.d.mts"
+        "dist/server/fetch.d.ts"
       ],
       "server/node": [
-        "dist/server/node.d.mts"
+        "dist/server/node.d.ts"
       ],
       "server/worker": [
-        "dist/server/worker.d.mts"
+        "dist/server/worker.d.ts"
       ],
       "vite": [
-        "dist/vite.d.mts"
+        "dist/vite.d.ts"
       ],
       "webpack": [
-        "dist/webpack.d.mts"
+        "dist/webpack.d.ts"
       ],
       "runtime": [
-        "dist/runtime.d.mts"
+        "dist/runtime.d.ts"
       ],
       "sw": [
-        "dist/sw.d.mts"
+        "dist/sw.d.ts"
       ]
     }
   },
@@ -147,11 +103,11 @@
     "dist"
   ],
   "engines": {
-    "node": ">=20.0.0"
+    "node": "^20.19.0 || >=22.12.0"
   },
   "scripts": {
-    "build": "unbuild",
-    "dev": "unbuild --stub",
+    "build": "tsdown",
+    "dev": "tsdown --watch",
     "lint": "eslint .",
     "test:types": "tsd",
     "typecheck": "tsc -p tsconfig.json --noEmit"
