@@ -1,5 +1,5 @@
 import type { FetchServerOptions, FetchServerOptionsConfig } from '@mokup/server/node'
-import type { BuildOptions } from './manifest/types'
+import type { BuildOptions, DiagnosticCategory } from './manifest/types'
 import process from 'node:process'
 import { createFetchServer, serve } from '@mokup/server/node'
 import { createLogger } from '@mokup/shared/logger'
@@ -18,6 +18,20 @@ function collectRegex(value: string, previous: RegExp[] | undefined) {
   return next
 }
 
+function collectDiagnosticCategory(value: string, previous: string[] | undefined) {
+  return [...(previous ?? []), value]
+}
+
+function resolveErrorOn(value: string[] | undefined): BuildOptions['errorOn'] {
+  if (!value || value.length === 0) {
+    return undefined
+  }
+  if (value.includes('all')) {
+    return 'all'
+  }
+  return value as DiagnosticCategory[]
+}
+
 function toBuildOptions(options: {
   dir?: string[]
   out?: string
@@ -26,6 +40,7 @@ function toBuildOptions(options: {
   exclude?: RegExp[]
   ignorePrefix?: string[]
   handlers?: boolean
+  errorOn?: string[]
 }) {
   const buildOptions: BuildOptions = {
     handlers: options.handlers !== false,
@@ -50,6 +65,10 @@ function toBuildOptions(options: {
   }
   if (options.ignorePrefix && options.ignorePrefix.length > 0) {
     buildOptions.ignorePrefix = options.ignorePrefix
+  }
+  const errorOn = resolveErrorOn(options.errorOn)
+  if (errorOn) {
+    buildOptions.errorOn = errorOn
   }
   return buildOptions
 }
@@ -127,6 +146,11 @@ export function createCli() {
     .option('--include <pattern>', 'Include regex (repeatable)', collectRegex)
     .option('--exclude <pattern>', 'Exclude regex (repeatable)', collectRegex)
     .option('--ignore-prefix <prefix>', 'Ignore path segment prefix (repeatable)', collectValues)
+    .option(
+      '--error-on <category>',
+      'Fail build on selected diagnostics (repeatable: invalid-route, unsupported-fields, missing-handler, duplicate-route, sw-conflict, all)',
+      collectDiagnosticCategory,
+    )
     .option('--no-handlers', 'Skip function handler output')
     .action(async (options) => {
       const buildOptions = toBuildOptions(options)

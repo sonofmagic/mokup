@@ -61,6 +61,10 @@ describe('cli program', () => {
       'bar$',
       '--ignore-prefix',
       '_',
+      '--error-on',
+      'invalid-route',
+      '--error-on',
+      'missing-handler',
       '--no-handlers',
     ])
 
@@ -73,6 +77,7 @@ describe('cli program', () => {
         include: [expect.any(RegExp)],
         exclude: [expect.any(RegExp)],
         ignorePrefix: ['_'],
+        errorOn: ['invalid-route', 'missing-handler'],
         handlers: false,
         log: expect.any(Function),
       }),
@@ -99,6 +104,23 @@ describe('cli program', () => {
 
     const [options] = mocks.buildManifest.mock.calls[0] ?? []
     expect(options.dir).toBeUndefined()
+  })
+
+  it('normalizes build errorOn all mode', async () => {
+    mocks.buildManifest.mockResolvedValue(undefined)
+
+    await runCli([
+      'node',
+      'mokup',
+      'build',
+      '--error-on',
+      'invalid-route',
+      '--error-on',
+      'all',
+    ])
+
+    const [options] = mocks.buildManifest.mock.calls[0] ?? []
+    expect(options.errorOn).toBe('all')
   })
 
   it('runs serve and registers shutdown handlers', async () => {

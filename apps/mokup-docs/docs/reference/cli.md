@@ -35,15 +35,16 @@ bunx mokup build --dir mock --out .mokup
 
 ### Build options
 
-| Option            | Description                               |
-| ----------------- | ----------------------------------------- |
-| `--dir, -d`       | Mock directory (repeatable)               |
-| `--out, -o`       | Output directory (default: `.mokup`)      |
-| `--prefix`        | URL prefix                                |
-| `--include`       | Include regex (repeatable)                |
-| `--exclude`       | Exclude regex (repeatable)                |
-| `--ignore-prefix` | Ignore path segment prefixes (repeatable) |
-| `--no-handlers`   | Skip handler output                       |
+| Option            | Description                                     |
+| ----------------- | ----------------------------------------------- |
+| `--dir, -d`       | Mock directory (repeatable)                     |
+| `--out, -o`       | Output directory (default: `.mokup`)            |
+| `--prefix`        | URL prefix                                      |
+| `--include`       | Include regex (repeatable)                      |
+| `--exclude`       | Exclude regex (repeatable)                      |
+| `--ignore-prefix` | Ignore path segment prefixes (repeatable)       |
+| `--error-on`      | Fail build on selected diagnostics (repeatable) |
+| `--no-handlers`   | Skip handler output                             |
 
 ## Serve
 
