@@ -1,6 +1,7 @@
 import type {
   DiagnosticCategory,
   DiagnosticErrorMode,
+  DiagnosticSummarySection,
   DirInput,
   HookErrorPolicy,
   MockEntryOptions,
@@ -8,8 +9,12 @@ import type {
 } from '@mokup/shared'
 import {
   collectFiles,
+  collectRouteDiagnosticWarning,
+  collectSwConflictDiagnosticWarning,
   createDefineConfig,
+  createRouteDiagnosticSections,
   createRouteUtils,
+  createSwConflictDiagnosticSections,
   diagnosticCategories,
   isDiagnosticCategory,
   loadRules,
@@ -41,6 +46,15 @@ expectAssignable<DiagnosticCategory>(diagnosticCategory)
 expectAssignable<DiagnosticErrorMode>(diagnosticErrorMode)
 expectAssignable<readonly DiagnosticCategory[]>(diagnosticCategories)
 expectType<boolean>(isDiagnosticCategory('invalid-route'))
+expectType<boolean>(collectSwConflictDiagnosticWarning({ message: 'SW path "/other.js" ignored; using "/mokup-sw.js".' }))
+expectType<void>(collectRouteDiagnosticWarning({ message: 'Skip mock without handler: /root/mock/a.get.ts' }))
+expectAssignable<DiagnosticSummarySection[]>(createRouteDiagnosticSections({
+  invalidRoutes: ['mock/invalid.ts'],
+  duplicateRoutes: ['GET /api/ping'],
+}))
+expectAssignable<DiagnosticSummarySection[]>(createSwConflictDiagnosticSections([
+  'SW path "/other.js" ignored; using "/mokup-sw.js".',
+]))
 
 interface DevConfig {
   hookError?: HookErrorPolicy
