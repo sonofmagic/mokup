@@ -47,6 +47,9 @@ jobs:
         run: pnpm audit --audit-level=moderate
         continue-on-error: true
 
+      - name: Migration Guards
+        run: pnpm run guard:migration
+
       - name: Lint
         run: pnpm lint
 
