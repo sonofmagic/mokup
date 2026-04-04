@@ -97,6 +97,33 @@ module.exports = {
 
 Options match the Vite plugin: top-level `entries` + `playground`, plus entry options for each item. See [Vite Plugin](./vite-plugin) for the full list.
 
+## Strict diagnostics
+
+`errorOn` is also available in webpack mode. Use it to fail startup or build when
+selected diagnostics are detected instead of only printing warnings.
+
+Example:
+
+```js
+const { createWebpackPlugin } = require('mokup/webpack')
+
+module.exports = {
+  plugins: [
+    createWebpackPlugin({
+      errorOn: ['invalid-route', 'sw-conflict'],
+      entries: {
+        dir: 'mock',
+        prefix: '/api',
+        mode: 'sw',
+      },
+    }),
+  ],
+}
+```
+
+Supported categories are the same as Vite: `invalid-route`, `unsupported-fields`,
+`missing-handler`, `duplicate-route`, and `sw-conflict`.
+
 ## Notes
 
 - Dev server support uses `devServer.setupMiddlewares`; ensure `webpack-dev-server` is enabled.

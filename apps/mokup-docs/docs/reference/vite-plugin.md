@@ -52,11 +52,12 @@ export default {
 
 ### Plugin options
 
-| Option       | Type                                                              | Description                         |
-| ------------ | ----------------------------------------------------------------- | ----------------------------------- |
-| `entries`    | `VitePluginOptions / VitePluginOptions[]`                         | Mock entry configs                  |
-| `playground` | `boolean / { path?: string; enabled?: boolean; build?: boolean }` | Playground config                   |
-| `runtime`    | `'node' / 'worker'`                                               | Dev runtime target (default `node`) |
+| Option       | Type                                                              | Description                            |
+| ------------ | ----------------------------------------------------------------- | -------------------------------------- |
+| `entries`    | `VitePluginOptions / VitePluginOptions[]`                         | Mock entry configs                     |
+| `playground` | `boolean / { path?: string; enabled?: boolean; build?: boolean }` | Playground config                      |
+| `runtime`    | `'node' / 'worker'`                                               | Dev runtime target (default `node`)    |
+| `errorOn`    | `'all' / DiagnosticCategory[]`                                    | Promote selected diagnostics to errors |
 
 ### Entry options
 
@@ -71,6 +72,40 @@ export default {
 | `log`          | `boolean`                                                                                                                       | Enable logging                             |
 | `mode`         | `'server' / 'sw'`                                                                                                               | Mock runtime mode                          |
 | `sw`           | `{ path?: string; scope?: string; register?: boolean; unregister?: boolean; fallback?: boolean; basePath?: string / string[] }` | Service worker options (SW mode only)      |
+
+### Strict diagnostics
+
+Use `errorOn` when you want route scanning warnings to fail the build instead of
+only logging a summary.
+
+Supported categories:
+
+- `invalid-route`
+- `unsupported-fields`
+- `missing-handler`
+- `duplicate-route`
+- `sw-conflict`
+
+Example:
+
+```ts
+import mokup from 'mokup/vite'
+
+export default {
+  plugins: [
+    mokup({
+      errorOn: ['invalid-route', 'duplicate-route', 'sw-conflict'],
+      entries: {
+        dir: 'mock',
+        prefix: '/api',
+        mode: 'sw',
+      },
+    }),
+  ],
+}
+```
+
+Use `errorOn: 'all'` to fail on every supported diagnostic category.
 
 Use `runtime: 'worker'` to skip Vite dev middleware and let a Worker handle
 mock requests instead:

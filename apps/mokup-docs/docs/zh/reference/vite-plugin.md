@@ -57,6 +57,7 @@ export default {
 | `entries`    | `VitePluginOptions / VitePluginOptions[]`                         | mock 目录配置               |
 | `playground` | `boolean / { path?: string; enabled?: boolean; build?: boolean }` | Playground 配置             |
 | `runtime`    | `'node' / 'worker'`                                               | 开发运行目标（默认 `node`） |
+| `errorOn`    | `'all' / DiagnosticCategory[]`                                    | 将指定诊断升级为错误        |
 
 ### Entry 选项
 
@@ -71,6 +72,39 @@ export default {
 | `log`          | `boolean`                                                                                                                       | 是否输出日志                      |
 | `mode`         | `'server' / 'sw'`                                                                                                               | mock 运行模式                     |
 | `sw`           | `{ path?: string; scope?: string; register?: boolean; unregister?: boolean; fallback?: boolean; basePath?: string / string[] }` | Service Worker 配置（仅 SW 模式） |
+
+### 严格诊断
+
+如果希望扫描阶段的 warning 直接让构建失败，可以使用 `errorOn`。
+
+支持的类别：
+
+- `invalid-route`
+- `unsupported-fields`
+- `missing-handler`
+- `duplicate-route`
+- `sw-conflict`
+
+示例：
+
+```ts
+import mokup from 'mokup/vite'
+
+export default {
+  plugins: [
+    mokup({
+      errorOn: ['invalid-route', 'duplicate-route', 'sw-conflict'],
+      entries: {
+        dir: 'mock',
+        prefix: '/api',
+        mode: 'sw',
+      },
+    }),
+  ],
+}
+```
+
+如果希望所有支持的诊断都直接失败，可使用 `errorOn: 'all'`。
 
 使用 `runtime: 'worker'` 可跳过 Vite dev 中间件，让 Worker 负责 mock 请求：
 

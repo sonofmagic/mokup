@@ -108,8 +108,25 @@ import { buildManifest } from 'mokup/cli'
 await buildManifest({
   dir: 'mock',
   outDir: '.mokup',
+  errorOn: ['invalid-route', 'missing-handler'],
 })
 ```
+
+### 严格诊断
+
+`buildManifest(...)` 也支持同样的诊断升级能力。
+
+支持的类别：
+
+- `invalid-route`
+- `unsupported-fields`
+- `missing-handler`
+- `duplicate-route`
+- `sw-conflict`
+
+如果希望所有支持的诊断都直接抛错，可使用 `errorOn: 'all'`。在 CLI 的
+manifest 构建里，`sw-conflict` 主要用于类型对齐；当前真正会产出的仍然是
+路由扫描相关诊断。
 
 ### Bundle helper（跨平台）
 

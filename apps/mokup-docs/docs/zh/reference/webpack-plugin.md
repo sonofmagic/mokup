@@ -97,6 +97,33 @@ module.exports = {
 
 选项与 Vite 插件一致：顶层 `entries` + `playground`，以及每个 entry 的配置，详见 [Vite 插件](./vite-plugin)。
 
+## 严格诊断
+
+webpack 模式同样支持 `errorOn`。开启后，命中的诊断不会只输出 warning，
+而是直接使启动或构建失败。
+
+示例：
+
+```js
+const { createWebpackPlugin } = require('mokup/webpack')
+
+module.exports = {
+  plugins: [
+    createWebpackPlugin({
+      errorOn: ['invalid-route', 'sw-conflict'],
+      entries: {
+        dir: 'mock',
+        prefix: '/api',
+        mode: 'sw',
+      },
+    }),
+  ],
+}
+```
+
+支持的类别与 Vite 一致：`invalid-route`、`unsupported-fields`、
+`missing-handler`、`duplicate-route`、`sw-conflict`。
+
 ## 注意
 
 - Dev server 会通过 `devServer.setupMiddlewares` 注入中间件，请确保启用了 `webpack-dev-server`。

@@ -108,8 +108,26 @@ import { buildManifest } from 'mokup/cli'
 await buildManifest({
   dir: 'mock',
   outDir: '.mokup',
+  errorOn: ['invalid-route', 'missing-handler'],
 })
 ```
+
+### Strict diagnostics
+
+`buildManifest(...)` supports the same diagnostics control model as the plugin
+APIs.
+
+Supported categories:
+
+- `invalid-route`
+- `unsupported-fields`
+- `missing-handler`
+- `duplicate-route`
+- `sw-conflict`
+
+Use `errorOn: 'all'` to turn every supported diagnostic into a thrown build
+error. In CLI manifest builds, `sw-conflict` is accepted for type parity but only
+route-scan diagnostics can currently be emitted.
 
 ### Bundle helper (cross-platform)
 
