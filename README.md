@@ -24,7 +24,7 @@
 
 - Published packages are ESM-only. CommonJS `require()` is no longer supported.
 - Internal build packages now use `tsdown` on top of Rolldown.
-- `@mokup/shared/esbuild` has been renamed to `@mokup/shared/rolldown`.
+- The old `@mokup/shared/esbuild` entry has been removed. Use `@mokup/shared/rolldown`.
 
 ## Quick start
 

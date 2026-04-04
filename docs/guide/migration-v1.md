@@ -33,21 +33,21 @@ const mokup = require('mokup')
 import mokup from 'mokup'
 ```
 
-## 3. `@mokup/shared/esbuild` 改名
+## 3. `@mokup/shared/esbuild` 已移除
 
-原来的内部兼容入口：
+旧入口：
 
 ```ts
 import { build } from '@mokup/shared/esbuild'
 ```
 
-现在应改为：
+现在应直接改为：
 
 ```ts
 import { build } from '@mokup/shared/rolldown'
 ```
 
-这个入口仍然提供仓库内部当前使用的 `build()` 能力，但底层已经切到 Rolldown。
+当前仓库内部统一使用 `@mokup/shared/rolldown` 的 `build()` 能力，底层实现已经切到 Rolldown。
 
 ## 4. 构建工具链变更
 
@@ -64,7 +64,7 @@ import { build } from '@mokup/shared/rolldown'
 
 - CI / Docker / 部署环境里的 Node.js 版本
 - 是否还有 CommonJS `require()` 引用公开包
-- 是否还有 `@mokup/shared/esbuild` 导入
+- 是否还有 `@mokup/shared/esbuild` 旧导入
 - 是否还有旧的包构建脚本或 `build.config.ts`
 
 ## 6. 仓库当前状态
