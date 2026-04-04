@@ -134,6 +134,7 @@ export {
   buildDiagnosticSummaryLines,
   createDiagnosticError,
   type DiagnosticSummarySection,
+  reportDiagnostics,
   routeDiagnosticCatalog,
   swConflictDiagnostic,
 } from './diagnostics'

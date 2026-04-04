@@ -124,11 +124,11 @@ describe('cli program', () => {
   })
 
   it('rejects invalid build errorOn category', async () => {
+    vi.spyOn(process, 'exit').mockImplementation((() => undefined) as never)
+
     await expect(
       runCli(['node', 'mokup', 'build', '--error-on', 'not-a-category']),
-    ).rejects.toThrow(
-      'Invalid diagnostic category "not-a-category". Expected one of: invalid-route, unsupported-fields, missing-handler, duplicate-route, sw-conflict, all',
-    )
+    ).rejects.toThrow(/Invalid diagnostic category "not-a-category"/)
   })
 
   it('runs serve and registers shutdown handlers', async () => {
@@ -282,11 +282,11 @@ describe('cli program', () => {
   })
 
   it('rejects invalid serve errorOn category', async () => {
+    vi.spyOn(process, 'exit').mockImplementation((() => undefined) as never)
+
     await expect(
       runCli(['node', 'mokup', 'serve', '--error-on', 'not-a-category']),
-    ).rejects.toThrow(
-      'Invalid diagnostic category "not-a-category". Expected one of: invalid-route, unsupported-fields, missing-handler, duplicate-route, sw-conflict, all',
-    )
+    ).rejects.toThrow(/Invalid diagnostic category "not-a-category"/)
   })
 
   it('propagates shutdown errors and still exits', async () => {

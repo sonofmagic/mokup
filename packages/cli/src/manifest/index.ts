@@ -4,7 +4,7 @@ import type { BuildOptions, RouteDirectoryConfig, RouteRule } from './types'
 import { promises as fs } from 'node:fs'
 import { cwd } from 'node:process'
 
-import { buildDiagnosticSummaryLines, createDiagnosticError, routeDiagnosticCatalog } from '@mokup/shared/diagnostics'
+import { reportDiagnostics, routeDiagnosticCatalog } from '@mokup/shared/diagnostics'
 import { join, relative, resolve } from '@mokup/shared/pathe'
 import { writeBundle, writeManifestModule } from './bundle'
 import { resolveDirectoryConfig } from './config'
@@ -233,15 +233,10 @@ export async function buildManifest(options: BuildOptions = {}) {
       items: Array.from(duplicateRoutes),
     },
   ]
-  const diagnosticLines = buildDiagnosticSummaryLines({
-    sections: diagnosticSections,
-  })
-  for (const line of diagnosticLines) {
-    options.log?.(line)
-  }
-  const diagnosticError = createDiagnosticError({
+  const { error: diagnosticError } = reportDiagnostics({
     errorOn: options.errorOn,
     sections: diagnosticSections,
+    warn: message => options.log?.(message),
   })
   if (diagnosticError) {
     throw diagnosticError

@@ -4,7 +4,7 @@ import type { MokupPluginOptions } from '../shared/types'
 import type { PluginState } from './plugin/state'
 import { cwd } from 'node:process'
 import { buildBundleModule, buildSwScript, createPlaygroundMiddleware, resolvePlaygroundOptions, resolveSwConfig, resolveSwUnregisterConfig, writePlaygroundBuild } from '@mokup/core'
-import { buildDiagnosticSummaryLines, createDiagnosticError, swConflictDiagnostic } from '@mokup/shared/diagnostics'
+import { reportDiagnostics, swConflictDiagnostic } from '@mokup/shared/diagnostics'
 import { resolvePlaygroundDist } from '../playground/assets'
 import { createLogger } from '../shared/logger'
 import { normalizeMokupOptions, normalizeOptions } from './plugin/options'
@@ -80,29 +80,16 @@ export function createMokupPlugin(options: MokupPluginOptions = {}): Plugin {
   const hasSwEntries = optionList.some(entry => entry.mode === 'sw')
   const swConfig = resolveSwConfig(optionList, configLogger)
   const unregisterConfig = resolveSwUnregisterConfig(optionList, configLogger)
-  const swDiagnosticLines = buildDiagnosticSummaryLines({
+  const { error: swDiagnosticError } = reportDiagnostics({
+    errorOn: normalizedOptions.errorOn,
     sections: [
       {
         ...swConflictDiagnostic,
         items: swConflictMessages,
       },
     ],
+    warn: message => logger.warn(message),
   })
-  for (const line of swDiagnosticLines) {
-    logger.warn(line)
-  }
-  const swDiagnosticErrorParams: Parameters<typeof createDiagnosticError>[0] = {
-    sections: [
-      {
-        ...swConflictDiagnostic,
-        items: swConflictMessages,
-      },
-    ],
-  }
-  if (normalizedOptions.errorOn) {
-    swDiagnosticErrorParams.errorOn = normalizedOptions.errorOn
-  }
-  const swDiagnosticError = createDiagnosticError(swDiagnosticErrorParams)
   if (swDiagnosticError) {
     throw swDiagnosticError
   }

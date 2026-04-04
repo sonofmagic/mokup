@@ -4,7 +4,7 @@ import type { RouteTable } from './dev/types'
 import type {
   FetchServerOptionsInput,
 } from './fetch-options'
-import { buildDiagnosticSummaryLines, createDiagnosticError, routeDiagnosticCatalog } from '@mokup/shared/diagnostics'
+import { reportDiagnostics, routeDiagnosticCatalog } from '@mokup/shared/diagnostics'
 import { relative } from '@mokup/shared/pathe'
 import { createLogger } from './dev/logger'
 import { resolvePlaygroundOptions } from './dev/playground'
@@ -176,19 +176,12 @@ export async function createFetchServer(
           items: Array.from(duplicateRoutes),
         },
       ]
-      const diagnosticLines = buildDiagnosticSummaryLines({
+      const { error: diagnosticError } = reportDiagnostics({
+        errorTitle: diagnosticErrorTitle.slice(0, -1),
         sections: diagnosticSections,
+        errorOn,
+        warn: message => logger.warn(message),
       })
-      for (const line of diagnosticLines) {
-        logger.warn(line)
-      }
-      const diagnosticErrorParams: Parameters<typeof createDiagnosticError>[0] = {
-        sections: diagnosticSections,
-      }
-      if (errorOn) {
-        diagnosticErrorParams.errorOn = errorOn
-      }
-      const diagnosticError = createDiagnosticError(diagnosticErrorParams)
       if (diagnosticError) {
         throw diagnosticError
       }

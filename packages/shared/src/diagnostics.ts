@@ -115,3 +115,33 @@ export function createDiagnosticError<TCategory extends string>(params: {
   }
   return new Error(buildDiagnosticSummaryLines(buildParams).join('\n'))
 }
+
+export function reportDiagnostics<TCategory extends string>(params: {
+  errorOn?: 'all' | TCategory[]
+  sections: DiagnosticSummarySection<TCategory>[]
+  title?: string
+  errorTitle?: string
+  maxItems?: number
+  warn?: (message: string) => void
+}) {
+  const summaryLines = buildDiagnosticSummaryLines({
+    title: params.title,
+    sections: params.sections,
+    maxItems: params.maxItems,
+  })
+  if (params.warn) {
+    for (const line of summaryLines) {
+      params.warn(line)
+    }
+  }
+  const error = createDiagnosticError({
+    errorOn: params.errorOn,
+    sections: params.sections,
+    title: params.errorTitle,
+    maxItems: params.maxItems,
+  })
+  return {
+    summaryLines,
+    error,
+  }
+}

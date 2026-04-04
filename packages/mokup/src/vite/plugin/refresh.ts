@@ -3,7 +3,7 @@ import type { PreviewServer, ViteDevServer } from 'vite'
 import type { DiagnosticErrorMode, RouteTable, VitePluginOptions } from '../../shared/types'
 import type { PluginState } from './state'
 import { createHonoApp, scanRoutes, sortRoutes } from '@mokup/core'
-import { buildDiagnosticSummaryLines, createDiagnosticError, routeDiagnosticCatalog } from '@mokup/shared/diagnostics'
+import { reportDiagnostics, routeDiagnosticCatalog } from '@mokup/shared/diagnostics'
 import { relative } from '@mokup/shared/pathe'
 import { resolveDirs, toPosix } from '../../shared/utils'
 import { buildRouteSignature } from './routes'
@@ -131,20 +131,14 @@ function createRouteRefresher(params: {
         items: Array.from(duplicateRoutes),
       },
     ]
-    const diagnosticLines = buildDiagnosticSummaryLines({
+    const { error: diagnosticError, summaryLines: diagnosticLines } = reportDiagnostics({
+      errorOn,
       sections: diagnosticSections,
     })
     const diagnosticSignature = diagnosticLines.join('\n')
     const previousDiagnosticsSignature = state.lastDiagnosticsSignature ?? ''
     const diagnosticsChanged = diagnosticSignature !== previousDiagnosticsSignature
     state.lastDiagnosticsSignature = diagnosticLines.length > 0 ? diagnosticSignature : null
-    const diagnosticErrorParams: Parameters<typeof createDiagnosticError>[0] = {
-      sections: diagnosticSections,
-    }
-    if (errorOn) {
-      diagnosticErrorParams.errorOn = errorOn
-    }
-    const diagnosticError = createDiagnosticError(diagnosticErrorParams)
     if (diagnosticError) {
       throw diagnosticError
     }
