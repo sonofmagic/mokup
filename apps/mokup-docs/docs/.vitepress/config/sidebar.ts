@@ -81,6 +81,7 @@ export const zhSidebar: DefaultTheme.Sidebar = {
       collapsed: false,
       items: [
         { text: 'CLI', link: '/zh/reference/cli' },
+        { text: 'Diagnostics', link: '/zh/reference/diagnostics' },
         { text: 'Vite 插件', link: '/zh/reference/vite-plugin' },
         { text: 'Webpack 插件', link: '/zh/reference/webpack-plugin' },
         { text: 'Server 适配器', link: '/zh/reference/server' },
@@ -173,6 +174,7 @@ export const enSidebar: DefaultTheme.Sidebar = {
       collapsed: false,
       items: [
         { text: 'CLI', link: '/reference/cli' },
+        { text: 'Diagnostics', link: '/reference/diagnostics' },
         { text: 'Vite Plugin', link: '/reference/vite-plugin' },
         { text: 'Webpack Plugin', link: '/reference/webpack-plugin' },
         { text: 'Server Adapters', link: '/reference/server' },
