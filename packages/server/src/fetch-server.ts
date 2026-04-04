@@ -4,7 +4,7 @@ import type { RouteTable } from './dev/types'
 import type {
   FetchServerOptionsInput,
 } from './fetch-options'
-import { reportDiagnostics, routeDiagnosticCatalog } from '@mokup/shared/diagnostics'
+import { createRouteDiagnosticSections, reportDiagnostics } from '@mokup/shared/diagnostics'
 import { relative } from '@mokup/shared/pathe'
 import { createLogger } from './dev/logger'
 import { resolvePlaygroundOptions } from './dev/playground'
@@ -156,26 +156,14 @@ export async function createFetchServer(
         collected.push(...scanned)
       }
       const errorOn = optionList.find(entry => typeof entry.errorOn !== 'undefined')?.errorOn
-      const diagnosticSections = [
-        {
-          ...routeDiagnosticCatalog.invalidRoute,
-          items: collectedIgnored
-            .filter(info => info.reason === 'invalid-route')
-            .map(info => relative(root, info.file)),
-        },
-        {
-          ...routeDiagnosticCatalog.unsupportedFields,
-          items: Array.from(unsupportedRuleFiles).map(file => relative(root, file)),
-        },
-        {
-          ...routeDiagnosticCatalog.missingHandler,
-          items: Array.from(missingHandlerFiles).map(file => relative(root, file)),
-        },
-        {
-          ...routeDiagnosticCatalog.duplicateRoute,
-          items: Array.from(duplicateRoutes),
-        },
-      ]
+      const diagnosticSections = createRouteDiagnosticSections({
+        invalidRoutes: collectedIgnored
+          .filter(info => info.reason === 'invalid-route')
+          .map(info => relative(root, info.file)),
+        unsupportedFields: Array.from(unsupportedRuleFiles).map(file => relative(root, file)),
+        missingHandlers: Array.from(missingHandlerFiles).map(file => relative(root, file)),
+        duplicateRoutes: Array.from(duplicateRoutes),
+      })
       const { error: diagnosticError } = reportDiagnostics({
         errorTitle: diagnosticErrorTitle.slice(0, -1),
         sections: diagnosticSections,

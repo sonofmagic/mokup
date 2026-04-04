@@ -35,6 +35,32 @@ export const swConflictDiagnostic = {
   advice: 'Align sw.path, sw.scope, sw.register, and sw.unregister across entries that use SW mode.',
 } as const
 
+export function createRouteDiagnosticSections(params: {
+  invalidRoutes?: string[]
+  unsupportedFields?: string[]
+  missingHandlers?: string[]
+  duplicateRoutes?: string[]
+}) {
+  return [
+    {
+      ...routeDiagnosticCatalog.invalidRoute,
+      items: params.invalidRoutes ?? [],
+    },
+    {
+      ...routeDiagnosticCatalog.unsupportedFields,
+      items: params.unsupportedFields ?? [],
+    },
+    {
+      ...routeDiagnosticCatalog.missingHandler,
+      items: params.missingHandlers ?? [],
+    },
+    {
+      ...routeDiagnosticCatalog.duplicateRoute,
+      items: params.duplicateRoutes ?? [],
+    },
+  ] satisfies DiagnosticSummarySection[]
+}
+
 function normalizeSections<TCategory extends string>(sections: DiagnosticSummarySection<TCategory>[]) {
   return sections.map((section) => {
     const items = Array.from(

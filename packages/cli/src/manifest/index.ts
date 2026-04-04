@@ -4,7 +4,7 @@ import type { BuildOptions, RouteDirectoryConfig, RouteRule } from './types'
 import { promises as fs } from 'node:fs'
 import { cwd } from 'node:process'
 
-import { reportDiagnostics, routeDiagnosticCatalog } from '@mokup/shared/diagnostics'
+import { createRouteDiagnosticSections, reportDiagnostics } from '@mokup/shared/diagnostics'
 import { join, relative, resolve } from '@mokup/shared/pathe'
 import { writeBundle, writeManifestModule } from './bundle'
 import { resolveDirectoryConfig } from './config'
@@ -215,24 +215,12 @@ export async function buildManifest(options: BuildOptions = {}) {
   await writeManifestModule(outDir, manifest)
   await writeBundle(outDir, handlerSources.size > 0)
 
-  const diagnosticSections = [
-    {
-      ...routeDiagnosticCatalog.invalidRoute,
-      items: Array.from(invalidRouteFiles),
-    },
-    {
-      ...routeDiagnosticCatalog.unsupportedFields,
-      items: Array.from(unsupportedRuleFiles),
-    },
-    {
-      ...routeDiagnosticCatalog.missingHandler,
-      items: Array.from(missingHandlerFiles),
-    },
-    {
-      ...routeDiagnosticCatalog.duplicateRoute,
-      items: Array.from(duplicateRoutes),
-    },
-  ]
+  const diagnosticSections = createRouteDiagnosticSections({
+    invalidRoutes: Array.from(invalidRouteFiles),
+    unsupportedFields: Array.from(unsupportedRuleFiles),
+    missingHandlers: Array.from(missingHandlerFiles),
+    duplicateRoutes: Array.from(duplicateRoutes),
+  })
   const { error: diagnosticError } = reportDiagnostics({
     errorOn: options.errorOn,
     sections: diagnosticSections,

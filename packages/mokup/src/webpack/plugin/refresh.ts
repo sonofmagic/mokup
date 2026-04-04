@@ -2,7 +2,7 @@ import type { RouteConfigInfo, RouteIgnoreInfo, RouteSkipInfo } from '@mokup/cor
 import type { DiagnosticErrorMode, RouteTable, VitePluginOptions } from '../../shared/types'
 import type { PluginState } from './state'
 import { createHonoApp, scanRoutes, sortRoutes } from '@mokup/core'
-import { reportDiagnostics, routeDiagnosticCatalog } from '@mokup/shared/diagnostics'
+import { createRouteDiagnosticSections, reportDiagnostics } from '@mokup/shared/diagnostics'
 import { relative } from '@mokup/shared/pathe'
 import { resolveDirs, toPosix } from '../../shared/utils'
 
@@ -95,26 +95,14 @@ function createRouteRefresher(params: {
     const resolvedConfigs = Array.from(configMap.values())
     state.configFiles = resolvedConfigs.filter(entry => entry.enabled)
     state.disabledConfigFiles = resolvedConfigs.filter(entry => !entry.enabled)
-    const diagnosticSections = [
-      {
-        ...routeDiagnosticCatalog.invalidRoute,
-        items: collectedIgnored
-          .filter(info => info.reason === 'invalid-route')
-          .map(info => toPosix(relative(root(), info.file))),
-      },
-      {
-        ...routeDiagnosticCatalog.unsupportedFields,
-        items: Array.from(unsupportedRuleFiles),
-      },
-      {
-        ...routeDiagnosticCatalog.missingHandler,
-        items: Array.from(missingHandlerFiles),
-      },
-      {
-        ...routeDiagnosticCatalog.duplicateRoute,
-        items: Array.from(duplicateRoutes),
-      },
-    ]
+    const diagnosticSections = createRouteDiagnosticSections({
+      invalidRoutes: collectedIgnored
+        .filter(info => info.reason === 'invalid-route')
+        .map(info => toPosix(relative(root(), info.file))),
+      unsupportedFields: Array.from(unsupportedRuleFiles),
+      missingHandlers: Array.from(missingHandlerFiles),
+      duplicateRoutes: Array.from(duplicateRoutes),
+    })
     const { error: diagnosticError, summaryLines: diagnosticLines } = reportDiagnostics({
       errorOn,
       sections: diagnosticSections,

@@ -133,6 +133,7 @@ export {
 export {
   buildDiagnosticSummaryLines,
   createDiagnosticError,
+  createRouteDiagnosticSections,
   type DiagnosticSummarySection,
   reportDiagnostics,
   routeDiagnosticCatalog,
