@@ -125,8 +125,10 @@ export {
   type HookHandler,
 } from './define-config'
 export {
+  diagnosticCategories,
   type DiagnosticCategory,
   type DiagnosticErrorMode,
+  isDiagnosticCategory,
 } from './diagnostic-types'
 export {
   buildDiagnosticSummaryLines,

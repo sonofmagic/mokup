@@ -1,17 +1,12 @@
 import type { FetchServerOptions, FetchServerOptionsConfig } from '@mokup/server/node'
 import type { BuildOptions, DiagnosticCategory } from './manifest/types'
 import process from 'node:process'
-import { routeDiagnosticCatalog, swConflictDiagnostic } from '@mokup/shared/diagnostics'
+import { diagnosticCategories, isDiagnosticCategory } from '@mokup/shared'
 import { createLogger } from '@mokup/shared/logger'
 import { Command, InvalidArgumentError } from 'commander'
 import { buildManifest } from './manifest'
 
 const logger = createLogger()
-const diagnosticCategories = [
-  ...Object.values(routeDiagnosticCatalog).map(item => item.category),
-  swConflictDiagnostic.category,
-] as const satisfies readonly DiagnosticCategory[]
-const diagnosticCategorySet = new Set<string>(diagnosticCategories)
 const diagnosticCategoryHelp = [...diagnosticCategories, 'all'].join(', ')
 
 function collectValues(value: string, previous: string[] | undefined) {
@@ -25,7 +20,7 @@ function collectRegex(value: string, previous: RegExp[] | undefined) {
 }
 
 function collectDiagnosticCategory(value: string, previous: string[] | undefined) {
-  if (value !== 'all' && !diagnosticCategorySet.has(value)) {
+  if (value !== 'all' && !isDiagnosticCategory(value)) {
     throw new InvalidArgumentError(
       `Invalid diagnostic category "${value}". Expected one of: ${diagnosticCategoryHelp}`,
     )

@@ -1,4 +1,6 @@
 import type {
+  DiagnosticCategory,
+  DiagnosticErrorMode,
   DirInput,
   HookErrorPolicy,
   MockEntryOptions,
@@ -8,6 +10,8 @@ import {
   collectFiles,
   createDefineConfig,
   createRouteUtils,
+  diagnosticCategories,
+  isDiagnosticCategory,
   loadRules,
   normalizeMethod,
   normalizePrefix,
@@ -21,15 +25,22 @@ const entry: MockEntryOptions = {
   prefix: '/api',
   watch: true,
   log: false,
+  errorOn: ['invalid-route'],
 }
 const playground: PlaygroundOptionsInput = {
   path: '/__mokup',
   enabled: true,
 }
+const diagnosticCategory: DiagnosticCategory = 'invalid-route'
+const diagnosticErrorMode: DiagnosticErrorMode = [diagnosticCategory]
 
 expectAssignable<DirInput>(dirInput)
 expectType<MockEntryOptions>(entry)
 expectAssignable<PlaygroundOptionsInput>(playground)
+expectAssignable<DiagnosticCategory>(diagnosticCategory)
+expectAssignable<DiagnosticErrorMode>(diagnosticErrorMode)
+expectAssignable<readonly DiagnosticCategory[]>(diagnosticCategories)
+expectType<boolean>(isDiagnosticCategory('invalid-route'))
 
 interface DevConfig {
   hookError?: HookErrorPolicy
