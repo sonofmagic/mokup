@@ -3,6 +3,8 @@ export { defineHandler } from './define/handler'
 
 export type {
   Context,
+  DiagnosticCategory,
+  DiagnosticErrorMode,
   HookErrorPolicy,
   HttpMethod,
   MiddlewareHandler,

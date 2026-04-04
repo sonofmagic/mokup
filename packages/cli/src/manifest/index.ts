@@ -8,7 +8,7 @@ import { join, relative, resolve } from '@mokup/shared/pathe'
 
 import { writeBundle, writeManifestModule } from './bundle'
 import { resolveDirectoryConfig } from './config'
-import { buildDiagnosticSummaryLines } from './diagnostics'
+import { buildDiagnosticSummaryLines, createDiagnosticError } from './diagnostics'
 import {
   collectFiles,
   hasIgnoredPrefix,
@@ -216,32 +216,44 @@ export async function buildManifest(options: BuildOptions = {}) {
   await writeManifestModule(outDir, manifest)
   await writeBundle(outDir, handlerSources.size > 0)
 
+  const diagnosticSections = [
+    {
+      category: 'invalid-route' as const,
+      label: 'invalid route files ignored',
+      items: Array.from(invalidRouteFiles),
+      advice: 'Add a method suffix like .get.ts and avoid unsupported route group segments.',
+    },
+    {
+      category: 'unsupported-fields' as const,
+      label: 'routes skipped for unsupported rule fields',
+      items: Array.from(unsupportedRuleFiles),
+      advice: 'Use handler, headers, status, and delay in route rules; do not use legacy response, url, or method fields.',
+    },
+    {
+      category: 'missing-handler' as const,
+      label: 'routes skipped without handler',
+      items: Array.from(missingHandlerFiles),
+      advice: 'Export a handler value or function for every enabled rule.',
+    },
+    {
+      category: 'duplicate-route' as const,
+      label: 'duplicate route definitions',
+      items: Array.from(duplicateRoutes),
+      advice: 'Keep each method + route path unique across scanned files.',
+    },
+  ]
   const diagnosticLines = buildDiagnosticSummaryLines({
-    sections: [
-      {
-        label: 'invalid route files ignored',
-        items: Array.from(invalidRouteFiles),
-        advice: 'Add a method suffix like .get.ts and avoid unsupported route group segments.',
-      },
-      {
-        label: 'routes skipped for unsupported rule fields',
-        items: Array.from(unsupportedRuleFiles),
-        advice: 'Use handler, headers, status, and delay in route rules; do not use legacy response, url, or method fields.',
-      },
-      {
-        label: 'routes skipped without handler',
-        items: Array.from(missingHandlerFiles),
-        advice: 'Export a handler value or function for every enabled rule.',
-      },
-      {
-        label: 'duplicate route definitions',
-        items: Array.from(duplicateRoutes),
-        advice: 'Keep each method + route path unique across scanned files.',
-      },
-    ],
+    sections: diagnosticSections,
   })
   for (const line of diagnosticLines) {
     options.log?.(line)
+  }
+  const diagnosticError = createDiagnosticError({
+    errorOn: options.errorOn,
+    sections: diagnosticSections,
+  })
+  if (diagnosticError) {
+    throw diagnosticError
   }
 
   options.log?.(`Manifest written to ${manifestPath}`)

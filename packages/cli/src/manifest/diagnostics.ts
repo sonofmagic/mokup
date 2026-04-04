@@ -1,19 +1,15 @@
+import type { DiagnosticCategory, DiagnosticErrorMode } from './types'
+
 interface DiagnosticSummarySection {
+  category?: DiagnosticCategory
   label: string
   items?: string[]
   count?: number
   advice?: string
 }
 
-export function buildDiagnosticSummaryLines(params: {
-  title?: string
-  sections: DiagnosticSummarySection[]
-  maxItems?: number
-}) {
-  const title = params.title ?? 'Mokup diagnostics summary'
-  const maxItems = params.maxItems ?? 3
-
-  const sections = params.sections.map((section) => {
+function normalizeSections(sections: DiagnosticSummarySection[]) {
+  return sections.map((section) => {
     const items = Array.from(
       new Set((section.items ?? []).filter(item => typeof item === 'string' && item.length > 0)),
     )
@@ -24,6 +20,17 @@ export function buildDiagnosticSummaryLines(params: {
       count,
     }
   }).filter(section => section.count > 0)
+}
+
+export function buildDiagnosticSummaryLines(params: {
+  title?: string
+  sections: DiagnosticSummarySection[]
+  maxItems?: number
+}) {
+  const title = params.title ?? 'Mokup diagnostics summary'
+  const maxItems = params.maxItems ?? 3
+
+  const sections = normalizeSections(params.sections)
 
   if (sections.length === 0) {
     return []
@@ -47,4 +54,35 @@ export function buildDiagnosticSummaryLines(params: {
   }
 
   return lines
+}
+
+function matchesErrorMode(category: DiagnosticCategory | undefined, errorOn: DiagnosticErrorMode | undefined) {
+  if (!category || !errorOn) {
+    return false
+  }
+  if (errorOn === 'all') {
+    return true
+  }
+  return errorOn.includes(category)
+}
+
+export function createDiagnosticError(params: {
+  errorOn?: DiagnosticErrorMode
+  sections: DiagnosticSummarySection[]
+  title?: string
+  maxItems?: number
+}) {
+  const failingSections = normalizeSections(params.sections)
+    .filter(section => matchesErrorMode(section.category, params.errorOn))
+  if (failingSections.length === 0) {
+    return null
+  }
+  const buildParams: Parameters<typeof buildDiagnosticSummaryLines>[0] = {
+    title: params.title ?? 'Mokup diagnostics error',
+    sections: failingSections,
+  }
+  if (typeof params.maxItems === 'number') {
+    buildParams.maxItems = params.maxItems
+  }
+  return new Error(buildDiagnosticSummaryLines(buildParams).join('\n'))
 }

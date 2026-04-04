@@ -11,7 +11,7 @@ import type {
 import { cwd } from 'node:process'
 import { createMiddleware, createPlaygroundMiddleware, resolvePlaygroundOptions, resolveSwConfig, resolveSwUnregisterConfig } from '@mokup/core'
 import { resolvePlaygroundDist } from '../playground/assets'
-import { buildDiagnosticSummaryLines } from '../shared/diagnostics'
+import { buildDiagnosticSummaryLines, createDiagnosticError } from '../shared/diagnostics'
 import { createLogger } from '../shared/logger'
 import { resolveDirs } from '../shared/utils'
 import { createBundleBuilder } from './plugin/bundles'
@@ -72,6 +72,7 @@ export function createMokupWebpackPlugin(
   const swDiagnosticLines = buildDiagnosticSummaryLines({
     sections: [
       {
+        category: 'sw-conflict',
         label: 'service worker config conflicts',
         items: swConflictMessages,
         advice: 'Align sw.path, sw.scope, sw.register, and sw.unregister across entries that use SW mode.',
@@ -80,6 +81,23 @@ export function createMokupWebpackPlugin(
   })
   for (const line of swDiagnosticLines) {
     logger.warn(line)
+  }
+  const swDiagnosticErrorParams: Parameters<typeof createDiagnosticError>[0] = {
+    sections: [
+      {
+        category: 'sw-conflict',
+        label: 'service worker config conflicts',
+        items: swConflictMessages,
+        advice: 'Align sw.path, sw.scope, sw.register, and sw.unregister across entries that use SW mode.',
+      },
+    ],
+  }
+  if (normalizedOptions.errorOn) {
+    swDiagnosticErrorParams.errorOn = normalizedOptions.errorOn
+  }
+  const swDiagnosticError = createDiagnosticError(swDiagnosticErrorParams)
+  if (swDiagnosticError) {
+    throw swDiagnosticError
   }
   let root = cwd()
   let base = '/'
@@ -119,12 +137,16 @@ export function createMokupWebpackPlugin(
     return dirs
   }
   const hasSwRoutes = () => !!swConfig && state.swRoutes.length > 0
-  const refreshRoutes = createRouteRefresher({
+  const refreshRouteParams: Parameters<typeof createRouteRefresher>[0] = {
     state,
     optionList,
     root: () => root,
     logger,
-  })
+  }
+  if (normalizedOptions.errorOn) {
+    refreshRouteParams.errorOn = normalizedOptions.errorOn
+  }
+  const refreshRoutes = createRouteRefresher(refreshRouteParams)
   const { rebuildBundles, ensureBuilt } = createBundleBuilder({
     bundleState,
     state,

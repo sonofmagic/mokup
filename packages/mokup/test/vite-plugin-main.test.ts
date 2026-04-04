@@ -233,6 +233,24 @@ describe('mokup vite plugin', () => {
     )
   })
 
+  it('throws when service worker conflicts are promoted to errors', () => {
+    mocks.resolveSwConfig.mockImplementationOnce((_options: any, configLogger: any) => {
+      configLogger.warn('SW path "/other.js" ignored; using "/mokup-sw.js".')
+      return {
+        path: '/mokup-sw.js',
+        scope: '/',
+        register: true,
+        unregister: false,
+        basePaths: [],
+      }
+    })
+
+    expect(() => createMokupPlugin({
+      entries: { dir: '/root/mock' },
+      errorOn: ['sw-conflict'],
+    })).toThrow(/Mokup diagnostics error: 1 service worker config conflicts/)
+  })
+
   it('returns empty lifecycle output when script is null and defaults are used', async () => {
     mocks.buildSwLifecycleScript.mockReturnValueOnce(null)
     const plugin = createMokupPlugin({ entries: { dir: '/root/mock' } })

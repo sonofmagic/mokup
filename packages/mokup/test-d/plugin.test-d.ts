@@ -1,4 +1,6 @@
 import type {
+  DiagnosticCategory,
+  DiagnosticErrorMode,
   MokupPluginOptions,
   RequestHandler,
   RouteDirectoryConfig,
@@ -18,13 +20,18 @@ import { expectAssignable, expectType } from 'tsd'
 const options: MokupPluginOptions = {
   entries: { dir: 'mock' },
   playground: true,
+  errorOn: ['invalid-route'],
 }
 const viteOptionsInput: VitePluginOptionsInput = options
 const viteEntry: VitePluginOptions = { dir: 'mock', mode: 'server' }
+const diagnosticCategory: DiagnosticCategory = 'sw-conflict'
+const diagnosticErrorMode: DiagnosticErrorMode = [diagnosticCategory]
 
 expectType<MokupPluginOptions>(options)
 expectType<VitePluginOptionsInput>(viteOptionsInput)
 expectType<VitePluginOptions>(viteEntry)
+expectAssignable<DiagnosticCategory>(diagnosticCategory)
+expectAssignable<DiagnosticErrorMode>(diagnosticErrorMode)
 
 const handler = defineHandler(c => ({ ok: true, method: c.req.method }))
 expectAssignable<RequestHandler>(handler)

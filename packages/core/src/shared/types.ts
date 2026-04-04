@@ -129,6 +129,31 @@ export type RuntimeMode = 'server' | 'sw'
 export type RuntimeTarget = 'node' | 'worker'
 
 /**
+ * Diagnostic categories emitted during mokup route scanning.
+ *
+ * @example
+ * import type { DiagnosticCategory } from 'mokup/vite'
+ *
+ * const category: DiagnosticCategory = 'invalid-route'
+ */
+export type DiagnosticCategory
+  = | 'invalid-route'
+    | 'unsupported-fields'
+    | 'missing-handler'
+    | 'duplicate-route'
+    | 'sw-conflict'
+
+/**
+ * Controls which diagnostics should fail instead of warn.
+ *
+ * @example
+ * import type { DiagnosticErrorMode } from 'mokup/vite'
+ *
+ * const errorOn: DiagnosticErrorMode = ['invalid-route', 'duplicate-route']
+ */
+export type DiagnosticErrorMode = 'all' | DiagnosticCategory[]
+
+/**
  * Service worker behavior options for mokup.
  *
  * @example
@@ -354,6 +379,12 @@ export interface MokupPluginOptions {
    * @default "node"
    */
   runtime?: RuntimeTarget
+  /**
+   * Promote selected diagnostics from warnings to errors.
+   *
+   * @default undefined
+   */
+  errorOn?: DiagnosticErrorMode
 }
 
 /**

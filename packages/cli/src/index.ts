@@ -22,6 +22,8 @@ export { defineConfig, onAfterAll, onBeforeAll } from './manifest/define-config'
  */
 export type {
   BuildOptions,
+  DiagnosticCategory,
+  DiagnosticErrorMode,
   HookErrorPolicy,
   MiddlewarePosition,
   MiddlewareRegistry,

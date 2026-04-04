@@ -194,4 +194,48 @@ describe('buildManifest extra branches', () => {
       await cleanupTempRoot(root)
     }
   })
+
+  it('throws when selected diagnostics are promoted to errors', async () => {
+    const { root, mockDir } = await createTempRoot()
+    try {
+      await writeFile(
+        path.join(mockDir, 'broken.get.ts'),
+        'export default [{ handler: undefined }, { handler: { ok: true } }]',
+      )
+
+      await expect(buildManifest({
+        root,
+        dir: 'mock',
+        outDir: 'dist',
+        handlers: false,
+        errorOn: ['missing-handler'],
+      })).rejects.toThrow(/Mokup diagnostics error: 1 routes skipped without handler/)
+    }
+    finally {
+      await cleanupTempRoot(root)
+    }
+  })
+
+  it('does not throw when promoted diagnostics do not match', async () => {
+    const { root, mockDir } = await createTempRoot()
+    try {
+      await writeFile(
+        path.join(mockDir, 'broken.get.ts'),
+        'export default [{ handler: undefined }, { handler: { ok: true } }]',
+      )
+
+      const result = await buildManifest({
+        root,
+        dir: 'mock',
+        outDir: 'dist',
+        handlers: false,
+        errorOn: ['duplicate-route'],
+      })
+
+      expect(result.manifest.routes).toHaveLength(1)
+    }
+    finally {
+      await cleanupTempRoot(root)
+    }
+  })
 })

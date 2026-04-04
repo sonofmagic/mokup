@@ -295,4 +295,91 @@ describe('vite plugin route refresh', () => {
     expect(logger.info).toHaveBeenCalledWith('Mokup diagnostics cleared.')
     expect(state.lastDiagnosticsSignature).toBeNull()
   })
+
+  it('throws when selected diagnostics are promoted to errors', async () => {
+    const parsed = parseRouteTemplate('/strict')
+    mocks.scanRoutes.mockImplementation(async (params: any) => {
+      params.logger.warn('Skip mock without handler: /root/mock/strict.get.ts')
+      return [
+        {
+          file: '/root/mock/strict.get.json',
+          template: parsed.template,
+          method: 'GET',
+          tokens: parsed.tokens,
+          score: parsed.score,
+          handler: { ok: true },
+        },
+      ]
+    })
+
+    const state = {
+      routes: [],
+      serverRoutes: [],
+      swRoutes: [],
+      disabledRoutes: [],
+      ignoredRoutes: [],
+      configFiles: [],
+      disabledConfigFiles: [],
+      app: null,
+      lastSignature: 'old',
+      lastDiagnosticsSignature: null,
+      swModuleVersion: 0,
+    }
+
+    const refresher = createRouteRefresher({
+      state: state as never,
+      optionList: [{ dir: '/root/mock', prefix: '/api' }],
+      root: () => '/root',
+      logger: { info: vi.fn(), warn: vi.fn(), error: vi.fn() },
+      enableViteMiddleware: false,
+      errorOn: ['missing-handler'],
+    })
+
+    await expect(refresher({ ws: { send: vi.fn() } } as never))
+      .rejects
+      .toThrow(/Mokup diagnostics error: 1 routes skipped without handler/)
+    expect(state.lastDiagnosticsSignature).toContain('routes skipped without handler')
+  })
+
+  it('does not throw when promoted diagnostics do not match', async () => {
+    const parsed = parseRouteTemplate('/strict-safe')
+    mocks.scanRoutes.mockImplementation(async (params: any) => {
+      params.logger.warn('Skip mock without handler: /root/mock/strict-safe.get.ts')
+      return [
+        {
+          file: '/root/mock/strict-safe.get.json',
+          template: parsed.template,
+          method: 'GET',
+          tokens: parsed.tokens,
+          score: parsed.score,
+          handler: { ok: true },
+        },
+      ]
+    })
+
+    const state = {
+      routes: [],
+      serverRoutes: [],
+      swRoutes: [],
+      disabledRoutes: [],
+      ignoredRoutes: [],
+      configFiles: [],
+      disabledConfigFiles: [],
+      app: null,
+      lastSignature: 'old',
+      lastDiagnosticsSignature: null,
+      swModuleVersion: 0,
+    }
+
+    const refresher = createRouteRefresher({
+      state: state as never,
+      optionList: [{ dir: '/root/mock', prefix: '/api' }],
+      root: () => '/root',
+      logger: { info: vi.fn(), warn: vi.fn(), error: vi.fn() },
+      enableViteMiddleware: false,
+      errorOn: ['duplicate-route'],
+    })
+
+    await expect(refresher({ ws: { send: vi.fn() } } as never)).resolves.toBeUndefined()
+  })
 })

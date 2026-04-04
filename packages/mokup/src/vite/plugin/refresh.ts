@@ -1,10 +1,10 @@
 import type { RouteConfigInfo, RouteIgnoreInfo, RouteSkipInfo } from '@mokup/core'
 import type { PreviewServer, ViteDevServer } from 'vite'
-import type { RouteTable, VitePluginOptions } from '../../shared/types'
+import type { DiagnosticErrorMode, RouteTable, VitePluginOptions } from '../../shared/types'
 import type { PluginState } from './state'
 import { createHonoApp, scanRoutes, sortRoutes } from '@mokup/core'
 import { relative } from '@mokup/shared/pathe'
-import { buildDiagnosticSummaryLines } from '../../shared/diagnostics'
+import { buildDiagnosticSummaryLines, createDiagnosticError } from '../../shared/diagnostics'
 import { resolveDirs, toPosix } from '../../shared/utils'
 import { buildRouteSignature } from './routes'
 import { isViteDevServer } from './server'
@@ -21,6 +21,7 @@ function createRouteRefresher(params: {
   enableViteMiddleware: boolean
   virtualModuleIds?: string[]
   reloadOnChange?: boolean
+  errorOn?: DiagnosticErrorMode
 }) {
   const {
     state,
@@ -30,6 +31,7 @@ function createRouteRefresher(params: {
     enableViteMiddleware,
     virtualModuleIds,
     reloadOnChange = false,
+    errorOn,
   } = params
 
   return async (
@@ -109,45 +111,61 @@ function createRouteRefresher(params: {
     const resolvedConfigs = Array.from(configMap.values())
     state.configFiles = resolvedConfigs.filter(entry => entry.enabled)
     state.disabledConfigFiles = resolvedConfigs.filter(entry => !entry.enabled)
+    const diagnosticSections = [
+      {
+        category: 'invalid-route' as const,
+        label: 'invalid route files ignored',
+        items: collectedIgnored
+          .filter(info => info.reason === 'invalid-route')
+          .map(info => toPosix(relative(root(), info.file))),
+        advice: 'Add a method suffix like .get.ts and avoid unsupported route group segments.',
+      },
+      {
+        category: 'unsupported-fields' as const,
+        label: 'routes skipped for unsupported rule fields',
+        items: Array.from(unsupportedRuleFiles),
+        advice: 'Use handler, headers, status, and delay in route rules; do not use legacy response, url, or method fields.',
+      },
+      {
+        category: 'missing-handler' as const,
+        label: 'routes skipped without handler',
+        items: Array.from(missingHandlerFiles),
+        advice: 'Export a handler value or function for every enabled rule.',
+      },
+      {
+        category: 'duplicate-route' as const,
+        label: 'duplicate route definitions',
+        items: Array.from(duplicateRoutes),
+        advice: 'Keep each method + route path unique across scanned files.',
+      },
+    ]
     const diagnosticLines = buildDiagnosticSummaryLines({
-      sections: [
-        {
-          label: 'invalid route files ignored',
-          items: collectedIgnored
-            .filter(info => info.reason === 'invalid-route')
-            .map(info => toPosix(relative(root(), info.file))),
-          advice: 'Add a method suffix like .get.ts and avoid unsupported route group segments.',
-        },
-        {
-          label: 'routes skipped for unsupported rule fields',
-          items: Array.from(unsupportedRuleFiles),
-          advice: 'Use handler, headers, status, and delay in route rules; do not use legacy response, url, or method fields.',
-        },
-        {
-          label: 'routes skipped without handler',
-          items: Array.from(missingHandlerFiles),
-          advice: 'Export a handler value or function for every enabled rule.',
-        },
-        {
-          label: 'duplicate route definitions',
-          items: Array.from(duplicateRoutes),
-          advice: 'Keep each method + route path unique across scanned files.',
-        },
-      ],
+      sections: diagnosticSections,
     })
     const diagnosticSignature = diagnosticLines.join('\n')
-    const diagnosticsChanged = diagnosticSignature !== (state.lastDiagnosticsSignature ?? '')
+    const previousDiagnosticsSignature = state.lastDiagnosticsSignature ?? ''
+    const diagnosticsChanged = diagnosticSignature !== previousDiagnosticsSignature
+    state.lastDiagnosticsSignature = diagnosticLines.length > 0 ? diagnosticSignature : null
+    const diagnosticErrorParams: Parameters<typeof createDiagnosticError>[0] = {
+      sections: diagnosticSections,
+    }
+    if (errorOn) {
+      diagnosticErrorParams.errorOn = errorOn
+    }
+    const diagnosticError = createDiagnosticError(diagnosticErrorParams)
+    if (diagnosticError) {
+      throw diagnosticError
+    }
     if (!options?.silent && diagnosticsChanged) {
       if (diagnosticLines.length > 0) {
         for (const line of diagnosticLines) {
           logger.warn(line)
         }
       }
-      else if (state.lastDiagnosticsSignature) {
+      else if (previousDiagnosticsSignature) {
         logger.info('Mokup diagnostics cleared.')
       }
     }
-    state.lastDiagnosticsSignature = diagnosticLines.length > 0 ? diagnosticSignature : null
     state.app = enableViteMiddleware && state.serverRoutes.length > 0
       ? createHonoApp(state.serverRoutes)
       : null

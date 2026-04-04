@@ -1,6 +1,8 @@
 /* eslint-disable antfu/no-import-dist */
 import type { IncomingMessage, ServerResponse } from 'node:http'
 import type {
+  DiagnosticCategory,
+  DiagnosticErrorMode,
   Logger,
   ResolvedRoute,
   ResolvedSwConfig,
@@ -28,6 +30,8 @@ const logger: Logger = {
   error: () => {},
   log: () => {},
 }
+const diagnosticCategory: DiagnosticCategory = 'invalid-route'
+const diagnosticErrorMode: DiagnosticErrorMode = [diagnosticCategory]
 
 const route: ResolvedRoute = {
   file: 'mock/ping.get.ts',
@@ -84,3 +88,5 @@ expectType<ResolvedSwConfig>(swUnregister)
 
 expectAssignable<string>(defaultSwPath)
 expectAssignable<string>(defaultSwScope)
+expectAssignable<DiagnosticCategory>(diagnosticCategory)
+expectAssignable<DiagnosticErrorMode>(diagnosticErrorMode)

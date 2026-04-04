@@ -1,6 +1,8 @@
 /* eslint-disable antfu/no-import-dist */
 import type {
   BuildOptions,
+  DiagnosticCategory,
+  DiagnosticErrorMode,
   HookErrorPolicy,
   MiddlewarePosition,
   MiddlewareRegistry,
@@ -22,7 +24,10 @@ const options: BuildOptions = {
   outDir: '.mokup',
   prefix: '/api',
   handlers: true,
+  errorOn: ['duplicate-route'],
 }
+const diagnosticCategory: DiagnosticCategory = 'missing-handler'
+const diagnosticErrorMode: DiagnosticErrorMode = [diagnosticCategory]
 
 const routeRule: RouteRule = {
   handler: { ok: true },
@@ -44,6 +49,8 @@ const policy: HookErrorPolicy = 'warn'
 const position: MiddlewarePosition = 'pre'
 
 expectType<BuildOptions>(options)
+expectAssignable<DiagnosticCategory>(diagnosticCategory)
+expectAssignable<DiagnosticErrorMode>(diagnosticErrorMode)
 expectType<RouteRule>(routeRule)
 expectType<RouteDirectoryConfig>(directoryConfig)
 expectType<MiddlewareRegistry>(registry)

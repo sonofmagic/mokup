@@ -1,5 +1,7 @@
 export type {
   Context,
+  DiagnosticCategory,
+  DiagnosticErrorMode,
   HttpMethod,
   MiddlewareHandler,
   MiddlewarePosition,

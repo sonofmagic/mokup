@@ -4,6 +4,8 @@ import { createMokupWebpackPlugin } from './webpack/plugin'
 
 export type {
   Context,
+  DiagnosticCategory,
+  DiagnosticErrorMode,
   HttpMethod,
   MiddlewareHandler,
   MiddlewarePosition,

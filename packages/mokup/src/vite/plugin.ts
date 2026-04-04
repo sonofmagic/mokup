@@ -5,7 +5,7 @@ import type { PluginState } from './plugin/state'
 import { cwd } from 'node:process'
 import { buildBundleModule, buildSwScript, createPlaygroundMiddleware, resolvePlaygroundOptions, resolveSwConfig, resolveSwUnregisterConfig, writePlaygroundBuild } from '@mokup/core'
 import { resolvePlaygroundDist } from '../playground/assets'
-import { buildDiagnosticSummaryLines } from '../shared/diagnostics'
+import { buildDiagnosticSummaryLines, createDiagnosticError } from '../shared/diagnostics'
 import { createLogger } from '../shared/logger'
 import { normalizeMokupOptions, normalizeOptions } from './plugin/options'
 import { resolveSwImportPath } from './plugin/paths'
@@ -83,6 +83,7 @@ export function createMokupPlugin(options: MokupPluginOptions = {}): Plugin {
   const swDiagnosticLines = buildDiagnosticSummaryLines({
     sections: [
       {
+        category: 'sw-conflict',
         label: 'service worker config conflicts',
         items: swConflictMessages,
         advice: 'Align sw.path, sw.scope, sw.register, and sw.unregister across entries that use SW mode.',
@@ -91,6 +92,23 @@ export function createMokupPlugin(options: MokupPluginOptions = {}): Plugin {
   })
   for (const line of swDiagnosticLines) {
     logger.warn(line)
+  }
+  const swDiagnosticErrorParams: Parameters<typeof createDiagnosticError>[0] = {
+    sections: [
+      {
+        category: 'sw-conflict',
+        label: 'service worker config conflicts',
+        items: swConflictMessages,
+        advice: 'Align sw.path, sw.scope, sw.register, and sw.unregister across entries that use SW mode.',
+      },
+    ],
+  }
+  if (normalizedOptions.errorOn) {
+    swDiagnosticErrorParams.errorOn = normalizedOptions.errorOn
+  }
+  const swDiagnosticError = createDiagnosticError(swDiagnosticErrorParams)
+  if (swDiagnosticError) {
+    throw swDiagnosticError
   }
 
   const resolveAllDirs = createDirResolver(optionList, () => root)
@@ -132,7 +150,7 @@ export function createMokupPlugin(options: MokupPluginOptions = {}): Plugin {
     resolvePlaygroundDist,
   })
 
-  const refreshRoutes = createRouteRefresher({
+  const refreshRouteParams: Parameters<typeof createRouteRefresher>[0] = {
     state,
     optionList,
     root: () => root,
@@ -140,7 +158,11 @@ export function createMokupPlugin(options: MokupPluginOptions = {}): Plugin {
     enableViteMiddleware,
     virtualModuleIds: [resolvedBundleVirtualId],
     reloadOnChange: runtime === 'worker',
-  })
+  }
+  if (normalizedOptions.errorOn) {
+    refreshRouteParams.errorOn = normalizedOptions.errorOn
+  }
+  const refreshRoutes = createRouteRefresher(refreshRouteParams)
 
   return {
     name: 'mokup:vite',
