@@ -24,8 +24,8 @@ bun add -d mokup
 
 ## 2. Add the plugin
 
-```js
-const { mokupWebpack } = require('mokup/webpack')
+```ts
+import { mokupWebpack } from 'mokup/webpack'
 
 const withMokup = mokupWebpack({
   entries: {
@@ -34,8 +34,10 @@ const withMokup = mokupWebpack({
   },
 })
 
-module.exports = withMokup({})
+export default withMokup({})
 ```
+
+Use `webpack.config.ts` or `webpack.config.mjs`. Published Mokup packages no longer support CommonJS `require()`.
 
 ## 3. Start dev server
 

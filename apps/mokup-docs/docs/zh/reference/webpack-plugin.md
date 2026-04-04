@@ -33,8 +33,8 @@ bun add -d mokup
 
 推荐（使用封装函数）：
 
-```js
-const { mokupWebpack } = require('mokup/webpack')
+```ts
+import { mokupWebpack } from 'mokup/webpack'
 
 const withMokup = mokupWebpack({
   entries: {
@@ -43,15 +43,15 @@ const withMokup = mokupWebpack({
   },
 })
 
-module.exports = withMokup({})
+export default withMokup({})
 ```
 
 直接使用插件（短名称）：
 
-```js
-const { createWebpackPlugin } = require('mokup/webpack')
+```ts
+import { createWebpackPlugin } from 'mokup/webpack'
 
-module.exports = {
+export default {
   plugins: [
     createWebpackPlugin({
       entries: {
@@ -73,10 +73,10 @@ module.exports = {
 
 示例：
 
-```js
-const { createWebpackPlugin } = require('mokup/webpack')
+```ts
+import { createWebpackPlugin } from 'mokup/webpack'
 
-module.exports = {
+export default {
   plugins: [
     createWebpackPlugin({
       entries: {
@@ -104,10 +104,10 @@ webpack 模式同样支持 `errorOn`。开启后，命中的诊断不会只输�
 
 示例：
 
-```js
-const { createWebpackPlugin } = require('mokup/webpack')
+```ts
+import { createWebpackPlugin } from 'mokup/webpack'
 
-module.exports = {
+export default {
   plugins: [
     createWebpackPlugin({
       errorOn: ['invalid-route', 'sw-conflict'],
@@ -126,6 +126,7 @@ module.exports = {
 
 ## 注意
 
+- 已发布包现在只提供 ESM。推荐使用 `webpack.config.ts` 或 `webpack.config.mjs`。
 - Dev server 会通过 `devServer.setupMiddlewares` 注入中间件，请确保启用了 `webpack-dev-server`。
 - `mokupWebpack(...)` 会自动创建 `devServer` 对象，除非需要自定义 dev-server 设置，否则可以省略。
 - SW 生命周期脚本会输出到 assets 目录（默认 `assets/mokup-sw-lifecycle.js`）。如果使用 `html-webpack-plugin` 会自动注入，否则需要手动引入。

@@ -33,8 +33,8 @@ Use cases:
 
 Recommended (with wrapper):
 
-```js
-const { mokupWebpack } = require('mokup/webpack')
+```ts
+import { mokupWebpack } from 'mokup/webpack'
 
 const withMokup = mokupWebpack({
   entries: {
@@ -43,15 +43,15 @@ const withMokup = mokupWebpack({
   },
 })
 
-module.exports = withMokup({})
+export default withMokup({})
 ```
 
 Direct plugin (short name):
 
-```js
-const { createWebpackPlugin } = require('mokup/webpack')
+```ts
+import { createWebpackPlugin } from 'mokup/webpack'
 
-module.exports = {
+export default {
   plugins: [
     createWebpackPlugin({
       entries: {
@@ -73,10 +73,10 @@ Use cases:
 
 Demo:
 
-```js
-const { createWebpackPlugin } = require('mokup/webpack')
+```ts
+import { createWebpackPlugin } from 'mokup/webpack'
 
-module.exports = {
+export default {
   plugins: [
     createWebpackPlugin({
       entries: {
@@ -104,10 +104,10 @@ selected diagnostics are detected instead of only printing warnings.
 
 Example:
 
-```js
-const { createWebpackPlugin } = require('mokup/webpack')
+```ts
+import { createWebpackPlugin } from 'mokup/webpack'
 
-module.exports = {
+export default {
   plugins: [
     createWebpackPlugin({
       errorOn: ['invalid-route', 'sw-conflict'],
@@ -126,6 +126,7 @@ Supported categories are the same as Vite: `invalid-route`, `unsupported-fields`
 
 ## Notes
 
+- Published packages are ESM-only. Prefer `webpack.config.ts` or `webpack.config.mjs`.
 - Dev server support uses `devServer.setupMiddlewares`; ensure `webpack-dev-server` is enabled.
 - `mokupWebpack(...)` auto-creates a `devServer` object, so you can omit it unless you need custom dev-server settings.
 - The SW lifecycle script is emitted under your assets directory (default `assets/mokup-sw-lifecycle.js`). With `html-webpack-plugin` it is auto-injected; otherwise include it manually.

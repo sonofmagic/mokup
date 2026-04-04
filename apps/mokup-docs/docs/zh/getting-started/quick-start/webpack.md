@@ -24,8 +24,8 @@ bun add -d mokup
 
 ## 2. 添加插件
 
-```js
-const { mokupWebpack } = require('mokup/webpack')
+```ts
+import { mokupWebpack } from 'mokup/webpack'
 
 const withMokup = mokupWebpack({
   entries: {
@@ -34,8 +34,10 @@ const withMokup = mokupWebpack({
   },
 })
 
-module.exports = withMokup({})
+export default withMokup({})
 ```
+
+推荐使用 `webpack.config.ts` 或 `webpack.config.mjs`。Mokup 已发布包不再支持 CommonJS `require()`。
 
 ## 3. 启动开发服务
 
