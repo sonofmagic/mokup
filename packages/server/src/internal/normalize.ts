@@ -1,3 +1,5 @@
+const ABSOLUTE_HTTP_URL_RE = /^https?:\/\//
+
 /**
  * Normalize URLSearchParams into a record.
  *
@@ -92,7 +94,7 @@ export function resolveUrl(
   input: string,
   headers: Record<string, string> & { host?: string },
 ): URL {
-  if (/^https?:\/\//.test(input)) {
+  if (ABSOLUTE_HTTP_URL_RE.test(input)) {
     return new URL(input)
   }
   const host = headers.host

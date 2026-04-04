@@ -1,6 +1,10 @@
 import { isAbsolute, resolve } from '@mokup/shared/pathe'
 import { toPosix } from '../../shared/utils'
 
+const ABSOLUTE_HTTP_URL_RE = /^https?:\/\//
+const WINDOWS_SEPARATOR_RE = /\\/g
+const WINDOWS_DRIVE_RE = /^[a-z]:\//i
+
 function normalizeBase(base: string) {
   if (!base) {
     return '/'
@@ -34,7 +38,7 @@ function resolveRegisterScope(base: string, scope: string) {
 }
 
 function isAbsoluteUrl(value: string) {
-  return /^https?:\/\//.test(value)
+  return ABSOLUTE_HTTP_URL_RE.test(value)
 }
 
 function resolveBaseFromPublicPath(publicPath: unknown) {
@@ -54,7 +58,7 @@ function resolveAssetsDir(assetModuleFilename?: unknown) {
   if (typeof assetModuleFilename !== 'string') {
     return 'assets'
   }
-  const normalized = assetModuleFilename.replace(/\\/g, '/')
+  const normalized = assetModuleFilename.replace(WINDOWS_SEPARATOR_RE, '/')
   const prefix = normalized.split('/')[0] ?? ''
   if (!prefix || prefix.includes('[')) {
     return 'assets'
@@ -73,7 +77,7 @@ function joinPublicPath(publicPath: string, fileName: string) {
 function resolveModuleFilePath(file: string, root: string) {
   const absolute = isAbsolute(file) ? file : resolve(root, file)
   const normalized = toPosix(absolute)
-  if (/^[a-z]:\//i.test(normalized)) {
+  if (WINDOWS_DRIVE_RE.test(normalized)) {
     return `file:///${normalized}`
   }
   return normalized

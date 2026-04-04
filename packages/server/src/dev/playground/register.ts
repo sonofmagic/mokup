@@ -12,6 +12,8 @@ import {
   toPlaygroundRoute,
 } from './serialize'
 
+const LEADING_SLASH_RE = /^\/+/
+
 /**
  * Register playground routes on a Hono app.
  *
@@ -100,7 +102,7 @@ export function registerPlaygroundRoutes(params: {
   })
   params.app.get(`${playgroundPath}/*`, async (c) => {
     const pathname = c.req.path
-    const relPath = pathname.slice(playgroundPath.length).replace(/^\/+/, '')
+    const relPath = pathname.slice(playgroundPath.length).replace(LEADING_SLASH_RE, '')
     if (!relPath || relPath === '/') {
       return serveIndex()
     }

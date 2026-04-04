@@ -218,6 +218,7 @@ export function resolveSwUnregisterConfig(
  * @param params.runtimeImportPath - Runtime import override.
  * @param params.loggerImportPath - Logger import override.
  * @param params.basePaths - Base paths for SW matching.
+ * @param params.moduleVersion - Optional version appended to SW module imports.
  * @param params.resolveModulePath - Optional module resolver.
  * @returns JavaScript source string.
  *

@@ -17,6 +17,8 @@ import {
   toPlaygroundRoute,
 } from './serialize'
 
+const LEADING_SLASH_RE = /^\/+/
+
 /**
  * Create middleware that serves the playground UI and routes data.
  *
@@ -128,7 +130,7 @@ export function createPlaygroundMiddleware(params: {
       return
     }
 
-    const relPath = subPath.replace(/^\/+/, '')
+    const relPath = subPath.replace(LEADING_SLASH_RE, '')
     if (relPath.includes('..')) {
       res.statusCode = 400
       res.end('Invalid path.')

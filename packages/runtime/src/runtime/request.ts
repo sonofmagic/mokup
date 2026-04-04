@@ -2,6 +2,8 @@ import type { ManifestRoute, ModuleMap, RuntimeRequest } from '../types'
 import { normalizeMethod } from '../normalize'
 import { normalizePathname } from '../router'
 
+const EXTERNAL_MODULE_PATH_RE = /^(?:data|http|https|file):/
+
 function appendQueryParams(url: URL, query: RuntimeRequest['query']) {
   for (const [key, value] of Object.entries(query)) {
     if (Array.isArray(value)) {
@@ -61,7 +63,7 @@ function toFetchRequest(req: RuntimeRequest): Request {
 }
 
 function isRelativeModulePath(modulePath: string) {
-  return !/^(?:data|http|https|file):/.test(modulePath)
+  return !EXTERNAL_MODULE_PATH_RE.test(modulePath)
 }
 
 function requiresModuleBase(
@@ -71,7 +73,7 @@ function requiresModuleBase(
   if (!isRelativeModulePath(modulePath)) {
     return false
   }
-  if (moduleMap && Object.prototype.hasOwnProperty.call(moduleMap, modulePath)) {
+  if (moduleMap && Object.hasOwn(moduleMap, modulePath)) {
     return false
   }
   return true

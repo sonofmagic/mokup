@@ -14,6 +14,9 @@ import {
   toPlaygroundRoute,
 } from './serialize'
 
+const LEADING_SLASH_RE = /^\/+/
+const SW_LIFECYCLE_SCRIPT_RE = /<script[^>]*mokup-sw-lifecycle\.js[^>]*><\/script>\s*/gi
+
 interface PlaygroundBuildParams {
   outDir: string
   base: string
@@ -32,15 +35,12 @@ interface PlaygroundBuildParams {
 
 function resolvePlaygroundOutDir(outDir: string, playgroundPath: string) {
   const normalized = normalizePlaygroundPath(playgroundPath)
-  const trimmed = normalized.replace(/^\/+/, '')
+  const trimmed = normalized.replace(LEADING_SLASH_RE, '')
   return trimmed ? join(outDir, normalize(trimmed)) : outDir
 }
 
 function stripSwLifecycle(html: string) {
-  return html.replace(
-    /<script[^>]*mokup-sw-lifecycle\.js[^>]*><\/script>\s*/gi,
-    '',
-  )
+  return html.replace(SW_LIFECYCLE_SCRIPT_RE, '')
 }
 
 async function writeRoutesPayload(params: PlaygroundBuildParams, targetDir: string) {

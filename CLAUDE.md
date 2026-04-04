@@ -4,27 +4,26 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-This is a pnpm + Turbo monorepo template designed for production-ready projects. The monorepo maintains a clear separation: **deployable applications** live under `apps/` while **reusable packages/templates** live under `packages/`.
+This is the `mokup` pnpm + Turbo monorepo. **Deployable apps and demos** live under `apps/`, while **publishable packages** live under `packages/`.
 
 ### Architecture
 
-- **`apps/`** - Deployable applications:
-  - `cli/` - CLI application scaffold
-  - `client/` - Vue.js web client with Cloudflare integration
-  - `server/` - Server/API layer (tsup-based)
-  - `website/` - VitePress documentation site
+- **`apps/`** - Documentation and integration demos:
+  - `mokup-docs/` - VitePress documentation site
+  - `mokup-vite-*`, `mokup-webpack-demo/`, `mokup-node-demo/` - runnable integration examples
+  - `mokup-web-demo/`, `mokup-d1-demo/`, `mokup-middleware-demo/` - runtime and deployment demos
 
-- **`packages/`** - Reusable templates and utilities:
-  - `monorepo/` - @icebreakers/monorepo helper scripts and CLI
-  - `tsup-template/`, `unbuild-template/`, `tsdown-template/` - Library build templates
-  - `vue-lib-template/` - Vue component library template
-  - `create-icebreaker/` - CLI scaffolding tool
+- **`packages/`** - Publishable Mokup packages:
+  - `mokup/` - main public package
+  - `cli/`, `server/`, `runtime/`, `client/`, `core/`, `query/`, `shared/` - supporting packages
+  - `playground/` - docs playground assets
 
 ### Build System
 
 - **Package Manager**: pnpm (enforced by preinstall hook, requires pnpm@10.26.1)
 - **Task Orchestration**: Turbo with caching and parallel execution
-- **Node Version**: >= 20.0.0
+- **Library Bundler**: tsdown powered by Rolldown
+- **Node Version**: `^20.19.0 || >=22.12.0`
 
 ## Development Commands
 
@@ -106,12 +105,8 @@ This monorepo uses Changesets for version management:
 
 When modifying publishable packages, always create a changeset so releases stay traceable.
 
-## Template Customization
+## Current Upgrade Notes
 
-When adapting this template for a new project:
-
-- Remove unused apps/packages with `pnpm script:clean`
-- Duplicate existing templates to create new modules quickly
-- Run `pnpm script:init` to align workspace configuration
-- Keep versions synchronized with `pnpm script:sync`
-- Update `package.json` name, repository, bugs URLs
+- Published packages are ESM-only.
+- Internal package builds have been migrated from `unbuild` / `tsup` to `tsdown`.
+- `@mokup/shared/esbuild` has been renamed to `@mokup/shared/rolldown`.

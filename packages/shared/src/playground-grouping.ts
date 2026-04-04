@@ -2,6 +2,8 @@ import { cwd } from 'node:process'
 import { dirname, normalize, relative } from 'pathe'
 import { normalizePathForComparison, toPosix } from './path-utils'
 
+const TRAILING_SLASH_RE = /\/$/
+
 interface PlaygroundGroup {
   key: string
   label: string
@@ -13,7 +15,7 @@ function normalizePath(value: string) {
 }
 
 function isAncestor(parent: string, child: string) {
-  const normalizedParent = normalizePathForComparison(parent).replace(/\/$/, '')
+  const normalizedParent = normalizePathForComparison(parent).replace(TRAILING_SLASH_RE, '')
   const normalizedChild = normalizePathForComparison(child)
   return normalizedChild === normalizedParent || normalizedChild.startsWith(`${normalizedParent}/`)
 }

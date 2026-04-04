@@ -43,7 +43,7 @@ export function createDefineConfig<
   const contextStack: DefineConfigContext<TMiddleware>[] = []
 
   function getActiveContext() {
-    const context = contextStack[contextStack.length - 1]
+    const context = contextStack.at(-1)
     if (!context) {
       throw new Error('onBeforeAll/onAfterAll must be called inside defineConfig()')
     }

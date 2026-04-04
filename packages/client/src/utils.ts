@@ -2,6 +2,8 @@ export type HeaderRecord = Record<string, string>
 
 export const truthyValues = new Set(['1', 'true', 'yes', 'on', 'mock'])
 export const falsyValues = new Set(['0', 'false', 'no', 'off', 'real'])
+const ABSOLUTE_URL_RE = /^[a-z][a-z\d+.-]*:/i
+const TRAILING_SLASH_RE = /\/$/
 
 export function parseBoolean(value: unknown): boolean | undefined {
   if (typeof value === 'boolean') {
@@ -24,7 +26,7 @@ export function parseBoolean(value: unknown): boolean | undefined {
 }
 
 export function isAbsoluteUrl(value: string): boolean {
-  return /^[a-z][a-z\d+.-]*:/i.test(value)
+  return ABSOLUTE_URL_RE.test(value)
 }
 
 export function normalizeHeaders(input?: HeadersInit | null): HeaderRecord {
@@ -112,7 +114,7 @@ export function joinPaths(prefix: string, path: string): string {
   if (normalizedPath === normalizedPrefix || normalizedPath.startsWith(`${normalizedPrefix}/`)) {
     return normalizedPath
   }
-  return `${normalizedPrefix.replace(/\/$/, '')}${normalizedPath}`
+  return `${normalizedPrefix.replace(TRAILING_SLASH_RE, '')}${normalizedPath}`
 }
 
 export interface ParsedUrl {

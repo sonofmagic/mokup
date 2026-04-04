@@ -1,14 +1,18 @@
 import { platform } from 'node:process'
 import { normalize, relative } from 'pathe'
 
+const WINDOWS_DRIVE_RE = /^[a-z]:\//i
+const WINDOWS_SEPARATOR_RE = /\\/g
+const TRAILING_SLASH_RE = /\/$/
+
 function isWindowsLikePath(normalized: string) {
   return platform === 'win32'
-    || /^[a-z]:\//i.test(normalized)
+    || WINDOWS_DRIVE_RE.test(normalized)
     || normalized.startsWith('//')
 }
 
 export function toPosix(value: string) {
-  return value.replace(/\\/g, '/')
+  return value.replace(WINDOWS_SEPARATOR_RE, '/')
 }
 
 function normalizePath(value: string) {
@@ -23,7 +27,7 @@ export function normalizePathForComparison(value: string) {
 export function isInDirs(file: string, dirs: string[]) {
   const normalized = normalizePathForComparison(file)
   return dirs.some((dir) => {
-    const normalizedDir = normalizePathForComparison(dir).replace(/\/$/, '')
+    const normalizedDir = normalizePathForComparison(dir).replace(TRAILING_SLASH_RE, '')
     return normalized === normalizedDir || normalized.startsWith(`${normalizedDir}/`)
   })
 }
