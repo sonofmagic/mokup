@@ -2,7 +2,9 @@ import type { RouteConfigInfo, RouteIgnoreInfo, RouteSkipInfo } from '@mokup/cor
 import type { RouteTable, VitePluginOptions } from '../../shared/types'
 import type { PluginState } from './state'
 import { createHonoApp, scanRoutes, sortRoutes } from '@mokup/core'
-import { resolveDirs } from '../../shared/utils'
+import { relative } from '@mokup/shared/pathe'
+import { buildDiagnosticSummaryLines } from '../../shared/diagnostics'
+import { resolveDirs, toPosix } from '../../shared/utils'
 
 function createRouteRefresher(params: {
   state: PluginState
@@ -58,6 +60,29 @@ function createRouteRefresher(params: {
     const resolvedConfigs = Array.from(configMap.values())
     state.configFiles = resolvedConfigs.filter(entry => entry.enabled)
     state.disabledConfigFiles = resolvedConfigs.filter(entry => !entry.enabled)
+    const diagnosticLines = buildDiagnosticSummaryLines({
+      sections: [
+        {
+          label: 'invalid route files ignored',
+          items: collectedIgnored
+            .filter(info => info.reason === 'invalid-route')
+            .map(info => toPosix(relative(root(), info.file))),
+          advice: 'Add a method suffix like .get.ts and avoid unsupported route group segments.',
+        },
+      ],
+    })
+    const diagnosticSignature = diagnosticLines.join('\n')
+    if (diagnosticSignature !== (state.lastDiagnosticsSignature ?? '')) {
+      if (diagnosticLines.length > 0) {
+        for (const line of diagnosticLines) {
+          logger.warn(line)
+        }
+      }
+      else if (state.lastDiagnosticsSignature) {
+        logger.info('Mokup diagnostics cleared.')
+      }
+    }
+    state.lastDiagnosticsSignature = diagnosticLines.length > 0 ? diagnosticSignature : null
     state.app = state.serverRoutes.length > 0 ? createHonoApp(state.serverRoutes) : null
   }
 }

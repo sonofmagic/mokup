@@ -19,9 +19,10 @@ describe('vite plugin route refresh', () => {
   it('refreshes routes and notifies the dev server', async () => {
     const parsed = parseRouteTemplate('/ping')
     let callIndex = 0
+    const logger = { info: vi.fn(), warn: vi.fn(), error: vi.fn() }
     mocks.scanRoutes.mockImplementation(async (params: any) => {
       params.onSkip?.({ reason: 'disabled', file: '/root/mock/skip.get.ts' })
-      params.onIgnore?.({ reason: 'ignored', file: '/root/mock/ignore.txt' })
+      params.onIgnore?.({ reason: 'invalid-route', file: '/root/mock/(group)/users.get.json' })
       params.onConfig?.({ file: '/root/mock/index.config.ts', enabled: callIndex === 0 })
       callIndex += 1
       return [
@@ -68,7 +69,7 @@ describe('vite plugin route refresh', () => {
         },
       ],
       root: () => '/root',
-      logger: { info: vi.fn(), warn: vi.fn(), error: vi.fn() },
+      logger,
       enableViteMiddleware: true,
     })
 
@@ -85,6 +86,9 @@ describe('vite plugin route refresh', () => {
     expect(state.app).not.toBeNull()
     expect(state.swModuleVersion).toBe(1)
     expect(server.ws.send).toHaveBeenCalled()
+    expect(logger.warn).toHaveBeenCalledWith(
+      expect.stringContaining('Mokup diagnostics summary: 1 invalid route files ignored'),
+    )
 
     const firstCall = mocks.scanRoutes.mock.calls[0]?.[0]
     expect(firstCall.include).toEqual([/^ping/])
@@ -236,5 +240,47 @@ describe('vite plugin route refresh', () => {
     await refresher(server as never)
 
     expect(server.ws.send).toHaveBeenCalledWith(expect.objectContaining({ type: 'full-reload' }))
+  })
+
+  it('logs when diagnostics are cleared', async () => {
+    const parsed = parseRouteTemplate('/clear')
+    const logger = { info: vi.fn(), warn: vi.fn(), error: vi.fn() }
+    mocks.scanRoutes.mockImplementation(async () => [
+      {
+        file: '/root/mock/clear.get.json',
+        template: parsed.template,
+        method: 'GET',
+        tokens: parsed.tokens,
+        score: parsed.score,
+        handler: { ok: true },
+      },
+    ])
+
+    const state = {
+      routes: [],
+      serverRoutes: [],
+      swRoutes: [],
+      disabledRoutes: [],
+      ignoredRoutes: [],
+      configFiles: [],
+      disabledConfigFiles: [],
+      app: null,
+      lastSignature: 'old',
+      lastDiagnosticsSignature: 'previous-diagnostics',
+      swModuleVersion: 0,
+    }
+
+    const refresher = createRouteRefresher({
+      state: state as never,
+      optionList: [{ dir: '/root/mock', prefix: '/api' }],
+      root: () => '/root',
+      logger,
+      enableViteMiddleware: false,
+    })
+
+    await refresher({ ws: { send: vi.fn() } } as never)
+
+    expect(logger.info).toHaveBeenCalledWith('Mokup diagnostics cleared.')
+    expect(state.lastDiagnosticsSignature).toBeNull()
   })
 })

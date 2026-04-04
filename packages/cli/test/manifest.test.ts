@@ -50,6 +50,8 @@ describe('buildManifest', () => {
       expect(urls).toEqual(expect.arrayContaining(['/users', '/profile']))
       expect(logs.some(message => message.includes('method suffix'))).toBe(true)
       expect(logs.some(message => message.includes('Route groups'))).toBe(true)
+      expect(logs.some(message => message.includes('Mokup diagnostics summary: 2 invalid route files ignored'))).toBe(true)
+      expect(logs.some(message => message.includes('Fix: Add a method suffix like .get.ts'))).toBe(true)
     }
     finally {
       await cleanupTempRoot(root)

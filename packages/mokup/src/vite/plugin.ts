@@ -5,6 +5,7 @@ import type { PluginState } from './plugin/state'
 import { cwd } from 'node:process'
 import { buildBundleModule, buildSwScript, createPlaygroundMiddleware, resolvePlaygroundOptions, resolveSwConfig, resolveSwUnregisterConfig, writePlaygroundBuild } from '@mokup/core'
 import { resolvePlaygroundDist } from '../playground/assets'
+import { buildDiagnosticSummaryLines } from '../shared/diagnostics'
 import { createLogger } from '../shared/logger'
 import { normalizeMokupOptions, normalizeOptions } from './plugin/options'
 import { resolveSwImportPath } from './plugin/paths'
@@ -48,6 +49,7 @@ export function createMokupPlugin(options: MokupPluginOptions = {}): Plugin {
     disabledConfigFiles: [],
     app: null,
     lastSignature: null,
+    lastDiagnosticsSignature: null,
     swModuleVersion: 0,
   }
   type PreviewWatcher = Awaited<ReturnType<typeof configurePreviewServer>>
@@ -62,9 +64,34 @@ export function createMokupPlugin(options: MokupPluginOptions = {}): Plugin {
   const watchEnabled = optionList.every(entry => entry.watch !== false)
   const playgroundConfig = resolvePlaygroundOptions(normalizedOptions.playground)
   const logger = createLogger(logEnabled)
+  const swConflictMessages: string[] = []
+  const configLogger = {
+    ...logger,
+    warn: (...args: unknown[]) => {
+      if (args.length > 0) {
+        const message = args.map(String).join(' ')
+        if (message.startsWith('SW ')) {
+          swConflictMessages.push(message)
+        }
+      }
+      logger.warn(...args)
+    },
+  }
   const hasSwEntries = optionList.some(entry => entry.mode === 'sw')
-  const swConfig = resolveSwConfig(optionList, logger)
-  const unregisterConfig = resolveSwUnregisterConfig(optionList, logger)
+  const swConfig = resolveSwConfig(optionList, configLogger)
+  const unregisterConfig = resolveSwUnregisterConfig(optionList, configLogger)
+  const swDiagnosticLines = buildDiagnosticSummaryLines({
+    sections: [
+      {
+        label: 'service worker config conflicts',
+        items: swConflictMessages,
+        advice: 'Align sw.path, sw.scope, sw.register, and sw.unregister across entries that use SW mode.',
+      },
+    ],
+  })
+  for (const line of swDiagnosticLines) {
+    logger.warn(line)
+  }
 
   const resolveAllDirs = createDirResolver(optionList, () => root)
   const hasSwRoutes = () => !!swConfig && state.swRoutes.length > 0

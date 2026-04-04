@@ -208,6 +208,31 @@ describe('mokup vite plugin', () => {
     expect(mocks.writePlaygroundBuild).toHaveBeenCalled()
   })
 
+  it('prints a service worker conflict summary', () => {
+    const logger = { info: vi.fn(), warn: vi.fn(), error: vi.fn(), log: vi.fn() }
+    mocks.createLogger.mockReturnValueOnce(logger)
+    mocks.resolveSwConfig.mockImplementationOnce((_options: any, configLogger: any) => {
+      configLogger.warn('SW path "/other.js" ignored; using "/mokup-sw.js".')
+      configLogger.warn('SW scope "/other" ignored; using "/".')
+      return {
+        path: '/mokup-sw.js',
+        scope: '/',
+        register: true,
+        unregister: false,
+        basePaths: [],
+      }
+    })
+
+    createMokupPlugin({ entries: { dir: '/root/mock' } })
+
+    expect(logger.warn).toHaveBeenCalledWith(
+      expect.stringContaining('Mokup diagnostics summary: 2 service worker config conflicts'),
+    )
+    expect(logger.warn).toHaveBeenCalledWith(
+      expect.stringContaining('Fix: Align sw.path, sw.scope, sw.register, and sw.unregister'),
+    )
+  })
+
   it('returns empty lifecycle output when script is null and defaults are used', async () => {
     mocks.buildSwLifecycleScript.mockReturnValueOnce(null)
     const plugin = createMokupPlugin({ entries: { dir: '/root/mock' } })

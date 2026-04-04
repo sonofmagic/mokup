@@ -8,6 +8,7 @@ import { join, relative, resolve } from '@mokup/shared/pathe'
 
 import { writeBundle, writeManifestModule } from './bundle'
 import { resolveDirectoryConfig } from './config'
+import { buildDiagnosticSummaryLines } from './diagnostics'
 import {
   collectFiles,
   hasIgnoredPrefix,
@@ -46,6 +47,7 @@ export async function buildManifest(options: BuildOptions = {}) {
   const configCache = new Map<string, RouteDirectoryConfig | null>()
   const configFileCache = new Map<string, string | null>()
   const globalIgnorePrefix = normalizeIgnorePrefix(options.ignorePrefix)
+  const invalidRouteFiles = new Set<string>()
 
   for (const fileInfo of files) {
     const configParams: Parameters<typeof resolveDirectoryConfig>[0] = {
@@ -81,6 +83,7 @@ export async function buildManifest(options: BuildOptions = {}) {
     }
     const derived = deriveRouteFromFile(fileInfo.file, fileInfo.rootDir, options.log)
     if (!derived) {
+      invalidRouteFiles.add(toPosix(relative(root, fileInfo.file)))
       continue
     }
     const rules = await loadRules(fileInfo.file)
@@ -205,6 +208,19 @@ export async function buildManifest(options: BuildOptions = {}) {
   await fs.writeFile(manifestPath, JSON.stringify(manifest, null, 2), 'utf8')
   await writeManifestModule(outDir, manifest)
   await writeBundle(outDir, handlerSources.size > 0)
+
+  const diagnosticLines = buildDiagnosticSummaryLines({
+    sections: [
+      {
+        label: 'invalid route files ignored',
+        items: Array.from(invalidRouteFiles),
+        advice: 'Add a method suffix like .get.ts and avoid unsupported route group segments.',
+      },
+    ],
+  })
+  for (const line of diagnosticLines) {
+    options.log?.(line)
+  }
 
   options.log?.(`Manifest written to ${manifestPath}`)
 

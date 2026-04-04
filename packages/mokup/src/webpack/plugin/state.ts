@@ -11,6 +11,7 @@ interface PluginState {
   configFiles: RouteConfigInfo[]
   disabledConfigFiles: RouteConfigInfo[]
   app: Hono | null
+  lastDiagnosticsSignature: string | null
 }
 
 export type { PluginState }
