@@ -25,5 +25,5 @@ handler 和 service worker 配置冲突不再只是 warning，而是直接让构
 ## 升级提示
 
 - 已发布包现在只提供 ESM 输出。
-- 旧的 `@mokup/shared/esbuild` 入口已经移除，请直接改用 `@mokup/shared/rolldown`。
+- 共享构建辅助入口统一使用 `@mokup/shared/rolldown`。
 - 完整迁移说明见：[../../docs/guide/migration-v1.md](../../docs/guide/migration-v1.md)

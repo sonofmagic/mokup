@@ -109,4 +109,4 @@ When modifying publishable packages, always create a changeset so releases stay 
 
 - Published packages are ESM-only.
 - Internal package builds have been migrated from `unbuild` / `tsup` to `tsdown`.
-- `@mokup/shared/esbuild` has been renamed to `@mokup/shared/rolldown`.
+- Shared build helpers live under `@mokup/shared/rolldown`.

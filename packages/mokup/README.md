@@ -26,5 +26,5 @@ See:
 ## Upgrade notes
 
 - Published packages now ship ESM-only output.
-- The old `@mokup/shared/esbuild` entry has been removed. Use `@mokup/shared/rolldown`.
+- Shared build helpers are available from `@mokup/shared/rolldown`.
 - Full migration guide: [../../docs/guide/migration-v1.md](../../docs/guide/migration-v1.md)
