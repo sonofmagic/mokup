@@ -109,7 +109,7 @@ function createRouteRefresher(params: {
       duplicateRoutes: Array.from(duplicateRoutes),
     })
     const { error: diagnosticError, summaryLines: diagnosticLines } = reportDiagnostics({
-      errorOn,
+      ...(errorOn ? { errorOn } : {}),
       sections: diagnosticSections,
     })
     const diagnosticSignature = diagnosticLines.join('\n')

@@ -85,7 +85,7 @@ export function createMokupPlugin(options: MokupPluginOptions = {}): Plugin {
   const swConfig = resolveSwConfig(optionList, configLogger)
   const unregisterConfig = resolveSwUnregisterConfig(optionList, configLogger)
   const { error: swDiagnosticError } = reportDiagnostics({
-    errorOn: normalizedOptions.errorOn,
+    ...(normalizedOptions.errorOn ? { errorOn: normalizedOptions.errorOn } : {}),
     sections: createSwConflictDiagnosticSections(swConflictMessages),
     warn: message => logger.warn(message),
   })
