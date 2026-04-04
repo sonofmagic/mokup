@@ -36,6 +36,11 @@
       "import": "./dist/define-config.mjs",
       "default": "./dist/define-config.mjs"
     },
+    "./diagnostics": {
+      "types": "./dist/diagnostics.d.ts",
+      "import": "./dist/diagnostics.mjs",
+      "default": "./dist/diagnostics.mjs"
+    },
     "./rolldown": {
       "types": "./dist/rolldown.d.ts",
       "import": "./dist/rolldown.mjs",
@@ -133,6 +138,9 @@
       ],
       "define-config": [
         "dist/define-config.d.ts"
+      ],
+      "diagnostics": [
+        "dist/diagnostics.d.ts"
       ],
       "rolldown": [
         "dist/rolldown.d.ts"

@@ -4,8 +4,8 @@ import type { RouteTable } from './dev/types'
 import type {
   FetchServerOptionsInput,
 } from './fetch-options'
+import { buildDiagnosticSummaryLines, createDiagnosticError, routeDiagnosticCatalog } from '@mokup/shared/diagnostics'
 import { relative } from '@mokup/shared/pathe'
-import { buildDiagnosticSummaryLines, createDiagnosticError } from './dev/diagnostics'
 import { createLogger } from './dev/logger'
 import { resolvePlaygroundOptions } from './dev/playground'
 import { sortRoutes } from './dev/routes'
@@ -158,30 +158,22 @@ export async function createFetchServer(
       const errorOn = optionList.find(entry => typeof entry.errorOn !== 'undefined')?.errorOn
       const diagnosticSections = [
         {
-          category: 'invalid-route' as const,
-          label: 'invalid route files ignored',
+          ...routeDiagnosticCatalog.invalidRoute,
           items: collectedIgnored
             .filter(info => info.reason === 'invalid-route')
             .map(info => relative(root, info.file)),
-          advice: 'Add a method suffix like .get.ts and avoid unsupported route group segments.',
         },
         {
-          category: 'unsupported-fields' as const,
-          label: 'routes skipped for unsupported rule fields',
+          ...routeDiagnosticCatalog.unsupportedFields,
           items: Array.from(unsupportedRuleFiles).map(file => relative(root, file)),
-          advice: 'Use handler, headers, status, and delay in route rules; do not use legacy response, url, or method fields.',
         },
         {
-          category: 'missing-handler' as const,
-          label: 'routes skipped without handler',
+          ...routeDiagnosticCatalog.missingHandler,
           items: Array.from(missingHandlerFiles).map(file => relative(root, file)),
-          advice: 'Export a handler value or function for every enabled rule.',
         },
         {
-          category: 'duplicate-route' as const,
-          label: 'duplicate route definitions',
+          ...routeDiagnosticCatalog.duplicateRoute,
           items: Array.from(duplicateRoutes),
-          advice: 'Keep each method + route path unique across scanned files.',
         },
       ]
       const diagnosticLines = buildDiagnosticSummaryLines({

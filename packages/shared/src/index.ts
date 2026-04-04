@@ -116,6 +116,13 @@ export {
   type HookErrorPolicy,
   type HookHandler,
 } from './define-config'
+export {
+  buildDiagnosticSummaryLines,
+  createDiagnosticError,
+  type DiagnosticSummarySection,
+  routeDiagnosticCatalog,
+  swConflictDiagnostic,
+} from './diagnostics'
 export { readJsoncFile } from './jsonc-utils'
 export { loadRules } from './load-rules'
 export { collectFiles, isConfigFile, isSupportedFile } from './mock-files'

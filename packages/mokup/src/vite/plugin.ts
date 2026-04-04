@@ -4,8 +4,8 @@ import type { MokupPluginOptions } from '../shared/types'
 import type { PluginState } from './plugin/state'
 import { cwd } from 'node:process'
 import { buildBundleModule, buildSwScript, createPlaygroundMiddleware, resolvePlaygroundOptions, resolveSwConfig, resolveSwUnregisterConfig, writePlaygroundBuild } from '@mokup/core'
+import { buildDiagnosticSummaryLines, createDiagnosticError, swConflictDiagnostic } from '@mokup/shared/diagnostics'
 import { resolvePlaygroundDist } from '../playground/assets'
-import { buildDiagnosticSummaryLines, createDiagnosticError } from '../shared/diagnostics'
 import { createLogger } from '../shared/logger'
 import { normalizeMokupOptions, normalizeOptions } from './plugin/options'
 import { resolveSwImportPath } from './plugin/paths'
@@ -83,10 +83,8 @@ export function createMokupPlugin(options: MokupPluginOptions = {}): Plugin {
   const swDiagnosticLines = buildDiagnosticSummaryLines({
     sections: [
       {
-        category: 'sw-conflict',
-        label: 'service worker config conflicts',
+        ...swConflictDiagnostic,
         items: swConflictMessages,
-        advice: 'Align sw.path, sw.scope, sw.register, and sw.unregister across entries that use SW mode.',
       },
     ],
   })
@@ -96,10 +94,8 @@ export function createMokupPlugin(options: MokupPluginOptions = {}): Plugin {
   const swDiagnosticErrorParams: Parameters<typeof createDiagnosticError>[0] = {
     sections: [
       {
-        category: 'sw-conflict',
-        label: 'service worker config conflicts',
+        ...swConflictDiagnostic,
         items: swConflictMessages,
-        advice: 'Align sw.path, sw.scope, sw.register, and sw.unregister across entries that use SW mode.',
       },
     ],
   }

@@ -11,6 +11,7 @@ export default createPackageConfig({
     'src/config-core',
     'src/config-utils',
     'src/define-config',
+    'src/diagnostics',
     'src/jsonc-utils',
     'src/load-rules',
     'src/mock-files',

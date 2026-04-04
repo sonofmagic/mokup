@@ -10,8 +10,8 @@ import type {
 } from './plugin/types'
 import { cwd } from 'node:process'
 import { createMiddleware, createPlaygroundMiddleware, resolvePlaygroundOptions, resolveSwConfig, resolveSwUnregisterConfig } from '@mokup/core'
+import { buildDiagnosticSummaryLines, createDiagnosticError, swConflictDiagnostic } from '@mokup/shared/diagnostics'
 import { resolvePlaygroundDist } from '../playground/assets'
-import { buildDiagnosticSummaryLines, createDiagnosticError } from '../shared/diagnostics'
 import { createLogger } from '../shared/logger'
 import { resolveDirs } from '../shared/utils'
 import { createBundleBuilder } from './plugin/bundles'
@@ -72,10 +72,8 @@ export function createMokupWebpackPlugin(
   const swDiagnosticLines = buildDiagnosticSummaryLines({
     sections: [
       {
-        category: 'sw-conflict',
-        label: 'service worker config conflicts',
+        ...swConflictDiagnostic,
         items: swConflictMessages,
-        advice: 'Align sw.path, sw.scope, sw.register, and sw.unregister across entries that use SW mode.',
       },
     ],
   })
@@ -85,10 +83,8 @@ export function createMokupWebpackPlugin(
   const swDiagnosticErrorParams: Parameters<typeof createDiagnosticError>[0] = {
     sections: [
       {
-        category: 'sw-conflict',
-        label: 'service worker config conflicts',
+        ...swConflictDiagnostic,
         items: swConflictMessages,
-        advice: 'Align sw.path, sw.scope, sw.register, and sw.unregister across entries that use SW mode.',
       },
     ],
   }

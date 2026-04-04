@@ -3,8 +3,8 @@ import type { PreviewServer, ViteDevServer } from 'vite'
 import type { DiagnosticErrorMode, RouteTable, VitePluginOptions } from '../../shared/types'
 import type { PluginState } from './state'
 import { createHonoApp, scanRoutes, sortRoutes } from '@mokup/core'
+import { buildDiagnosticSummaryLines, createDiagnosticError, routeDiagnosticCatalog } from '@mokup/shared/diagnostics'
 import { relative } from '@mokup/shared/pathe'
-import { buildDiagnosticSummaryLines, createDiagnosticError } from '../../shared/diagnostics'
 import { resolveDirs, toPosix } from '../../shared/utils'
 import { buildRouteSignature } from './routes'
 import { isViteDevServer } from './server'
@@ -113,30 +113,22 @@ function createRouteRefresher(params: {
     state.disabledConfigFiles = resolvedConfigs.filter(entry => !entry.enabled)
     const diagnosticSections = [
       {
-        category: 'invalid-route' as const,
-        label: 'invalid route files ignored',
+        ...routeDiagnosticCatalog.invalidRoute,
         items: collectedIgnored
           .filter(info => info.reason === 'invalid-route')
           .map(info => toPosix(relative(root(), info.file))),
-        advice: 'Add a method suffix like .get.ts and avoid unsupported route group segments.',
       },
       {
-        category: 'unsupported-fields' as const,
-        label: 'routes skipped for unsupported rule fields',
+        ...routeDiagnosticCatalog.unsupportedFields,
         items: Array.from(unsupportedRuleFiles),
-        advice: 'Use handler, headers, status, and delay in route rules; do not use legacy response, url, or method fields.',
       },
       {
-        category: 'missing-handler' as const,
-        label: 'routes skipped without handler',
+        ...routeDiagnosticCatalog.missingHandler,
         items: Array.from(missingHandlerFiles),
-        advice: 'Export a handler value or function for every enabled rule.',
       },
       {
-        category: 'duplicate-route' as const,
-        label: 'duplicate route definitions',
+        ...routeDiagnosticCatalog.duplicateRoute,
         items: Array.from(duplicateRoutes),
-        advice: 'Keep each method + route path unique across scanned files.',
       },
     ]
     const diagnosticLines = buildDiagnosticSummaryLines({

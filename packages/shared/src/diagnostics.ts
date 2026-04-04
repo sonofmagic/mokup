@@ -1,14 +1,41 @@
-import type { DiagnosticCategory, DiagnosticErrorMode } from './types'
-
-interface DiagnosticSummarySection {
-  category?: DiagnosticCategory
+export interface DiagnosticSummarySection<TCategory extends string = string> {
+  category?: TCategory
   label: string
   items?: string[]
   count?: number
   advice?: string
 }
 
-function normalizeSections(sections: DiagnosticSummarySection[]) {
+export const routeDiagnosticCatalog = {
+  invalidRoute: {
+    category: 'invalid-route',
+    label: 'invalid route files ignored',
+    advice: 'Add a method suffix like .get.ts and avoid unsupported route group segments.',
+  },
+  unsupportedFields: {
+    category: 'unsupported-fields',
+    label: 'routes skipped for unsupported rule fields',
+    advice: 'Use handler, headers, status, and delay in route rules; do not use legacy response, url, or method fields.',
+  },
+  missingHandler: {
+    category: 'missing-handler',
+    label: 'routes skipped without handler',
+    advice: 'Export a handler value or function for every enabled rule.',
+  },
+  duplicateRoute: {
+    category: 'duplicate-route',
+    label: 'duplicate route definitions',
+    advice: 'Keep each method + route path unique across scanned files.',
+  },
+} as const
+
+export const swConflictDiagnostic = {
+  category: 'sw-conflict',
+  label: 'service worker config conflicts',
+  advice: 'Align sw.path, sw.scope, sw.register, and sw.unregister across entries that use SW mode.',
+} as const
+
+function normalizeSections<TCategory extends string>(sections: DiagnosticSummarySection<TCategory>[]) {
   return sections.map((section) => {
     const items = Array.from(
       new Set((section.items ?? []).filter(item => typeof item === 'string' && item.length > 0)),
@@ -22,14 +49,13 @@ function normalizeSections(sections: DiagnosticSummarySection[]) {
   }).filter(section => section.count > 0)
 }
 
-export function buildDiagnosticSummaryLines(params: {
+export function buildDiagnosticSummaryLines<TCategory extends string>(params: {
   title?: string
-  sections: DiagnosticSummarySection[]
+  sections: DiagnosticSummarySection<TCategory>[]
   maxItems?: number
 }) {
   const title = params.title ?? 'Mokup diagnostics summary'
   const maxItems = params.maxItems ?? 3
-
   const sections = normalizeSections(params.sections)
 
   if (sections.length === 0) {
@@ -56,7 +82,10 @@ export function buildDiagnosticSummaryLines(params: {
   return lines
 }
 
-function matchesErrorMode(category: DiagnosticCategory | undefined, errorOn: DiagnosticErrorMode | undefined) {
+function matchesErrorMode<TCategory extends string>(
+  category: TCategory | undefined,
+  errorOn: 'all' | TCategory[] | undefined,
+) {
   if (!category || !errorOn) {
     return false
   }
@@ -66,9 +95,9 @@ function matchesErrorMode(category: DiagnosticCategory | undefined, errorOn: Dia
   return errorOn.includes(category)
 }
 
-export function createDiagnosticError(params: {
-  errorOn?: DiagnosticErrorMode
-  sections: DiagnosticSummarySection[]
+export function createDiagnosticError<TCategory extends string>(params: {
+  errorOn?: 'all' | TCategory[]
+  sections: DiagnosticSummarySection<TCategory>[]
   title?: string
   maxItems?: number
 }) {
@@ -77,7 +106,7 @@ export function createDiagnosticError(params: {
   if (failingSections.length === 0) {
     return null
   }
-  const buildParams: Parameters<typeof buildDiagnosticSummaryLines>[0] = {
+  const buildParams: Parameters<typeof buildDiagnosticSummaryLines<TCategory>>[0] = {
     title: params.title ?? 'Mokup diagnostics error',
     sections: failingSections,
   }

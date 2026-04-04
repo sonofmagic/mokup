@@ -4,11 +4,10 @@ import type { BuildOptions, RouteDirectoryConfig, RouteRule } from './types'
 import { promises as fs } from 'node:fs'
 import { cwd } from 'node:process'
 
+import { buildDiagnosticSummaryLines, createDiagnosticError, routeDiagnosticCatalog } from '@mokup/shared/diagnostics'
 import { join, relative, resolve } from '@mokup/shared/pathe'
-
 import { writeBundle, writeManifestModule } from './bundle'
 import { resolveDirectoryConfig } from './config'
-import { buildDiagnosticSummaryLines, createDiagnosticError } from './diagnostics'
 import {
   collectFiles,
   hasIgnoredPrefix,
@@ -218,28 +217,20 @@ export async function buildManifest(options: BuildOptions = {}) {
 
   const diagnosticSections = [
     {
-      category: 'invalid-route' as const,
-      label: 'invalid route files ignored',
+      ...routeDiagnosticCatalog.invalidRoute,
       items: Array.from(invalidRouteFiles),
-      advice: 'Add a method suffix like .get.ts and avoid unsupported route group segments.',
     },
     {
-      category: 'unsupported-fields' as const,
-      label: 'routes skipped for unsupported rule fields',
+      ...routeDiagnosticCatalog.unsupportedFields,
       items: Array.from(unsupportedRuleFiles),
-      advice: 'Use handler, headers, status, and delay in route rules; do not use legacy response, url, or method fields.',
     },
     {
-      category: 'missing-handler' as const,
-      label: 'routes skipped without handler',
+      ...routeDiagnosticCatalog.missingHandler,
       items: Array.from(missingHandlerFiles),
-      advice: 'Export a handler value or function for every enabled rule.',
     },
     {
-      category: 'duplicate-route' as const,
-      label: 'duplicate route definitions',
+      ...routeDiagnosticCatalog.duplicateRoute,
       items: Array.from(duplicateRoutes),
-      advice: 'Keep each method + route path unique across scanned files.',
     },
   ]
   const diagnosticLines = buildDiagnosticSummaryLines({
