@@ -19,7 +19,7 @@ Create a new package: `packages/shared` with name `@mokup/shared`.
 
 Expose common dependencies via subpath exports:
 
-- `@mokup/shared/esbuild`
+- `@mokup/shared/rolldown`
 - `@mokup/shared/chokidar`
 - `@mokup/shared/hono`
 - `@mokup/shared/pathe`
@@ -28,16 +28,16 @@ Expose common dependencies via subpath exports:
 Each entry re-exports the upstream module without wrapping:
 
 ```ts
-export * from 'esbuild'
+export * from 'rolldown'
 ```
 
 Add default export re-exports if any consumer relies on defaults (verify per dependency).
 
 ## Migration Plan
 
-1. Add `packages/shared` with `package.json`, `build.config.ts`, `tsconfig.json` and entry files for each shared dependency.
+1. Add `packages/shared` with `package.json`, `tsdown.config.ts`, `tsconfig.json` and entry files for each shared dependency.
 2. Replace imports in `packages/mokup`, `packages/server`, and `packages/cli`:
-   - `import { build } from 'esbuild'` -> `import { build } from '@mokup/shared/esbuild'`
+   - `import { build } from 'rolldown'` -> `import { build } from '@mokup/shared/rolldown'`
    - `import { Hono } from 'hono'` -> `import { Hono } from '@mokup/shared/hono'`
    - `import { resolve } from 'pathe'` -> `import { resolve } from '@mokup/shared/pathe'`
    - `import { parse } from 'jsonc-parser'` -> `import { parse } from '@mokup/shared/jsonc-parser'`

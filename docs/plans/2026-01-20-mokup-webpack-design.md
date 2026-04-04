@@ -18,7 +18,7 @@
 - Generate two ESM assets:
   - `mokup-sw.js` (service worker) from `buildSwScript`.
   - `mokup-sw-lifecycle.js` (register/unregister) from the SW lifecycle script.
-- Bundle each asset with `esbuild` (platform: `browser`, format: `esm`).
+- Bundle each asset with the shared `rolldown` pipeline (platform: `browser`, format: `esm`).
 - Emit assets via `compilation.emitAsset`.
 
 ## HTML Injection

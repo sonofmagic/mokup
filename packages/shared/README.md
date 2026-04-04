@@ -6,7 +6,7 @@ Shared utilities and public helper exports used across Mokup packages.
 
 - Shared diagnostics helpers for route-scan and service worker conflict reporting.
 - Shared filesystem, path, config, and module-loader helpers.
-- The shared `rolldown` wrapper that replaced the old `@mokup/shared/esbuild` entry.
+- The shared `rolldown` wrapper used by Mokup build tooling.
 
 ## Diagnostics helpers
 
