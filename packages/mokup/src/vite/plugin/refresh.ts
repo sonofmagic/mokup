@@ -3,15 +3,11 @@ import type { PreviewServer, ViteDevServer } from 'vite'
 import type { DiagnosticErrorMode, RouteTable, VitePluginOptions } from '../../shared/types'
 import type { PluginState } from './state'
 import { createHonoApp, scanRoutes, sortRoutes } from '@mokup/core'
-import { createRouteDiagnosticSections, reportDiagnostics } from '@mokup/shared/diagnostics'
+import { collectRouteDiagnosticWarning, createRouteDiagnosticSections, reportDiagnostics } from '@mokup/shared/diagnostics'
 import { relative } from '@mokup/shared/pathe'
 import { resolveDirs, toPosix } from '../../shared/utils'
 import { buildRouteSignature } from './routes'
 import { isViteDevServer } from './server'
-
-const unsupportedFieldsWarningRE = /^Skip mock with unsupported fields .*: (.+)$/
-const missingHandlerWarningRE = /^Skip mock without handler: (.+)$/
-const duplicateRouteWarningRE = /^Duplicate mock route (.+) from .+$/
 
 function createRouteRefresher(params: {
   state: PluginState
@@ -45,19 +41,12 @@ function createRouteRefresher(params: {
       ...logger,
       warn: (...args: unknown[]) => {
         if (args.length > 0) {
-          const message = args.map(String).join(' ')
-          const unsupportedMatch = message.match(unsupportedFieldsWarningRE)
-          if (unsupportedMatch?.[1]) {
-            unsupportedRuleFiles.add(toPosix(relative(root(), unsupportedMatch[1])))
-          }
-          const missingHandlerMatch = message.match(missingHandlerWarningRE)
-          if (missingHandlerMatch?.[1]) {
-            missingHandlerFiles.add(toPosix(relative(root(), missingHandlerMatch[1])))
-          }
-          const duplicateRouteMatch = message.match(duplicateRouteWarningRE)
-          if (duplicateRouteMatch?.[1]) {
-            duplicateRoutes.add(duplicateRouteMatch[1])
-          }
+          collectRouteDiagnosticWarning({
+            message: args.map(String).join(' '),
+            onUnsupportedFields: value => unsupportedRuleFiles.add(toPosix(relative(root(), value))),
+            onMissingHandler: value => missingHandlerFiles.add(toPosix(relative(root(), value))),
+            onDuplicateRoute: value => duplicateRoutes.add(value),
+          })
         }
         logger.warn(...args)
       },

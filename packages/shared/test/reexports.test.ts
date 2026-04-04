@@ -1,5 +1,5 @@
-import { describe, expect, it } from 'vitest'
-import { createRouteDiagnosticSections } from '../src/diagnostics'
+import { describe, expect, it, vi } from 'vitest'
+import { collectRouteDiagnosticWarning, createRouteDiagnosticSections } from '../src/diagnostics'
 import { parse } from '../src/jsonc-parser'
 import { join } from '../src/pathe'
 
@@ -35,5 +35,34 @@ describe('shared re-exports', () => {
         items: ['GET /api/users'],
       }),
     ])
+  })
+
+  it('collects route diagnostics from warning text', () => {
+    const unsupportedFields = vi.fn()
+    const missingHandler = vi.fn()
+    const duplicateRoute = vi.fn()
+
+    collectRouteDiagnosticWarning({
+      message: 'Skip mock with unsupported fields (response): /root/mock/a.get.ts',
+      onUnsupportedFields: unsupportedFields,
+      onMissingHandler: missingHandler,
+      onDuplicateRoute: duplicateRoute,
+    })
+    collectRouteDiagnosticWarning({
+      message: 'Skip mock without handler: /root/mock/b.get.ts',
+      onUnsupportedFields: unsupportedFields,
+      onMissingHandler: missingHandler,
+      onDuplicateRoute: duplicateRoute,
+    })
+    collectRouteDiagnosticWarning({
+      message: 'Duplicate mock route GET /api/ping from /root/mock/c.get.ts',
+      onUnsupportedFields: unsupportedFields,
+      onMissingHandler: missingHandler,
+      onDuplicateRoute: duplicateRoute,
+    })
+
+    expect(unsupportedFields).toHaveBeenCalledWith('/root/mock/a.get.ts')
+    expect(missingHandler).toHaveBeenCalledWith('/root/mock/b.get.ts')
+    expect(duplicateRoute).toHaveBeenCalledWith('GET /api/ping')
   })
 })

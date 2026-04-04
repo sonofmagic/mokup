@@ -132,6 +132,7 @@ export {
 } from './diagnostic-types'
 export {
   buildDiagnosticSummaryLines,
+  collectRouteDiagnosticWarning,
   createDiagnosticError,
   createRouteDiagnosticSections,
   type DiagnosticSummarySection,

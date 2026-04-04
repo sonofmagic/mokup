@@ -35,6 +35,30 @@ export const swConflictDiagnostic = {
   advice: 'Align sw.path, sw.scope, sw.register, and sw.unregister across entries that use SW mode.',
 } as const
 
+const unsupportedFieldsWarningRE = /^Skip mock with unsupported fields .*: (.+)$/
+const missingHandlerWarningRE = /^Skip mock without handler: (.+)$/
+const duplicateRouteWarningRE = /^Duplicate mock route (.+) from .+$/
+
+export function collectRouteDiagnosticWarning(params: {
+  message: string
+  onUnsupportedFields?: (value: string) => void
+  onMissingHandler?: (value: string) => void
+  onDuplicateRoute?: (value: string) => void
+}) {
+  const unsupportedMatch = params.message.match(unsupportedFieldsWarningRE)
+  if (unsupportedMatch?.[1]) {
+    params.onUnsupportedFields?.(unsupportedMatch[1])
+  }
+  const missingHandlerMatch = params.message.match(missingHandlerWarningRE)
+  if (missingHandlerMatch?.[1]) {
+    params.onMissingHandler?.(missingHandlerMatch[1])
+  }
+  const duplicateRouteMatch = params.message.match(duplicateRouteWarningRE)
+  if (duplicateRouteMatch?.[1]) {
+    params.onDuplicateRoute?.(duplicateRouteMatch[1])
+  }
+}
+
 export function createRouteDiagnosticSections(params: {
   invalidRoutes?: string[]
   unsupportedFields?: string[]

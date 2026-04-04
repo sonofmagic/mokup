@@ -4,7 +4,7 @@ import type { RouteTable } from './dev/types'
 import type {
   FetchServerOptionsInput,
 } from './fetch-options'
-import { createRouteDiagnosticSections, reportDiagnostics } from '@mokup/shared/diagnostics'
+import { collectRouteDiagnosticWarning, createRouteDiagnosticSections, reportDiagnostics } from '@mokup/shared/diagnostics'
 import { relative } from '@mokup/shared/pathe'
 import { createLogger } from './dev/logger'
 import { resolvePlaygroundOptions } from './dev/playground'
@@ -16,9 +16,6 @@ import { normalizeOptions, resolveAllDirs, resolveRoot } from './fetch-server/op
 import { createPlaygroundWs } from './fetch-server/playground-ws'
 import { createWatcher } from './fetch-server/watcher'
 
-const unsupportedFieldsWarningRE = /^Skip mock with unsupported fields .*: (.+)$/
-const missingHandlerWarningRE = /^Skip mock without handler: (.+)$/
-const duplicateRouteWarningRE = /^Duplicate mock route (.+) from .+$/
 const diagnosticErrorTitle = 'Mokup diagnostics error:'
 
 export type {
@@ -118,19 +115,12 @@ export async function createFetchServer(
           ...logger,
           warn: (...args: unknown[]) => {
             if (args.length > 0) {
-              const message = args.map(String).join(' ')
-              const unsupportedMatch = message.match(unsupportedFieldsWarningRE)
-              if (unsupportedMatch?.[1]) {
-                unsupportedRuleFiles.add(unsupportedMatch[1])
-              }
-              const missingHandlerMatch = message.match(missingHandlerWarningRE)
-              if (missingHandlerMatch?.[1]) {
-                missingHandlerFiles.add(missingHandlerMatch[1])
-              }
-              const duplicateRouteMatch = message.match(duplicateRouteWarningRE)
-              if (duplicateRouteMatch?.[1]) {
-                duplicateRoutes.add(duplicateRouteMatch[1])
-              }
+              collectRouteDiagnosticWarning({
+                message: args.map(String).join(' '),
+                onUnsupportedFields: value => unsupportedRuleFiles.add(value),
+                onMissingHandler: value => missingHandlerFiles.add(value),
+                onDuplicateRoute: value => duplicateRoutes.add(value),
+              })
             }
             logger.warn(...args)
           },
