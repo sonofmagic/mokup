@@ -26,6 +26,7 @@ const skipDirs = new Set([
   'dist',
   'node_modules',
   'playwright-report',
+  'test',
   'test-results',
 ])
 const skipFiles = new Set([
@@ -66,6 +67,16 @@ const forbiddenContentRules = [
     message: 'Legacy tsup/unbuild build-chain references are forbidden outside migration docs.',
   },
 ]
+
+function getContentViolations(relativeFile, content) {
+  const violations = []
+  for (const rule of forbiddenContentRules) {
+    if (rule.test(content)) {
+      violations.push(`${relativeFile}: ${rule.message}`)
+    }
+  }
+  return violations
+}
 
 function toRelative(file) {
   return path.relative(rootDir, file)
@@ -204,8 +215,34 @@ function checkPackageMeta(relativeFile, pkg, violations) {
   }
 }
 
-async function main() {
+function evaluateMigrationGuards(input) {
   const violations = []
+
+  for (const entry of input.scanEntries) {
+    violations.push(...getContentViolations(entry.file, entry.content))
+  }
+
+  for (const entry of input.packageEntries) {
+    if (!isPublishablePackageJson(entry.file, entry.pkg)) {
+      continue
+    }
+    checkPackageMeta(entry.file, entry.pkg, violations)
+    checkPackageScripts(entry.file, entry.pkg, violations)
+    checkPackageDeps(entry.file, entry.pkg, violations)
+    checkPackageExports(entry.file, entry.pkg, violations)
+  }
+
+  if (input.rootPackage.engines?.node !== expectedNodeRange) {
+    violations.push(`package.json: root engines.node must be "${expectedNodeRange}"`)
+  }
+  if (input.rootPackage.pnpm?.overrides?.rolldown !== expectedRolldownVersion) {
+    violations.push(`package.json: root pnpm.overrides.rolldown must stay pinned to "${expectedRolldownVersion}"`)
+  }
+
+  return violations.sort((a, b) => a.localeCompare(b))
+}
+
+async function main() {
   const packageJsonFiles = []
   const scanFiles = []
 
@@ -236,39 +273,31 @@ async function main() {
     }
   }
 
-  for (const file of scanFiles) {
-    const content = await fs.readFile(file, 'utf8')
-    const relativeFile = toRelative(file)
-    for (const rule of forbiddenContentRules) {
-      if (rule.test(content)) {
-        violations.push(`${relativeFile}: ${rule.message}`)
-      }
-    }
-  }
-
-  for (const file of packageJsonFiles) {
-    const pkg = await readJson(file)
-    const relativeFile = toRelative(file)
-    if (!isPublishablePackageJson(relativeFile, pkg)) {
-      continue
-    }
-    checkPackageMeta(relativeFile, pkg, violations)
-    checkPackageScripts(relativeFile, pkg, violations)
-    checkPackageDeps(relativeFile, pkg, violations)
-    checkPackageExports(relativeFile, pkg, violations)
-  }
-
   const rootPackage = await readJson(path.join(rootDir, 'package.json'))
-  if (rootPackage.engines?.node !== expectedNodeRange) {
-    violations.push(`package.json: root engines.node must be "${expectedNodeRange}"`)
-  }
-  if (rootPackage.pnpm?.overrides?.rolldown !== expectedRolldownVersion) {
-    violations.push(`package.json: root pnpm.overrides.rolldown must stay pinned to "${expectedRolldownVersion}"`)
-  }
+  const scanEntries = await Promise.all(
+    scanFiles.map(async (file) => {
+      return {
+        file: toRelative(file),
+        content: await fs.readFile(file, 'utf8'),
+      }
+    }),
+  )
+  const packageEntries = await Promise.all(
+    packageJsonFiles.map(async (file) => {
+      return {
+        file: toRelative(file),
+        pkg: await readJson(file),
+      }
+    }),
+  )
+  const violations = evaluateMigrationGuards({
+    packageEntries,
+    rootPackage,
+    scanEntries,
+  })
 
   if (violations.length > 0) {
     const formatted = violations
-      .sort((a, b) => a.localeCompare(b))
       .map(entry => `- ${entry}`)
       .join('\n')
     process.stderr.write(`migration guards failed:\n${formatted}\n`)
@@ -282,3 +311,7 @@ main().catch((error) => {
   process.stderr.write(`migration guards failed: ${error instanceof Error ? error.stack ?? error.message : String(error)}\n`)
   process.exit(1)
 })
+
+export {
+  evaluateMigrationGuards,
+}

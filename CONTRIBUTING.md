@@ -1,3 +1,33 @@
 # Contributing
 
-TODO
+## Baseline
+
+- Use Node.js `^20.19.0 || >=22.12.0`
+- Use `pnpm`
+- Keep published packages ESM-only
+- Keep published library packages on `tsdown` + `rolldown`
+
+## Before Opening A PR
+
+- Run `pnpm run guard:migration`
+- Run `pnpm lint`
+- Run `pnpm test`
+- Run `pnpm test:e2e:serial` for changes that may affect demos, dev server flow, or HMR
+
+## Migration Guards
+
+The repository enforces the post-migration constraints in `scripts/check-migration-guards.mjs`.
+
+The guard blocks:
+
+- Reintroducing `@mokup/shared/esbuild`
+- Direct `esbuild` imports in repository code or config
+- Reintroducing `tsup`, `unbuild`, or `build.config.*` in active code/config
+- Published library packages drifting away from:
+  - `type: "module"`
+  - `engines.node: "^20.19.0 || >=22.12.0"`
+  - `build: "tsdown"`
+  - `dev: "tsdown --watch"`
+  - ESM-only `exports`
+
+If you intentionally change these rules, update the guard script, its tests, and the migration docs in the same PR.
