@@ -98,7 +98,10 @@ describe('migration guards', () => {
         },
         {
           file: 'packages/example/tsup.config.ts',
-          content: 'export default {}',
+          content: `export default {
+  tool: 'tsup',
+}
+`,
         },
         {
           file: 'apps/mokup-docs/docs/reference/webpack-plugin.md',
