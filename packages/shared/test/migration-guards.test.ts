@@ -43,6 +43,10 @@ describe('migration guards', () => {
           file: 'packages/example/src/index.ts',
           content: `import { build } from '@mokup/shared/rolldown'\nexport { build }\n`,
         },
+        {
+          file: 'apps/mokup-docs/docs/reference/webpack-plugin.md',
+          content: `import { mokupWebpack } from 'mokup/webpack'\nexport default mokupWebpack({})\n`,
+        },
       ],
     })
 
@@ -96,6 +100,10 @@ describe('migration guards', () => {
           file: 'packages/example/tsup.config.ts',
           content: 'export default {}',
         },
+        {
+          file: 'apps/mokup-docs/docs/reference/webpack-plugin.md',
+          content: `const { mokupWebpack } = require('mokup/webpack')\nmodule.exports = mokupWebpack({})\n`,
+        },
       ],
     })
 
@@ -110,6 +118,8 @@ describe('migration guards', () => {
         expect.stringContaining('must not depend on esbuild'),
         expect.stringContaining('must not expose a require export condition'),
         expect.stringContaining('must stay ESM-only'),
+        expect.stringContaining('public docs must use ESM import examples'),
+        expect.stringContaining('public docs must use ESM config examples'),
         expect.stringContaining('root engines.node'),
         expect.stringContaining('pnpm.overrides.rolldown'),
       ]),

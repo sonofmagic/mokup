@@ -14,6 +14,7 @@ const allowedScanExtensions = new Set([
   '.mts',
   '.cjs',
   '.cts',
+  '.md',
   '.json',
   '.yaml',
   '.yml',
@@ -26,6 +27,7 @@ const skipDirs = new Set([
   'dist',
   'node_modules',
   'playwright-report',
+  'plans',
   'test',
   'test-results',
 ])
@@ -34,20 +36,37 @@ const skipFiles = new Set([
   'pnpm-lock.yaml',
   'yarn.lock',
 ])
-const scanRoots = ['apps', 'packages', 'scripts', '.github', '.changeset']
+const scanRoots = ['apps', 'packages', 'scripts', '.github', 'docs']
 const skippedScanFiles = new Set([
   'scripts/check-migration-guards.mjs',
 ])
+const allowedLegacyDocFiles = new Set([
+  'apps/mokup-docs/docs/getting-started/upgrade-to-v1.md',
+  'apps/mokup-docs/docs/zh/getting-started/upgrade-to-v1.md',
+  'docs/guide/migration-v1.md',
+])
+const SHARED_ESBUILD_IMPORT_RE = /@mokup\/shared\/esbuild/
+const SHARED_ESBUILD_FROM_RE = /from\s+['"]@mokup\/shared\/esbuild['"]/
+const SHARED_ESBUILD_DYNAMIC_IMPORT_RE = /import\s*\(\s*['"]@mokup\/shared\/esbuild['"]\s*\)/
+const SHARED_ESBUILD_REQUIRE_RE = /require\s*\(\s*['"]@mokup\/shared\/esbuild['"]\s*\)/
 const DIRECT_ESBUILD_IMPORT_RE = /from\s+['"]esbuild['"]/
 const DIRECT_ESBUILD_DYNAMIC_IMPORT_RE = /import\s*\(\s*['"]esbuild['"]\s*\)/
 const DIRECT_ESBUILD_REQUIRE_RE = /require\s*\(\s*['"]esbuild['"]\s*\)/
 const LEGACY_TSUP_RE = /\btsup\b/
 const LEGACY_UNBUILD_RE = /\bunbuild\b/
 const LEGACY_BUILD_CONFIG_RE = /\bbuild\.config\.(?:ts|js|mjs|mts|cjs|cts)\b/
+const DOC_REQUIRE_MOKUP_RE = /require\s*\(\s*['"]mokup(?:\/[^'"]+)?['"]\s*\)/
+const DOC_MODULE_EXPORTS_RE = /\bmodule\.exports\b/
 const forbiddenContentRules = [
   {
     id: 'shared-esbuild-entry',
-    test: content => content.includes('@mokup/shared/esbuild'),
+    test: content =>
+      SHARED_ESBUILD_IMPORT_RE.test(content)
+      && (
+        SHARED_ESBUILD_FROM_RE.test(content)
+        || SHARED_ESBUILD_DYNAMIC_IMPORT_RE.test(content)
+        || SHARED_ESBUILD_REQUIRE_RE.test(content)
+      ),
     message: 'Use @mokup/shared/rolldown instead of the removed @mokup/shared/esbuild entry.',
   },
   {
@@ -70,9 +89,30 @@ const forbiddenContentRules = [
 
 function getContentViolations(relativeFile, content) {
   const violations = []
-  for (const rule of forbiddenContentRules) {
-    if (rule.test(content)) {
-      violations.push(`${relativeFile}: ${rule.message}`)
+  const isAllowedLegacyDoc = allowedLegacyDocFiles.has(relativeFile)
+  const isPublicDoc = relativeFile.endsWith('.md')
+    && (
+      relativeFile.startsWith('apps/mokup-docs/docs/')
+      || relativeFile.startsWith('docs/guide/')
+    )
+    && !relativeFile.includes('/blog/')
+    && !relativeFile.endsWith('.draft.md')
+    && !relativeFile.startsWith('.changeset/')
+
+  if (!isAllowedLegacyDoc) {
+    for (const rule of forbiddenContentRules) {
+      if (rule.test(content)) {
+        violations.push(`${relativeFile}: ${rule.message}`)
+      }
+    }
+  }
+
+  if (isPublicDoc && !isAllowedLegacyDoc) {
+    if (DOC_REQUIRE_MOKUP_RE.test(content)) {
+      violations.push(`${relativeFile}: public docs must use ESM import examples for published mokup packages`)
+    }
+    if (DOC_MODULE_EXPORTS_RE.test(content)) {
+      violations.push(`${relativeFile}: public docs must use ESM config examples instead of module.exports`)
     }
   }
   return violations
