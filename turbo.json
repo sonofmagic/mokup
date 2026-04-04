@@ -14,7 +14,8 @@
       ],
       "outputs": [
         "dist/**",
-        "bin/**"
+        "bin/**",
+        "docs/.vitepress/dist/**"
       ]
     },
     "lint": {
@@ -57,9 +58,7 @@
         "vitest.config.{js,ts}",
         "tsconfig*.json"
       ],
-      "outputs": [
-        "coverage/**"
-      ]
+      "outputs": []
     },
     "test:e2e": {
       "cache": false,
