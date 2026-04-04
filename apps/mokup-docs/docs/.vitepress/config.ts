@@ -46,6 +46,7 @@ const vitePlugins = [
     generateLLMsTxt: true,
     generateLLMsFullTxt: true,
     generateLLMFriendlyDocsForEachPage: true,
+    excludeBlog: false,
     customTemplateVariables: {
       title: `${siteTitle} Documentation`,
       description: siteDescription,
@@ -107,6 +108,9 @@ export default defineConfig({
     ['meta', { name: 'twitter:image', content: ogImage }],
   ],
   vite: {
+    build: {
+      chunkSizeWarningLimit: 800,
+    },
     plugins: vitePlugins,
   },
   sitemap: {

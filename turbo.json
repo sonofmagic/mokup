@@ -8,6 +8,9 @@
       "inputs": [
         "src/**",
         "lib/**",
+        "../mokup/src/**",
+        "../runtime/src/**",
+        "../../apps/mokup-docs/mock/**",
         "package.json",
         "tsconfig*.json",
         "*.config.{js,ts,mjs,mts}"
