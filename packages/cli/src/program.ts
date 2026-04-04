@@ -1,11 +1,18 @@
 import type { FetchServerOptions, FetchServerOptionsConfig } from '@mokup/server/node'
 import type { BuildOptions, DiagnosticCategory } from './manifest/types'
 import process from 'node:process'
+import { routeDiagnosticCatalog, swConflictDiagnostic } from '@mokup/shared/diagnostics'
 import { createLogger } from '@mokup/shared/logger'
-import { Command } from 'commander'
+import { Command, InvalidArgumentError } from 'commander'
 import { buildManifest } from './manifest'
 
 const logger = createLogger()
+const diagnosticCategories = [
+  ...Object.values(routeDiagnosticCatalog).map(item => item.category),
+  swConflictDiagnostic.category,
+] as const satisfies readonly DiagnosticCategory[]
+const diagnosticCategorySet = new Set<string>(diagnosticCategories)
+const diagnosticCategoryHelp = [...diagnosticCategories, 'all'].join(', ')
 
 function collectValues(value: string, previous: string[] | undefined) {
   return [...(previous ?? []), value]
@@ -18,6 +25,11 @@ function collectRegex(value: string, previous: RegExp[] | undefined) {
 }
 
 function collectDiagnosticCategory(value: string, previous: string[] | undefined) {
+  if (value !== 'all' && !diagnosticCategorySet.has(value)) {
+    throw new InvalidArgumentError(
+      `Invalid diagnostic category "${value}". Expected one of: ${diagnosticCategoryHelp}`,
+    )
+  }
   return [...(previous ?? []), value]
 }
 
@@ -152,7 +164,7 @@ export function createCli() {
     .option('--ignore-prefix <prefix>', 'Ignore path segment prefix (repeatable)', collectValues)
     .option(
       '--error-on <category>',
-      'Fail build on selected diagnostics (repeatable: invalid-route, unsupported-fields, missing-handler, duplicate-route, sw-conflict, all)',
+      `Fail build on selected diagnostics (repeatable: ${diagnosticCategoryHelp})`,
       collectDiagnosticCategory,
     )
     .option('--no-handlers', 'Skip function handler output')
@@ -171,7 +183,7 @@ export function createCli() {
     .option('--ignore-prefix <prefix>', 'Ignore path segment prefix (repeatable)', collectValues)
     .option(
       '--error-on <category>',
-      'Fail serve startup on selected diagnostics (repeatable: invalid-route, unsupported-fields, missing-handler, duplicate-route, sw-conflict, all)',
+      `Fail serve startup on selected diagnostics (repeatable: ${diagnosticCategoryHelp})`,
       collectDiagnosticCategory,
     )
     .option('--host <host>', 'Hostname (default: localhost)')

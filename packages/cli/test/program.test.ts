@@ -123,6 +123,14 @@ describe('cli program', () => {
     expect(options.errorOn).toBe('all')
   })
 
+  it('rejects invalid build errorOn category', async () => {
+    await expect(
+      runCli(['node', 'mokup', 'build', '--error-on', 'not-a-category']),
+    ).rejects.toThrow(
+      'Invalid diagnostic category "not-a-category". Expected one of: invalid-route, unsupported-fields, missing-handler, duplicate-route, sw-conflict, all',
+    )
+  })
+
   it('runs serve and registers shutdown handlers', async () => {
     const nodeServer = { close: vi.fn((cb?: (error?: Error) => void) => cb?.()) }
     const mockServer = {
@@ -270,6 +278,14 @@ describe('cli program', () => {
           errorOn: 'all',
         }),
       }),
+    )
+  })
+
+  it('rejects invalid serve errorOn category', async () => {
+    await expect(
+      runCli(['node', 'mokup', 'serve', '--error-on', 'not-a-category']),
+    ).rejects.toThrow(
+      'Invalid diagnostic category "not-a-category". Expected one of: invalid-route, unsupported-fields, missing-handler, duplicate-route, sw-conflict, all',
     )
   })
 
