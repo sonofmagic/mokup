@@ -1,5 +1,12 @@
 # mokup-vite-server-demo
 
+## 0.0.10
+
+### Patch Changes
+
+- 📦 **Dependencies** [`ef1e626`](https://github.com/sonofmagic/mokup/commit/ef1e6262b45211d5fb0325a677058b87c401c44e)
+  → `mokup@3.0.0`, `@mokup/client@1.0.0`
+
 ## 0.0.9
 
 ### Patch Changes
