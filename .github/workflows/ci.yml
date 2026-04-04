@@ -59,6 +59,9 @@ jobs:
       - name: Test
         run: pnpm test
 
+      - name: Type Tests
+        run: pnpm run test:types
+
       - name: Pack Artifacts
         run: pnpm run release:pack-check
 
