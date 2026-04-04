@@ -6,6 +6,10 @@ import { relative } from '@mokup/shared/pathe'
 import { buildDiagnosticSummaryLines } from '../../shared/diagnostics'
 import { resolveDirs, toPosix } from '../../shared/utils'
 
+const unsupportedFieldsWarningRE = /^Skip mock with unsupported fields .*: (.+)$/
+const missingHandlerWarningRE = /^Skip mock without handler: (.+)$/
+const duplicateRouteWarningRE = /^Duplicate mock route (.+) from .+$/
+
 function createRouteRefresher(params: {
   state: PluginState
   optionList: VitePluginOptions[]
@@ -15,6 +19,30 @@ function createRouteRefresher(params: {
   const { state, optionList, root, logger } = params
 
   return async () => {
+    const unsupportedRuleFiles = new Set<string>()
+    const missingHandlerFiles = new Set<string>()
+    const duplicateRoutes = new Set<string>()
+    const diagnosticLogger = {
+      ...logger,
+      warn: (...args: unknown[]) => {
+        if (args.length > 0) {
+          const message = args.map(String).join(' ')
+          const unsupportedMatch = message.match(unsupportedFieldsWarningRE)
+          if (unsupportedMatch?.[1]) {
+            unsupportedRuleFiles.add(toPosix(relative(root(), unsupportedMatch[1])))
+          }
+          const missingHandlerMatch = message.match(missingHandlerWarningRE)
+          if (missingHandlerMatch?.[1]) {
+            missingHandlerFiles.add(toPosix(relative(root(), missingHandlerMatch[1])))
+          }
+          const duplicateRouteMatch = message.match(duplicateRouteWarningRE)
+          if (duplicateRouteMatch?.[1]) {
+            duplicateRoutes.add(duplicateRouteMatch[1])
+          }
+        }
+        logger.warn(...args)
+      },
+    }
     const collected: RouteTable = []
     const collectedServer: RouteTable = []
     const collectedSw: RouteTable = []
@@ -25,7 +53,7 @@ function createRouteRefresher(params: {
       const scanParams: Parameters<typeof scanRoutes>[0] = {
         dirs: resolveDirs(entry.dir, root()),
         prefix: entry.prefix ?? '',
-        logger,
+        logger: diagnosticLogger,
         onSkip: info => collectedDisabled.push(info),
         onIgnore: info => collectedIgnored.push(info),
         onConfig: info => collectedConfigs.push(info),
@@ -68,6 +96,21 @@ function createRouteRefresher(params: {
             .filter(info => info.reason === 'invalid-route')
             .map(info => toPosix(relative(root(), info.file))),
           advice: 'Add a method suffix like .get.ts and avoid unsupported route group segments.',
+        },
+        {
+          label: 'routes skipped for unsupported rule fields',
+          items: Array.from(unsupportedRuleFiles),
+          advice: 'Use handler, headers, status, and delay in route rules; do not use legacy response, url, or method fields.',
+        },
+        {
+          label: 'routes skipped without handler',
+          items: Array.from(missingHandlerFiles),
+          advice: 'Export a handler value or function for every enabled rule.',
+        },
+        {
+          label: 'duplicate route definitions',
+          items: Array.from(duplicateRoutes),
+          advice: 'Keep each method + route path unique across scanned files.',
         },
       ],
     })

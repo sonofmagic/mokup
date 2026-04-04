@@ -72,7 +72,11 @@ describe('buildManifest extra branches', () => {
       expect(first?.headers).toEqual({ 'x-config': '1', 'x-rule': 'yes' })
 
       expect(logs.some(message => message.includes('unsupported fields'))).toBe(true)
+      expect(logs.some(message => message.includes('without handler'))).toBe(true)
       expect(logs.some(message => message.includes('Duplicate mock route'))).toBe(true)
+      expect(logs.some(message => message.includes('routes skipped for unsupported rule fields'))).toBe(true)
+      expect(logs.some(message => message.includes('routes skipped without handler'))).toBe(true)
+      expect(logs.some(message => message.includes('duplicate route definitions'))).toBe(true)
     }
     finally {
       await cleanupTempRoot(root)

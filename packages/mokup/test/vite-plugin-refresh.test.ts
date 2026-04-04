@@ -21,6 +21,9 @@ describe('vite plugin route refresh', () => {
     let callIndex = 0
     const logger = { info: vi.fn(), warn: vi.fn(), error: vi.fn() }
     mocks.scanRoutes.mockImplementation(async (params: any) => {
+      params.logger.warn(`Skip mock with unsupported fields (response): /root/mock/unsupported-${callIndex}.get.ts`)
+      params.logger.warn(`Skip mock without handler: /root/mock/missing-${callIndex}.get.ts`)
+      params.logger.warn(`Duplicate mock route GET /api/dup-${callIndex} from /root/mock/dup-${callIndex}.get.ts`)
       params.onSkip?.({ reason: 'disabled', file: '/root/mock/skip.get.ts' })
       params.onIgnore?.({ reason: 'invalid-route', file: '/root/mock/(group)/users.get.json' })
       params.onConfig?.({ file: '/root/mock/index.config.ts', enabled: callIndex === 0 })
@@ -88,6 +91,15 @@ describe('vite plugin route refresh', () => {
     expect(server.ws.send).toHaveBeenCalled()
     expect(logger.warn).toHaveBeenCalledWith(
       expect.stringContaining('Mokup diagnostics summary: 1 invalid route files ignored'),
+    )
+    expect(logger.warn).toHaveBeenCalledWith(
+      expect.stringContaining('routes skipped for unsupported rule fields'),
+    )
+    expect(logger.warn).toHaveBeenCalledWith(
+      expect.stringContaining('routes skipped without handler'),
+    )
+    expect(logger.warn).toHaveBeenCalledWith(
+      expect.stringContaining('duplicate route definitions'),
     )
 
     const firstCall = mocks.scanRoutes.mock.calls[0]?.[0]

@@ -48,6 +48,9 @@ export async function buildManifest(options: BuildOptions = {}) {
   const configFileCache = new Map<string, string | null>()
   const globalIgnorePrefix = normalizeIgnorePrefix(options.ignorePrefix)
   const invalidRouteFiles = new Set<string>()
+  const unsupportedRuleFiles = new Set<string>()
+  const missingHandlerFiles = new Set<string>()
+  const duplicateRoutes = new Set<string>()
 
   for (const fileInfo of files) {
     const configParams: Parameters<typeof resolveDirectoryConfig>[0] = {
@@ -99,12 +102,15 @@ export async function buildManifest(options: BuildOptions = {}) {
         key => key in ruleValue,
       )
       if (unsupportedKeys.length > 0) {
+        unsupportedRuleFiles.add(toPosix(relative(root, fileInfo.file)))
         options.log?.(
           `Skip mock with unsupported fields (${unsupportedKeys.join(', ')}): ${fileInfo.file}`,
         )
         continue
       }
       if (typeof rule.handler === 'undefined') {
+        missingHandlerFiles.add(toPosix(relative(root, fileInfo.file)))
+        options.log?.(`Skip mock without handler: ${fileInfo.file}`)
         continue
       }
       const resolveParams: {
@@ -130,6 +136,7 @@ export async function buildManifest(options: BuildOptions = {}) {
       }
       const key = `${resolved.method} ${resolved.template}`
       if (seen.has(key)) {
+        duplicateRoutes.add(key)
         options.log?.(`Duplicate mock route ${key} from ${fileInfo.file}`)
       }
       seen.add(key)
@@ -215,6 +222,21 @@ export async function buildManifest(options: BuildOptions = {}) {
         label: 'invalid route files ignored',
         items: Array.from(invalidRouteFiles),
         advice: 'Add a method suffix like .get.ts and avoid unsupported route group segments.',
+      },
+      {
+        label: 'routes skipped for unsupported rule fields',
+        items: Array.from(unsupportedRuleFiles),
+        advice: 'Use handler, headers, status, and delay in route rules; do not use legacy response, url, or method fields.',
+      },
+      {
+        label: 'routes skipped without handler',
+        items: Array.from(missingHandlerFiles),
+        advice: 'Export a handler value or function for every enabled rule.',
+      },
+      {
+        label: 'duplicate route definitions',
+        items: Array.from(duplicateRoutes),
+        advice: 'Keep each method + route path unique across scanned files.',
       },
     ],
   })
