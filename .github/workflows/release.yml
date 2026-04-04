@@ -33,7 +33,10 @@ jobs:
           cache: pnpm
 
       - name: Install Dependencies
-        run: pnpm i
+        run: pnpm install --frozen-lockfile
+
+      - name: Install Playwright browsers
+        run: pnpm exec playwright install --with-deps
 
       - name: Release Preflight
         run: pnpm run release:check
