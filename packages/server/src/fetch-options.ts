@@ -1,4 +1,5 @@
 import type { MockEntryOptions, PlaygroundOptionsInput } from '@mokup/shared'
+import type { DiagnosticErrorMode } from './dev/types'
 
 /**
  * Options for a fetch-based mokup server.
@@ -27,6 +28,12 @@ export interface FetchServerOptions extends MockEntryOptions {
    * @default process.cwd()
    */
   root?: string
+  /**
+   * Promote selected diagnostics from warnings to errors.
+   *
+   * @default undefined
+   */
+  errorOn?: DiagnosticErrorMode
 }
 
 /**

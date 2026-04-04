@@ -79,18 +79,19 @@ bunx mokup serve --dir mock --prefix /api --port 3000
 
 ### Serve 选项
 
-| 参数              | 说明                       |
-| ----------------- | -------------------------- |
-| `--dir, -d`       | mock 目录（可重复）        |
-| `--prefix`        | 路由前缀                   |
-| `--include`       | 仅包含匹配的正则（可重复） |
-| `--exclude`       | 排除匹配的正则（可重复）   |
-| `--ignore-prefix` | 忽略路径段前缀（可重复）   |
-| `--host`          | 主机名（默认 `localhost`） |
-| `--port`          | 端口（默认 `8080`）        |
-| `--no-watch`      | 关闭文件监听               |
-| `--no-playground` | 关闭 Playground            |
-| `--no-log`        | 关闭日志输出               |
+| 参数              | 说明                                   |
+| ----------------- | -------------------------------------- |
+| `--dir, -d`       | mock 目录（可重复）                    |
+| `--prefix`        | 路由前缀                               |
+| `--include`       | 仅包含匹配的正则（可重复）             |
+| `--exclude`       | 排除匹配的正则（可重复）               |
+| `--ignore-prefix` | 忽略路径段前缀（可重复）               |
+| `--error-on`      | 指定命中后启动直接失败的诊断（可重复） |
+| `--host`          | 主机名（默认 `localhost`）             |
+| `--port`          | 端口（默认 `8080`）                    |
+| `--no-watch`      | 关闭文件监听                           |
+| `--no-playground` | 关闭 Playground                        |
+| `--no-log`        | 关闭日志输出                           |
 
 ## API
 

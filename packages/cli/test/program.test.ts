@@ -157,6 +157,8 @@ describe('cli program', () => {
       'bar$',
       '--ignore-prefix',
       '_',
+      '--error-on',
+      'invalid-route',
       '--host',
       '0.0.0.0',
       '--port',
@@ -173,6 +175,7 @@ describe('cli program', () => {
         include: [expect.any(RegExp)],
         exclude: [expect.any(RegExp)],
         ignorePrefix: ['_'],
+        errorOn: ['invalid-route'],
         host: '0.0.0.0',
         port: 9090,
         watch: false,
@@ -238,6 +241,35 @@ describe('cli program', () => {
 
     expect(mocks.logger.info).toHaveBeenCalledWith(
       'Mock server ready at http://localhost:8080',
+    )
+  })
+
+  it('normalizes serve errorOn all mode', async () => {
+    const nodeServer = { close: vi.fn((cb?: (error?: Error) => void) => cb?.()) }
+    const mockServer = {
+      fetch: vi.fn(),
+      close: vi.fn().mockResolvedValue(undefined),
+    }
+    mocks.createFetchServer.mockResolvedValue(mockServer)
+    mocks.serve.mockImplementation((_options, callback) => {
+      callback?.({})
+      return nodeServer
+    })
+
+    vi.spyOn(process, 'exit').mockImplementation((() => undefined) as never)
+    vi.spyOn(process, 'on').mockImplementation(((_event: string, handler: () => Promise<void>) => {
+      void handler
+      return process
+    }) as never)
+
+    await runCli(['node', 'mokup', 'serve', '--error-on', 'invalid-route', '--error-on', 'all'])
+
+    expect(mocks.createFetchServer).toHaveBeenCalledWith(
+      expect.objectContaining({
+        entries: expect.objectContaining({
+          errorOn: 'all',
+        }),
+      }),
     )
   })
 

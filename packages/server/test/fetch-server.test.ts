@@ -94,4 +94,25 @@ describe('fetch server', () => {
     expect(teams.status).toBe(200)
     await expect(teams.json()).resolves.toEqual({ id: 2 })
   })
+
+  it('throws when selected diagnostics are promoted to errors', async () => {
+    const root = await mkdtemp(join(tmpdir(), 'mokup-fetch-'))
+    const mockDir = join(root, 'mock')
+    await mkdir(mockDir, { recursive: true })
+    await writeFile(
+      join(mockDir, 'broken.get.ts'),
+      'export default [{ handler: undefined }, { handler: { ok: true } }]',
+      'utf8',
+    )
+
+    await expect(createFetchServer({
+      entries: {
+        dir: mockDir,
+        log: false,
+        watch: false,
+        errorOn: ['missing-handler'],
+      },
+      playground: false,
+    })).rejects.toThrow(/Mokup diagnostics error: 1 routes skipped without handler/)
+  })
 })

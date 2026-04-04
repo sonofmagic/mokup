@@ -6,6 +6,13 @@
  */
 export { createConnectMiddleware } from './connect'
 /**
+ * Re-export diagnostics control types.
+ *
+ * @example
+ * import type { DiagnosticErrorMode } from '@mokup/server/node'
+ */
+export type { DiagnosticCategory, DiagnosticErrorMode } from './dev/types'
+/**
  * Express middleware factory.
  *
  * @example
@@ -25,7 +32,11 @@ export { createFastifyPlugin } from './fastify'
  * @example
  * import type { FetchServerOptions } from '@mokup/server/node'
  */
-export type { FetchServerOptions, FetchServerOptionsConfig, FetchServerOptionsInput } from './fetch-options'
+export type {
+  FetchServerOptions,
+  FetchServerOptionsConfig,
+  FetchServerOptionsInput,
+} from './fetch-options'
 /**
  * Fetch server factory.
  *

@@ -12,6 +12,8 @@ export { defineConfig, onAfterAll, onBeforeAll } from './dev/define-config'
  * import type { RouteDirectoryConfig } from '@mokup/server'
  */
 export type {
+  DiagnosticCategory,
+  DiagnosticErrorMode,
   HookErrorPolicy,
   MiddlewareHandler,
   MiddlewarePosition,

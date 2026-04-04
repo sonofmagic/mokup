@@ -1,7 +1,6 @@
 import type { FetchServerOptions, FetchServerOptionsConfig } from '@mokup/server/node'
 import type { BuildOptions, DiagnosticCategory } from './manifest/types'
 import process from 'node:process'
-import { createFetchServer, serve } from '@mokup/server/node'
 import { createLogger } from '@mokup/shared/logger'
 import { Command } from 'commander'
 import { buildManifest } from './manifest'
@@ -79,6 +78,7 @@ function toServeOptions(options: {
   include?: RegExp[]
   exclude?: RegExp[]
   ignorePrefix?: string[]
+  errorOn?: string[]
   host?: string
   port?: string
   watch?: boolean
@@ -103,6 +103,10 @@ function toServeOptions(options: {
   }
   if (options.ignorePrefix && options.ignorePrefix.length > 0) {
     serveOptions.ignorePrefix = options.ignorePrefix
+  }
+  const errorOn = resolveErrorOn(options.errorOn)
+  if (errorOn) {
+    serveOptions.errorOn = errorOn
   }
   if (options.host) {
     serveOptions.host = options.host
@@ -165,12 +169,18 @@ export function createCli() {
     .option('--include <pattern>', 'Include regex (repeatable)', collectRegex)
     .option('--exclude <pattern>', 'Exclude regex (repeatable)', collectRegex)
     .option('--ignore-prefix <prefix>', 'Ignore path segment prefix (repeatable)', collectValues)
+    .option(
+      '--error-on <category>',
+      'Fail serve startup on selected diagnostics (repeatable: invalid-route, unsupported-fields, missing-handler, duplicate-route, sw-conflict, all)',
+      collectDiagnosticCategory,
+    )
     .option('--host <host>', 'Hostname (default: localhost)')
     .option('--port <port>', 'Port (default: 8080)')
     .option('--no-watch', 'Disable file watching')
     .option('--no-playground', 'Disable Playground')
     .option('--no-log', 'Disable logging')
     .action(async (options) => {
+      const { createFetchServer, serve } = await import('@mokup/server/node')
       const serveOptions = toServeOptions(options)
       const { entry, playground } = serveOptions
       const host = entry.host ?? 'localhost'

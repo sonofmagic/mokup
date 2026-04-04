@@ -4,6 +4,8 @@ import type { RouteTable } from './dev/types'
 import type {
   FetchServerOptionsInput,
 } from './fetch-options'
+import { relative } from '@mokup/shared/pathe'
+import { buildDiagnosticSummaryLines, createDiagnosticError } from './dev/diagnostics'
 import { createLogger } from './dev/logger'
 import { resolvePlaygroundOptions } from './dev/playground'
 import { sortRoutes } from './dev/routes'
@@ -13,6 +15,11 @@ import { buildFetchServerApp } from './fetch-server/app'
 import { normalizeOptions, resolveAllDirs, resolveRoot } from './fetch-server/options'
 import { createPlaygroundWs } from './fetch-server/playground-ws'
 import { createWatcher } from './fetch-server/watcher'
+
+const unsupportedFieldsWarningRE = /^Skip mock with unsupported fields .*: (.+)$/
+const missingHandlerWarningRE = /^Skip mock without handler: (.+)$/
+const duplicateRouteWarningRE = /^Duplicate mock route (.+) from .+$/
+const diagnosticErrorTitle = 'Mokup diagnostics error:'
 
 export type {
   FetchServerOptions,
@@ -97,17 +104,41 @@ export async function createFetchServer(
   }
   let app = buildFetchServerApp(appParams)
 
-  const refreshRoutes = async () => {
+  const refreshRoutes = async (refreshOptions?: { throwOnError?: boolean }) => {
     try {
       const collected: RouteTable = []
       const collectedDisabled: RouteSkipInfo[] = []
       const collectedIgnored: RouteIgnoreInfo[] = []
       const collectedConfigs: RouteConfigInfo[] = []
+      const unsupportedRuleFiles = new Set<string>()
+      const missingHandlerFiles = new Set<string>()
+      const duplicateRoutes = new Set<string>()
       for (const entry of optionList) {
+        const diagnosticLogger = {
+          ...logger,
+          warn: (...args: unknown[]) => {
+            if (args.length > 0) {
+              const message = args.map(String).join(' ')
+              const unsupportedMatch = message.match(unsupportedFieldsWarningRE)
+              if (unsupportedMatch?.[1]) {
+                unsupportedRuleFiles.add(unsupportedMatch[1])
+              }
+              const missingHandlerMatch = message.match(missingHandlerWarningRE)
+              if (missingHandlerMatch?.[1]) {
+                missingHandlerFiles.add(missingHandlerMatch[1])
+              }
+              const duplicateRouteMatch = message.match(duplicateRouteWarningRE)
+              if (duplicateRouteMatch?.[1]) {
+                duplicateRoutes.add(duplicateRouteMatch[1])
+              }
+            }
+            logger.warn(...args)
+          },
+        }
         const scanParams: Parameters<typeof scanRoutes>[0] = {
           dirs: resolveDirs(entry.dir, root),
           prefix: entry.prefix ?? '',
-          logger,
+          logger: diagnosticLogger,
           onSkip: info => collectedDisabled.push(info),
           onIgnore: info => collectedIgnored.push(info),
           onConfig: info => collectedConfigs.push(info),
@@ -123,6 +154,51 @@ export async function createFetchServer(
         }
         const scanned = await scanRoutes(scanParams)
         collected.push(...scanned)
+      }
+      const errorOn = optionList.find(entry => typeof entry.errorOn !== 'undefined')?.errorOn
+      const diagnosticSections = [
+        {
+          category: 'invalid-route' as const,
+          label: 'invalid route files ignored',
+          items: collectedIgnored
+            .filter(info => info.reason === 'invalid-route')
+            .map(info => relative(root, info.file)),
+          advice: 'Add a method suffix like .get.ts and avoid unsupported route group segments.',
+        },
+        {
+          category: 'unsupported-fields' as const,
+          label: 'routes skipped for unsupported rule fields',
+          items: Array.from(unsupportedRuleFiles).map(file => relative(root, file)),
+          advice: 'Use handler, headers, status, and delay in route rules; do not use legacy response, url, or method fields.',
+        },
+        {
+          category: 'missing-handler' as const,
+          label: 'routes skipped without handler',
+          items: Array.from(missingHandlerFiles).map(file => relative(root, file)),
+          advice: 'Export a handler value or function for every enabled rule.',
+        },
+        {
+          category: 'duplicate-route' as const,
+          label: 'duplicate route definitions',
+          items: Array.from(duplicateRoutes),
+          advice: 'Keep each method + route path unique across scanned files.',
+        },
+      ]
+      const diagnosticLines = buildDiagnosticSummaryLines({
+        sections: diagnosticSections,
+      })
+      for (const line of diagnosticLines) {
+        logger.warn(line)
+      }
+      const diagnosticErrorParams: Parameters<typeof createDiagnosticError>[0] = {
+        sections: diagnosticSections,
+      }
+      if (errorOn) {
+        diagnosticErrorParams.errorOn = errorOn
+      }
+      const diagnosticError = createDiagnosticError(diagnosticErrorParams)
+      if (diagnosticError) {
+        throw diagnosticError
       }
       const resolvedRoutes = sortRoutes(collected)
       routes = resolvedRoutes
@@ -153,10 +229,17 @@ export async function createFetchServer(
     }
     catch (error) {
       logger.error('Failed to scan mock routes:', error)
+      if (
+        refreshOptions?.throwOnError
+        && error instanceof Error
+        && error.message.startsWith(diagnosticErrorTitle)
+      ) {
+        throw error
+      }
     }
   }
 
-  await refreshRoutes()
+  await refreshRoutes({ throwOnError: true })
   await playgroundWs.setupPlaygroundWebSocket(app)
   const wsHandler = playgroundWs.getWsHandler()
   if (wsHandler && playgroundConfig.enabled) {
@@ -177,7 +260,7 @@ export async function createFetchServer(
 
   const server: FetchServer = {
     fetch,
-    refresh: refreshRoutes,
+    refresh: async () => await refreshRoutes({ throwOnError: true }),
     getRoutes: () => routes,
   }
   const injectWebSocket = playgroundWs.getInjectWebSocket()

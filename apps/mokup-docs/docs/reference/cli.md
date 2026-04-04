@@ -79,18 +79,19 @@ bunx mokup serve --dir mock --prefix /api --port 3000
 
 ### Serve options
 
-| Option            | Description                               |
-| ----------------- | ----------------------------------------- |
-| `--dir, -d`       | Mock directory (repeatable)               |
-| `--prefix`        | URL prefix                                |
-| `--include`       | Include regex (repeatable)                |
-| `--exclude`       | Exclude regex (repeatable)                |
-| `--ignore-prefix` | Ignore path segment prefixes (repeatable) |
-| `--host`          | Hostname (default: `localhost`)           |
-| `--port`          | Port (default: `8080`)                    |
-| `--no-watch`      | Disable file watching                     |
-| `--no-playground` | Disable Playground                        |
-| `--no-log`        | Disable logging                           |
+| Option            | Description                                       |
+| ----------------- | ------------------------------------------------- |
+| `--dir, -d`       | Mock directory (repeatable)                       |
+| `--prefix`        | URL prefix                                        |
+| `--include`       | Include regex (repeatable)                        |
+| `--exclude`       | Exclude regex (repeatable)                        |
+| `--ignore-prefix` | Ignore path segment prefixes (repeatable)         |
+| `--error-on`      | Fail startup on selected diagnostics (repeatable) |
+| `--host`          | Hostname (default: `localhost`)                   |
+| `--port`          | Port (default: `8080`)                            |
+| `--no-watch`      | Disable file watching                             |
+| `--no-playground` | Disable Playground                                |
+| `--no-log`        | Disable logging                                   |
 
 ## API
 

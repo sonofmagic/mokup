@@ -1,5 +1,7 @@
 /* eslint-disable antfu/no-import-dist */
 import type {
+  DiagnosticCategory,
+  DiagnosticErrorMode,
   FetchHandler,
   Manifest,
   RouteDirectoryConfig,
@@ -27,6 +29,8 @@ import {
 } from '../dist/node.mjs'
 
 const manifest: Manifest = { version: 1, routes: [] }
+const diagnosticCategory: DiagnosticCategory = 'missing-handler'
+const diagnosticErrorMode: DiagnosticErrorMode = [diagnosticCategory]
 
 const serverOptions: ServerOptions = {
   manifest,
@@ -74,7 +78,9 @@ expectType<ReturnType<typeof createKoaMiddleware>>(
 )
 
 const fetchServerOptions: FetchServerOptionsInput = {
-  entries: { dir: 'mock' },
+  entries: { dir: 'mock', errorOn: ['invalid-route'] },
 }
 const fetchServer = createFetchServer(fetchServerOptions)
 expectType<Promise<FetchServer>>(fetchServer)
+expectAssignable<DiagnosticCategory>(diagnosticCategory)
+expectAssignable<DiagnosticErrorMode>(diagnosticErrorMode)
