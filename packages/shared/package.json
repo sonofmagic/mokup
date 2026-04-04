@@ -36,6 +36,11 @@
       "import": "./dist/define-config.mjs",
       "default": "./dist/define-config.mjs"
     },
+    "./diagnostic-types": {
+      "types": "./dist/diagnostic-types.d.ts",
+      "import": "./dist/diagnostic-types.mjs",
+      "default": "./dist/diagnostic-types.mjs"
+    },
     "./diagnostics": {
       "types": "./dist/diagnostics.d.ts",
       "import": "./dist/diagnostics.mjs",
@@ -138,6 +143,9 @@
       ],
       "define-config": [
         "dist/define-config.d.ts"
+      ],
+      "diagnostic-types": [
+        "dist/diagnostic-types.d.ts"
       ],
       "diagnostics": [
         "dist/diagnostics.d.ts"

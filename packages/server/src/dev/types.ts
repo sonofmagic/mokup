@@ -1,6 +1,8 @@
 import type { RouteToken } from '@mokup/runtime'
 import type { Context, MiddlewareHandler } from '@mokup/shared/hono'
 
+export type { DiagnosticCategory, DiagnosticErrorMode } from '@mokup/shared'
+
 /**
  * Supported HTTP methods for server dev routes.
  *
@@ -17,31 +19,6 @@ export type HttpMethod
     | 'DELETE'
     | 'OPTIONS'
     | 'HEAD'
-
-/**
- * Diagnostic categories emitted during server-side route scanning.
- *
- * @example
- * import type { DiagnosticCategory } from '@mokup/server'
- *
- * const category: DiagnosticCategory = 'invalid-route'
- */
-export type DiagnosticCategory
-  = | 'invalid-route'
-    | 'unsupported-fields'
-    | 'missing-handler'
-    | 'duplicate-route'
-    | 'sw-conflict'
-
-/**
- * Controls which diagnostics should fail instead of warn.
- *
- * @example
- * import type { DiagnosticErrorMode } from '@mokup/server'
- *
- * const errorOn: DiagnosticErrorMode = ['invalid-route']
- */
-export type DiagnosticErrorMode = 'all' | DiagnosticCategory[]
 
 /**
  * Static response payloads supported by route rules.

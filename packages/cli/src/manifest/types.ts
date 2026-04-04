@@ -1,21 +1,8 @@
+import type { DiagnosticErrorMode } from '@mokup/shared'
 import type { MiddlewareHandler } from '@mokup/shared/hono'
 
+export type { DiagnosticCategory, DiagnosticErrorMode } from '@mokup/shared'
 export type { MiddlewareHandler } from '@mokup/shared/hono'
-
-/**
- * Diagnostic categories emitted during manifest builds.
- */
-export type DiagnosticCategory
-  = | 'invalid-route'
-    | 'unsupported-fields'
-    | 'missing-handler'
-    | 'duplicate-route'
-    | 'sw-conflict'
-
-/**
- * Controls which diagnostics should fail instead of warn.
- */
-export type DiagnosticErrorMode = 'all' | DiagnosticCategory[]
 
 /**
  * Options for building a mokup manifest.

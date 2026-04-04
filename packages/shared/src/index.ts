@@ -1,3 +1,5 @@
+import type { DiagnosticErrorMode } from './diagnostic-types'
+
 /**
  * Directory input for mock scanning.
  *
@@ -63,6 +65,12 @@ export interface MockEntryOptions {
    * @default true
    */
   log?: boolean
+  /**
+   * Promote selected diagnostics from warnings to errors.
+   *
+   * @default undefined
+   */
+  errorOn?: DiagnosticErrorMode
 }
 
 /**
@@ -116,6 +124,10 @@ export {
   type HookErrorPolicy,
   type HookHandler,
 } from './define-config'
+export {
+  type DiagnosticCategory,
+  type DiagnosticErrorMode,
+} from './diagnostic-types'
 export {
   buildDiagnosticSummaryLines,
   createDiagnosticError,

@@ -1,6 +1,8 @@
 import type { RouteToken } from '@mokup/runtime'
-import type { MockEntryOptions, PlaygroundOptionsInput } from '@mokup/shared'
+import type { DiagnosticErrorMode, MockEntryOptions, PlaygroundOptionsInput } from '@mokup/shared'
 import type { Context, MiddlewareHandler } from '@mokup/shared/hono'
+
+export type { DiagnosticCategory, DiagnosticErrorMode } from '@mokup/shared'
 
 /**
  * Supported HTTP methods for mokup routes.
@@ -127,31 +129,6 @@ export type RuntimeMode = 'server' | 'sw'
  * const runtime: RuntimeTarget = 'node'
  */
 export type RuntimeTarget = 'node' | 'worker'
-
-/**
- * Diagnostic categories emitted during mokup route scanning.
- *
- * @example
- * import type { DiagnosticCategory } from 'mokup/vite'
- *
- * const category: DiagnosticCategory = 'invalid-route'
- */
-export type DiagnosticCategory
-  = | 'invalid-route'
-    | 'unsupported-fields'
-    | 'missing-handler'
-    | 'duplicate-route'
-    | 'sw-conflict'
-
-/**
- * Controls which diagnostics should fail instead of warn.
- *
- * @example
- * import type { DiagnosticErrorMode } from 'mokup/vite'
- *
- * const errorOn: DiagnosticErrorMode = ['invalid-route', 'duplicate-route']
- */
-export type DiagnosticErrorMode = 'all' | DiagnosticCategory[]
 
 /**
  * Service worker behavior options for mokup.
