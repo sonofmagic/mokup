@@ -1,5 +1,25 @@
 # @mokup/cli
 
+## 2.0.0
+
+### Major Changes
+
+- 🚀 **Switch all published packages to ESM-only outputs, replace unbuild/tsup-based package builds with tsdown, raise the minimum supported Node.js versions to `^20.19.0 || >=22.12.0`, and rename `@mokup/shared/esbuild` to `@mokup/shared/rolldown`.** [`45ce7ee`](https://github.com/sonofmagic/mokup/commit/45ce7ee79f50ace21a585c1aa5418c2e5f5d0137) by @sonofmagic
+
+### Patch Changes
+
+- 🐛 **Add a repeatable `mokup build --error-on <category>` CLI flag so selected diagnostics can fail manifest builds from the command line.** [`ef1e626`](https://github.com/sonofmagic/mokup/commit/ef1e6262b45211d5fb0325a677058b87c401c44e) by @sonofmagic
+
+- 🐛 **Validate `--error-on` CLI values against the shared diagnostics catalog and keep the help text in sync with supported categories.** [`e182cc4`](https://github.com/sonofmagic/mokup/commit/e182cc4007bc095f95d6aac7d05bdff144ac8c31) by @sonofmagic
+
+- 🐛 **Add repeatable `mokup serve --error-on <category>` support and allow fetch-based server startup to fail on selected route diagnostics.** [`665aa7c`](https://github.com/sonofmagic/mokup/commit/665aa7c51da560ddb5cacb31d5f33ccbf728d33b) by @sonofmagic
+
+- 🐛 **Add `errorOn` diagnostics controls so selected mokup route and service worker diagnostics can fail builds instead of only logging warnings.** [`8cf5d8a`](https://github.com/sonofmagic/mokup/commit/8cf5d8a05cbfa98878c3510bedd4805ceafeefa0) by @sonofmagic
+
+- 🐛 **Add summarized diagnostics for invalid route files and service worker config conflicts during builds and plugin refreshes.** [`f85e89a`](https://github.com/sonofmagic/mokup/commit/f85e89aa991c53538e0adb569f56dba2d2d7faa8) by @sonofmagic
+- 📦 **Dependencies** [`326c455`](https://github.com/sonofmagic/mokup/commit/326c455f3fd4d80b2436176c95d9917272e4cec3)
+  → `@mokup/shared@2.0.0`, `@mokup/server@2.0.0`, `@mokup/runtime@2.0.0`
+
 ## 1.1.6
 
 ### Patch Changes

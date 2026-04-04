@@ -1,5 +1,16 @@
 # @mokup/runtime
 
+## 2.0.0
+
+### Major Changes
+
+- 🚀 **Switch all published packages to ESM-only outputs, replace unbuild/tsup-based package builds with tsdown, raise the minimum supported Node.js versions to `^20.19.0 || >=22.12.0`, and rename `@mokup/shared/esbuild` to `@mokup/shared/rolldown`.** [`45ce7ee`](https://github.com/sonofmagic/mokup/commit/45ce7ee79f50ace21a585c1aa5418c2e5f5d0137) by @sonofmagic
+
+### Patch Changes
+
+- 📦 **Dependencies** [`326c455`](https://github.com/sonofmagic/mokup/commit/326c455f3fd4d80b2436176c95d9917272e4cec3)
+  → `@mokup/shared@2.0.0`
+
 ## 1.0.9
 
 ### Patch Changes

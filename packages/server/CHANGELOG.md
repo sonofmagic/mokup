@@ -1,5 +1,19 @@
 # @mokup/server
 
+## 2.0.0
+
+### Major Changes
+
+- 🚀 **Switch all published packages to ESM-only outputs, replace unbuild/tsup-based package builds with tsdown, raise the minimum supported Node.js versions to `^20.19.0 || >=22.12.0`, and rename `@mokup/shared/esbuild` to `@mokup/shared/rolldown`.** [`45ce7ee`](https://github.com/sonofmagic/mokup/commit/45ce7ee79f50ace21a585c1aa5418c2e5f5d0137) by @sonofmagic
+
+### Patch Changes
+
+- 🐛 **Add repeatable `mokup serve --error-on <category>` support and allow fetch-based server startup to fail on selected route diagnostics.** [`665aa7c`](https://github.com/sonofmagic/mokup/commit/665aa7c51da560ddb5cacb31d5f33ccbf728d33b) by @sonofmagic
+
+- 🐛 **Update package dependencies across the playground, server, and shared packages.** [`4b05558`](https://github.com/sonofmagic/mokup/commit/4b05558f27df7e1a8b76474a3b9fbe6958ae7eac) by @sonofmagic
+- 📦 **Dependencies** [`326c455`](https://github.com/sonofmagic/mokup/commit/326c455f3fd4d80b2436176c95d9917272e4cec3)
+  → `@mokup/shared@2.0.0`, `@mokup/playground@1.0.0`, `@mokup/runtime@2.0.0`
+
 ## 1.2.6
 
 ### Patch Changes

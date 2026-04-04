@@ -1,5 +1,12 @@
 # mokup-d1-demo
 
+## 0.0.14
+
+### Patch Changes
+
+- 📦 **Dependencies** [`ef1e626`](https://github.com/sonofmagic/mokup/commit/ef1e6262b45211d5fb0325a677058b87c401c44e)
+  → `mokup@3.0.0`
+
 ## 0.0.13
 
 ### Patch Changes
