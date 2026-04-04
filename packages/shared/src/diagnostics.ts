@@ -39,6 +39,17 @@ const unsupportedFieldsWarningRE = /^Skip mock with unsupported fields .*: (.+)$
 const missingHandlerWarningRE = /^Skip mock without handler: (.+)$/
 const duplicateRouteWarningRE = /^Duplicate mock route (.+) from .+$/
 
+export function collectSwConflictDiagnosticWarning(params: {
+  message: string
+  onConflict?: (value: string) => void
+}) {
+  if (!params.message.startsWith('SW ')) {
+    return false
+  }
+  params.onConflict?.(params.message)
+  return true
+}
+
 export function collectRouteDiagnosticWarning(params: {
   message: string
   onUnsupportedFields?: (value: string) => void
@@ -81,6 +92,15 @@ export function createRouteDiagnosticSections(params: {
     {
       ...routeDiagnosticCatalog.duplicateRoute,
       items: params.duplicateRoutes ?? [],
+    },
+  ] satisfies DiagnosticSummarySection[]
+}
+
+export function createSwConflictDiagnosticSections(messages: string[] = []) {
+  return [
+    {
+      ...swConflictDiagnostic,
+      items: messages,
     },
   ] satisfies DiagnosticSummarySection[]
 }

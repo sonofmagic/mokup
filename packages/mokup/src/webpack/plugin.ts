@@ -10,7 +10,11 @@ import type {
 } from './plugin/types'
 import { cwd } from 'node:process'
 import { createMiddleware, createPlaygroundMiddleware, resolvePlaygroundOptions, resolveSwConfig, resolveSwUnregisterConfig } from '@mokup/core'
-import { reportDiagnostics, swConflictDiagnostic } from '@mokup/shared/diagnostics'
+import {
+  collectSwConflictDiagnosticWarning,
+  createSwConflictDiagnosticSections,
+  reportDiagnostics,
+} from '@mokup/shared/diagnostics'
 import { resolvePlaygroundDist } from '../playground/assets'
 import { createLogger } from '../shared/logger'
 import { resolveDirs } from '../shared/utils'
@@ -58,10 +62,10 @@ export function createMokupWebpackPlugin(
     ...logger,
     warn: (...args: unknown[]) => {
       if (args.length > 0) {
-        const message = args.map(String).join(' ')
-        if (message.startsWith('SW ')) {
-          swConflictMessages.push(message)
-        }
+        collectSwConflictDiagnosticWarning({
+          message: args.map(String).join(' '),
+          onConflict: value => swConflictMessages.push(value),
+        })
       }
       logger.warn(...args)
     },
@@ -71,12 +75,7 @@ export function createMokupWebpackPlugin(
   const unregisterConfig = resolveSwUnregisterConfig(optionList, configLogger)
   const { error: swDiagnosticError } = reportDiagnostics({
     errorOn: normalizedOptions.errorOn,
-    sections: [
-      {
-        ...swConflictDiagnostic,
-        items: swConflictMessages,
-      },
-    ],
+    sections: createSwConflictDiagnosticSections(swConflictMessages),
     warn: message => logger.warn(message),
   })
   if (swDiagnosticError) {

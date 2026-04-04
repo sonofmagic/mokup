@@ -133,8 +133,10 @@ export {
 export {
   buildDiagnosticSummaryLines,
   collectRouteDiagnosticWarning,
+  collectSwConflictDiagnosticWarning,
   createDiagnosticError,
   createRouteDiagnosticSections,
+  createSwConflictDiagnosticSections,
   type DiagnosticSummarySection,
   reportDiagnostics,
   routeDiagnosticCatalog,

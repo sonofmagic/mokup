@@ -1,5 +1,10 @@
 import { describe, expect, it, vi } from 'vitest'
-import { collectRouteDiagnosticWarning, createRouteDiagnosticSections } from '../src/diagnostics'
+import {
+  collectRouteDiagnosticWarning,
+  collectSwConflictDiagnosticWarning,
+  createRouteDiagnosticSections,
+  createSwConflictDiagnosticSections,
+} from '../src/diagnostics'
 import { parse } from '../src/jsonc-parser'
 import { join } from '../src/pathe'
 
@@ -64,5 +69,28 @@ describe('shared re-exports', () => {
     expect(unsupportedFields).toHaveBeenCalledWith('/root/mock/a.get.ts')
     expect(missingHandler).toHaveBeenCalledWith('/root/mock/b.get.ts')
     expect(duplicateRoute).toHaveBeenCalledWith('GET /api/ping')
+  })
+
+  it('collects and builds service worker conflict diagnostics', () => {
+    const conflict = vi.fn()
+
+    expect(collectSwConflictDiagnosticWarning({
+      message: 'SW path "/other.js" ignored; using "/mokup-sw.js".',
+      onConflict: conflict,
+    })).toBe(true)
+    expect(collectSwConflictDiagnosticWarning({
+      message: 'Skip mock without handler: /root/mock/a.get.ts',
+      onConflict: conflict,
+    })).toBe(false)
+
+    expect(conflict).toHaveBeenCalledWith('SW path "/other.js" ignored; using "/mokup-sw.js".')
+    expect(createSwConflictDiagnosticSections([
+      'SW path "/other.js" ignored; using "/mokup-sw.js".',
+    ])).toEqual([
+      expect.objectContaining({
+        category: 'sw-conflict',
+        items: ['SW path "/other.js" ignored; using "/mokup-sw.js".'],
+      }),
+    ])
   })
 })
