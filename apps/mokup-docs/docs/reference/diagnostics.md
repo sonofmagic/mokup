@@ -77,6 +77,45 @@ When `errorOn` does not match:
 - Route scanning continues where possible.
 - Valid routes are still loaded.
 
+## Shared helpers
+
+If you are building tooling on top of Mokup, reuse the helpers from
+`@mokup/shared/diagnostics` instead of rebuilding the summary and strict-mode
+logic yourself.
+
+```ts
+import {
+  collectRouteDiagnosticWarning,
+  createRouteDiagnosticSections,
+  reportDiagnostics,
+} from '@mokup/shared/diagnostics'
+
+const unsupportedFields = new Set<string>()
+const missingHandlers = new Set<string>()
+const duplicateRoutes = new Set<string>()
+
+collectRouteDiagnosticWarning({
+  message: 'Skip mock without handler: mock/users.get.ts',
+  onUnsupportedFields: value => unsupportedFields.add(value),
+  onMissingHandler: value => missingHandlers.add(value),
+  onDuplicateRoute: value => duplicateRoutes.add(value),
+})
+
+const diagnostics = createRouteDiagnosticSections({
+  unsupportedFields: [...unsupportedFields],
+  missingHandlers: [...missingHandlers],
+  duplicateRoutes: [...duplicateRoutes],
+})
+
+const { error, summaryLines } = reportDiagnostics({
+  sections: diagnostics,
+  errorOn: ['missing-handler'],
+})
+```
+
+For service worker conflicts, use `collectSwConflictDiagnosticWarning(...)` and
+`createSwConflictDiagnosticSections(...)` in the same way.
+
 ## Recommendations
 
 - Use `['duplicate-route']` first if you want a low-risk strictness upgrade.

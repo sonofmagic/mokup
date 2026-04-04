@@ -76,6 +76,45 @@ export default {
 - 路由扫描会尽可能继续。
 - 仍然有效的路由会继续被加载。
 
+## Shared helpers
+
+如果你在 Mokup 之上继续封装工具，建议直接复用
+`@mokup/shared/diagnostics` 提供的 helper，而不是自己重新拼装摘要和严格模式逻辑。
+
+```ts
+import {
+  collectRouteDiagnosticWarning,
+  createRouteDiagnosticSections,
+  reportDiagnostics,
+} from '@mokup/shared/diagnostics'
+
+const unsupportedFields = new Set<string>()
+const missingHandlers = new Set<string>()
+const duplicateRoutes = new Set<string>()
+
+collectRouteDiagnosticWarning({
+  message: 'Skip mock without handler: mock/users.get.ts',
+  onUnsupportedFields: value => unsupportedFields.add(value),
+  onMissingHandler: value => missingHandlers.add(value),
+  onDuplicateRoute: value => duplicateRoutes.add(value),
+})
+
+const diagnostics = createRouteDiagnosticSections({
+  unsupportedFields: [...unsupportedFields],
+  missingHandlers: [...missingHandlers],
+  duplicateRoutes: [...duplicateRoutes],
+})
+
+const { error, summaryLines } = reportDiagnostics({
+  sections: diagnostics,
+  errorOn: ['missing-handler'],
+})
+```
+
+如果要处理 service worker 冲突，也可以按同样方式使用
+`collectSwConflictDiagnosticWarning(...)` 和
+`createSwConflictDiagnosticSections(...)`。
+
 ## 推荐用法
 
 - 如果想低风险启用严格模式，先从 `['duplicate-route']` 开始。
