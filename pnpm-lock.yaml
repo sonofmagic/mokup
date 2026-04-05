@@ -246,9 +246,6 @@ importers:
       '@types/express':
         specifier: ^5.0.6
         version: 5.0.6
-      tsx:
-        specifier: 'catalog:'
-        version: 4.21.0
       typescript:
         specifier: 'catalog:'
         version: 6.0.2
@@ -265,9 +262,6 @@ importers:
         specifier: workspace:*
         version: link:../../packages/mokup
     devDependencies:
-      tsx:
-        specifier: 'catalog:'
-        version: 4.21.0
       typescript:
         specifier: 'catalog:'
         version: 6.0.2
