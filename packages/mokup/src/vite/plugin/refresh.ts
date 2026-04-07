@@ -9,6 +9,29 @@ import { resolveDirs, toPosix } from '../../shared/utils'
 import { buildRouteSignature } from './routes'
 import { isViteDevServer } from './server'
 
+interface InvalidatableModuleNode {
+  importers?: Set<InvalidatableModuleNode>
+}
+
+function invalidateModuleChain(server: ViteDevServer, node: InvalidatableModuleNode) {
+  const visited = new Set<InvalidatableModuleNode>()
+  const stack = [node]
+
+  while (stack.length > 0) {
+    const current = stack.pop()
+    if (!current || visited.has(current)) {
+      continue
+    }
+    visited.add(current)
+    server.moduleGraph.invalidateModule(current as Parameters<typeof server.moduleGraph.invalidateModule>[0])
+    if (current.importers) {
+      for (const importer of current.importers) {
+        stack.push(importer)
+      }
+    }
+  }
+}
+
 function createRouteRefresher(params: {
   state: PluginState
   optionList: VitePluginOptions[]
@@ -157,7 +180,7 @@ function createRouteRefresher(params: {
           for (const id of virtualModuleIds) {
             const moduleNode = server.moduleGraph.getModuleById(id)
             if (moduleNode) {
-              server.moduleGraph.invalidateModule(moduleNode)
+              invalidateModuleChain(server, moduleNode as InvalidatableModuleNode)
             }
           }
         }
