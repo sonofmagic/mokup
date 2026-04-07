@@ -38,5 +38,8 @@
 
 ## Scripts
 
-- `pnpm test:e2e` for CI-style run.
-- `pnpm test:e2e:ui` for headed or UI mode when debugging.
+- `pnpm test:e2e:root` for root Playwright coverage (`tests/e2e/*.spec.ts`).
+- `pnpm test:e2e:apps` for app-owned E2E routed through Turbo.
+- `pnpm test:e2e` for CI-style aggregate run (`root` then `apps`).
+- `pnpm test:e2e:serial` for serialized aggregate debugging.
+- `pnpm test:e2e:ui` for root Playwright UI plus app-owned UI/debug runs.

@@ -19,7 +19,8 @@
 - Each app provides a lightweight `playwright.config.ts` that reads `E2E_BASE_URL`.
 - A root runner script starts the app dev server on an available port, waits for readiness,
   runs Playwright, and shuts down the server.
-- Root `pnpm test:e2e` runs `turbo run test:e2e --filter=./apps/*`.
+- Root `pnpm test:e2e:apps` runs `turbo run test:e2e --filter=./apps/*`.
+- Root `pnpm test:e2e` is the aggregate entry: it runs root Playwright E2E first, then app-owned E2E.
 
 ## Runner Responsibilities
 
