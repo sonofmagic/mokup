@@ -91,6 +91,7 @@ const forbiddenContentRules = [
 function getContentViolations(relativeFile, content) {
   const violations = []
   const isAllowedLegacyDoc = allowedLegacyDocFiles.has(relativeFile)
+  const isChangelog = path.basename(relativeFile) === 'CHANGELOG.md'
   const isPublicDoc = relativeFile.endsWith('.md')
     && (
       relativeFile.startsWith('apps/mokup-docs/docs/')
@@ -100,7 +101,7 @@ function getContentViolations(relativeFile, content) {
     && !relativeFile.endsWith('.draft.md')
     && !relativeFile.startsWith('.changeset/')
 
-  if (!isAllowedLegacyDoc) {
+  if (!isAllowedLegacyDoc && !isChangelog) {
     for (const rule of forbiddenContentRules) {
       if (rule.test(content)) {
         violations.push(`${relativeFile}: ${rule.message}`)

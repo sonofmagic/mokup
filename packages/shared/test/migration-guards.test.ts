@@ -53,6 +53,30 @@ describe('migration guards', () => {
     expect(violations).toEqual([])
   })
 
+  it('ignores historical changelog references to legacy tools', () => {
+    const violations = evaluateMigrationGuards({
+      packageEntries: [],
+      rootPackage: {
+        engines: {
+          node: '^20.19.0 || >=22.12.0',
+        },
+        pnpm: {
+          overrides: {
+            rolldown: '1.0.0-rc.13',
+          },
+        },
+      },
+      scanEntries: [
+        {
+          file: 'packages/example/CHANGELOG.md',
+          content: '- Migrated from tsup and unbuild to tsdown.\n',
+        },
+      ],
+    })
+
+    expect(violations).toEqual([])
+  })
+
   it('reports legacy build-chain regressions', () => {
     const violations = evaluateMigrationGuards({
       packageEntries: [
