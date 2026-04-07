@@ -16,14 +16,14 @@ const buildPackages = [
 ]
 
 export default async function globalSetup() {
-  if (!process.env.MOKUP_E2E_SKIP_BUILD) {
+  if (!process.env['MOKUP_E2E_SKIP_BUILD']) {
     for (const pkg of buildPackages) {
       await runCommand('pnpm', ['--filter', pkg, 'build'], { cwd: repoRoot })
     }
   }
 
   const servers = [] as NonNullable<Awaited<ReturnType<typeof startViteServer>>>[]
-  const reuseExistingServer = !process.env.CI
+  const reuseExistingServer = !process.env['CI']
   const viteServer = await startViteServer({
     cwd: repoRoot,
     env: {

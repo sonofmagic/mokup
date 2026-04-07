@@ -2,7 +2,7 @@ import process from 'node:process'
 import { defineConfig } from '@playwright/test'
 import { MOCK_VITE_SERVER_BASE_URL, WEB_BASE_URL } from './tests/e2e/constants'
 
-const isCI = Boolean(process.env.CI)
+const isCI = Boolean(process.env['CI'])
 const webBaseURL = WEB_BASE_URL
 
 export default defineConfig({

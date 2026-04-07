@@ -4,12 +4,16 @@ interface ResolveEditorOptions {
   allowAbsoluteWithoutRoot?: boolean
 }
 
+const WINDOWS_ABSOLUTE_PATH_PATTERN = /^[a-z]:\//i
+const TRAILING_SLASH_PATTERN = /\/+$/
+const LEADING_SLASH_PATTERN = /^\/+/
+
 function isAbsolutePath(value: string) {
-  return value.startsWith('/') || /^[a-z]:\//i.test(value)
+  return value.startsWith('/') || WINDOWS_ABSOLUTE_PATH_PATTERN.test(value)
 }
 
 function normalizeRoot(root: string) {
-  return toPosixPath(root).replace(/\/+$/, '')
+  return toPosixPath(root).replace(TRAILING_SLASH_PATTERN, '')
 }
 
 function normalizeFile(file: string) {
@@ -38,7 +42,7 @@ function resolveEditorUrl(
   if (!normalizedRoot) {
     return null
   }
-  const relative = normalizedFile.replace(/^\/+/, '')
+  const relative = normalizedFile.replace(LEADING_SLASH_PATTERN, '')
   return `vscode://file/${encodeURI(`${normalizedRoot}/${relative}`)}`
 }
 

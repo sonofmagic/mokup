@@ -28,9 +28,9 @@ export async function startViteServer(params?: {
   }
 
   const repoRoot = params?.cwd ?? process.cwd()
-  const appDir = params?.appDir ?? join('apps', 'web')
+  const appDir = params?.appDir ?? join('apps', 'mokup-web-demo')
   const appRoot = isAbsolute(appDir) ? appDir : resolve(repoRoot, appDir)
-  const name = params?.name ?? 'web'
+  const name = params?.name ?? 'mokup-web-demo'
   const viteBin = join(repoRoot, 'node_modules', '.bin', 'vite')
   const child = execa(
     viteBin,

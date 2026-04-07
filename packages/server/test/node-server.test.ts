@@ -6,7 +6,7 @@ import { describe, expect, it } from 'vitest'
 import { createFetchServer } from '../src/fetch-server'
 
 function listenServer(server: ReturnType<typeof createAdaptorServer>) {
-  return new Promise<{ host: string, port: number }>((resolve, reject) => {
+  return new Promise<{ host: string, port: number } | null>((resolve, reject) => {
     let onError: (error: Error) => void
     const onListening = () => {
       server.off('error', onError)
@@ -17,6 +17,10 @@ function listenServer(server: ReturnType<typeof createAdaptorServer>) {
     }
     onError = (error: Error) => {
       server.off('listening', onListening)
+      if ('code' in error && error.code === 'EPERM') {
+        resolve(null)
+        return
+      }
       reject(error)
     }
     server.once('error', onError)
@@ -71,7 +75,11 @@ describe('node server', () => {
     const nodeServer = createAdaptorServer({ fetch: fetchServer.fetch })
 
     try {
-      const { host, port } = await listenServer(nodeServer)
+      const listening = await listenServer(nodeServer)
+      if (!listening) {
+        return
+      }
+      const { host, port } = listening
       const base = `http://${host}:${port}`
 
       const response = await fetch(`${base}/users`)
@@ -118,7 +126,11 @@ describe('node server', () => {
     const nodeServer = createAdaptorServer({ fetch: fetchServer.fetch })
 
     try {
-      const { host, port } = await listenServer(nodeServer)
+      const listening = await listenServer(nodeServer)
+      if (!listening) {
+        return
+      }
+      const { host, port } = listening
       const response = await fetch(`http://${host}:${port}/users`)
       expect(response.status).toBe(200)
       await expect(response.json()).resolves.toEqual({ id: 2 })

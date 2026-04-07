@@ -1,4 +1,3 @@
-import type { IncomingMessage, ServerResponse } from 'node:http'
 import type { ServerOptions } from '../../packages/server/src/index'
 import { Buffer } from 'node:buffer'
 import { mkdtemp } from 'node:fs/promises'
@@ -41,14 +40,23 @@ test.beforeAll(async ({ request: _request }) => {
   }
 })
 
-type ConnectMiddleware = (req: IncomingMessage, res: ServerResponse, next: () => void) => void
+type ConnectHandler = ReturnType<typeof createConnectMiddleware>
+type KoaHandler = ReturnType<typeof createKoaMiddleware>
+type FastifyPlugin = ReturnType<typeof createFastifyPlugin>
+type ConnectMiddleware = ConnectHandler
+type FastifyInstance = Parameters<FastifyPlugin>[0]
+type FastifyHook = Parameters<FastifyInstance['addHook']>[1]
 
 async function runConnectStyleRequest(middleware: ConnectMiddleware) {
   const server = createServer(async (req, res) => {
-    await middleware(req, res, () => {
-      res.statusCode = 404
-      res.end()
-    })
+    await middleware(
+      req as Parameters<ConnectHandler>[0],
+      res as Parameters<ConnectHandler>[1],
+      () => {
+        res.statusCode = 404
+        res.end()
+      },
+    )
   })
 
   const { url, close } = await listen(server)
@@ -60,10 +68,14 @@ async function runConnectStyleRequest(middleware: ConnectMiddleware) {
 
 async function runPostWithBody(middleware: ConnectMiddleware) {
   const server = createServer(async (req, res) => {
-    await middleware(req, res, () => {
-      res.statusCode = 404
-      res.end()
-    })
+    await middleware(
+      req as Parameters<ConnectHandler>[0],
+      res as Parameters<ConnectHandler>[1],
+      () => {
+        res.statusCode = 404
+        res.end()
+      },
+    )
   })
 
   const { url, close } = await listen(server)
@@ -99,7 +111,7 @@ function createKoaServer(middleware: ReturnType<typeof createKoaMiddleware>) {
       },
     }
 
-    await middleware(ctx, async () => {
+    await middleware(ctx as Parameters<KoaHandler>[0], async () => {
       ctx.status = 404
     })
 
@@ -126,19 +138,15 @@ function createKoaServer(middleware: ReturnType<typeof createKoaMiddleware>) {
 }
 
 function createFastifyServer(plugin: ReturnType<typeof createFastifyPlugin>) {
-  let onRequest: ((request: { raw?: IncomingMessage }, reply: {
-    status: (code: number) => unknown
-    header: (name: string, value: string) => unknown
-    send: (payload?: unknown) => void
-  }) => Promise<void> | void) | undefined
+  let onRequest: FastifyHook | undefined
   const instance = {
-    addHook: (name: 'onRequest' | 'preHandler', handler: typeof onRequest) => {
+    addHook: (name: 'onRequest' | 'preHandler', handler: FastifyHook) => {
       if (name === 'onRequest') {
         onRequest = handler
       }
     },
   }
-  const init = plugin(instance)
+  const init = plugin(instance as unknown as FastifyInstance)
 
   return createServer(async (req, res) => {
     await init
@@ -174,7 +182,10 @@ function createFastifyServer(plugin: ReturnType<typeof createFastifyPlugin>) {
     }
 
     if (onRequest) {
-      await onRequest({ raw: req }, reply)
+      await onRequest(
+        { raw: req } as unknown as Parameters<FastifyHook>[0],
+        reply as Parameters<FastifyHook>[1],
+      )
     }
 
     if (!res.writableEnded) {
@@ -185,15 +196,15 @@ function createFastifyServer(plugin: ReturnType<typeof createFastifyPlugin>) {
 
 test('connect and express middleware serve JSON', async () => {
   const connectJson = await runConnectStyleRequest(createConnectMiddleware(options))
-  expect(connectJson.name).toBe('Orion Vale')
+  expect(connectJson['name']).toBe('Orion Vale')
 
   const expressJson = await runConnectStyleRequest(createExpressMiddleware(options))
-  expect(expressJson.name).toBe('Orion Vale')
+  expect(expressJson['name']).toBe('Orion Vale')
 })
 
 test('connect middleware handles POST bodies', async () => {
   const json = await runPostWithBody(createConnectMiddleware(options))
-  expect(json.token).toBe('mock-token-7d91')
+  expect(json['token']).toBe('mock-token-7d91')
 })
 
 test('koa middleware serves JSON', async () => {
@@ -202,7 +213,7 @@ test('koa middleware serves JSON', async () => {
   const { json } = await fetchJson(`${url}/profile`)
   await close()
 
-  expect(json.name).toBe('Orion Vale')
+  expect(json['name']).toBe('Orion Vale')
 })
 
 test('fastify plugin serves JSON', async () => {
@@ -211,7 +222,7 @@ test('fastify plugin serves JSON', async () => {
   const { json } = await fetchJson(`${url}/profile`)
   await close()
 
-  expect(json.name).toBe('Orion Vale')
+  expect(json['name']).toBe('Orion Vale')
 })
 
 test('hono middleware serves JSON', async () => {
@@ -221,7 +232,7 @@ test('hono middleware serves JSON', async () => {
   const response = await app.fetch(new Request('http://localhost/profile'))
   const json = await response.json() as Record<string, unknown>
 
-  expect(json.name).toBe('Orion Vale')
+  expect(json['name']).toBe('Orion Vale')
 })
 
 test('fetch server serves JSON', async () => {
@@ -237,7 +248,7 @@ test('fetch server serves JSON', async () => {
   const response = await server.fetch(new Request('http://localhost/profile'))
   const json = await response.json() as Record<string, unknown>
 
-  expect(json.name).toBe('Orion Vale')
+  expect(json['name']).toBe('Orion Vale')
 
   await server.close?.()
 })

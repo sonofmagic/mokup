@@ -1,5 +1,5 @@
 {
-  "name": "monorepo-template",
+  "name": "mokup-monorepo",
   "type": "module",
   "version": "0.0.0",
   "private": true,
@@ -8,10 +8,10 @@
   "homepage": "https://mokup.icebreaker.top",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/sonofmagic/monorepo-template.git"
+    "url": "git+https://github.com/sonofmagic/mokup.git"
   },
   "bugs": {
-    "url": "https://github.com/sonofmagic/monorepo-template/issues"
+    "url": "https://github.com/sonofmagic/mokup/issues"
   },
   "engines": {
     "node": "^20.19.0 || >=22.12.0"
@@ -26,20 +26,23 @@
     "test": "vitest run",
     "test:dev": "vitest",
     "test:types": "pnpm -r --filter \"./packages/*\" --filter \"!./packages/playground\" run test:types",
+    "typecheck:root": "tsc -p tsconfig.root.json --noEmit",
     "guard:migration": "node scripts/check-migration-guards.mjs",
     "release:pack-check": "node scripts/check-pack-artifacts.mjs",
     "lint": "turbo run lint",
     "lint:lines": "node scripts/lint-lines.mjs",
     "audit": "pnpm audit --audit-level=moderate",
     "audit:fix": "pnpm audit --fix",
-    "typecheck": "turbo run typecheck",
+    "typecheck": "pnpm run typecheck:root && turbo run typecheck",
     "format": "eslint . --fix",
     "validate": "pnpm run guard:migration && pnpm run typecheck && pnpm run lint && pnpm run test",
-    "test:e2e": "turbo run test:e2e --filter=./apps/* --concurrency=${E2E_CONCURRENCY:-3}",
+    "test:e2e": "pnpm run test:e2e:root && pnpm run test:e2e:apps",
+    "test:e2e:root": "playwright test",
+    "test:e2e:apps": "turbo run test:e2e --filter=./apps/* --concurrency=${E2E_CONCURRENCY:-3}",
     "test:e2e:serial": "turbo run test:e2e --filter=./apps/* --concurrency=1",
     "test:e2e:ui": "turbo run test:e2e --filter=./apps/* --concurrency=${E2E_CONCURRENCY:-3} -- --ui",
     "release": "changeset",
-    "release:check": "pnpm run guard:migration && turbo run build lint test && pnpm run test:types && pnpm run test:e2e && pnpm run release:pack-check",
+    "release:check": "pnpm run guard:migration && pnpm run typecheck && turbo run build lint test && pnpm run test:types && pnpm run test:e2e && pnpm run release:pack-check",
     "publish-packages": "pnpm run release:check && changeset version && changeset publish",
     "------": "--------------",
     "preinstall": "npx only-allow pnpm",

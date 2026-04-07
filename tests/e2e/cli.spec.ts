@@ -52,5 +52,5 @@ test('mokup bundle works with createFetchHandler', async ({ request: _request },
   const response = await handler(new Request('http://localhost/profile'))
   expect(response).not.toBeNull()
   const json = await response?.json() as Record<string, unknown>
-  expect(json.name).toBe('Orion Vale')
+  expect(json['name']).toBe('Orion Vale')
 })

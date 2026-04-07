@@ -1,7 +1,8 @@
 <script setup lang="ts">
 import type { BodyType, MultipartFileEntry, PlaygroundRoute, RawBodyType, RouteParamField } from '../types'
-import { computed, nextTick, onBeforeUnmount, ref, toRefs, watch } from 'vue'
+import { computed } from 'vue'
 import { useI18n } from 'vue-i18n'
+import { useRequestEditorState } from '../hooks/useRequestEditorState'
 import UiField from './ui/UiField.vue'
 import UiPill from './ui/UiPill.vue'
 import UiTextarea from './ui/UiTextarea.vue'
@@ -39,224 +40,40 @@ const emit = defineEmits<{
   (event: 'toggle-info'): void
 }>()
 const { t } = useI18n()
-const { bodyType } = toRefs(props)
 
 const methodBadge = computed(() => `method-${props.selected.method.toLowerCase()}`)
-const activeTab = ref<RequestTab>('params')
-const missingPulseActive = ref(false)
-const missingParamRefs = new Map<string, HTMLElement>()
-let missingPulseTimeout: ReturnType<typeof setTimeout> | null = null
-let multipartRowId = 0
-
-const missingParamsSet = computed(() => new Set(props.missingParams))
-const hasMissingParams = computed(() => props.missingParams.length > 0)
-const hasRequiredParams = computed(() => props.routeParams.some(param => param.required))
-const rawTypeLabel = computed(() => {
-  switch (props.rawType) {
-    case 'text':
-      return t('detail.rawTypeText')
-    case 'javascript':
-      return t('detail.rawTypeJavascript')
-    case 'html':
-      return t('detail.rawTypeHtml')
-    case 'xml':
-      return t('detail.rawTypeXml')
-    default:
-      return t('detail.rawTypeJson')
-  }
-})
-const bodyTypeLabel = computed(() => {
-  switch (bodyType.value) {
-    case 'none':
-      return t('detail.bodyTypeNone')
-    case 'form-data':
-      return t('detail.bodyTypeFormData')
-    case 'form-urlencoded':
-      return t('detail.bodyTypeFormUrlencoded')
-    case 'raw':
-      return `${t('detail.bodyTypeRaw')} · ${rawTypeLabel.value}`
-    case 'binary':
-      return t('detail.bodyTypeBinary')
-    default:
-      return t('detail.bodyTypeNone')
-  }
-})
-
-function paramPlaceholder(param: RouteParamField) {
-  return param.kind === 'param'
-    ? t('detail.paramPlaceholder')
-    : t('detail.paramPlaceholderCatchall')
-}
-
-function registerMissingParamRef(name: string, el: HTMLElement | null) {
-  if (!el) {
-    missingParamRefs.delete(name)
-    return
-  }
-  missingParamRefs.set(name, el)
-}
-
-function triggerMissingPulse() {
-  if (missingPulseTimeout) {
-    clearTimeout(missingPulseTimeout)
-    missingPulseTimeout = null
-  }
-  missingPulseActive.value = false
-  if (typeof window === 'undefined') {
-    return
-  }
-  window.requestAnimationFrame(() => {
-    missingPulseActive.value = true
-    missingPulseTimeout = window.setTimeout(() => {
-      missingPulseActive.value = false
-      missingPulseTimeout = null
-    }, 1400)
-  })
-}
-
-function focusFirstMissingParam() {
-  const [firstMissing] = props.missingParams
-  if (!firstMissing) {
-    return
-  }
-  const target = missingParamRefs.get(firstMissing)
-  if (!target) {
-    return
-  }
-  target.scrollIntoView({ behavior: 'smooth', block: 'center' })
-  const input = target.querySelector('input')
-  input?.focus()
-}
-
-watch(
-  () => props.selected?.url ?? '',
-  () => {
-    activeTab.value = 'params'
-  },
-  { immediate: true },
-)
-watch(
-  () => props.missingPulse,
-  async (value, previous) => {
-    if (value === previous || !hasMissingParams.value) {
-      return
-    }
-    activeTab.value = 'params'
-    await nextTick()
-    focusFirstMissingParam()
-    triggerMissingPulse()
-  },
-)
-watch(
-  () => props.missingParams.length,
-  (length) => {
-    if (length === 0) {
-      missingPulseActive.value = false
-    }
-  },
-)
-
-onBeforeUnmount(() => {
-  if (missingPulseTimeout) {
-    clearTimeout(missingPulseTimeout)
-    missingPulseTimeout = null
-  }
-})
-
 const queryExample = '{ "q": "alpha", "page": 1 }'
 const headersExample = '{ "x-mokup": "playground" }'
-const bodyExample = '{ "name": "Ada" }'
-const rawTextExample = 'Hello Mokup'
-const rawJavascriptExample = 'export const data = { ok: true }'
-const rawHtmlExample = '<div class="card">Hello</div>'
-const rawXmlExample = '<note>Hello</note>'
-const formExample = 'title=alpha\ncount=3'
-function resolveBodyPlaceholder() {
-  switch (props.bodyType) {
-    case 'raw':
-      switch (props.rawType) {
-        case 'text':
-          return t('detail.bodyPlaceholderRawText', { sample: rawTextExample })
-        case 'javascript':
-          return t('detail.bodyPlaceholderRawJavascript', { sample: rawJavascriptExample })
-        case 'html':
-          return t('detail.bodyPlaceholderRawHtml', { sample: rawHtmlExample })
-        case 'xml':
-          return t('detail.bodyPlaceholderRawXml', { sample: rawXmlExample })
-        default:
-          return t('detail.bodyPlaceholderRawJson', { json: bodyExample })
-      }
-    case 'form-data':
-      return t('detail.bodyPlaceholderFormData', { sample: formExample })
-    case 'form-urlencoded':
-      return t('detail.bodyPlaceholderFormUrlencoded', { sample: formExample })
-    default:
-      return ''
-  }
-}
-
-function createMultipartRow(): MultipartFileEntry {
-  multipartRowId += 1
-  return {
-    id: `multipart-${multipartRowId}`,
-    name: '',
-    files: [],
-  }
-}
-
-function addMultipartRow() {
-  emit('update:multipartFiles', [...props.multipartFiles, createMultipartRow()])
-}
-
-function removeMultipartRow(id: string) {
-  emit('update:multipartFiles', props.multipartFiles.filter(row => row.id !== id))
-}
-
-function updateMultipartName(id: string, value: string) {
-  emit(
-    'update:multipartFiles',
-    props.multipartFiles.map(row => (row.id === id ? { ...row, name: value } : row)),
-  )
-}
-
-function updateMultipartFiles(id: string, event: Event) {
-  const input = event.target as HTMLInputElement | null
-  const files = Array.from(input?.files ?? [])
-  emit(
-    'update:multipartFiles',
-    props.multipartFiles.map(row => (row.id === id ? { ...row, files } : row)),
-  )
-}
-
-function resolveMultipartLabel(row: MultipartFileEntry) {
-  if (row.files.length === 0) {
-    return t('detail.bodyMultipartChoose')
-  }
-  return t('detail.bodyMultipartCount', { count: row.files.length })
-}
-
-function updateBinaryFile(event: Event) {
-  const input = event.target as HTMLInputElement | null
-  const [file] = Array.from(input?.files ?? [])
-  emit('update:binaryFile', file ?? null)
-}
-
-function clearBinaryFile() {
-  emit('update:binaryFile', null)
-}
-
-function formatBytes(size: number) {
-  if (!size) {
-    return '0 B'
-  }
-  if (size < 1024) {
-    return `${size} B`
-  }
-  if (size < 1024 * 1024) {
-    return `${(size / 1024).toFixed(1)} KB`
-  }
-  return `${(size / (1024 * 1024)).toFixed(1)} MB`
-}
+const {
+  activeTab,
+  addMultipartRow,
+  bodyTypeLabel,
+  clearBinaryFile,
+  formatBytes,
+  hasRequiredParams,
+  missingParamsSet,
+  missingPulseActive,
+  paramPlaceholder,
+  registerMissingParamRef,
+  removeMultipartRow,
+  resolveBodyPlaceholder,
+  resolveMultipartLabel,
+  updateBinaryFile,
+  updateMultipartFiles,
+  updateMultipartName,
+} = useRequestEditorState<RequestTab>({
+  t,
+  selectedUrl: () => props.selected?.url,
+  routeParams: () => props.routeParams,
+  missingParams: () => props.missingParams,
+  missingPulse: () => props.missingPulse,
+  bodyType: () => props.bodyType,
+  rawType: () => props.rawType,
+  multipartFiles: () => props.multipartFiles,
+  setMultipartFiles: value => emit('update:multipartFiles', value),
+  setBinaryFile: value => emit('update:binaryFile', value),
+  resolveDefaultTab: () => 'params',
+})
 </script>
 
 <template>

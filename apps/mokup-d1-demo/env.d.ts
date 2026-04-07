@@ -1,9 +1,5 @@
 /// <reference types="vite/client" />
 
-import type { betterAuth } from 'better-auth'
-import type { DrizzleD1Database } from 'drizzle-orm/d1'
-import type * as schema from './db/schema'
-
 declare module '*.vue' {
   import type { DefineComponent } from 'vue'
 
@@ -11,9 +7,19 @@ declare module '*.vue' {
   export default component
 }
 
+declare module 'virtual:mokup-bundle' {
+  const mokupBundle: {
+    manifest: import('mokup/runtime').Manifest
+    moduleMap?: import('mokup/runtime').ModuleMap | undefined
+    moduleBase?: string | URL | undefined
+  }
+  export default mokupBundle
+  export { mokupBundle }
+}
+
 declare module 'hono' {
   interface ContextVariableMap {
-    db: DrizzleD1Database<typeof schema>
-    auth: ReturnType<typeof betterAuth>
+    db: import('drizzle-orm/d1').DrizzleD1Database<typeof import('./db/schema')>
+    auth: ReturnType<typeof import('better-auth').betterAuth>
   }
 }

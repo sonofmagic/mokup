@@ -1,5 +1,5 @@
 import { expect, test } from '@playwright/test'
-import { createMokupWorker } from '../../packages/server/src/index'
+import { createMokupWorker } from '../../packages/server/src/node'
 import { runMokup } from './utils/command'
 import { ensureEmptyDir } from './utils/fs'
 import { repoRoot } from './utils/paths'
@@ -21,7 +21,7 @@ test('worker bundle serves json and handler responses', async ({ request: _reque
     new Request('http://localhost/profile'),
   )
   const profileJson = await profileResponse.json() as Record<string, unknown>
-  expect(profileJson.name).toBe('Orion Vale')
+  expect(profileJson['name']).toBe('Orion Vale')
 
   const loginResponse = await worker.fetch(
     new Request('http://localhost/login', {
@@ -36,5 +36,5 @@ test('worker bundle serves json and handler responses', async ({ request: _reque
     }),
   )
   const loginJson = await loginResponse.json() as Record<string, unknown>
-  expect(loginJson.token).toBe('mock-token-7d91')
+  expect(loginJson['token']).toBe('mock-token-7d91')
 })

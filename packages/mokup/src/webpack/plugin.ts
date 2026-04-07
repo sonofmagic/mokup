@@ -9,12 +9,12 @@ import type {
   WebpackPluginInstance,
 } from './plugin/types'
 import { cwd } from 'node:process'
-import { createMiddleware, createPlaygroundMiddleware, resolvePlaygroundOptions, resolveSwConfig, resolveSwUnregisterConfig } from '@mokup/core'
 import {
   collectSwConflictDiagnosticWarning,
   createSwConflictDiagnosticSections,
   reportDiagnostics,
 } from '@mokup/shared/diagnostics'
+import { createMiddleware, createPlaygroundMiddleware, resolvePlaygroundOptions, resolveSwConfig, resolveSwUnregisterConfig } from '../internal/core'
 import { resolvePlaygroundDist } from '../playground/assets'
 import { createLogger } from '../shared/logger'
 import { resolveDirs } from '../shared/utils'

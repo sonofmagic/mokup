@@ -3,12 +3,12 @@ import type { MokupPluginOptions } from '../shared/types'
 
 import type { PluginState } from './plugin/state'
 import { cwd } from 'node:process'
-import { buildBundleModule, buildSwScript, createPlaygroundMiddleware, resolvePlaygroundOptions, resolveSwConfig, resolveSwUnregisterConfig, writePlaygroundBuild } from '@mokup/core'
 import {
   collectSwConflictDiagnosticWarning,
   createSwConflictDiagnosticSections,
   reportDiagnostics,
 } from '@mokup/shared/diagnostics'
+import { buildBundleModule, buildSwScript, createPlaygroundMiddleware, resolvePlaygroundOptions, resolveSwConfig, resolveSwUnregisterConfig, writePlaygroundBuild } from '../internal/core'
 import { resolvePlaygroundDist } from '../playground/assets'
 import { createLogger } from '../shared/logger'
 import { normalizeMokupOptions, normalizeOptions } from './plugin/options'

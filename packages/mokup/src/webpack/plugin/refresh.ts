@@ -1,9 +1,9 @@
-import type { RouteConfigInfo, RouteIgnoreInfo, RouteSkipInfo } from '@mokup/core'
+import type { RouteConfigInfo, RouteIgnoreInfo, RouteSkipInfo } from '../../internal/core'
 import type { DiagnosticErrorMode, RouteTable, VitePluginOptions } from '../../shared/types'
 import type { PluginState } from './state'
-import { createHonoApp, scanRoutes, sortRoutes } from '@mokup/core'
 import { collectRouteDiagnosticWarning, createRouteDiagnosticSections, reportDiagnostics } from '@mokup/shared/diagnostics'
 import { relative } from '@mokup/shared/pathe'
+import { createHonoApp, scanRoutes, sortRoutes } from '../../internal/core'
 import { resolveDirs, toPosix } from '../../shared/utils'
 
 function createRouteRefresher(params: {

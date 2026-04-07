@@ -1,4 +1,4 @@
-import type { DefaultTheme } from 'vitepress'
+import type { DefaultTheme, HeadConfig, MarkdownRenderer, UserConfig } from 'vitepress'
 import process from 'node:process'
 import tailwindcss from '@tailwindcss/vite'
 import mokup from 'mokup/vite'
@@ -14,7 +14,7 @@ const siteDescription
   = 'Build file-driven HTTP routes with a unified runtime, serving mock or real APIs across dev and deployment.'
 const siteUrl = 'https://mokup.icebreaker.top'
 const ogImage = `${siteUrl}/brand/mokup-logo.svg`
-const isProductionBuild = process.env.NODE_ENV === 'production' || process.argv.includes('build')
+const isProductionBuild = process.env['NODE_ENV'] === 'production' || process.argv.includes('build')
 const zhNavWithDraftPreview: DefaultTheme.NavItem[] = isProductionBuild
   ? zhNav
   : [...zhNav, { text: '草稿预览', link: '/zh/blog/drafts' }]
@@ -71,42 +71,43 @@ const vitePlugins = [
   }),
 ] as unknown as any[]
 
-export default defineConfig({
+const head: HeadConfig[] = [
+  ['link', { rel: 'icon', href: '/favicon.ico' }],
+  [
+    'meta',
+    {
+      name: 'keywords',
+      content:
+        'Mokup, HTTP framework, file-based routing, API, mock, Vite, Node, Worker, middleware, runtime',
+    },
+  ],
+  ['meta', { property: 'og:site_name', content: siteTitle }],
+  ['meta', { property: 'og:type', content: 'website' }],
+  [
+    'meta',
+    { property: 'og:title', content: `${siteTitle} — ${siteTagline}` },
+  ],
+  ['meta', { property: 'og:description', content: siteDescription }],
+  ['meta', { property: 'og:url', content: siteUrl }],
+  ['meta', { property: 'og:image', content: ogImage }],
+  ['meta', { property: 'og:locale', content: 'en_US' }],
+  ['meta', { property: 'og:locale:alternate', content: 'zh_CN' }],
+  ['meta', { name: 'twitter:card', content: 'summary' }],
+  [
+    'meta',
+    { name: 'twitter:title', content: `${siteTitle} — ${siteTagline}` },
+  ],
+  ['meta', { name: 'twitter:description', content: siteDescription }],
+  ['meta', { name: 'twitter:image', content: ogImage }],
+]
+
+const docsConfig: UserConfig<DefaultTheme.Config> = {
   title: siteTitle,
   description: siteDescription,
   lang: 'en-US',
   cleanUrls: true,
   lastUpdated: true,
-  srcExclude: isProductionBuild ? ['**/*.zh-draft.md', 'zh/blog/drafts.md'] : undefined,
-  head: [
-    ['link', { rel: 'icon', href: '/favicon.ico' }],
-    [
-      'meta',
-      {
-        name: 'keywords',
-        content:
-          'Mokup, HTTP framework, file-based routing, API, mock, Vite, Node, Worker, middleware, runtime',
-      },
-    ],
-    ['meta', { property: 'og:site_name', content: siteTitle }],
-    ['meta', { property: 'og:type', content: 'website' }],
-    [
-      'meta',
-      { property: 'og:title', content: `${siteTitle} — ${siteTagline}` },
-    ],
-    ['meta', { property: 'og:description', content: siteDescription }],
-    ['meta', { property: 'og:url', content: siteUrl }],
-    ['meta', { property: 'og:image', content: ogImage }],
-    ['meta', { property: 'og:locale', content: 'en_US' }],
-    ['meta', { property: 'og:locale:alternate', content: 'zh_CN' }],
-    ['meta', { name: 'twitter:card', content: 'summary' }],
-    [
-      'meta',
-      { name: 'twitter:title', content: `${siteTitle} — ${siteTagline}` },
-    ],
-    ['meta', { name: 'twitter:description', content: siteDescription }],
-    ['meta', { name: 'twitter:image', content: ogImage }],
-  ],
+  head,
   vite: {
     build: {
       chunkSizeWarningLimit: 800,
@@ -133,8 +134,17 @@ export default defineConfig({
   },
   themeConfig,
   markdown: {
-    config(md) {
+    config(md: MarkdownRenderer) {
       md.use(groupIconMdPlugin)
     },
   },
-})
+}
+
+const finalConfig: UserConfig<DefaultTheme.Config> = {
+  ...docsConfig,
+}
+if (isProductionBuild) {
+  finalConfig.srcExclude = ['**/*.zh-draft.md', 'zh/blog/drafts.md']
+}
+
+export default defineConfig(finalConfig)

@@ -4,5 +4,3 @@ declare module 'axios' {
     meta?: Record<string, unknown>
   }
 }
-
-export {}

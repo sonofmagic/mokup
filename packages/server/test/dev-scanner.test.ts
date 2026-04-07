@@ -1,3 +1,4 @@
+import type { RouteIgnoreInfo, RouteSkipInfo } from '../src/dev/scanner'
 import { promises as fs } from 'node:fs'
 import { tmpdir } from 'node:os'
 import path from 'node:path'
@@ -138,6 +139,62 @@ describe('dev route scanner', () => {
 
       expect(configs.some(entry => entry.file.endsWith('index.config.js'))).toBe(true)
       expect(logger.warn).toHaveBeenCalled()
+    }
+    finally {
+      await fs.rm(root, { recursive: true, force: true })
+    }
+  })
+
+  it('preserves compatibility while exposing core diagnostic metadata', async () => {
+    const { root, mockDir } = await createTempRoot()
+    const logger = { warn: vi.fn(), info: vi.fn(), error: vi.fn(), log: vi.fn() }
+    const skipped: RouteSkipInfo[] = []
+    const ignored: RouteIgnoreInfo[] = []
+    try {
+      await fs.writeFile(
+        path.join(mockDir, 'index.config.js'),
+        [
+          'export default {',
+          '  headers: { "x-root": "1" },',
+          '  include: /users/,',
+          '}',
+        ].join('\n'),
+        'utf8',
+      )
+      await fs.writeFile(
+        path.join(mockDir, 'users-disabled.get.js'),
+        'export default { enabled: false, handler: { ok: true } }',
+        'utf8',
+      )
+      await fs.writeFile(path.join(mockDir, 'notes.txt'), 'unsupported', 'utf8')
+
+      await scanRoutes({
+        dirs: [mockDir],
+        prefix: '/api',
+        logger,
+        onSkip: info => skipped.push(info),
+        onIgnore: info => ignored.push(info),
+      })
+
+      expect(skipped[0]).toMatchObject({
+        file: expect.stringContaining('users-disabled.get.js'),
+        reason: 'disabled',
+        method: 'GET',
+        url: '/api/users-disabled',
+      })
+      expect(skipped[0]?.configChain).toEqual([
+        expect.stringContaining('index.config.js'),
+      ])
+      expect(skipped[0]?.decisionChain?.length).toBeGreaterThan(0)
+      expect(skipped[0]?.effectiveConfig).toMatchObject({
+        headers: { 'x-root': '1' },
+      })
+
+      expect(ignored[0]).toMatchObject({
+        file: expect.stringContaining('notes.txt'),
+        reason: 'unsupported',
+      })
+      expect(ignored[0]?.decisionChain?.length).toBeGreaterThan(0)
     }
     finally {
       await fs.rm(root, { recursive: true, force: true })

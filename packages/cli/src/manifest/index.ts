@@ -221,11 +221,14 @@ export async function buildManifest(options: BuildOptions = {}) {
     missingHandlers: Array.from(missingHandlerFiles),
     duplicateRoutes: Array.from(duplicateRoutes),
   })
-  const { error: diagnosticError } = reportDiagnostics({
-    errorOn: options.errorOn,
+  const diagnosticParams: Parameters<typeof reportDiagnostics>[0] = {
     sections: diagnosticSections,
     warn: message => options.log?.(message),
-  })
+  }
+  if (typeof options.errorOn !== 'undefined') {
+    diagnosticParams.errorOn = options.errorOn
+  }
+  const { error: diagnosticError } = reportDiagnostics(diagnosticParams)
   if (diagnosticError) {
     throw diagnosticError
   }

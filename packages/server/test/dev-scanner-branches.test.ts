@@ -82,7 +82,7 @@ describe('dev scanner extra branches', () => {
 
       expect(routes.some(route => route.template === '/api/keep')).toBe(true)
       expect(routes.find(route => route.template === '/api/keep')?.middlewares?.length).toBeGreaterThan(0)
-      expect(skipped.some(entry => entry.reason === 'include')).toBe(true)
+      expect(skipped.some(entry => entry.reason === 'exclude')).toBe(true)
     }
     finally {
       await fs.rm(root, { recursive: true, force: true })

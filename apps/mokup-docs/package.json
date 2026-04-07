@@ -14,6 +14,8 @@
     "build:playground": "pnpm --filter @mokup/playground build",
     "build": "pnpm build:playground && pnpm build:docs",
     "preview": "vitepress preview docs",
+    "lint": "eslint .",
+    "typecheck": "vue-tsc -p tsconfig.json --noEmit",
     "test:e2e": "node ../../tests/e2e/run-app-e2e.mjs",
     "worker:dev": "pnpm build && wrangler dev",
     "worker:deploy": "pnpm build && wrangler deploy"
@@ -29,6 +31,7 @@
     "vitepress": "^2.0.0-alpha.15",
     "vitepress-plugin-group-icons": "^1.7.3",
     "vitepress-plugin-llms": "^1.12.0",
+    "vue-tsc": "~3.2.0",
     "wrangler": "catalog:"
   }
 }

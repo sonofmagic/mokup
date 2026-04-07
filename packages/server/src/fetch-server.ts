@@ -154,12 +154,15 @@ export async function createFetchServer(
         missingHandlers: Array.from(missingHandlerFiles).map(file => relative(root, file)),
         duplicateRoutes: Array.from(duplicateRoutes),
       })
-      const { error: diagnosticError } = reportDiagnostics({
+      const diagnosticParams: Parameters<typeof reportDiagnostics>[0] = {
         errorTitle: diagnosticErrorTitle.slice(0, -1),
         sections: diagnosticSections,
-        errorOn,
         warn: message => logger.warn(message),
-      })
+      }
+      if (typeof errorOn !== 'undefined') {
+        diagnosticParams.errorOn = errorOn
+      }
+      const { error: diagnosticError } = reportDiagnostics(diagnosticParams)
       if (diagnosticError) {
         throw diagnosticError
       }

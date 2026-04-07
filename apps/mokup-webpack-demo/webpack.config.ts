@@ -1,3 +1,4 @@
+import type { WebpackConfig } from 'mokup/webpack'
 import type { Configuration } from 'webpack'
 // Pull in webpack-dev-server's type augmentation for Configuration.devServer.
 import type {} from 'webpack-dev-server'
@@ -10,6 +11,11 @@ import { DefinePlugin } from 'webpack'
 import { getMokupWebpackAliases } from '../../scripts/mokup-alias.mjs'
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url))
+const VUE_FILE_RE = /\.vue$/
+const TS_FILE_RE = /\.ts$/
+const CSS_FILE_RE = /\.css$/
+const NODE_MODULES_RE = /node_modules/
+const APPEND_TS_SUFFIX_TO = [VUE_FILE_RE]
 
 function config(_env: unknown, argv: { mode?: string }): Configuration {
   const isDev = argv.mode !== 'production'
@@ -40,20 +46,20 @@ function config(_env: unknown, argv: { mode?: string }): Configuration {
     module: {
       rules: [
         {
-          test: /\.vue$/,
+          test: VUE_FILE_RE,
           loader: 'vue-loader',
         },
         {
-          test: /\.ts$/,
+          test: TS_FILE_RE,
           loader: 'ts-loader',
           options: {
-            appendTsSuffixTo: [/\.vue$/],
+            appendTsSuffixTo: APPEND_TS_SUFFIX_TO,
             transpileOnly: true,
           },
-          exclude: /node_modules/,
+          exclude: NODE_MODULES_RE,
         },
         {
-          test: /\.css$/,
+          test: CSS_FILE_RE,
           use: ['style-loader', 'css-loader'],
         },
       ],
@@ -78,7 +84,7 @@ function config(_env: unknown, argv: { mode?: string }): Configuration {
     },
   }
 
-  return withMokup(base)
+  return withMokup(base as unknown as WebpackConfig) as unknown as Configuration
 }
 
 export default config

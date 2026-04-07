@@ -63,6 +63,8 @@ const placeholderCompartment = new Compartment()
 const editableCompartment = new Compartment()
 
 const setErrorIndexEffect = StateEffect.define<number | null>()
+const POSITION_PATTERN = /position\s+(\d+)/i
+const END_OF_JSON_INPUT_PATTERN = /end of json input/i
 
 const errorLineField = StateField.define({
   create() {
@@ -159,14 +161,14 @@ function resolveLineColumn(text: string, index: number) {
 }
 
 function resolveJsonErrorIndex(message: string, text: string) {
-  const match = message.match(/position\s+(\d+)/i)
+  const match = message.match(POSITION_PATTERN)
   if (match) {
     const value = Number(match[1])
     if (Number.isFinite(value)) {
       return Math.max(0, value)
     }
   }
-  if (/end of json input/i.test(message)) {
+  if (END_OF_JSON_INPUT_PATTERN.test(message)) {
     return Math.max(text.length - 1, 0)
   }
   return null

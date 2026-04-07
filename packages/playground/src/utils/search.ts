@@ -10,6 +10,9 @@ export interface HighlightPart {
   highlight: boolean
 }
 
+const SEARCH_TOKEN_SPLIT_PATTERN = /\s+/
+const SEARCH_FIELD_PATTERN = /^([a-z]+)(:|=)(.+)$/i
+
 function resolveSearchField(key: string): SearchField | null {
   switch (key.toLowerCase()) {
     case 'method':
@@ -39,11 +42,11 @@ export function parseSearchTokens(raw: string): SearchToken[] {
     return []
   }
   const tokens: SearchToken[] = []
-  for (const part of trimmed.split(/\s+/)) {
+  for (const part of trimmed.split(SEARCH_TOKEN_SPLIT_PATTERN)) {
     if (!part) {
       continue
     }
-    const match = part.match(/^([a-z]+)(:|=)(.+)$/i)
+    const match = part.match(SEARCH_FIELD_PATTERN)
     if (!match) {
       tokens.push({ field: 'text', value: part.toLowerCase() })
       continue
@@ -103,7 +106,7 @@ export function buildHighlightParts(text: string, tokens: string[]): HighlightPa
   ranges.sort((a, b) => (a[0] - b[0]) || (a[1] - b[1]))
   const merged: Array<[number, number]> = []
   for (const [start, end] of ranges) {
-    const last = merged[merged.length - 1]
+    const last = merged.at(-1)
     if (!last || start > last[1]) {
       merged.push([start, end])
     }

@@ -194,22 +194,36 @@ export function reportDiagnostics<TCategory extends string>(params: {
   maxItems?: number
   warn?: (message: string) => void
 }) {
-  const summaryLines = buildDiagnosticSummaryLines({
-    title: params.title,
+  const summaryParams: Parameters<typeof buildDiagnosticSummaryLines<TCategory>>[0] = {
     sections: params.sections,
-    maxItems: params.maxItems,
-  })
+  }
+  if (typeof params.title === 'string') {
+    summaryParams.title = params.title
+  }
+  if (typeof params.maxItems === 'number') {
+    summaryParams.maxItems = params.maxItems
+  }
+
+  const summaryLines = buildDiagnosticSummaryLines(summaryParams)
   if (params.warn) {
     for (const line of summaryLines) {
       params.warn(line)
     }
   }
-  const error = createDiagnosticError({
-    errorOn: params.errorOn,
+  const errorParams: Parameters<typeof createDiagnosticError<TCategory>>[0] = {
     sections: params.sections,
-    title: params.errorTitle,
-    maxItems: params.maxItems,
-  })
+  }
+  if (params.errorOn) {
+    errorParams.errorOn = params.errorOn
+  }
+  if (typeof params.errorTitle === 'string') {
+    errorParams.title = params.errorTitle
+  }
+  if (typeof params.maxItems === 'number') {
+    errorParams.maxItems = params.maxItems
+  }
+
+  const error = createDiagnosticError(errorParams)
   return {
     summaryLines,
     error,

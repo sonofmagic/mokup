@@ -1,4 +1,4 @@
-import type { MiddlewareHandler } from 'mokup'
+import type { Context, MiddlewareHandler } from 'mokup'
 import { betterAuth } from 'better-auth'
 import { drizzleAdapter } from 'better-auth/adapters/drizzle'
 import { drizzle } from 'drizzle-orm/d1'
@@ -14,7 +14,10 @@ interface Bindings {
   GITHUB_CLIENT_SECRET?: string
 }
 
-const middleware: MiddlewareHandler = async (c, next) => {
+const middleware: MiddlewareHandler = async (
+  c: Context,
+  next: () => Promise<void>,
+) => {
   const env = c.env as Bindings
   if (!env.DB) {
     return c.json({ error: 'Missing D1 binding: DB' }, 500)

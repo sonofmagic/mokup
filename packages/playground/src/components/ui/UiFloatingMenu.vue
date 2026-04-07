@@ -24,7 +24,7 @@ const props = withDefaults(defineProps<UiFloatingMenuProps>(), {
   panelRole: 'menu',
 })
 
-type ReferenceTarget = HTMLElement | ComponentPublicInstance | null
+type ReferenceTarget = Element | ComponentPublicInstance | null
 
 const panelId = `pg-floating-menu-${Math.random().toString(36).slice(2, 10)}`
 const isOpen = ref(false)

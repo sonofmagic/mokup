@@ -1,3 +1,5 @@
+const QUERY_SEGMENT_SPLIT_PATTERN = /[&\r\n]/
+
 function buildQueryString(query: Record<string, unknown>) {
   const params = new URLSearchParams()
   for (const [key, value] of Object.entries(query)) {
@@ -20,7 +22,7 @@ function parseKeyValueInput(input: string) {
   if (!trimmed) {
     return []
   }
-  const parts = trimmed.split(/[&\r\n]/)
+  const parts = trimmed.split(QUERY_SEGMENT_SPLIT_PATTERN)
   const entries: Array<[string, string]> = []
   for (const part of parts) {
     const segment = part.trim()

@@ -117,12 +117,14 @@
     "build": "tsdown",
     "dev": "tsdown --watch",
     "lint": "eslint .",
+    "test": "vitest run --config vitest.config.ts",
     "typecheck": "tsc -p tsconfig.json --noEmit",
     "test:types": "tsd"
   },
   "dependencies": {
     "@hono/node-server": "^1.19.13",
     "@hono/node-ws": "^1.1.1",
+    "@mokup/core": "workspace:*",
     "@mokup/playground": "workspace:*",
     "@mokup/runtime": "workspace:*",
     "@mokup/shared": "workspace:*"

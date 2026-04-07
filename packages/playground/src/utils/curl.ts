@@ -1,7 +1,19 @@
 import type { AuthType, BodyType, RawBodyType } from '../types'
 
+const SAFE_SHELL_VALUE_PATTERN = /^[\w./:@=&?%-]+$/
+
+function resolveContentType(rawType: RawBodyType): string {
+  switch (rawType) {
+    case 'json': return 'application/json'
+    case 'javascript': return 'application/javascript'
+    case 'html': return 'text/html'
+    case 'xml': return 'text/xml'
+    default: return 'text/plain'
+  }
+}
+
 function shellEscape(value: string) {
-  if (/^[\w./:@=&?%-]+$/.test(value)) {
+  if (SAFE_SHELL_VALUE_PATTERN.test(value)) {
     return value
   }
   return `'${value.replace(/'/g, `'\\''`)}'`
@@ -84,16 +96,6 @@ function buildCurl(options: BuildCurlOptions): string {
   }
 
   return parts.join(' \\\n  ')
-}
-
-function resolveContentType(rawType: RawBodyType): string {
-  switch (rawType) {
-    case 'json': return 'application/json'
-    case 'javascript': return 'application/javascript'
-    case 'html': return 'text/html'
-    case 'xml': return 'text/xml'
-    default: return 'text/plain'
-  }
 }
 
 export type { BuildCurlOptions }

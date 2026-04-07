@@ -1,9 +1,9 @@
-import type { PlaygroundConfig, resolveSwConfig } from '@mokup/core'
 import type { PreviewServer, ViteDevServer } from 'vite'
+import type { PlaygroundConfig, resolveSwConfig } from '../../internal/core'
 import type { Logger } from '../../shared/types'
 import type { MiddlewareHandler } from './middleware'
 import type { PluginState } from './state'
-import { buildSwScript, createMiddleware } from '@mokup/core'
+import { buildSwScript, createMiddleware } from '../../internal/core'
 import { addMiddlewareFirst } from './middleware'
 import {
   resolveRegisterPath,

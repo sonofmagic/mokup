@@ -1,6 +1,7 @@
 import { promises as fs } from 'node:fs'
 import path from 'node:path'
 import process from 'node:process'
+import { pathToFileURL } from 'node:url'
 
 const rootDir = process.cwd()
 const expectedNodeRange = '^20.19.0 || >=22.12.0'
@@ -347,11 +348,20 @@ async function main() {
   process.stdout.write(`migration guards ok (${packageJsonFiles.length} package.json files checked)\n`)
 }
 
-main().catch((error) => {
-  process.stderr.write(`migration guards failed: ${error instanceof Error ? error.stack ?? error.message : String(error)}\n`)
-  process.exit(1)
-})
+if (isDirectExecution()) {
+  main().catch((error) => {
+    process.stderr.write(`migration guards failed: ${error instanceof Error ? error.stack ?? error.message : String(error)}\n`)
+    process.exit(1)
+  })
+}
 
 export {
   evaluateMigrationGuards,
+}
+function isDirectExecution() {
+  const entry = process.argv[1]
+  if (!entry) {
+    return false
+  }
+  return import.meta.url === pathToFileURL(entry).href
 }

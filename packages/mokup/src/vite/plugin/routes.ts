@@ -1,4 +1,4 @@
-import type { RouteConfigInfo, RouteIgnoreInfo, RouteSkipInfo } from '@mokup/core'
+import type { RouteConfigInfo, RouteIgnoreInfo, RouteSkipInfo } from '../../internal/core'
 import type { RouteTable } from '../../shared/types'
 
 function buildRouteSignature(

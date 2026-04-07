@@ -8,8 +8,8 @@ interface BaseConfigOptions {
 }
 
 export function createPlaywrightConfig(options: BaseConfigOptions) {
-  const isCI = Boolean(process.env.CI)
-  const baseURL = process.env.E2E_BASE_URL
+  const isCI = Boolean(process.env['CI'])
+  const baseURL = process.env['E2E_BASE_URL']
   if (!baseURL) {
     throw new Error('E2E_BASE_URL is required. Run via pnpm test:e2e to provision it.')
   }

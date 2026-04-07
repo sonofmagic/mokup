@@ -120,6 +120,7 @@
     "build": "tsdown",
     "dev": "tsdown --watch",
     "lint": "eslint .",
+    "test": "vitest run --config vitest.config.ts",
     "test:types": "tsd",
     "typecheck": "tsc -p tsconfig.json --noEmit"
   },

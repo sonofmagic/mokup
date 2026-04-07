@@ -1,5 +1,15 @@
 import type { BuildCurlOptions } from './curl'
 
+function resolveContentType(rawType: string): string {
+  switch (rawType) {
+    case 'json': return 'application/json'
+    case 'javascript': return 'application/javascript'
+    case 'html': return 'text/html'
+    case 'xml': return 'text/xml'
+    default: return 'text/plain'
+  }
+}
+
 function jsString(value: string): string {
   return `'${value.replace(/\\/g, '\\\\').replace(/'/g, '\\\'')}'`
 }
@@ -69,16 +79,6 @@ function buildFetch(options: BuildCurlOptions): string {
   parts.push(')')
 
   return parts.join('\n')
-}
-
-function resolveContentType(rawType: string): string {
-  switch (rawType) {
-    case 'json': return 'application/json'
-    case 'javascript': return 'application/javascript'
-    case 'html': return 'text/html'
-    case 'xml': return 'text/xml'
-    default: return 'text/plain'
-  }
 }
 
 export { buildFetch }
