@@ -15,6 +15,10 @@ const CONFIG_FILENAMES = [
   'vitest.config.cjs',
   'vitest.config.mjs',
 ] as const
+const BACKSLASH_REGEX = /\\/g
+const LEADING_DOT_SLASH_REGEX = /^\.\//
+const GLOB_CHARACTER_REGEX = /[*?[{]/
+const TRAILING_SLASH_REGEX = /\/+$/
 const logger = createLogger({ tag: 'vitest' })
 
 function extractBaseDirFromGlob(pattern: string): string | null {
@@ -23,14 +27,14 @@ function extractBaseDirFromGlob(pattern: string): string | null {
   }
 
   const normalized = pattern
-    .replace(/\\/g, '/')
-    .replace(/^\.\//, '')
-  const globIndex = normalized.search(/[*?[{]/)
+    .replace(BACKSLASH_REGEX, '/')
+    .replace(LEADING_DOT_SLASH_REGEX, '')
+  const globIndex = normalized.search(GLOB_CHARACTER_REGEX)
   const base = globIndex === -1
     ? normalized
     : normalized.slice(0, globIndex)
 
-  const cleaned = base.replace(/\/+$/, '')
+  const cleaned = base.replace(TRAILING_SLASH_REGEX, '')
   return cleaned || null
 }
 
@@ -120,7 +124,11 @@ export default defineConfig(() => {
         ],
       },
       forceRerunTriggers: [
-        '**/{vitest,vite}.config.*/**',
+        'package.json',
+        'pnpm-workspace.yaml',
+        '**/package.json',
+        '**/vitest.config.*',
+        '**/vite.config.*',
       ],
     },
   }
