@@ -1,7 +1,7 @@
-import { readFile, writeFile } from 'node:fs/promises'
+import { readFile } from 'node:fs/promises'
 import { join } from 'node:path'
 import { expect, test } from '@playwright/test'
-import { writeJson } from '../../../../tests/e2e/utils/fs'
+import { writeJson, writeTextFile } from '../../../../tests/e2e/utils/fs'
 import { repoRoot } from '../../../../tests/e2e/utils/paths'
 
 const mockDir = join(repoRoot, 'apps/mokup-web-demo/mock')
@@ -24,7 +24,7 @@ async function backupFile(filePath: string) {
 
 async function restoreAll() {
   for (const backup of backups.reverse()) {
-    await writeFile(backup.path, backup.content, 'utf8')
+    await writeTextFile(backup.path, backup.content)
   }
   backups.length = 0
 }
@@ -108,7 +108,7 @@ test.describe('edit JSON mock files', () => {
       '}',
       '',
     ].join('\n')
-    await writeFile(filePath, newContent, 'utf8')
+    await writeTextFile(filePath, newContent)
 
     await pollApi(request, '/api/about', body => body['e2e'] === stamp)
   })
@@ -200,7 +200,7 @@ test.describe('edit TS handler mock files', () => {
       'export default rule',
       '',
     ].join('\n')
-    await writeFile(filePath, newContent, 'utf8')
+    await writeTextFile(filePath, newContent)
 
     await pollApi(request, '/api/health', body => body['marker'] === marker)
   })
@@ -220,7 +220,7 @@ test.describe('edit TS handler mock files', () => {
       'export default rule',
       '',
     ].join('\n')
-    await writeFile(filePath, newContent, 'utf8')
+    await writeTextFile(filePath, newContent)
 
     await pollApi(request, '/api/override', body => body['marker'] === marker)
   })
@@ -242,7 +242,7 @@ test.describe('edit TS handler mock files', () => {
       'export default rule',
       '',
     ].join('\n')
-    await writeFile(filePath, newContent, 'utf8')
+    await writeTextFile(filePath, newContent)
 
     await pollApi(request, '/api/search', body => body['marker'] === marker)
   })
@@ -269,7 +269,7 @@ test.describe('edit TS handler mock files', () => {
       'export default rule',
       '',
     ].join('\n')
-    await writeFile(filePath, newContent, 'utf8')
+    await writeTextFile(filePath, newContent)
 
     await expect.poll(async () => {
       try {
@@ -306,7 +306,7 @@ test.describe('edit TS handler mock files', () => {
       'export default rule',
       '',
     ].join('\n')
-    await writeFile(filePath, newContent, 'utf8')
+    await writeTextFile(filePath, newContent)
 
     await pollApi(request, '/api/users/42', body => body['marker'] === marker && body['id'] === '42')
   })
