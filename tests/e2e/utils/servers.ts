@@ -1,13 +1,58 @@
+import type { ChildProcess } from 'node:child_process'
+import { spawn } from 'node:child_process'
+import { existsSync } from 'node:fs'
 import { isAbsolute, join, resolve } from 'node:path'
 import process from 'node:process'
-import { execa } from 'execa'
 import { WEB_HOST, WEB_PORT } from '../constants'
 import { isPortOpen, waitForHttp } from './net'
 
 export interface RunningServer {
   name: string
-  process: ReturnType<typeof execa>
+  process: ChildProcess
   url: string
+}
+
+function waitForChildProcess(child: ChildProcess) {
+  return new Promise<void>((resolve, reject) => {
+    child.once('error', reject)
+    child.once('exit', (code, signal) => {
+      if (code === 0 || signal === 'SIGTERM' || signal === 'SIGKILL') {
+        resolve()
+        return
+      }
+      reject(new Error(`Process exited with code ${String(code)} and signal ${String(signal)}`))
+    })
+  })
+}
+
+function formatServerLabel(params: {
+  name: string
+  cwd: string
+  command: string
+  args: string[]
+  url: string
+}) {
+  return [
+    `name=${params.name}`,
+    `cwd=${params.cwd}`,
+    `url=${params.url}`,
+    `command=${[params.command, ...params.args].join(' ')}`,
+  ].join(', ')
+}
+
+function waitForUnexpectedExit(child: ChildProcess, label: string) {
+  return new Promise<never>((_, reject) => {
+    child.once('error', (error) => {
+      reject(new Error(`Failed to start dev server (${label}): ${String(error)}`))
+    })
+    child.once('exit', (code, signal) => {
+      reject(
+        new Error(
+          `Dev server exited before becoming ready (${label}, code=${String(code)}, signal=${String(signal)})`,
+        ),
+      )
+    })
+  })
 }
 
 export async function startViteServer(params?: {
@@ -32,9 +77,25 @@ export async function startViteServer(params?: {
   const appRoot = isAbsolute(appDir) ? appDir : resolve(repoRoot, appDir)
   const name = params?.name ?? 'mokup-web-demo'
   const viteBin = join(repoRoot, 'node_modules', '.bin', 'vite')
-  const child = execa(
+  const args = ['--host', host, '--port', String(port)]
+  const label = formatServerLabel({
+    name,
+    cwd: appRoot,
+    url: baseUrl,
+    command: viteBin,
+    args,
+  })
+
+  if (!existsSync(appRoot)) {
+    throw new Error(`Dev server app directory does not exist (${label})`)
+  }
+  if (!existsSync(viteBin)) {
+    throw new Error(`Dev server binary does not exist (${label})`)
+  }
+
+  const child = spawn(
     viteBin,
-    ['--host', host, '--port', String(port)],
+    args,
     {
       cwd: appRoot,
       env: {
@@ -45,7 +106,18 @@ export async function startViteServer(params?: {
     },
   )
 
-  await waitForHttp(baseUrl, 60_000)
+  try {
+    await Promise.race([
+      waitForHttp(baseUrl, 60_000),
+      waitForUnexpectedExit(child, label),
+    ])
+  }
+  catch (error) {
+    if (!child.killed && child.exitCode === null) {
+      child.kill('SIGTERM')
+    }
+    throw error
+  }
 
   return {
     name,
@@ -56,7 +128,7 @@ export async function startViteServer(params?: {
 
 export async function stopServers(servers: RunningServer[]) {
   await Promise.all(servers.map(async (server) => {
-    if (server.process.killed) {
+    if (server.process.killed || server.process.exitCode !== null) {
       return
     }
     server.process.kill('SIGTERM')
@@ -66,7 +138,7 @@ export async function stopServers(servers: RunningServer[]) {
       }
     }, 5_000)
     try {
-      await server.process
+      await waitForChildProcess(server.process)
     }
     catch {
       // ignore termination errors
