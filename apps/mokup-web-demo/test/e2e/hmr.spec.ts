@@ -1,10 +1,13 @@
 import { readFile } from 'node:fs/promises'
 import { join } from 'node:path'
+import { setTimeout as delay } from 'node:timers/promises'
 import { expect, test } from '@playwright/test'
 import { writeJson, writeTextFile } from '../../../../tests/e2e/utils/fs'
 import { repoRoot } from '../../../../tests/e2e/utils/paths'
 
 const mockDir = join(repoRoot, 'apps/mokup-web-demo/mock')
+const hmrSettleDelayMs = 200
+const hmrRewriteIntervalMs = 2_000
 
 // ---------------------------------------------------------------------------
 // Helpers
@@ -57,8 +60,52 @@ async function pollApi(
   }, { timeout }).toBe(true)
 }
 
+async function writeJsonAndWaitForApi(
+  request: import('@playwright/test').APIRequestContext,
+  filePath: string,
+  value: unknown,
+  path: string,
+  check: (body: Record<string, unknown>) => boolean,
+  timeout = 15_000,
+) {
+  const deadline = Date.now() + timeout
+  let lastRewriteAt = 0
+  let consecutiveMatches = 0
+
+  while (Date.now() < deadline) {
+    const now = Date.now()
+    if (lastRewriteAt === 0 || now - lastRewriteAt >= hmrRewriteIntervalMs) {
+      await writeJson(filePath, value)
+      lastRewriteAt = now
+      consecutiveMatches = 0
+    }
+
+    try {
+      const res = await request.get(path, {
+        headers: { 'cache-control': 'no-cache' },
+      })
+      if (res.ok()) {
+        const text = await res.text()
+        const json = JSON.parse(text) as Record<string, unknown>
+        consecutiveMatches = check(json) ? consecutiveMatches + 1 : 0
+        if (consecutiveMatches >= 2) {
+          return
+        }
+      }
+    }
+    catch {
+      consecutiveMatches = 0
+    }
+
+    await delay(hmrSettleDelayMs)
+  }
+
+  await pollApi(request, path, check, Math.max(hmrSettleDelayMs, timeout))
+}
+
 test.afterEach(async () => {
   await restoreAll()
+  await delay(hmrSettleDelayMs)
 })
 
 // ---------------------------------------------------------------------------
@@ -72,26 +119,36 @@ test.describe('edit JSON mock files', () => {
 
     const stamp = `edit-json-${Date.now()}`
     const original = JSON.parse(await readFile(filePath, 'utf8'))
-    await writeJson(filePath, { ...original, e2e: stamp })
-
-    await pollApi(request, '/api/heartbeat', body => body['e2e'] === stamp)
+    await writeJsonAndWaitForApi(
+      request,
+      filePath,
+      { ...original, e2e: stamp },
+      '/api/heartbeat',
+      body => body['e2e'] === stamp,
+    )
   })
 
   test('editing a JSON mock replaces the entire response body', async ({ request }) => {
     const filePath = join(mockDir, 'heartbeat.get.json')
     await backupFile(filePath)
 
-    await writeJson(filePath, {
+    const nextBody = {
       status: 'replaced',
       extra: 42,
       nested: { ok: true },
-    })
+    }
 
-    await pollApi(request, '/api/heartbeat', (body) => {
-      return body['status'] === 'replaced'
-        && body['extra'] === 42
-        && (body['nested'] as Record<string, unknown>)?.['ok'] === true
-    })
+    await writeJsonAndWaitForApi(
+      request,
+      filePath,
+      nextBody,
+      '/api/heartbeat',
+      (body) => {
+        return body['status'] === 'replaced'
+          && body['extra'] === 42
+          && (body['nested'] as Record<string, unknown>)?.['ok'] === true
+      },
+    )
   })
 
   test('editing a JSONC mock file triggers hot reload', async ({ request }) => {
@@ -148,9 +205,13 @@ test.describe('edit JSON mock files', () => {
       await writeJson(filePath, { ...original, rapid: `v${i}` })
     }
     const finalStamp = `final-${Date.now()}`
-    await writeJson(filePath, { ...original, rapid: finalStamp })
-
-    await pollApi(request, '/api/heartbeat', body => body['rapid'] === finalStamp)
+    await writeJsonAndWaitForApi(
+      request,
+      filePath,
+      { ...original, rapid: finalStamp },
+      '/api/heartbeat',
+      body => body['rapid'] === finalStamp,
+    )
   })
 
   test('editing profile.get.json updates the response', async ({ request }) => {
@@ -158,15 +219,19 @@ test.describe('edit JSON mock files', () => {
     await backupFile(filePath)
 
     const stamp = `profile-${Date.now()}`
-    await writeJson(filePath, {
-      id: 99,
-      name: stamp,
-      role: 'e2e-tester',
-      location: 'CI',
-      updatedAt: new Date().toISOString(),
-    })
-
-    await pollApi(request, '/api/profile', body => body['name'] === stamp)
+    await writeJsonAndWaitForApi(
+      request,
+      filePath,
+      {
+        id: 99,
+        name: stamp,
+        role: 'e2e-tester',
+        location: 'CI',
+        updatedAt: new Date().toISOString(),
+      },
+      '/api/profile',
+      body => body['name'] === stamp,
+    )
   })
 
   test('editing users/index.get.json updates the response', async ({ request }) => {
@@ -174,9 +239,13 @@ test.describe('edit JSON mock files', () => {
     await backupFile(filePath)
 
     const stamp = `team-${Date.now()}`
-    await writeJson(filePath, { team: stamp, members: ['E2E'] })
-
-    await pollApi(request, '/api/users', body => body['team'] === stamp)
+    await writeJsonAndWaitForApi(
+      request,
+      filePath,
+      { team: stamp, members: ['E2E'] },
+      '/api/users',
+      body => body['team'] === stamp,
+    )
   })
 })
 
@@ -321,75 +390,84 @@ test.describe('content structure changes', () => {
     const filePath = join(mockDir, 'heartbeat.get.json')
     await backupFile(filePath)
 
-    await writeJson(filePath, { version: 1, shape: 'original' })
-    await pollApi(request, '/api/heartbeat', body => body['version'] === 1)
+    await writeJsonAndWaitForApi(
+      request,
+      filePath,
+      { version: 1, shape: 'original' },
+      '/api/heartbeat',
+      body => body['version'] === 1,
+    )
 
-    await writeJson(filePath, { version: 2, newField: 'replaced', array: [1, 2, 3] })
-    await pollApi(request, '/api/heartbeat', (body) => {
-      return body['version'] === 2
-        && body['newField'] === 'replaced'
-        && Array.isArray(body['array'])
-    })
+    await writeJsonAndWaitForApi(
+      request,
+      filePath,
+      { version: 2, newField: 'replaced', array: [1, 2, 3] },
+      '/api/heartbeat',
+      (body) => {
+        return body['version'] === 2
+          && body['newField'] === 'replaced'
+          && Array.isArray(body['array'])
+      },
+    )
   })
 
   test('editing with special characters in the response', async ({ request }) => {
     const filePath = join(mockDir, 'heartbeat.get.json')
     await backupFile(filePath)
 
-    await writeJson(filePath, {
-      emoji: '🚀',
-      unicode: '你好世界',
-      html: '<script>alert("xss")</script>',
-      zero: 0,
-      nullish: null,
-    })
-
-    await pollApi(request, '/api/heartbeat', (body) => {
-      return body['emoji'] === '🚀'
-        && body['unicode'] === '你好世界'
-        && body['zero'] === 0
-        && body['nullish'] === null
-    })
+    await writeJsonAndWaitForApi(
+      request,
+      filePath,
+      {
+        emoji: '🚀',
+        unicode: '你好世界',
+        html: '<script>alert("xss")</script>',
+        zero: 0,
+        nullish: null,
+      },
+      '/api/heartbeat',
+      (body) => {
+        return body['emoji'] === '🚀'
+          && body['unicode'] === '你好世界'
+          && body['zero'] === 0
+          && body['nullish'] === null
+      },
+    )
   })
 
   test('editing with deeply nested JSON', async ({ request }) => {
     const filePath = join(mockDir, 'heartbeat.get.json')
     await backupFile(filePath)
 
-    await writeJson(filePath, {
-      a: { b: { c: { d: { value: 'deep' } } } },
-      array: [{ nested: [1, 2, 3] }],
-    })
-
-    await pollApi(request, '/api/heartbeat', (body) => {
-      const a = body['a'] as Record<string, unknown> | undefined
-      const b = a?.['b'] as Record<string, unknown> | undefined
-      const c = b?.['c'] as Record<string, unknown> | undefined
-      const d = c?.['d'] as Record<string, unknown> | undefined
-      return d?.['value'] === 'deep'
-    })
+    await writeJsonAndWaitForApi(
+      request,
+      filePath,
+      {
+        a: { b: { c: { d: { value: 'deep' } } } },
+        array: [{ nested: [1, 2, 3] }],
+      },
+      '/api/heartbeat',
+      (body) => {
+        const a = body['a'] as Record<string, unknown> | undefined
+        const b = a?.['b'] as Record<string, unknown> | undefined
+        const c = b?.['c'] as Record<string, unknown> | undefined
+        const d = c?.['d'] as Record<string, unknown> | undefined
+        return d?.['value'] === 'deep'
+      },
+    )
   })
 
   test('editing with empty JSON object', async ({ request }) => {
     const filePath = join(mockDir, 'heartbeat.get.json')
     await backupFile(filePath)
 
-    await writeJson(filePath, {})
-
-    await expect.poll(async () => {
-      try {
-        const res = await request.get('/api/heartbeat', {
-          headers: { 'cache-control': 'no-cache' },
-        })
-        if (!res.ok()) {
-          return null
-        }
-        return JSON.parse(await res.text())
-      }
-      catch {
-        return null
-      }
-    }, { timeout: 15_000 }).toEqual({})
+    await writeJsonAndWaitForApi(
+      request,
+      filePath,
+      {},
+      '/api/heartbeat',
+      body => Object.keys(body).length === 0,
+    )
   })
 
   test('editing multiple JSON mocks in sequence', async ({ request }) => {
@@ -400,10 +478,20 @@ test.describe('content structure changes', () => {
 
     const stamp = `multi-${Date.now()}`
 
-    await writeJson(heartbeatPath, { status: 'alive', e2e: stamp })
-    await pollApi(request, '/api/heartbeat', body => body['e2e'] === stamp)
+    await writeJsonAndWaitForApi(
+      request,
+      heartbeatPath,
+      { status: 'alive', e2e: stamp },
+      '/api/heartbeat',
+      body => body['e2e'] === stamp,
+    )
 
-    await writeJson(profilePath, { id: 1, name: stamp, role: 'tester' })
-    await pollApi(request, '/api/profile', body => body['name'] === stamp)
+    await writeJsonAndWaitForApi(
+      request,
+      profilePath,
+      { id: 1, name: stamp, role: 'tester' },
+      '/api/profile',
+      body => body['name'] === stamp,
+    )
   })
 })
