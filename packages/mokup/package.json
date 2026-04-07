@@ -124,6 +124,19 @@
     "test:types": "tsd",
     "typecheck": "tsc -p tsconfig.json --noEmit"
   },
+  "tsd": {
+    "compilerOptions": {
+      "baseUrl": ".",
+      "paths": {
+        "mokup": [
+          "./dist/index.d.ts"
+        ],
+        "mokup/*": [
+          "./dist/*"
+        ]
+      }
+    }
+  },
   "peerDependencies": {
     "html-webpack-plugin": "^5.0.0",
     "vite": "^5.0.0 || ^6.0.0 || ^7.0.0",
