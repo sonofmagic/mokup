@@ -8,6 +8,10 @@ import { build as rolldown } from '@mokup/shared/rolldown'
 
 import { toPosix } from './utils'
 
+function normalizeHandlerOutputPath(value: string) {
+  return value.replaceAll('[', '_').replaceAll(']', '_')
+}
+
 /**
  * Options for building a manifest response from a handler.
  *
@@ -61,7 +65,9 @@ export interface BuildResponseOptions {
 export function getHandlerModulePath(file: string, handlersDir: string, root: string) {
   const relFromRoot = relative(root, file)
   const ext = extname(relFromRoot)
-  const relNoExt = `${relFromRoot.slice(0, relFromRoot.length - ext.length)}.mjs`
+  const relNoExt = normalizeHandlerOutputPath(
+    `${relFromRoot.slice(0, relFromRoot.length - ext.length)}.mjs`,
+  )
   const outputPath = join(handlersDir, relNoExt)
   const relFromOutDir = relative(dirname(handlersDir), outputPath)
   const normalized = toPosix(relFromOutDir)
@@ -212,4 +218,9 @@ export async function bundleHandlers(files: string[], root: string, handlersDir:
     outExtension: { '.js': '.mjs' },
     logLevel: 'silent',
   })
+  await fs.writeFile(
+    join(handlersDir, 'package.json'),
+    `${JSON.stringify({ type: 'module' }, null, 2)}\n`,
+    'utf8',
+  )
 }

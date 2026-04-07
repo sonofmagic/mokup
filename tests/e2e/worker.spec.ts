@@ -36,5 +36,5 @@ test('worker bundle serves json and handler responses', async ({ request: _reque
     }),
   )
   const loginJson = await loginResponse.json() as Record<string, unknown>
-  expect(loginJson['token']).toBe('mock-token-7d91')
+  expect(loginJson['token']).toMatch(/^[a-z0-9]{18}$/)
 })

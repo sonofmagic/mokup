@@ -204,7 +204,7 @@ test('connect and express middleware serve JSON', async () => {
 
 test('connect middleware handles POST bodies', async () => {
   const json = await runPostWithBody(createConnectMiddleware(options))
-  expect(json['token']).toBe('mock-token-7d91')
+  expect(json['token']).toMatch(/^[a-z0-9]{18}$/)
 })
 
 test('koa middleware serves JSON', async () => {

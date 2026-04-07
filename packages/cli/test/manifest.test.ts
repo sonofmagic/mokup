@@ -197,6 +197,47 @@ describe('buildManifest', () => {
     }
   })
 
+  it('emits normalized dynamic handler paths and marks handlers as ESM', async () => {
+    const { root, mockDir } = await createTempRoot()
+    try {
+      await writeFile(
+        path.join(mockDir, 'docs', '[[...slug]].get.ts'),
+        [
+          'export default function handler() {',
+          '  return { ok: true }',
+          '}',
+        ].join('\n'),
+      )
+
+      const result = await buildManifest({
+        root,
+        dir: 'mock',
+        outDir: 'dist',
+        handlers: true,
+      })
+
+      const route = result.manifest.routes[0]
+      expect(route?.response.type).toBe('module')
+      expect(route?.response.module).toBe('./mokup-handlers/mock/docs/__...slug__.get.mjs')
+
+      const handlerPath = path.join(
+        root,
+        'dist',
+        'mokup-handlers',
+        'mock',
+        'docs',
+        '__...slug__.get.mjs',
+      )
+      const packageJsonPath = path.join(root, 'dist', 'mokup-handlers', 'package.json')
+      const stats = await fs.stat(handlerPath)
+      expect(stats.isFile()).toBe(true)
+      expect(JSON.parse(await fs.readFile(packageJsonPath, 'utf8'))).toEqual({ type: 'module' })
+    }
+    finally {
+      await cleanupTempRoot(root)
+    }
+  })
+
   it('applies directory config and emits middleware references', async () => {
     const { root, mockDir } = await createTempRoot()
     try {

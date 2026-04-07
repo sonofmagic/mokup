@@ -5,6 +5,7 @@ import path from 'node:path'
 import { describe, expect, it, vi } from 'vitest'
 import {
   buildResponse,
+  bundleHandlers,
   getHandlerModulePath,
   writeHandlerIndex,
 } from '../src/manifest/handlers'
@@ -188,6 +189,15 @@ describe('manifest handler helpers', () => {
     expect(modulePath.startsWith('..')).toBe(true)
   })
 
+  it('normalizes dynamic handler file names to match bundler output', () => {
+    const root = '/tmp/mokup-handlers'
+    const file = path.join(root, 'mock', 'docs', '[[...slug]].get.ts')
+    const handlersDir = path.join(root, '.mokup', 'mokup-handlers')
+    const modulePath = getHandlerModulePath(file, handlersDir, root)
+
+    expect(modulePath).toBe('./mokup-handlers/mock/docs/__...slug__.get.mjs')
+  })
+
   it('treats Buffer as binary when Uint8Array checks are unavailable', () => {
     const root = '/tmp/mokup-handlers'
     const file = path.join(root, 'mock', 'handler.get.ts')
@@ -217,6 +227,25 @@ describe('manifest handler helpers', () => {
     finally {
       vi.stubGlobal('Uint8Array', originalUint8Array)
       vi.stubGlobal('ArrayBuffer', originalArrayBuffer)
+    }
+  })
+
+  it('writes a package manifest so handler chunks load as ESM', async () => {
+    const root = await fs.mkdtemp(path.join(tmpdir(), 'mokup-handlers-package-'))
+    const entryFile = path.join(root, 'mock', 'login.post.ts')
+    const handlersDir = path.join(root, 'dist', 'mokup-handlers')
+    try {
+      await fs.mkdir(path.dirname(entryFile), { recursive: true })
+      await fs.writeFile(entryFile, 'export default () => ({ ok: true })\n', 'utf8')
+
+      await fs.mkdir(handlersDir, { recursive: true })
+      await bundleHandlers([entryFile], root, handlersDir)
+
+      const packageJson = await fs.readFile(path.join(handlersDir, 'package.json'), 'utf8')
+      expect(JSON.parse(packageJson)).toEqual({ type: 'module' })
+    }
+    finally {
+      await fs.rm(root, { recursive: true, force: true })
     }
   })
 })
