@@ -8,7 +8,7 @@
     "node": "^20.19.0 || >=22.12.0"
   },
   "scripts": {
-    "build:manifest": "pnpm --filter mokup build && pnpm exec mokup build --dir mock --out dist",
+    "build:manifest": "pnpm --filter mokup build && node ../../packages/mokup/dist/cli-bin.mjs build --dir mock --out dist",
     "dev": "node --experimental-strip-types src/index.ts",
     "lint": "eslint .",
     "test:e2e": "node ../../tests/e2e/run-app-e2e.mjs",
