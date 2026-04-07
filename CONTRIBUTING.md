@@ -10,9 +10,10 @@
 ## Before Opening A PR
 
 - Run `pnpm run guard:migration`
+- Run `pnpm typecheck`
 - Run `pnpm lint`
 - Run `pnpm test`
-- Run `pnpm test:e2e:serial` for changes that may affect demos, dev server flow, or HMR
+- Run `pnpm test:e2e:serial` for changes that may affect demos, dev server flow, HMR, or root Playwright E2E coverage
 
 ## Migration Guards
 
