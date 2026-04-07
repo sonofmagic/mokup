@@ -61,6 +61,14 @@ Upgrade details: [docs/guide/migration-v1.md](docs/guide/migration-v1.md)
 
 Issues and pull requests are welcome. See [CONTRIBUTING.md](CONTRIBUTING.md).
 
+### Development Checks
+
+- `pnpm run guard:migration`
+- `pnpm typecheck`
+- `pnpm lint`
+- `pnpm test`
+- `pnpm test:e2e:serial`
+
 ## Contributors
 
 Thanks to [all contributors](https://github.com/sonofmagic/mokup/graphs/contributors)!
