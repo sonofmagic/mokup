@@ -101,6 +101,7 @@
     },
     "typecheck": {
       "dependsOn": [
+        "^build",
         "^typecheck"
       ],
       "inputs": [
