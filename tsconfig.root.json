@@ -1,5 +1,51 @@
 {
   "extends": "./tsconfig.json",
+  "compilerOptions": {
+    "paths": {
+      "@mokup/cli": [
+        "packages/cli/src/index.ts"
+      ],
+      "@mokup/cli/*": [
+        "packages/cli/src/*"
+      ],
+      "@mokup/core": [
+        "packages/core/src/index.ts"
+      ],
+      "@mokup/core/*": [
+        "packages/core/src/*"
+      ],
+      "@mokup/playground": [
+        "packages/playground/src/index.ts"
+      ],
+      "@mokup/playground/*": [
+        "packages/playground/src/*"
+      ],
+      "@mokup/runtime": [
+        "packages/runtime/src/index.ts"
+      ],
+      "@mokup/runtime/*": [
+        "packages/runtime/src/*"
+      ],
+      "@mokup/server": [
+        "packages/server/src/index.ts"
+      ],
+      "@mokup/server/*": [
+        "packages/server/src/*"
+      ],
+      "@mokup/shared": [
+        "packages/shared/src/index.ts"
+      ],
+      "@mokup/shared/*": [
+        "packages/shared/src/*"
+      ],
+      "mokup": [
+        "packages/mokup/src/index.ts"
+      ],
+      "mokup/*": [
+        "packages/mokup/src/*"
+      ]
+    }
+  },
   "include": [
     "commitlint.config.ts",
     "monorepo.config.ts",
