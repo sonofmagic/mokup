@@ -12,6 +12,11 @@ export interface RunningServer {
   url: string
 }
 
+interface ServerCommand {
+  command: string
+  args: string[]
+}
+
 function waitForChildProcess(child: ChildProcess) {
   return new Promise<void>((resolve, reject) => {
     child.once('error', reject)
@@ -55,6 +60,26 @@ function waitForUnexpectedExit(child: ChildProcess, label: string) {
   })
 }
 
+function getPnpmCommand() {
+  return process.platform === 'win32' ? 'pnpm.cmd' : 'pnpm'
+}
+
+function resolveViteCommand(repoRoot: string, host: string, port: number): ServerCommand {
+  const viteBin = join(repoRoot, 'node_modules', '.bin', 'vite')
+  const viteArgs = ['--host', host, '--port', String(port)]
+  if (existsSync(viteBin)) {
+    return {
+      command: viteBin,
+      args: viteArgs,
+    }
+  }
+
+  return {
+    command: getPnpmCommand(),
+    args: ['exec', 'vite', ...viteArgs],
+  }
+}
+
 export async function startViteServer(params?: {
   reuseExistingServer?: boolean
   cwd?: string
@@ -76,26 +101,22 @@ export async function startViteServer(params?: {
   const appDir = params?.appDir ?? join('apps', 'mokup-web-demo')
   const appRoot = isAbsolute(appDir) ? appDir : resolve(repoRoot, appDir)
   const name = params?.name ?? 'mokup-web-demo'
-  const viteBin = join(repoRoot, 'node_modules', '.bin', 'vite')
-  const args = ['--host', host, '--port', String(port)]
+  const serverCommand = resolveViteCommand(repoRoot, host, port)
   const label = formatServerLabel({
     name,
     cwd: appRoot,
     url: baseUrl,
-    command: viteBin,
-    args,
+    command: serverCommand.command,
+    args: serverCommand.args,
   })
 
   if (!existsSync(appRoot)) {
     throw new Error(`Dev server app directory does not exist (${label})`)
   }
-  if (!existsSync(viteBin)) {
-    throw new Error(`Dev server binary does not exist (${label})`)
-  }
 
   const child = spawn(
-    viteBin,
-    args,
+    serverCommand.command,
+    serverCommand.args,
     {
       cwd: appRoot,
       env: {
