@@ -23,7 +23,16 @@ const plugins = [
 ] as PluginOption[]
 
 export default defineConfig({
-  ...(isE2E ? { optimizeDeps: { noDiscovery: true, entries: [] } } : {}),
+  ...(isE2E
+    ? {
+        optimizeDeps: { noDiscovery: true, entries: [] },
+        server: {
+          hmr: {
+            overlay: false,
+          },
+        },
+      }
+    : {}),
   resolve: {
     alias: getMokupViteAliases(),
   },
