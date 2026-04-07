@@ -1,18 +1,34 @@
+import { spawn } from 'node:child_process'
 import { existsSync, promises as fs } from 'node:fs'
 import { connect, createServer } from 'node:net'
 import { dirname, join, relative, resolve } from 'node:path'
 import process from 'node:process'
-import { execa } from 'execa'
 
 const ACCESS_HOST = process.env.E2E_ACCESS_HOST || '127.0.0.1'
 const BIND_HOST = process.env.E2E_BIND_HOST || '127.0.0.1'
 const DEFAULT_TIMEOUT_MS = 60_000
+const READY_URL_RE = /(Local|Network):\s+(https?:\/\/[^\s/]+:\d+)\//i
+const WORKSPACE_RELATIVE_SPLIT_RE = /[/\\]+/
 const VITE_LOCK_NAME = '.e2e-vite.lock'
 const VITE_LOCK_STALE_MS = 10 * 60 * 1000
 
 function stripAnsi(input) {
   // eslint-disable-next-line no-control-regex
   return input.replace(/\u001B\[[0-9;]*m/g, '')
+}
+
+function formatCommand(command, args = []) {
+  return [command, ...args].join(' ')
+}
+
+function formatAppContext(params) {
+  return [
+    `app=${params.appName}`,
+    `cwd=${params.cwd}`,
+    ...(params.url ? [`url=${params.url}`] : []),
+    ...(typeof params.port === 'number' ? [`port=${params.port}`] : []),
+    ...(params.command ? [`command=${params.command}`] : []),
+  ].join(', ')
 }
 
 function findRepoRoot(startDir) {
@@ -42,11 +58,50 @@ function detectAppName(repoRoot, cwd, argName) {
     return argName
   }
   const rel = relative(repoRoot, cwd)
-  const parts = rel.split(/[/\\]+/).filter(Boolean)
+  const parts = rel.split(WORKSPACE_RELATIVE_SPLIT_RE).filter(Boolean)
   if (parts[0] === 'apps' && parts[1]) {
     return parts[1]
   }
   throw new Error('Unable to determine app name. Pass it as the first argument.')
+}
+
+function createCommandEnv(extraEnv) {
+  if (!extraEnv) {
+    return process.env
+  }
+  return {
+    ...process.env,
+    ...extraEnv,
+  }
+}
+
+function runChildProcess(command, args, options = {}) {
+  return new Promise((resolve, reject) => {
+    const child = spawn(command, args, {
+      cwd: options.cwd,
+      env: createCommandEnv(options.env),
+      stdio: options.stdio ?? 'inherit',
+    })
+    child.once('error', reject)
+    child.once('exit', (code, signal) => {
+      if (code === 0) {
+        resolve(child)
+        return
+      }
+      reject(new Error(`Command failed with code ${String(code)} and signal ${String(signal)}`))
+    })
+  })
+}
+
+function waitForProcessExit(child) {
+  return new Promise((resolve) => {
+    if (!child || child.exitCode !== null) {
+      resolve()
+      return
+    }
+    child.once('exit', () => resolve())
+    child.once('error', () => resolve())
+  })
 }
 
 async function acquireLock(lockPath, timeoutMs) {
@@ -236,7 +291,7 @@ async function waitForHttp(url, timeoutMs) {
     }
     await new Promise(resolve => setTimeout(resolve, 250))
   }
-  throw new Error(`Timeout waiting for ${url}: ${String(lastError)}`)
+  throw new Error(`Timeout waiting for HTTP readiness at ${url}: ${String(lastError)}`)
 }
 
 async function waitForPort(host, port, timeoutMs) {
@@ -271,7 +326,7 @@ async function waitForPort(host, port, timeoutMs) {
     }
     await new Promise(resolve => setTimeout(resolve, 250))
   }
-  throw new Error(`Timeout waiting for ${host}:${port}: ${String(lastError)}`)
+  throw new Error(`Timeout waiting for TCP port ${host}:${port}: ${String(lastError)}`)
 }
 
 function createLineBuffer() {
@@ -309,7 +364,7 @@ async function waitForViteReady(child, timeoutMs, onServerUrl) {
 
     function handleLine(line) {
       const cleaned = stripAnsi(line)
-      const match = cleaned.match(/(Local|Network):\s+(https?:\/\/[^\s/]+:\d+)\//i)
+      const match = cleaned.match(READY_URL_RE)
       if (match) {
         onServerUrl?.(match[2], match[1].toLowerCase())
         if (!resolved) {
@@ -337,7 +392,7 @@ async function waitForViteReady(child, timeoutMs, onServerUrl) {
 
     timeout = setTimeout(() => {
       cleanup()
-      reject(new Error('Timeout waiting for Vite dev server to report readiness.'))
+      reject(new Error('Timeout waiting for Vite dev server to report readiness from stdout/stderr.'))
     }, timeoutMs)
 
     child.stdout?.on('data', onData)
@@ -472,7 +527,7 @@ async function stopProcess(child) {
     }
   }, 5_000)
   try {
-    await child
+    await waitForProcessExit(child)
   }
   catch {
     // ignore termination errors
@@ -546,10 +601,21 @@ async function main() {
     return devArgs
   }
 
-  const startDevProcess = (runtimeEnv, targetPort) => {
-    const nextProcess = execa(appConfig.server.command, buildDevArgs(targetPort), {
+  const describeAppRun = (command, args, targetBaseURL = baseURL, targetPort = port) => {
+    return formatAppContext({
+      appName,
       cwd: appRoot,
-      env: runtimeEnv,
+      url: targetBaseURL,
+      port: targetPort,
+      command: formatCommand(command, args),
+    })
+  }
+
+  const startDevProcess = (runtimeEnv, targetPort) => {
+    const devArgs = buildDevArgs(targetPort)
+    const nextProcess = spawn(appConfig.server.command, devArgs, {
+      cwd: appRoot,
+      env: createCommandEnv(runtimeEnv),
       stdio: ['inherit', 'pipe', 'pipe'],
     })
     nextProcess.stdout?.pipe(process.stdout)
@@ -588,11 +654,18 @@ async function main() {
 
       if (!preCommandsDone && appConfig.preCommands?.length) {
         for (const command of appConfig.preCommands) {
-          await execa(command.command, command.args, {
-            cwd: appRoot,
-            env,
-            stdio: 'inherit',
-          })
+          try {
+            await runChildProcess(command.command, command.args, {
+              cwd: appRoot,
+              env,
+              stdio: 'inherit',
+            })
+          }
+          catch (error) {
+            throw new Error(
+              `Pre-command failed (${describeAppRun(command.command, command.args)}): ${error instanceof Error ? error.message : String(error)}`,
+            )
+          }
         }
         preCommandsDone = true
       }
@@ -631,10 +704,12 @@ async function main() {
       catch (error) {
         await stopProcess(devProcess)
         if (attempt >= maxViteStartAttempts) {
-          throw error
+          throw new Error(
+            `Failed to start app dev server (${describeAppRun(appConfig.server.command, buildDevArgs(port))}): ${error instanceof Error ? error.message : String(error)}`,
+          )
         }
         process.stderr.write(
-          `Warning: Vite startup failed on attempt ${attempt}, retrying once: ${error instanceof Error ? error.message : String(error)}\n`,
+          `Warning: Vite startup failed on attempt ${attempt} (${describeAppRun(appConfig.server.command, buildDevArgs(port))}), retrying once: ${error instanceof Error ? error.message : String(error)}\n`,
         )
       }
       finally {
@@ -645,16 +720,23 @@ async function main() {
     }
 
     const playwrightArgs = ['exec', 'playwright', 'test', ...extraArgs]
-    await execa('pnpm', playwrightArgs, {
-      cwd: appRoot,
-      env: {
-        ...env,
-        E2E_BASE_URL: baseURL,
-        E2E_PORT: String(new URL(baseURL).port || port),
-        E2E_APP_NAME: appName,
-      },
-      stdio: 'inherit',
-    })
+    try {
+      await runChildProcess('pnpm', playwrightArgs, {
+        cwd: appRoot,
+        env: {
+          ...env,
+          E2E_BASE_URL: baseURL,
+          E2E_PORT: String(new URL(baseURL).port || port),
+          E2E_APP_NAME: appName,
+        },
+        stdio: 'inherit',
+      })
+    }
+    catch (error) {
+      throw new Error(
+        `Playwright run failed (${describeAppRun('pnpm', playwrightArgs)}): ${error instanceof Error ? error.message : String(error)}`,
+      )
+    }
   }
   finally {
     process.off('SIGINT', onExit)
