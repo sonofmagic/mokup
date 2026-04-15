@@ -4,10 +4,14 @@ import process from 'node:process'
 
 const root = process.cwd()
 const packagesDir = path.join(root, 'packages')
-const MAX_LINES = 300
-const VALID_MODES = new Set(['error', 'warn'])
+const SOFT_MAX_LINES = 300
+const HARD_MAX_LINES = 500
+const VALID_MODES = new Set(['error', 'warn', 'guard'])
 const MODE_ARG_RE = /^--mode=/
 const NEWLINE_RE = /\r?\n/
+const HARD_LIMIT_ALLOWLIST = new Set([
+  'packages/playground/src/components/PostmanRequestView.vue',
+])
 const allowedExts = new Set([
   '.ts',
   '.tsx',
@@ -106,25 +110,64 @@ async function main() {
       }
       count += 1
     }
-    if (count > MAX_LINES) {
+    if (count > SOFT_MAX_LINES) {
       violations.push({ file, count })
     }
   }
 
   if (violations.length > 0) {
-    const formatted = violations
+    const sorted = violations
       .sort((a, b) => b.count - a.count)
+    const softViolations = sorted
+      .filter(entry => entry.count <= HARD_MAX_LINES)
       .map(entry => `- ${path.relative(root, entry.file)}: ${entry.count}`)
       .join('\n')
-    const summary = `Files over ${MAX_LINES} lines (${violations.length}):\n${formatted}\n`
+    const hardViolations = sorted
+      .filter(entry => entry.count > HARD_MAX_LINES)
+      .map(entry => `- ${path.relative(root, entry.file)}: ${entry.count}`)
+      .join('\n')
+    const hardViolationsUnfiltered = sorted
+      .filter(entry => entry.count > HARD_MAX_LINES)
+    const hardViolationsNotAllowlisted = hardViolationsUnfiltered
+      .filter((entry) => {
+        const relative = path.relative(root, entry.file)
+        return !HARD_LIMIT_ALLOWLIST.has(relative)
+      })
+    const hasHardViolations = hardViolationsNotAllowlisted.length > 0
+    const allowlistedHardViolations = hardViolationsUnfiltered
+      .filter((entry) => {
+        const relative = path.relative(root, entry.file)
+        return HARD_LIMIT_ALLOWLIST.has(relative)
+      })
+      .map(entry => `- ${path.relative(root, entry.file)}: ${entry.count}`)
+      .join('\n')
+    const summaryParts = [
+      `Files over ${SOFT_MAX_LINES} lines (${violations.length}):`,
+      ...(softViolations ? [softViolations] : []),
+      ...(hardViolations
+        ? [`\nFiles over hard limit ${HARD_MAX_LINES} lines:`, hardViolations]
+        : []),
+      ...(allowlistedHardViolations
+        ? ['\nHard-limit allowlist (must be reduced over time):', allowlistedHardViolations]
+        : []),
+    ]
+    const summary = `${summaryParts.join('\n')}\n`
     if (mode === 'warn') {
       process.stdout.write(`lint:lines warn.\n${summary}`)
+      return
+    }
+    if (mode === 'guard') {
+      if (hasHardViolations) {
+        process.stderr.write(`lint:lines guard failed.\n${summary}`)
+        process.exit(1)
+      }
+      process.stdout.write(`lint:lines guard warn.\n${summary}`)
       return
     }
     process.stderr.write(`lint:lines failed.\n${summary}`)
     process.exit(1)
   }
-  process.stdout.write(`lint:lines ok (${targets.length} files checked, max=${MAX_LINES}, mode=${mode})\n`)
+  process.stdout.write(`lint:lines ok (${targets.length} files checked, soft=${SOFT_MAX_LINES}, hard=${HARD_MAX_LINES}, mode=${mode})\n`)
 }
 
 main().catch((error) => {

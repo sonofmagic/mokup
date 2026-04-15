@@ -13,7 +13,7 @@
 - Run `pnpm run typecheck:fast` while iterating (optional, faster local feedback)
 - Run `pnpm typecheck`
 - Run `pnpm lint`
-- Run `pnpm run lint:lines` for line-budget checks (or `pnpm run lint:lines:warn` for report-only mode)
+- Run `pnpm run lint:lines` for strict line-budget checks (or `pnpm run lint:lines:guard` for CI-compatible guard mode)
 - Run `pnpm test`
 - Run `pnpm test:e2e:serial` for changes that may affect demos, dev server flow, HMR, or root Playwright E2E coverage
 
@@ -23,8 +23,9 @@
 
 - `pnpm run lint:lines` runs in fail-fast mode (`--mode=error`)
 - `pnpm run lint:lines:warn` reports oversized files without failing
+- `pnpm run lint:lines:guard` warns for files above `300` lines and fails for files above `500` lines
 
-CI currently uses warn mode to keep existing hotspots visible while avoiding blocking unrelated PRs. For new or heavily touched files, prefer extracting reusable helpers/components to keep files under the budget.
+CI currently uses guard mode to keep existing hotspots visible while still blocking extreme file growth. For new or heavily touched files, prefer extracting reusable helpers/components to keep files under the budget.
 
 ## Migration Guards
 

@@ -10,7 +10,7 @@
 
 Current mode:
 
-- CI runs `pnpm run lint:lines:warn`.
+- CI runs `pnpm run lint:lines:guard` (`>300` warn, `>500` fail).
 - Local fail-fast remains available via `pnpm run lint:lines`.
 
 Phase 1 (short-term):
@@ -22,8 +22,8 @@ Phase 1 (short-term):
 
 Phase 2 (ratchet):
 
-- Introduce hard-fail gate for files above `500` lines.
-- Keep warn mode for `301-500` lines.
+- Reduce hard-fail gate from `500` to `400` lines once current top offenders are split.
+- Keep warn mode for `301-400` lines.
 
 Phase 3 (strict):
 

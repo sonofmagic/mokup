@@ -33,6 +33,7 @@
     "lint": "turbo run lint",
     "lint:lines": "node scripts/lint-lines.mjs",
     "lint:lines:warn": "node scripts/lint-lines.mjs --mode=warn",
+    "lint:lines:guard": "node scripts/lint-lines.mjs --mode=guard",
     "audit": "pnpm audit --audit-level=moderate",
     "audit:fix": "pnpm audit --fix",
     "typecheck": "pnpm run typecheck:root && turbo run typecheck",
