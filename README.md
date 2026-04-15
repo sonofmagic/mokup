@@ -63,7 +63,10 @@ Issues and pull requests are welcome. See [CONTRIBUTING.md](CONTRIBUTING.md).
 
 ### Development Checks
 
+- `pnpm run validate:fast`
 - `pnpm run guard:migration`
+- `pnpm run typecheck:fast`
+- `pnpm run lint:lines:guard`
 - `pnpm typecheck`
 - `pnpm lint`
 - `pnpm test`

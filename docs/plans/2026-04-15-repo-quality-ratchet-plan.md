@@ -3,6 +3,7 @@
 ## Goals
 
 - Keep developer feedback fast (`typecheck:fast`, non-blocking line-budget report).
+- Expose a single fast local gate via `pnpm run validate:fast`.
 - Ratchet repository quality without blocking unrelated delivery.
 - Convert current hotspots into incremental, reviewable tasks.
 
@@ -12,6 +13,7 @@ Current mode:
 
 - CI runs `pnpm run lint:lines:guard` (`>300` warn, `>500` fail).
 - Local fail-fast remains available via `pnpm run lint:lines`.
+- Local fast-path now lives at `pnpm run validate:fast`.
 
 Phase 1 (short-term):
 
@@ -31,11 +33,11 @@ Phase 3 (strict):
 
 Hotspots from latest report:
 
-- `packages/playground/src/components/PostmanRequestView.vue` (851)
-- `packages/playground/src/components/ui/UiCodeEditor.vue` (469)
-- `packages/playground/src/hooks/usePlaygroundRoutes.ts` (406)
-- `packages/playground/src/components/PostmanRequestPanel.vue` (404)
-- `packages/playground/src/App.vue` (383)
+- None. `pnpm run lint:lines:guard` is currently clean.
+
+Next ratchet candidate:
+
+- Switch CI from guard mode to strict `pnpm run lint:lines` after one more maintenance cycle without regressions.
 
 ## Track B: Coverage Hotspots
 
@@ -53,8 +55,8 @@ Execution rule:
 
 ## Suggested Issue Breakdown
 
-1. Split `PostmanRequestView.vue` into request/response pane subcomponents.
-2. Extract editor adapter logic from `UiCodeEditor.vue` into composables.
-3. Add webpack plugin branch tests for unsupported/edge config paths.
-4. Add diagnostics formatting tests for warning/error grouping.
-5. Add playground search tests for fuzzy/empty/large-tree scenarios.
+1. Switch CI line budget from `guard` to strict mode after the next stable pass.
+2. Add webpack plugin branch tests for unsupported/edge config paths.
+3. Add diagnostics formatting tests for warning/error grouping.
+4. Add playground search tests for fuzzy/empty/large-tree scenarios.
+5. Add regression tests for extracted playground shell/workspace helpers.

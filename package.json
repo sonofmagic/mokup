@@ -38,6 +38,7 @@
     "audit:fix": "pnpm audit --fix",
     "typecheck": "pnpm run typecheck:root && turbo run typecheck",
     "format": "eslint . --fix",
+    "validate:fast": "pnpm run guard:migration && pnpm run typecheck:fast && pnpm run lint:lines:guard",
     "validate": "pnpm run guard:migration && pnpm run typecheck && pnpm run lint && pnpm run test",
     "test:e2e": "pnpm run test:e2e:root && pnpm run test:e2e:apps",
     "test:e2e:root": "playwright test",
