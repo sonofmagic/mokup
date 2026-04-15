@@ -6,6 +6,7 @@ import type {
 
 import { buildManifestData, toViteImportPath } from './manifest'
 import { normalizePrefix } from './shared/utils'
+import { createRuntimeRuleHelpers } from './sw-script-snippets'
 
 /**
  * Default service worker script path.
@@ -269,55 +270,8 @@ export function buildSwScript(params: {
   lines.push(...imports, '')
   lines.push(
     'const logger = createLogger()',
-    '',
-    'const resolveModuleExport = (mod) => mod?.default ?? mod',
-    '',
-    'const toRuntimeRule = (value) => {',
-    '  if (typeof value === \'undefined\') {',
-    '    return null',
-    '  }',
-    '  if (typeof value === \'function\') {',
-    '    return { handler: value }',
-    '  }',
-    '  if (value === null) {',
-    '    return { handler: null }',
-    '  }',
-    '  if (typeof value === \'object\') {',
-    '    if (\'handler\' in value) {',
-    '      const handlerRule = value',
-    '      return {',
-    '        handler: handlerRule.handler,',
-    '        ...(typeof handlerRule.status === \'number\' ? { status: handlerRule.status } : {}),',
-    '        ...(handlerRule.headers ? { headers: handlerRule.headers } : {}),',
-    '        ...(typeof handlerRule.delay === \'number\' ? { delay: handlerRule.delay } : {}),',
-    '      }',
-    '    }',
-    '    if (\'response\' in value) {',
-    '      const responseRule = value',
-    '      return {',
-    '        handler: responseRule.response,',
-    '        ...(typeof responseRule.status === \'number\' ? { status: responseRule.status } : {}),',
-    '        ...(responseRule.headers ? { headers: responseRule.headers } : {}),',
-    '        ...(typeof responseRule.delay === \'number\' ? { delay: responseRule.delay } : {}),',
-    '      }',
-    '    }',
-    '    return { handler: value }',
-    '  }',
-    '  return { handler: value }',
-    '}',
-    '',
-    'const toRuntimeRules = (value) => {',
-    '  if (typeof value === \'undefined\') {',
-    '    return []',
-    '  }',
-    '  if (Array.isArray(value)) {',
-    '    return value.map(toRuntimeRule).filter(Boolean)',
-    '  }',
-    '  const rule = toRuntimeRule(value)',
-    '  return rule ? [rule] : []',
-    '}',
-    '',
   )
+  lines.push(...createRuntimeRuleHelpers(), '')
   lines.push(
     `const manifest = ${JSON.stringify(manifest, null, 2)}`,
     '',
