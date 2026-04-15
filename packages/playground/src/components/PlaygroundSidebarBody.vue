@@ -10,6 +10,7 @@ import { computed } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { openInEditor, resolveEditorUrl } from '../utils/editor'
 import { buildHighlightParts, extractSearchValues } from '../utils/search'
+import PlaygroundConfigFileList from './PlaygroundConfigFileList.vue'
 import RouteTree from './RouteTree.vue'
 import UiPill from './ui/UiPill.vue'
 
@@ -78,10 +79,6 @@ function formatRoutePath(value?: string) {
   return value ? value.toLowerCase() : ''
 }
 
-function formatConfigLabel(value: string) {
-  return value.toLowerCase()
-}
-
 function highlightParts(text: string) {
   return buildHighlightParts(text, highlightTokens.value)
 }
@@ -105,10 +102,6 @@ function handleSelectRow(row: TreeRow) {
   if (row.route) {
     emit('select-route', row.route)
   }
-}
-
-function isSelectedConfig(entry: PlaygroundConfigFile) {
-  return props.selectedConfig?.file === entry.file
 }
 
 function resolveDisabledKey(route: PlaygroundDisabledRoute | null | undefined) {
@@ -230,48 +223,15 @@ function isSelectedIgnored(route: PlaygroundIgnoredRoute) {
       >
         {{ t('states.emptyDisabledConfigFiles') }}
       </div>
-      <div v-else-if="props.routeMode === 'disabled' && props.disabledMode === 'config'" class="flex flex-col gap-0.5">
-        <button
-          v-for="entry in props.disabledConfigFiltered"
-          :key="entry.file"
-          class="rounded border px-3 py-1 text-left text-xs transition border-pg-border bg-pg-surface-soft text-pg-text-soft hover:bg-pg-hover-strong hover:text-pg-text"
-          :class="isSelectedConfig(entry) ? selectedRowClass : ''"
-          type="button"
-          @click="emit('select-config', entry)"
-        >
-          <div class="flex flex-wrap items-center justify-between gap-2">
-            <div class="flex flex-col gap-1">
-              <span class="text-[0.75rem] font-medium text-pg-text-strong">
-                <template v-for="(part, index) in highlightParts(formatConfigLabel(entry.file))" :key="`${entry.file}-disabled-${index}`">
-                  <span :class="part.highlight ? 'pg-highlight' : ''">{{ part.text }}</span>
-                </template>
-              </span>
-            </div>
-            <div class="flex items-center gap-2">
-              <span
-                v-if="isSelectedConfig(entry)"
-                class="flex h-6 w-6 items-center justify-center rounded border border-pg-accent/40 bg-pg-accent/10 text-pg-accent"
-                aria-hidden="true"
-              >
-                <span class="i-[carbon--checkmark] h-3.5 w-3.5" />
-              </span>
-              <UiPill tone="card" size="sm" :caps="false" tracking="none">
-                {{ t('enabled.configLabel') }}
-              </UiPill>
-              <button
-                v-if="resolveEditorUrlForFile(entry.file)"
-                class="flex h-7 w-7 items-center justify-center rounded-md transition text-pg-text-muted hover:bg-pg-hover-strong hover:text-pg-text-soft"
-                type="button"
-                :aria-label="`Open ${entry.file} in VS Code`"
-                :title="t('detail.openInVscode')"
-                @click.stop="openInEditorForFile(entry.file)"
-              >
-                <span class="i-[carbon--launch] h-3.5 w-3.5" aria-hidden="true" />
-              </button>
-            </div>
-          </div>
-        </button>
-      </div>
+      <PlaygroundConfigFileList
+        v-else-if="props.routeMode === 'disabled' && props.disabledMode === 'config'"
+        :entries="props.disabledConfigFiltered"
+        :selected-config="props.selectedConfig ?? null"
+        :search="props.search"
+        :selected-row-class="selectedRowClass"
+        :workspace-root="props.workspaceRoot"
+        @select-config="emit('select-config', $event)"
+      />
       <div v-else-if="props.routeMode === 'ignored'" class="flex flex-col gap-0.5">
         <button
           v-for="route in props.ignoredFiltered"
@@ -314,48 +274,15 @@ function isSelectedIgnored(route: PlaygroundIgnoredRoute) {
           </div>
         </button>
       </div>
-      <div v-else-if="props.routeMode === 'active' && props.enabledMode === 'config'" class="flex flex-col gap-0.5">
-        <button
-          v-for="entry in props.configFiltered"
-          :key="entry.file"
-          class="rounded border px-3 py-1 text-left text-xs transition border-pg-border bg-pg-surface-soft text-pg-text-soft hover:bg-pg-hover-strong hover:text-pg-text"
-          :class="isSelectedConfig(entry) ? selectedRowClass : ''"
-          type="button"
-          @click="emit('select-config', entry)"
-        >
-          <div class="flex flex-wrap items-center justify-between gap-2">
-            <div class="flex flex-col gap-1">
-              <span class="text-[0.75rem] font-medium text-pg-text-strong">
-                <template v-for="(part, index) in highlightParts(formatConfigLabel(entry.file))" :key="`${entry.file}-config-${index}`">
-                  <span :class="part.highlight ? 'pg-highlight' : ''">{{ part.text }}</span>
-                </template>
-              </span>
-            </div>
-            <div class="flex items-center gap-2">
-              <span
-                v-if="isSelectedConfig(entry)"
-                class="flex h-6 w-6 items-center justify-center rounded border border-pg-accent/40 bg-pg-accent/10 text-pg-accent"
-                aria-hidden="true"
-              >
-                <span class="i-[carbon--checkmark] h-3.5 w-3.5" />
-              </span>
-              <UiPill tone="card" size="sm" :caps="false" tracking="none">
-                {{ t('enabled.configLabel') }}
-              </UiPill>
-              <button
-                v-if="resolveEditorUrlForFile(entry.file)"
-                class="flex h-7 w-7 items-center justify-center rounded-md transition text-pg-text-muted hover:bg-pg-hover-strong hover:text-pg-text-soft"
-                type="button"
-                :aria-label="`Open ${entry.file} in VS Code`"
-                :title="t('detail.openInVscode')"
-                @click.stop="openInEditorForFile(entry.file)"
-              >
-                <span class="i-[carbon--launch] h-3.5 w-3.5" aria-hidden="true" />
-              </button>
-            </div>
-          </div>
-        </button>
-      </div>
+      <PlaygroundConfigFileList
+        v-else-if="props.routeMode === 'active' && props.enabledMode === 'config'"
+        :entries="props.configFiltered"
+        :selected-config="props.selectedConfig ?? null"
+        :search="props.search"
+        :selected-row-class="selectedRowClass"
+        :workspace-root="props.workspaceRoot"
+        @select-config="emit('select-config', $event)"
+      />
       <RouteTree
         v-else
         v-bind="routeTreeProps"
