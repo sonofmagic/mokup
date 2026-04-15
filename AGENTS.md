@@ -2,7 +2,7 @@
 
 ## Project Structure & Module Organization
 
-This pnpm + Turbo monorepo keeps deployable surfaces under `apps/` (`cli`, `client`, `server`, `website`) and reusable templates under `packages/` (e.g., `monorepo`, `vue-lib-template`). Shared TypeScript and build settings live in root configs such as `turbo.json`, `tsconfig.json`, and `eslint.config.js`. Tests sit alongside their targets in `test/*.test.ts`, and each app owns its public assets (`public/`, `worker/`) to keep deployments self-contained.
+This pnpm + Turbo monorepo keeps runnable demos and docs under `apps/` (for example `mokup-web-demo`, `mokup-vite-server-demo`, `mokup-docs`) and publishable libraries under `packages/` (for example `mokup`, `@mokup/server`, `@mokup/runtime`). Shared TypeScript and build settings live in root configs such as `turbo.json`, `tsconfig.json`, and `eslint.config.js`. Unit tests are colocated in workspace `test/*.test.ts`, root integration/e2e tests are in `tests/e2e`, and app-level e2e tests live in `apps/*/test/e2e`.
 
 ## Build, Test, and Development Commands
 
@@ -20,7 +20,7 @@ AI-generated code must comply with this project's ESLint and Stylelint rules, an
 
 ## Testing Guidelines
 
-Vitest powers unit tests located in `test/*.test.ts`. Mirror existing naming by matching the unit under test (`monorepo` utilities map to `packages/monorepo/test/*.test.ts`). Aim for meaningful assertions rather than snapshot defaults, and add coverage checks with `pnpm test -- --coverage`, which writes reports to `coverage/`. When introducing new public APIs, include integration-style tests in the relevant app workspace.
+Vitest powers unit tests located in workspace `test/*.test.ts` (for example `packages/server/test/*.test.ts`). Mirror existing naming by matching the unit under test. Aim for meaningful assertions rather than snapshot defaults. `pnpm test` already runs with coverage enabled (reports in `coverage/`). For behavior that crosses packages or runtime/dev-server boundaries, add Playwright coverage under `tests/e2e` or the affected `apps/*/test/e2e`.
 
 ## Commit & Pull Request Guidelines
 

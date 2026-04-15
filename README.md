@@ -4,8 +4,8 @@
 <h1 align="center">mokup</h1>
 <p align="center">File-based mock toolkit for Vite, CLI builds, and runtime usage.</p>
 <p align="center">
-  <a href="http://mokup.icebreaker.top/">Website</a> ·
-  <a href="http://mokup.icebreaker.top/__mokup">Playground</a> ·
+  <a href="https://mokup.icebreaker.top/">Website</a> ·
+  <a href="https://mokup.icebreaker.top/__mokup">Playground</a> ·
   <a href="https://github.com/sonofmagic/mokup">GitHub</a>
 </p>
 
@@ -54,7 +54,7 @@ export default defineHandler(async (c) => {
 })
 ```
 
-Follow the docs at http://mokup.icebreaker.top/ for Vite and CLI setup.
+Follow the docs at https://mokup.icebreaker.top/ for Vite and CLI setup.
 Upgrade details: [docs/guide/migration-v1.md](docs/guide/migration-v1.md)
 
 ## Contributing
