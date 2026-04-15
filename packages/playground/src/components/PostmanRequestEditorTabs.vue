@@ -1,15 +1,16 @@
 <script setup lang="ts">
 import type { ApiKeyLocation, AuthType, BodyType, MultipartFileEntry, PlaygroundRoute, RawBodyType, RouteParamField } from '../types'
-import { computed, defineAsyncComponent } from 'vue'
+import { computed } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useRequestEditorState } from '../hooks/useRequestEditorState'
 import PostmanRequestAuthTab from './PostmanRequestAuthTab.vue'
 import PostmanRequestBodyTab from './PostmanRequestBodyTab.vue'
+import PostmanRequestParamsTab from './PostmanRequestParamsTab.vue'
 import RouteDetailConfigChain from './RouteDetailConfigChain.vue'
 import RouteDetailMiddlewares from './RouteDetailMiddlewares.vue'
 import UiField from './ui/UiField.vue'
 import UiPill from './ui/UiPill.vue'
-import UiTextInput from './ui/UiTextInput.vue'
+import UiTextarea from './ui/UiTextarea.vue'
 
 const props = defineProps<{
   selected: PlaygroundRoute
@@ -59,11 +60,6 @@ const emit = defineEmits<{
   (event: 'update:param-value', name: string, value: string): void
 }>()
 
-const UiCodeEditor = defineAsyncComponent({
-  loader: () => import('./ui/UiCodeEditor.vue'),
-  suspensible: false,
-})
-
 type RequestTab = 'params' | 'auth' | 'headers' | 'body' | 'config' | 'middlewares'
 
 const { t } = useI18n()
@@ -105,7 +101,6 @@ const {
   resolveDefaultTab: () => 'params',
 })
 
-const queryExample = '{ "q": "alpha", "page": 1 }'
 const headersExample = '{ "x-mokup": "playground" }'
 </script>
 
@@ -203,53 +198,18 @@ const headersExample = '{ "x-mokup": "playground" }'
     </div>
 
     <div class="border-t px-4 py-4 border-pg-border">
-      <div v-show="activeTab === 'params'" class="flex flex-col gap-4">
-        <div>
-          <div class="mb-1.5 text-[0.55rem] tracking-[0.1em] text-pg-text-muted">
-            {{ t('detail.params') }}
-          </div>
-          <div
-            v-if="props.routeParams.length === 0"
-            class="rounded border px-4 py-3 text-sm border-pg-border bg-pg-surface-strong text-pg-text-muted"
-          >
-            {{ t('detail.emptyParams') }}
-          </div>
-          <div v-else class="grid gap-3 lg:grid-cols-2">
-            <label
-              v-for="param in props.routeParams"
-              :key="param.id"
-              :ref="(el) => registerMissingParamRef(param.name, el as HTMLElement | null)"
-              class="flex flex-col gap-1.5 text-[0.65rem] tracking-[0.08em] text-pg-text-muted"
-            >
-              <span class="flex items-center gap-2 text-[0.55rem] tracking-[0.08em] text-pg-text-muted">
-                <span>{{ param.name }}</span>
-                <span class="rounded border px-2 py-0.5 text-[0.5rem] tracking-[0.08em] border-pg-border bg-pg-surface-strong text-pg-text-soft">
-                  {{ param.token }}
-                </span>
-              </span>
-              <UiTextInput
-                :value="props.paramValues[param.name] ?? ''"
-                :placeholder="paramPlaceholder(param)"
-                :class="[
-                  missingParamsSet.has(param.name) ? 'pg-input-missing' : '',
-                  missingPulseActive && missingParamsSet.has(param.name) ? 'pg-pulse' : '',
-                ]"
-                @input="emit('update:param-value', param.name, ($event.target as HTMLInputElement | null)?.value ?? '')"
-              />
-            </label>
-          </div>
-        </div>
-        <UiField :label="t('detail.query')">
-          <UiCodeEditor
-            :model-value="props.queryText"
-            language="json"
-            :rows="4"
-            :format-label="t('detail.formatJson')"
-            :placeholder="t('detail.queryPlaceholder', { json: queryExample })"
-            @update:model-value="emit('update:queryText', $event)"
-          />
-        </UiField>
-      </div>
+      <PostmanRequestParamsTab
+        v-show="activeTab === 'params'"
+        :route-params="props.routeParams"
+        :param-values="props.paramValues"
+        :query-text="props.queryText"
+        :missing-params-set="missingParamsSet"
+        :missing-pulse-active="missingPulseActive"
+        :param-placeholder="paramPlaceholder"
+        :register-missing-param-ref="registerMissingParamRef"
+        @update:param-value="(name, value) => emit('update:param-value', name, value)"
+        @update:queryText="emit('update:queryText', $event)"
+      />
 
       <PostmanRequestAuthTab
         v-if="activeTab === 'auth'"
@@ -275,13 +235,11 @@ const headersExample = '{ "x-mokup": "playground" }'
 
       <div v-else-if="activeTab === 'headers'">
         <UiField :label="t('detail.headers')">
-          <UiCodeEditor
-            :model-value="props.headersText"
-            language="json"
-            :rows="4"
-            :format-label="t('detail.formatJson')"
+          <UiTextarea
+            :value="props.headersText"
+            rows="4"
             :placeholder="t('detail.headersPlaceholder', { json: headersExample })"
-            @update:model-value="emit('update:headersText', $event)"
+            @input="emit('update:headersText', ($event.target as HTMLTextAreaElement | null)?.value ?? '')"
           />
         </UiField>
       </div>
