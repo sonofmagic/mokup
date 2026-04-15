@@ -1,4 +1,3 @@
-import type { IncomingMessage, ServerResponse } from 'node:http'
 import type { PreviewServer, ViteDevServer } from 'vite'
 import type { MokupPluginOptions } from '../shared/types'
 
@@ -30,24 +29,12 @@ import {
   resolveRegisterScope,
 } from './plugin/paths'
 import { createRouteRefresher } from './plugin/refresh'
+import { createSwMiddleware } from './plugin/sw-middleware'
 import { createWebpackWatcher } from './plugin/watcher'
 
 const pluginName = 'mokup:webpack'
 const lifecycleBaseName = 'mokup-sw-lifecycle.js'
 
-/**
- * Create the mokup webpack plugin for webpack-dev-server.
- *
- * @param options - Plugin options.
- * @returns Webpack plugin instance.
- *
- * @example
- * import { createWebpackPlugin } from 'mokup/webpack'
- *
- * export default {
- *   plugins: [createWebpackPlugin({ entries: { dir: 'mock' } })],
- * }
- */
 export function createMokupWebpackPlugin(
   options: MokupPluginOptions = {},
 ): WebpackPluginInstance {
@@ -157,32 +144,13 @@ export function createMokupWebpackPlugin(
     resolvePlaygroundDist,
   })
 
-  const swMiddleware = async (
-    req: IncomingMessage,
-    res: ServerResponse,
-    next: (err?: unknown) => void,
-  ) => {
-    if (!swConfig || !hasSwRoutes()) {
-      return next()
-    }
-    const requestUrl = req.url ?? '/'
-    const parsed = new URL(requestUrl, 'http://mokup.local')
-    const swPath = resolveRegisterPath(base, swConfig.path)
-    if (parsed.pathname !== swPath) {
-      return next()
-    }
-    await ensureBuilt()
-    if (!bundleState.swBundle) {
-      res.statusCode = 500
-      res.setHeader('Content-Type', 'text/plain; charset=utf-8')
-      res.end('Failed to generate mokup service worker.')
-      return
-    }
-    res.statusCode = 200
-    res.setHeader('Content-Type', 'application/javascript; charset=utf-8')
-    res.setHeader('Cache-Control', 'no-cache')
-    res.end(bundleState.swBundle)
-  }
+  const swMiddleware = createSwMiddleware({
+    swConfig,
+    hasSwRoutes,
+    getBase: () => base,
+    ensureBuilt,
+    getSwBundle: () => bundleState.swBundle,
+  })
 
   const mockMiddleware = createMiddleware(() => state.app, logger)
 
