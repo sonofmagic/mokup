@@ -1,20 +1,12 @@
-import { computed, onBeforeUnmount, onMounted, ref } from 'vue'
+import { computed, ref } from 'vue'
 import { usePlaygroundCounts } from './usePlaygroundCounts'
 import { usePlaygroundModeHandlers } from './usePlaygroundModeHandlers'
 import { usePlaygroundRequest } from './usePlaygroundRequest'
 import { usePlaygroundRoutes } from './usePlaygroundRoutes'
+import { usePlaygroundShell } from './usePlaygroundShell'
 import { usePlaygroundWorkspaceProps } from './usePlaygroundWorkspaceProps'
 import { useRouteTree } from './useRouteTree'
 import { useSplitPane } from './useSplitPane'
-
-declare global {
-  interface Window {
-    __MOKUP_PLAYGROUND__?: {
-      reloadRoutes?: () => void
-      notifyHotReload?: () => void
-    }
-  }
-}
 
 export function usePlaygroundAppState() {
   const {
@@ -182,40 +174,13 @@ export function usePlaygroundAppState() {
     searchTerm,
     getRouteKey: routeKey,
   })
-  const hotReloadVisible = ref(false)
-  const hotReloadTimer = ref<number | null>(null)
-  const sidebarCollapsed = ref(false)
-  const sidebarLastWidth = ref(320)
-  const sidebarCollapsedKey = 'mokup.playground.sidebarCollapsed'
-  const sidebarCollapsedWidth = 72
-
-  function handleRefresh() {
-    loadRoutes().catch(() => undefined)
-  }
-
-  function notifyHotReload() {
-    if (hotReloadTimer.value) {
-      window.clearTimeout(hotReloadTimer.value)
-    }
-    hotReloadVisible.value = true
-    hotReloadTimer.value = window.setTimeout(() => {
-      hotReloadVisible.value = false
-      hotReloadTimer.value = null
-    }, 2000)
-  }
-
-  function toggleSidebar() {
-    if (sidebarCollapsed.value) {
-      sidebarCollapsed.value = false
-      splitWidth.value = sidebarLastWidth.value
-    }
-    else {
-      sidebarLastWidth.value = splitWidth.value
-      sidebarCollapsed.value = true
-      splitWidth.value = sidebarCollapsedWidth
-    }
-    localStorage.setItem(sidebarCollapsedKey, String(sidebarCollapsed.value))
-  }
+  const { hotReloadVisible, sidebarCollapsed, handleRefresh, toggleSidebar } = usePlaygroundShell({
+    loadRoutes,
+    setBasePath,
+    restoreSplitWidth,
+    stopDrag,
+    splitWidth,
+  })
 
   const workspaceRefs = {
     search,
@@ -322,29 +287,6 @@ export function usePlaygroundAppState() {
     authKeyLocation,
     authCustomName,
     authCustomValue,
-  })
-
-  onMounted(() => {
-    setBasePath(window.location.pathname)
-    restoreSplitWidth()
-    sidebarLastWidth.value = splitWidth.value
-    const storedCollapsed = localStorage.getItem(sidebarCollapsedKey)
-    if (storedCollapsed === 'true') {
-      sidebarCollapsed.value = true
-      splitWidth.value = sidebarCollapsedWidth
-    }
-    window.__MOKUP_PLAYGROUND__ = {
-      reloadRoutes: handleRefresh,
-      notifyHotReload,
-    }
-    handleRefresh()
-  })
-
-  onBeforeUnmount(() => {
-    stopDrag()
-    if (hotReloadTimer.value) {
-      window.clearTimeout(hotReloadTimer.value)
-    }
   })
 
   return {
