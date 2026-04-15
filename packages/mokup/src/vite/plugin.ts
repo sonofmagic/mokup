@@ -77,10 +77,7 @@ export function createMokupPlugin(options: MokupPluginOptions = {}): Plugin {
   const resolveAllDirs = createDirResolver(optionList, () => root)
   const hasSwRoutes = () => !!swConfig && state.swRoutes.length > 0
   const { resolveSwRequestPath, resolveSwRegisterScope } = createSwPathResolver(() => base)
-  const { resolveHtmlAssetPath, resolveAssetsFileName } = createHtmlAssetResolver(
-    () => base,
-    () => assetsDir,
-  )
+  const { resolveHtmlAssetPath, resolveAssetsFileName } = createHtmlAssetResolver(() => base, () => assetsDir)
   const swVirtualId = 'virtual:mokup-sw'
   const resolvedSwVirtualId = `\0${swVirtualId}`
   const swLifecycleVirtualId = 'virtual:mokup-sw-lifecycle'
