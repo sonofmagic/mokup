@@ -84,6 +84,14 @@ function createRequestRunner(params: {
     params.responseStatus.value = params.t('response.idle')
     params.responseTime.value = ''
   }
+  const setErrorResponse = (message: string) => {
+    setResponseRaw('')
+    setResponsePretty(message)
+    responseHeaders.value = {}
+    responseContentType.value = ''
+    params.responseStatus.value = params.t('response.error')
+    params.responseTime.value = ''
+  }
 
   const runRequest = async () => {
     if (!params.selected.value) {
@@ -95,36 +103,18 @@ function createRequestRunner(params: {
     const resolved = buildResolvedPath(tokens, params.paramValues.value)
     if (resolved.missing.length > 0) {
       params.onMissingParams?.(resolved.missing)
-      const message = params.t('errors.routeParams', { params: resolved.missing.join(', ') })
-      setResponseRaw('')
-      setResponsePretty(message)
-      responseHeaders.value = {}
-      responseContentType.value = ''
-      params.responseStatus.value = params.t('response.error')
-      params.responseTime.value = ''
+      setErrorResponse(params.t('errors.routeParams', { params: resolved.missing.join(', ') }))
       return
     }
     const requestKey = params.getRouteKey(params.selected.value)
     const parsedQuery = parseJsonInput(params.queryText.value)
     if (parsedQuery.error) {
-      const message = params.t('errors.queryJson', { message: parsedQuery.error })
-      setResponseRaw('')
-      setResponsePretty(message)
-      responseHeaders.value = {}
-      responseContentType.value = ''
-      params.responseStatus.value = params.t('response.error')
-      params.responseTime.value = ''
+      setErrorResponse(params.t('errors.queryJson', { message: parsedQuery.error }))
       return
     }
     const parsedHeaders = parseJsonInput(params.headersText.value)
     if (parsedHeaders.error) {
-      const message = params.t('errors.headersJson', { message: parsedHeaders.error })
-      setResponseRaw('')
-      setResponsePretty(message)
-      responseHeaders.value = {}
-      responseContentType.value = ''
-      params.responseStatus.value = params.t('response.error')
-      params.responseTime.value = ''
+      setErrorResponse(params.t('errors.headersJson', { message: parsedHeaders.error }))
       return
     }
     const url = new URL(resolved.path, window.location.origin)
@@ -191,13 +181,7 @@ function createRequestRunner(params: {
         if (params.rawType.value === 'json' && params.rawValidate.value) {
           const parsedBody = parseJsonInput(rawBody)
           if (parsedBody.error) {
-            const message = params.t('errors.bodyJson', { message: parsedBody.error })
-            setResponseRaw('')
-            setResponsePretty(message)
-            responseHeaders.value = {}
-            responseContentType.value = ''
-            params.responseStatus.value = params.t('response.error')
-            params.responseTime.value = ''
+            setErrorResponse(params.t('errors.bodyJson', { message: parsedBody.error }))
             return
           }
         }
@@ -294,12 +278,8 @@ function createRequestRunner(params: {
       }
     }
     catch (err) {
-      params.responseStatus.value = params.t('response.error')
       const message = err instanceof Error ? err.message : String(err)
-      setResponseRaw('')
-      setResponsePretty(message)
-      responseHeaders.value = {}
-      responseContentType.value = ''
+      setErrorResponse(message)
     }
   }
 
