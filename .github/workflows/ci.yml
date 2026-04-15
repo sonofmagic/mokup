@@ -53,6 +53,9 @@ jobs:
       - name: Lint
         run: pnpm lint
 
+      - name: Line Budget (warn)
+        run: pnpm run lint:lines:warn
+
       - name: Typecheck
         run: pnpm typecheck
 

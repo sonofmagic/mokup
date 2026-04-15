@@ -10,10 +10,21 @@
 ## Before Opening A PR
 
 - Run `pnpm run guard:migration`
+- Run `pnpm run typecheck:fast` while iterating (optional, faster local feedback)
 - Run `pnpm typecheck`
 - Run `pnpm lint`
+- Run `pnpm run lint:lines` for line-budget checks (or `pnpm run lint:lines:warn` for report-only mode)
 - Run `pnpm test`
 - Run `pnpm test:e2e:serial` for changes that may affect demos, dev server flow, HMR, or root Playwright E2E coverage
+
+## Line Budget Guard
+
+`scripts/lint-lines.mjs` checks non-comment source lines in `packages/*/src` and currently uses a `300`-line budget per file.
+
+- `pnpm run lint:lines` runs in fail-fast mode (`--mode=error`)
+- `pnpm run lint:lines:warn` reports oversized files without failing
+
+CI currently uses warn mode to keep existing hotspots visible while avoiding blocking unrelated PRs. For new or heavily touched files, prefer extracting reusable helpers/components to keep files under the budget.
 
 ## Migration Guards
 
