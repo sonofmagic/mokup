@@ -1,8 +1,8 @@
 <script setup lang="ts">
+import type { ApiKeyLocation, AuthType, BodyType, MultipartFileEntry, RawBodyType } from './types'
 import { computed, onBeforeUnmount, onMounted, ref } from 'vue'
-import PlaygroundContent from './components/PlaygroundContent.vue'
-import PlaygroundHeader from './components/PlaygroundHeader.vue'
-import PlaygroundSidebar from './components/PlaygroundSidebar.vue'
+import PlaygroundHotReloadToast from './components/PlaygroundHotReloadToast.vue'
+import PlaygroundWorkspace from './components/PlaygroundWorkspace.vue'
 import { usePlaygroundCounts } from './hooks/usePlaygroundCounts'
 import { usePlaygroundModeHandlers } from './hooks/usePlaygroundModeHandlers'
 import { usePlaygroundRequest } from './hooks/usePlaygroundRequest'
@@ -10,14 +10,7 @@ import { usePlaygroundRoutes } from './hooks/usePlaygroundRoutes'
 import { useRouteTree } from './hooks/useRouteTree'
 import { useSplitPane } from './hooks/useSplitPane'
 
-declare global {
-  interface Window {
-    __MOKUP_PLAYGROUND__?: {
-      reloadRoutes?: () => void
-      notifyHotReload?: () => void
-    }
-  }
-}
+declare global { interface Window { __MOKUP_PLAYGROUND__?: { reloadRoutes?: () => void, notifyHotReload?: () => void } } }
 
 const {
   routes,
@@ -219,6 +212,119 @@ function toggleSidebar() {
   localStorage.setItem(sidebarCollapsedKey, String(sidebarCollapsed.value))
 }
 
+const workspaceRefs = {
+  search,
+  isDragging,
+  splitStyle,
+  sidebarCollapsed,
+  basePath,
+  groups,
+  activeGroup,
+  treeMode,
+  routeMode,
+  enabledMode,
+  disabledMode,
+  selectedConfig,
+  selectedDisabled,
+  selectedIgnored,
+  activeTotal,
+  apiTotal,
+  disabledTotal,
+  ignoredTotal,
+  configTotal,
+  disabledApiTotal,
+  disabledConfigTotal,
+  error,
+  loading,
+  hasCachedData,
+  filtered,
+  disabledFiltered,
+  ignoredFiltered,
+  configFiltered,
+  disabledConfigFiltered,
+  treeRows,
+  workspaceRoot,
+  visibleCount,
+  totalCount,
+  requestMode,
+  selected,
+  requestUrl,
+  queryText,
+  headersText,
+  bodyText,
+  bodyType,
+  rawType,
+  rawValidate,
+  multipartFiles,
+  binaryFile,
+  authType,
+  authToken,
+  authUsername,
+  authPassword,
+  authKeyName,
+  authKeyValue,
+  authKeyLocation,
+  authCustomName,
+  authCustomValue,
+  responseRaw,
+  responsePretty,
+  responseHeaders,
+  responseContentType,
+  responseStatus,
+  responseTime,
+  isSwRegistering,
+  routeParams,
+  paramValues,
+  missingParams,
+  missingPulse,
+  configImpactRoutes,
+  configStatusMap,
+}
+
+const workspaceHandlers = {
+  getRouteCount,
+  onRefresh: handleRefresh,
+  onToggleCollapse: toggleSidebar,
+  onSelectGroup: setActiveGroup,
+  onSetRouteMode: setRouteMode,
+  onSetEnabledMode: setEnabledMode,
+  onSetDisabledMode: setDisabledMode,
+  onToggleTree: toggleExpanded,
+  onSelectRoute: handleSelectRoute,
+  onSelectDisabled: handleSelectDisabled,
+  onSelectIgnored: handleSelectIgnored,
+  onSelectConfig: handleSelectConfig,
+  onSetTreeMode: setTreeMode,
+  onDragStart: handleDragStart,
+  onSetParamValue: setParamValue,
+  onRunRequest: runRequest,
+  onUpdateSearch: (value: string) => { search.value = value },
+  onUpdateQueryText: (value: string) => { queryText.value = value },
+  onUpdateHeadersText: (value: string) => { headersText.value = value },
+  onUpdateBodyText: (value: string) => { bodyText.value = value },
+  onUpdateBodyType: (value: BodyType) => { bodyType.value = value },
+  onUpdateRawType: (value: RawBodyType) => { rawType.value = value },
+  onUpdateRawValidate: (value: boolean) => { rawValidate.value = value },
+  onUpdateMultipartFiles: (value: MultipartFileEntry[]) => { multipartFiles.value = value },
+  onUpdateBinaryFile: (value: File | null) => { binaryFile.value = value },
+  onUpdateAuthType: (value: AuthType) => { authType.value = value },
+  onUpdateAuthToken: (value: string) => { authToken.value = value },
+  onUpdateAuthUsername: (value: string) => { authUsername.value = value },
+  onUpdateAuthPassword: (value: string) => { authPassword.value = value },
+  onUpdateAuthKeyName: (value: string) => { authKeyName.value = value },
+  onUpdateAuthKeyValue: (value: string) => { authKeyValue.value = value },
+  onUpdateAuthKeyLocation: (value: ApiKeyLocation) => { authKeyLocation.value = value },
+  onUpdateAuthCustomName: (value: string) => { authCustomName.value = value },
+  onUpdateAuthCustomValue: (value: string) => { authCustomValue.value = value },
+}
+
+type WorkspaceProps = InstanceType<typeof PlaygroundWorkspace>['$props']
+
+const workspaceProps = computed<WorkspaceProps>(() => ({
+  ...Object.fromEntries(Object.entries(workspaceRefs).map(([key, value]) => [key, value.value])),
+  ...workspaceHandlers,
+}) as unknown as WorkspaceProps)
+
 onMounted(() => {
   setBasePath(window.location.pathname)
   restoreSplitWidth()
@@ -245,138 +351,7 @@ onBeforeUnmount(() => {
 
 <template>
   <div class="h-screen overflow-hidden pg-app-bg" data-testid="playground-app">
-    <Transition name="pg-hot-toast">
-      <div
-        v-if="hotReloadVisible"
-        class="pointer-events-none fixed inset-x-0 top-5 z-50 flex justify-center px-4"
-      >
-        <div
-          class="pg-hot-toast inline-flex items-center gap-2 rounded border border-pg-border bg-pg-surface-panel px-4 py-2 text-sm font-medium text-pg-text"
-        >
-          <span class="i-[carbon--checkmark-filled] h-4 w-4 text-pg-accent" aria-hidden="true" />
-          Hot reload complete
-        </div>
-      </div>
-    </Transition>
-
-    <div class="flex h-full w-full flex-col">
-      <main class="flex min-h-0 flex-1 flex-col overflow-hidden">
-        <div class="flex flex-1 flex-col overflow-hidden bg-pg-surface-shell">
-          <div
-            class="flex min-h-0 flex-1 flex-col lg:flex-row"
-            :class="isDragging ? 'select-none' : ''"
-            :style="splitStyle"
-          >
-            <PlaygroundSidebar
-              v-model:search="search"
-              :collapsed="sidebarCollapsed"
-              :base-path="basePath"
-              :groups="groups"
-              :active-group="activeGroup"
-              :tree-mode="treeMode"
-              :route-mode="routeMode"
-              :enabled-mode="enabledMode"
-              :disabled-mode="disabledMode"
-              :selected-config="selectedConfig"
-              :selected-disabled="selectedDisabled"
-              :selected-ignored="selectedIgnored"
-              :active-total="activeTotal"
-              :api-total="apiTotal"
-              :disabled-total="disabledTotal"
-              :ignored-total="ignoredTotal"
-              :config-total="configTotal"
-              :disabled-api-total="disabledApiTotal"
-              :disabled-config-total="disabledConfigTotal"
-              :error="error"
-              :loading="loading"
-              :has-cached-data="hasCachedData"
-              :filtered="filtered"
-              :disabled-filtered="disabledFiltered"
-              :ignored-filtered="ignoredFiltered"
-              :config-filtered="configFiltered"
-              :disabled-config-filtered="disabledConfigFiltered"
-              :tree-rows="treeRows"
-              :workspace-root="workspaceRoot"
-              :get-route-count="getRouteCount"
-              @toggle-collapse="toggleSidebar"
-              @select-group="setActiveGroup"
-              @set-route-mode="setRouteMode"
-              @set-enabled-mode="setEnabledMode"
-              @set-disabled-mode="setDisabledMode"
-              @toggle="toggleExpanded"
-              @select-route="handleSelectRoute"
-              @select-disabled-route="handleSelectDisabled"
-              @select-ignored-route="handleSelectIgnored"
-              @select-config="handleSelectConfig"
-              @update:treeMode="setTreeMode"
-            />
-
-            <div
-              v-if="!sidebarCollapsed"
-              class="pg-sash-zone relative hidden w-0 flex-none lg:flex"
-              :class="isDragging ? 'pg-sash-active' : ''"
-              @pointerdown="handleDragStart"
-            >
-              <div class="pg-sash" role="separator" aria-label="Resize panels" />
-            </div>
-
-            <section class="flex min-h-0 flex-1 flex-col overflow-hidden p-4 lg:p-6">
-              <PlaygroundHeader
-                :visible-count="visibleCount"
-                :total-count="totalCount"
-                :request-mode="requestMode"
-                @refresh="handleRefresh"
-              />
-
-              <div class="mt-3 flex-1 min-h-0 overflow-auto">
-                <PlaygroundContent
-                  v-model:queryText="queryText"
-                  v-model:headersText="headersText"
-                  v-model:bodyText="bodyText"
-                  v-model:bodyType="bodyType"
-                  v-model:rawType="rawType"
-                  v-model:rawValidate="rawValidate"
-                  v-model:multipartFiles="multipartFiles"
-                  v-model:binaryFile="binaryFile"
-                  v-model:authType="authType"
-                  v-model:authToken="authToken"
-                  v-model:authUsername="authUsername"
-                  v-model:authPassword="authPassword"
-                  v-model:authKeyName="authKeyName"
-                  v-model:authKeyValue="authKeyValue"
-                  v-model:authKeyLocation="authKeyLocation"
-                  v-model:authCustomName="authCustomName"
-                  v-model:authCustomValue="authCustomValue"
-                  :selected="selected"
-                  :selected-disabled="selectedDisabled"
-                  :selected-ignored="selectedIgnored"
-                  :selected-config="selectedConfig"
-                  :request-url="requestUrl"
-                  :workspace-root="workspaceRoot"
-                  :response-raw="responseRaw"
-                  :response-pretty="responsePretty"
-                  :response-headers="responseHeaders"
-                  :response-content-type="responseContentType"
-                  :response-status="responseStatus"
-                  :response-time="responseTime"
-                  :is-sw-registering="isSwRegistering"
-                  :route-params="routeParams"
-                  :param-values="paramValues"
-                  :missing-params="missingParams"
-                  :missing-pulse="missingPulse"
-                  :route-mode="routeMode"
-                  :enabled-mode="enabledMode"
-                  :disabled-mode="disabledMode"
-                  :config-impact-routes="configImpactRoutes"
-                  :config-status-map="configStatusMap"
-                  @update:param-value="setParamValue"
-                  @run="runRequest"
-                />
-              </div>
-            </section>
-          </div>
-        </div>
-      </main>
-    </div>
+    <PlaygroundHotReloadToast :visible="hotReloadVisible" />
+    <PlaygroundWorkspace v-bind="workspaceProps" />
   </div>
 </template>
