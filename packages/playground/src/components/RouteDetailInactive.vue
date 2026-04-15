@@ -163,7 +163,6 @@ function openInEditorForFile(file: string) {
         </div>
       </div>
     </div>
-
     <div class="rounded border p-4 border-pg-border bg-pg-surface-soft">
       <div class="flex items-center gap-2 text-[0.6rem] tracking-[0.08em] text-pg-text-muted">
         <span>{{ t('inactive.decisionChain') }}</span>
@@ -216,7 +215,6 @@ function openInEditorForFile(file: string) {
         {{ t('inactive.decisionChainEmpty') }}
       </div>
     </div>
-
     <div class="rounded border p-4 border-pg-border bg-pg-surface-soft">
       <div class="flex items-center gap-2 text-[0.6rem] tracking-[0.08em] text-pg-text-muted">
         <span>{{ t('detail.configChain') }}</span>
@@ -245,7 +243,6 @@ function openInEditorForFile(file: string) {
         {{ t('detail.configChainEmpty') }}
       </div>
     </div>
-
     <div class="rounded border p-4 border-pg-border bg-pg-surface-soft">
       <div class="flex items-center gap-2 text-[0.6rem] tracking-[0.08em] text-pg-text-muted">
         <span>{{ t('inactive.effectiveConfig') }}</span>
@@ -271,7 +268,6 @@ function openInEditorForFile(file: string) {
         {{ t('inactive.effectiveConfigEmpty') }}
       </div>
     </div>
-
     <div class="rounded border p-4 border-pg-border bg-pg-surface-soft">
       <div class="text-[0.6rem] tracking-[0.08em] text-pg-text-muted">
         {{ t('inactive.routeSummary') }}
