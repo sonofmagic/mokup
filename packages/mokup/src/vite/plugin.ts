@@ -8,7 +8,7 @@ import {
   createSwConflictDiagnosticSections,
   reportDiagnostics,
 } from '@mokup/shared/diagnostics'
-import { buildBundleModule, buildSwScript, createPlaygroundMiddleware, resolvePlaygroundOptions, resolveSwConfig, resolveSwUnregisterConfig, writePlaygroundBuild } from '../internal/core'
+import { createPlaygroundMiddleware, resolvePlaygroundOptions, resolveSwConfig, resolveSwUnregisterConfig, writePlaygroundBuild } from '../internal/core'
 import { resolvePlaygroundDist } from '../playground/assets'
 import { createLogger } from '../shared/logger'
 import { normalizeMokupOptions, normalizeOptions } from './plugin/options'
@@ -16,7 +16,8 @@ import { resolveSwImportPath } from './plugin/paths'
 import { createRouteRefresher } from './plugin/refresh'
 import { createDirResolver, createHtmlAssetResolver, createSwPathResolver } from './plugin/resolvers'
 import { configureDevServer, configurePreviewServer } from './plugin/server-hooks'
-import { buildSwLifecycleInlineScript, buildSwLifecycleScript, resolveSwModuleImport } from './plugin/sw'
+import { buildSwLifecycleInlineScript, buildSwLifecycleScript } from './plugin/sw'
+import { loadMokupVirtualModule, resolveMokupVirtualId } from './plugin/virtual-modules'
 
 /**
  * Create the mokup Vite plugin.
@@ -150,72 +151,41 @@ export function createMokupPlugin(options: MokupPluginOptions = {}): Plugin {
     name: 'mokup:vite',
     enforce: 'pre',
     resolveId(id) {
-      if (id === swVirtualId) {
-        return resolvedSwVirtualId
-      }
-      if (id === swLifecycleVirtualId) {
-        return resolvedSwLifecycleVirtualId
-      }
-      if (id === bundleVirtualId) {
-        return resolvedBundleVirtualId
-      }
-      return null
+      return resolveMokupVirtualId(id, {
+        swVirtualId,
+        resolvedSwVirtualId,
+        swLifecycleVirtualId,
+        resolvedSwLifecycleVirtualId,
+        bundleVirtualId,
+        resolvedBundleVirtualId,
+      })
     },
     async load(id) {
-      if (id === resolvedBundleVirtualId) {
-        const shouldRefresh = command !== 'build' || !state.lastSignature
-        if (shouldRefresh) {
-          await refreshRoutes(currentServer ?? undefined, { silent: true })
-        }
-        const dirs = resolveAllDirs()
-        for (const dir of dirs) {
-          this.addWatchFile(dir)
-        }
-        for (const route of state.serverRoutes) {
-          this.addWatchFile(route.file)
-          route.middlewares?.forEach((entry) => {
-            this.addWatchFile(entry.source)
-          })
-        }
-        for (const config of state.configFiles) {
-          this.addWatchFile(config.file)
-        }
-        for (const config of state.disabledConfigFiles) {
-          this.addWatchFile(config.file)
-        }
-        return buildBundleModule({ routes: state.serverRoutes, root })
-      }
-      if (id !== resolvedSwVirtualId) {
-        if (id !== resolvedSwLifecycleVirtualId) {
-          return null
-        }
-        if (!swLifecycleScript) {
-          if (state.swRoutes.length === 0) {
-            await refreshRoutes()
-          }
-          const importPath = await resolveSwModuleImport(this)
-          swLifecycleScript = buildSwLifecycleScript({
-            importPath,
-            swConfig,
-            unregisterConfig,
-            hasSwEntries,
-            hasSwRoutes: hasSwRoutes(),
-            resolveRequestPath: resolveSwRequestPath,
-            resolveRegisterScope: resolveSwRegisterScope,
-          })
-        }
-        return swLifecycleScript ?? ''
-      }
-      if (state.swRoutes.length === 0) {
-        await refreshRoutes()
-      }
-      return buildSwScript({
-        routes: state.swRoutes,
+      return loadMokupVirtualModule(this, id, {
+        ids: {
+          swVirtualId,
+          resolvedSwVirtualId,
+          swLifecycleVirtualId,
+          resolvedSwLifecycleVirtualId,
+          bundleVirtualId,
+          resolvedBundleVirtualId,
+        },
+        command,
+        state,
+        currentServer,
+        refreshRoutes,
+        resolveAllDirs,
         root,
-        basePaths: swConfig?.basePaths ?? [],
-        ...(typeof state.swModuleVersion !== 'undefined'
-          ? { moduleVersion: state.swModuleVersion }
-          : {}),
+        swConfig,
+        unregisterConfig,
+        hasSwEntries,
+        hasSwRoutes,
+        resolveSwRequestPath,
+        resolveSwRegisterScope,
+        swLifecycleScript,
+        setSwLifecycleScript: (value) => {
+          swLifecycleScript = value
+        },
       })
     },
     async buildStart() {
