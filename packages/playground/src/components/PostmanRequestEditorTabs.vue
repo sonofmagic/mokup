@@ -4,6 +4,7 @@ import { computed, defineAsyncComponent } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useRequestEditorState } from '../hooks/useRequestEditorState'
 import PostmanRequestAuthTab from './PostmanRequestAuthTab.vue'
+import PostmanRequestBodyTab from './PostmanRequestBodyTab.vue'
 import RouteDetailConfigChain from './RouteDetailConfigChain.vue'
 import RouteDetailMiddlewares from './RouteDetailMiddlewares.vue'
 import UiField from './ui/UiField.vue'
@@ -64,9 +65,6 @@ const UiCodeEditor = defineAsyncComponent({
 })
 
 type RequestTab = 'params' | 'auth' | 'headers' | 'body' | 'config' | 'middlewares'
-type BodyOption
-  = | { value: BodyType, label: string, disabled?: false }
-    | { value: 'graphql', label: string, disabled: true }
 
 const { t } = useI18n()
 
@@ -107,32 +105,8 @@ const {
   resolveDefaultTab: () => 'params',
 })
 
-const bodyTypeOptions = computed<BodyOption[]>(() => [
-  { value: 'none', label: t('detail.bodyTypeNone') },
-  { value: 'form-data', label: t('detail.bodyTypeFormData') },
-  { value: 'form-urlencoded', label: t('detail.bodyTypeFormUrlencoded') },
-  { value: 'raw', label: t('detail.bodyTypeRaw') },
-  { value: 'binary', label: t('detail.bodyTypeBinary') },
-  { value: 'graphql', label: t('detail.bodyTypeGraphql'), disabled: true },
-])
-
-const rawTypeOptions = computed(() => [
-  { value: 'text', label: t('detail.rawTypeText') },
-  { value: 'javascript', label: t('detail.rawTypeJavascript') },
-  { value: 'json', label: t('detail.rawTypeJson') },
-  { value: 'html', label: t('detail.rawTypeHtml') },
-  { value: 'xml', label: t('detail.rawTypeXml') },
-])
-
 const queryExample = '{ "q": "alpha", "page": 1 }'
 const headersExample = '{ "x-mokup": "playground" }'
-
-const bodyEditorLanguage = computed<'text' | 'json'>(() => {
-  if (props.bodyType === 'raw' && props.rawType === 'json') {
-    return 'json'
-  }
-  return 'text'
-})
 </script>
 
 <template>
@@ -312,144 +286,28 @@ const bodyEditorLanguage = computed<'text' | 'json'>(() => {
         </UiField>
       </div>
 
-      <div v-else-if="activeTab === 'body'">
-        <UiField :label="t('detail.bodyType')">
-          <div class="flex flex-wrap items-center gap-4 text-[0.65rem] tracking-[0.08em] text-pg-text-muted">
-            <label
-              v-for="option in bodyTypeOptions"
-              :key="option.value"
-              class="inline-flex items-center gap-2 rounded border px-3 py-1 transition border-pg-border bg-pg-surface-strong"
-              :class="option.disabled ? 'opacity-60 cursor-not-allowed' : 'text-pg-text-soft'"
-            >
-              <input
-                class="h-3.5 w-3.5 rounded border-pg-border text-pg-accent"
-                type="radio"
-                name="bodyType"
-                :disabled="option.disabled"
-                :checked="props.bodyType === option.value"
-                @change="option.disabled ? null : emit('update:bodyType', option.value as BodyType)"
-              >
-              <span>{{ option.label }}</span>
-            </label>
-          </div>
-        </UiField>
-
-        <div v-if="props.bodyType === 'raw'" class="mt-3 flex flex-wrap items-center gap-3">
-          <UiField :label="t('detail.rawType')" class="flex-1 min-w-[200px]">
-            <div class="relative">
-              <select
-                class="w-full appearance-none rounded border px-3 py-2 text-[0.7rem] tracking-[0.08em] outline-none transition border-pg-border bg-pg-surface-strong text-pg-text focus:border-pg-accent"
-                :value="props.rawType"
-                @change="emit('update:rawType', ($event.target as HTMLSelectElement | null)?.value as RawBodyType)"
-              >
-                <option v-for="option in rawTypeOptions" :key="option.value" :value="option.value">
-                  {{ option.label }}
-                </option>
-              </select>
-              <span
-                class="pointer-events-none absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 text-pg-text-muted"
-                aria-hidden="true"
-              >
-                <span class="i-[carbon--chevron-down] block h-4 w-4" />
-              </span>
-            </div>
-          </UiField>
-          <label
-            v-if="props.rawType === 'json'"
-            class="flex items-center gap-2 rounded border px-3 py-2 text-[0.7rem] tracking-[0.08em] border-pg-border bg-pg-surface-strong text-pg-text-muted"
-          >
-            <input
-              type="checkbox"
-              class="h-4 w-4 rounded border-pg-border text-pg-accent"
-              :checked="props.rawValidate"
-              @change="emit('update:rawValidate', ($event.target as HTMLInputElement | null)?.checked ?? true)"
-            >
-            <span>{{ t('detail.rawValidate') }}</span>
-          </label>
-        </div>
-
-        <div v-if="props.bodyType === 'none'" class="mt-3 rounded border px-4 py-3 text-sm border-pg-border bg-pg-surface-strong text-pg-text-muted">
-          {{ t('detail.bodyNoneHint') }}
-        </div>
-        <div v-else-if="props.bodyType === 'binary'" class="mt-2">
-          <UiField :label="t('detail.bodyBinaryFile')">
-            <div class="flex flex-wrap items-center gap-3">
-              <label class="flex items-center gap-2 rounded border px-3 py-2 text-[0.7rem] tracking-[0.08em] border-pg-border bg-pg-surface-card text-pg-text-muted">
-                <input
-                  class="sr-only"
-                  type="file"
-                  @change="updateBinaryFile"
-                >
-                <span>{{ props.binaryFile ? t('detail.bodyBinarySelected', { name: props.binaryFile.name, size: formatBytes(props.binaryFile.size) }) : t('detail.bodyBinaryChoose') }}</span>
-              </label>
-              <button
-                v-if="props.binaryFile"
-                class="rounded border px-3 py-2 text-[0.7rem] tracking-[0.08em] transition border-pg-border bg-pg-surface-card text-pg-text-muted hover:text-pg-text-soft"
-                type="button"
-                @click="clearBinaryFile"
-              >
-                {{ t('detail.bodyBinaryRemove') }}
-              </button>
-            </div>
-          </UiField>
-        </div>
-        <UiField
-          v-else
-          :label="t('detail.body')"
-        >
-          <UiCodeEditor
-            :model-value="props.bodyText"
-            :language="bodyEditorLanguage"
-            :rows="6"
-            :format-label="t('detail.formatJson')"
-            :placeholder="resolveBodyPlaceholder()"
-            @update:model-value="emit('update:bodyText', $event)"
-          />
-        </UiField>
-        <div v-if="props.bodyType === 'form-data'" class="mt-4">
-          <UiField :label="t('detail.bodyMultipartFiles')">
-            <div class="mt-2 flex flex-col gap-2">
-              <div
-                v-for="row in props.multipartFiles"
-                :key="row.id"
-                class="rounded border p-3 border-pg-border bg-pg-surface-strong"
-              >
-                <div class="flex flex-col gap-2 lg:flex-row lg:items-center">
-                  <UiTextInput
-                    class="flex-1"
-                    :value="row.name"
-                    :placeholder="t('detail.bodyMultipartField')"
-                    @input="updateMultipartName(row.id, ($event.target as HTMLInputElement | null)?.value ?? '')"
-                  />
-                  <label class="flex items-center gap-2 rounded border px-3 py-2 text-[0.7rem] tracking-[0.08em] border-pg-border bg-pg-surface-card text-pg-text-muted">
-                    <input
-                      class="sr-only"
-                      type="file"
-                      multiple
-                      @change="updateMultipartFiles(row.id, $event)"
-                    >
-                    <span>{{ resolveMultipartLabel(row) }}</span>
-                  </label>
-                  <button
-                    class="rounded border px-3 py-2 text-[0.7rem] tracking-[0.08em] transition border-pg-border bg-pg-surface-card text-pg-text-muted hover:text-pg-text-soft"
-                    type="button"
-                    @click="removeMultipartRow(row.id)"
-                  >
-                    {{ t('detail.bodyMultipartRemove') }}
-                  </button>
-                </div>
-              </div>
-              <button
-                class="w-full rounded border px-3 py-2 text-[0.7rem] tracking-[0.08em] transition border-dashed border-pg-border bg-pg-surface-card text-pg-text-muted hover:text-pg-text-soft"
-                type="button"
-                @click="addMultipartRow"
-              >
-                {{ t('detail.bodyMultipartAdd') }}
-              </button>
-            </div>
-          </UiField>
-        </div>
-      </div>
+      <PostmanRequestBodyTab
+        v-else-if="activeTab === 'body'"
+        :body-type="props.bodyType"
+        :raw-type="props.rawType"
+        :raw-validate="props.rawValidate"
+        :body-text="props.bodyText"
+        :multipart-files="props.multipartFiles"
+        :binary-file="props.binaryFile"
+        :format-bytes="formatBytes"
+        :resolve-body-placeholder="resolveBodyPlaceholder"
+        :resolve-multipart-label="resolveMultipartLabel"
+        :add-multipart-row="addMultipartRow"
+        :remove-multipart-row="removeMultipartRow"
+        :update-binary-file="updateBinaryFile"
+        :clear-binary-file="clearBinaryFile"
+        :update-multipart-name="updateMultipartName"
+        :update-multipart-files="updateMultipartFiles"
+        @update:bodyType="emit('update:bodyType', $event)"
+        @update:rawType="emit('update:rawType', $event)"
+        @update:rawValidate="emit('update:rawValidate', $event)"
+        @update:bodyText="emit('update:bodyText', $event)"
+      />
 
       <div v-show="activeTab === 'config'" class="rounded border border-pg-border bg-pg-surface-strong">
         <RouteDetailConfigChain
