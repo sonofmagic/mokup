@@ -14,19 +14,6 @@ import { parseWsMessage, resolvePlaygroundWsUrl } from './playground-request/web
 
 let swReadyPromise: Promise<void> | null = null
 
-/**
- * Vue composable for running playground requests and tracking state.
- *
- * @param selected - Currently selected route.
- * @param options - Optional configuration.
- * @param options.basePath - Optional base path ref for websocket.
- * @returns Reactive request helpers and state.
- *
- * @example
- * import { usePlaygroundRequest } from '@mokup/playground'
- *
- * const request = usePlaygroundRequest({ route: null })
- */
 export function usePlaygroundRequest(
   selected: Ref<PlaygroundRoute | null>,
   options: { basePath?: Ref<string> } = {},
@@ -56,6 +43,36 @@ export function usePlaygroundRequest(
   const responseContentType = ref('')
   const responseStatus = ref(t('response.idle'))
   const responseTime = ref('')
+  const requestPayloadState = {
+    queryText,
+    headersText,
+    bodyText,
+    bodyType,
+    rawType,
+    rawValidate,
+    multipartFiles,
+    binaryFile,
+  }
+  const authState = {
+    authType,
+    authToken,
+    authUsername,
+    authPassword,
+    authKeyName,
+    authKeyValue,
+    authKeyLocation,
+    authCustomName,
+    authCustomValue,
+  }
+  const responseState = {
+    responseRaw,
+    responsePretty,
+    responseText,
+    responseHeaders,
+    responseContentType,
+    responseStatus,
+    responseTime,
+  }
   const isSwMode = ref(false)
   const isSwReady = ref(false)
   const isSwRegistering = computed(() => isSwMode.value && !isSwReady.value)
@@ -84,13 +101,8 @@ export function usePlaygroundRequest(
     return `${path}${buildQueryString(parsedQuery.value)}`
   })
 
-  function getRouteKey(route: PlaygroundRoute) {
-    return `${route.method} ${route.url}`
-  }
-
-  function getRouteCount(route: PlaygroundRoute) {
-    return routeCounts.value[getRouteKey(route)] ?? 0
-  }
+  const getRouteKey = (route: PlaygroundRoute) => `${route.method} ${route.url}`
+  const getRouteCount = (route: PlaygroundRoute) => routeCounts.value[getRouteKey(route)] ?? 0
 
   function handleWsMessage(event: MessageEvent) {
     if (typeof event.data !== 'string') {
@@ -247,30 +259,9 @@ export function usePlaygroundRequest(
     selected,
     routeTokens,
     paramValues,
-    queryText,
-    headersText,
-    bodyText,
-    bodyType,
-    rawType,
-    rawValidate,
-    multipartFiles,
-    binaryFile,
-    authType,
-    authToken,
-    authUsername,
-    authPassword,
-    authKeyName,
-    authKeyValue,
-    authKeyLocation,
-    authCustomName,
-    authCustomValue,
-    responseRaw,
-    responsePretty,
-    responseText,
-    responseHeaders,
-    responseContentType,
-    responseStatus,
-    responseTime,
+    ...requestPayloadState,
+    ...authState,
+    ...responseState,
     routeCounts,
     isServerCounts,
     ensureSwReady,
@@ -287,30 +278,9 @@ export function usePlaygroundRequest(
   })
 
   return {
-    queryText,
-    headersText,
-    bodyText,
-    bodyType,
-    rawType,
-    rawValidate,
-    multipartFiles,
-    binaryFile,
-    authType,
-    authToken,
-    authUsername,
-    authPassword,
-    authKeyName,
-    authKeyValue,
-    authKeyLocation,
-    authCustomName,
-    authCustomValue,
-    responseRaw,
-    responsePretty,
-    responseText,
-    responseHeaders,
-    responseContentType,
-    responseStatus,
-    responseTime,
+    ...requestPayloadState,
+    ...authState,
+    ...responseState,
     resetResponse,
     runRequest,
     isSwMode,
