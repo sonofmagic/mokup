@@ -3,9 +3,9 @@ import type { ApiKeyLocation, AuthType, BodyType, PlaygroundRoute, RawBodyType }
 import { autoUpdate, computePosition, flip, offset, shift } from '@floating-ui/dom'
 import { computed, nextTick, onBeforeUnmount, ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
+import { resolveCopyOptions } from '../utils/copy'
 import { buildCurl } from '../utils/curl'
 import { buildFetch } from '../utils/fetch'
-import { parseJsonInput } from '../utils/request'
 import UiTextInput from './ui/UiTextInput.vue'
 
 const props = defineProps<{
@@ -30,10 +30,8 @@ const props = defineProps<{
 const emit = defineEmits<{
   (event: 'run'): void
 }>()
-
 const { t } = useI18n()
 const methodBadge = computed(() => `method-${props.selected.method.toLowerCase()}`)
-
 const copyMenuOpen = ref(false)
 const copyMenuId = 'playground-copy-menu'
 const copyMenuButtonRef = ref<HTMLElement | null>(null)
@@ -43,21 +41,18 @@ const copiedLabel = ref('')
 let copiedTimeout: ReturnType<typeof setTimeout> | null = null
 let copyMenuCloseTimeout: ReturnType<typeof setTimeout> | null = null
 let copyMenuAutoUpdateCleanup: ReturnType<typeof autoUpdate> | null = null
-
 function clearCopyMenuCloseTimeout() {
   if (copyMenuCloseTimeout) {
     clearTimeout(copyMenuCloseTimeout)
     copyMenuCloseTimeout = null
   }
 }
-
 function clearCopyMenuAutoUpdate() {
   if (copyMenuAutoUpdateCleanup) {
     copyMenuAutoUpdateCleanup()
     copyMenuAutoUpdateCleanup = null
   }
 }
-
 async function updateCopyMenuPosition() {
   const reference = copyMenuButtonRef.value
   const floating = copyMenuPanelRef.value
@@ -74,12 +69,10 @@ async function updateCopyMenuPosition() {
     top: `${Math.round(y)}px`,
   }
 }
-
 function openCopyMenu() {
   clearCopyMenuCloseTimeout()
   copyMenuOpen.value = true
 }
-
 function closeCopyMenu(options: { focusButton?: boolean } = {}) {
   clearCopyMenuCloseTimeout()
   copyMenuOpen.value = false
@@ -89,7 +82,6 @@ function closeCopyMenu(options: { focusButton?: boolean } = {}) {
     })
   }
 }
-
 function toggleCopyMenu() {
   if (copyMenuOpen.value) {
     closeCopyMenu()
@@ -97,7 +89,6 @@ function toggleCopyMenu() {
   }
   openCopyMenu()
 }
-
 function scheduleCopyMenuClose() {
   clearCopyMenuCloseTimeout()
   copyMenuCloseTimeout = setTimeout(() => {
@@ -105,12 +96,10 @@ function scheduleCopyMenuClose() {
     closeCopyMenu()
   }, 120)
 }
-
 function keepCopyMenuOpen() {
   clearCopyMenuCloseTimeout()
   copyMenuOpen.value = true
 }
-
 function handleDocumentPointerDown(event: PointerEvent) {
   const target = event.target as Node | null
   if (!target) {
@@ -123,14 +112,12 @@ function handleDocumentPointerDown(event: PointerEvent) {
   }
   closeCopyMenu()
 }
-
 function handleDocumentKeydown(event: KeyboardEvent) {
   if (event.key !== 'Escape') {
     return
   }
   closeCopyMenu({ focusButton: true })
 }
-
 watch(copyMenuOpen, (open) => {
   if (open) {
     document.addEventListener('pointerdown', handleDocumentPointerDown)
@@ -156,34 +143,6 @@ watch(copyMenuOpen, (open) => {
   document.removeEventListener('pointerdown', handleDocumentPointerDown)
   document.removeEventListener('keydown', handleDocumentKeydown)
 })
-
-function resolveBuildOptions() {
-  const parsedHeaders = parseJsonInput(props.headersText)
-  const headers: Record<string, string> = {}
-  if (parsedHeaders.value && typeof parsedHeaders.value === 'object') {
-    for (const [k, v] of Object.entries(parsedHeaders.value)) {
-      headers[k] = String(v)
-    }
-  }
-  return {
-    method: props.selected.method,
-    url: props.requestUrl,
-    headers,
-    bodyType: props.bodyType,
-    rawType: props.rawType,
-    bodyText: props.bodyText,
-    authType: props.authType,
-    authToken: props.authToken,
-    authUsername: props.authUsername,
-    authPassword: props.authPassword,
-    authKeyName: props.authKeyName,
-    authKeyValue: props.authKeyValue,
-    authKeyLocation: props.authKeyLocation,
-    authCustomName: props.authCustomName,
-    authCustomValue: props.authCustomValue,
-  }
-}
-
 function copyToClipboard(text: string, label: string) {
   navigator.clipboard.writeText(text)
   copiedLabel.value = label
@@ -196,19 +155,34 @@ function copyToClipboard(text: string, label: string) {
     copiedTimeout = null
   }, 2000)
 }
-
 function handleCopyUrl() {
   copyToClipboard(props.requestUrl, 'url')
 }
-
+function resolveCopyBuildOptions() {
+  return resolveCopyOptions({
+    method: props.selected.method,
+    url: props.requestUrl,
+    headersText: props.headersText,
+    bodyType: props.bodyType,
+    rawType: props.rawType,
+    bodyText: props.bodyText,
+    authType: props.authType,
+    authToken: props.authToken,
+    authUsername: props.authUsername,
+    authPassword: props.authPassword,
+    authKeyName: props.authKeyName,
+    authKeyValue: props.authKeyValue,
+    authKeyLocation: props.authKeyLocation,
+    authCustomName: props.authCustomName,
+    authCustomValue: props.authCustomValue,
+  })
+}
 function handleCopyCurl() {
-  copyToClipboard(buildCurl(resolveBuildOptions()), 'curl')
+  copyToClipboard(buildCurl(resolveCopyBuildOptions()), 'curl')
 }
-
 function handleCopyFetch() {
-  copyToClipboard(buildFetch(resolveBuildOptions()), 'fetch')
+  copyToClipboard(buildFetch(resolveCopyBuildOptions()), 'fetch')
 }
-
 onBeforeUnmount(() => {
   clearCopyMenuCloseTimeout()
   clearCopyMenuAutoUpdate()
