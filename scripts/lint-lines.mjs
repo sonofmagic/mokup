@@ -9,9 +9,7 @@ const HARD_MAX_LINES = 500
 const VALID_MODES = new Set(['error', 'warn', 'guard'])
 const MODE_ARG_RE = /^--mode=/
 const NEWLINE_RE = /\r?\n/
-const HARD_LIMIT_ALLOWLIST = new Set([
-  'packages/playground/src/components/PostmanRequestView.vue',
-])
+const HARD_LIMIT_ALLOWLIST = new Set()
 const allowedExts = new Set([
   '.ts',
   '.tsx',
