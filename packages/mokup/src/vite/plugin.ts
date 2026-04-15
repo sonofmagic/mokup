@@ -1,6 +1,5 @@
 import type { Plugin, PreviewServer, ViteDevServer } from 'vite'
 import type { MokupPluginOptions } from '../shared/types'
-
 import type { PluginState } from './plugin/state'
 import { cwd } from 'node:process'
 import {
@@ -11,6 +10,7 @@ import {
 import { createPlaygroundMiddleware, resolvePlaygroundOptions, resolveSwConfig, resolveSwUnregisterConfig, writePlaygroundBuild } from '../internal/core'
 import { resolvePlaygroundDist } from '../playground/assets'
 import { createLogger } from '../shared/logger'
+import { transformMokupIndexHtml } from './plugin/html-transform'
 import { normalizeMokupOptions, normalizeOptions } from './plugin/options'
 import { resolveSwImportPath } from './plugin/paths'
 import { createRouteRefresher } from './plugin/refresh'
@@ -19,24 +19,6 @@ import { configureDevServer, configurePreviewServer } from './plugin/server-hook
 import { buildSwLifecycleInlineScript, buildSwLifecycleScript } from './plugin/sw'
 import { loadMokupVirtualModule, resolveMokupVirtualId } from './plugin/virtual-modules'
 
-/**
- * Create the mokup Vite plugin.
- *
- * @param options - Plugin options.
- * @returns Vite plugin instance.
- *
- * @example
- * import mokup from 'mokup/vite'
- *
- * export default {
- *   plugins: [
- *     mokup({
- *       entries: { dir: 'mock', prefix: '/api' },
- *       playground: true,
- *     }),
- *   ],
- * }
- */
 export function createMokupPlugin(options: MokupPluginOptions = {}): Plugin {
   let root = cwd()
   let base = '/'
@@ -60,7 +42,6 @@ export function createMokupPlugin(options: MokupPluginOptions = {}): Plugin {
   type PreviewWatcher = Awaited<ReturnType<typeof configurePreviewServer>>
   let previewWatcher: PreviewWatcher | null = null
   let currentServer: ViteDevServer | PreviewServer | null = null
-
   const normalizedOptions = normalizeMokupOptions(options)
   const runtime = normalizedOptions.runtime ?? 'node'
   const enableViteMiddleware = runtime !== 'worker'
@@ -93,7 +74,6 @@ export function createMokupPlugin(options: MokupPluginOptions = {}): Plugin {
   if (swDiagnosticError) {
     throw swDiagnosticError
   }
-
   const resolveAllDirs = createDirResolver(optionList, () => root)
   const hasSwRoutes = () => !!swConfig && state.swRoutes.length > 0
   const { resolveSwRequestPath, resolveSwRegisterScope } = createSwPathResolver(() => base)
@@ -101,7 +81,6 @@ export function createMokupPlugin(options: MokupPluginOptions = {}): Plugin {
     () => base,
     () => assetsDir,
   )
-
   const swVirtualId = 'virtual:mokup-sw'
   const resolvedSwVirtualId = `\0${swVirtualId}`
   const swLifecycleVirtualId = 'virtual:mokup-sw-lifecycle'
@@ -110,7 +89,6 @@ export function createMokupPlugin(options: MokupPluginOptions = {}): Plugin {
   const resolvedBundleVirtualId = `\0${bundleVirtualId}`
   let swLifecycleFileName: string | null = null
   let swLifecycleScript: string | null = null
-
   const playgroundMiddleware = createPlaygroundMiddleware({
     getRoutes: () => state.routes,
     getDisabledRoutes: () => state.disabledRoutes,
@@ -132,7 +110,6 @@ export function createMokupPlugin(options: MokupPluginOptions = {}): Plugin {
     }),
     resolvePlaygroundDist,
   })
-
   const refreshRouteParams: Parameters<typeof createRouteRefresher>[0] = {
     state,
     optionList,
@@ -146,7 +123,6 @@ export function createMokupPlugin(options: MokupPluginOptions = {}): Plugin {
     refreshRouteParams.errorOn = normalizedOptions.errorOn
   }
   const refreshRoutes = createRouteRefresher(refreshRouteParams)
-
   return {
     name: 'mokup:vite',
     enforce: 'pre',
@@ -183,9 +159,7 @@ export function createMokupPlugin(options: MokupPluginOptions = {}): Plugin {
         resolveSwRequestPath,
         resolveSwRegisterScope,
         swLifecycleScript,
-        setSwLifecycleScript: (value) => {
-          swLifecycleScript = value
-        },
+        setSwLifecycleScript: (value) => { swLifecycleScript = value },
       })
     },
     async buildStart() {
@@ -227,48 +201,22 @@ export function createMokupPlugin(options: MokupPluginOptions = {}): Plugin {
       })
     },
     async transformIndexHtml(html) {
-      if (state.swRoutes.length === 0) {
-        await refreshRoutes(currentServer ?? undefined)
-      }
-      const script = buildSwLifecycleScript({
-        importPath: command === 'build' ? 'mokup/sw' : resolveSwImportPath(base),
+      return transformMokupIndexHtml(html, {
+        state,
+        refreshRoutes,
+        currentServer,
+        command,
+        base,
         swConfig,
         unregisterConfig,
         hasSwEntries,
         hasSwRoutes: hasSwRoutes(),
+        resolveSwImportPath,
         resolveRequestPath: resolveSwRequestPath,
         resolveRegisterScope: resolveSwRegisterScope,
+        swLifecycleFileName,
+        resolveHtmlAssetPath,
       })
-      if (!script) {
-        return html
-      }
-      if (command === 'build') {
-        if (!swLifecycleFileName) {
-          return html
-        }
-        const src = resolveHtmlAssetPath(swLifecycleFileName)
-        return {
-          html,
-          tags: [
-            {
-              tag: 'script',
-              attrs: { type: 'module', src },
-              injectTo: 'head',
-            },
-          ],
-        }
-      }
-      return {
-        html,
-        tags: [
-          {
-            tag: 'script',
-            attrs: { type: 'module' },
-            children: script,
-            injectTo: 'head',
-          },
-        ],
-      }
     },
     configResolved(config) {
       root = config.root
