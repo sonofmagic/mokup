@@ -17,7 +17,7 @@ export type {
   ServiceWorkerOptions,
   VitePluginOptions,
   VitePluginOptionsInput,
-} from './shared/types'
+} from './shared/types.js'
 
 /**
  * Vite plugin entry for mokup.
@@ -29,4 +29,4 @@ export type {
  *   plugins: [mokup({ entries: { dir: 'mock' } })],
  * }
  */
-export { createMokupPlugin as default } from './vite/plugin'
+export { createMokupPlugin as default } from './vite/plugin.js'

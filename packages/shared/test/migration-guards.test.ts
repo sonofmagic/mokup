@@ -32,11 +32,6 @@ describe('migration guards', () => {
         engines: {
           node: '^20.19.0 || >=22.12.0',
         },
-        pnpm: {
-          overrides: {
-            rolldown: '1.0.0-rc.13',
-          },
-        },
       },
       scanEntries: [
         {
@@ -48,6 +43,11 @@ describe('migration guards', () => {
           content: `import { mokupWebpack } from 'mokup/webpack'\nexport default mokupWebpack({})\n`,
         },
       ],
+      workspaceConfig: {
+        overrides: {
+          rolldown: '1.2.0',
+        },
+      },
     })
 
     expect(violations).toEqual([])
@@ -60,11 +60,6 @@ describe('migration guards', () => {
         engines: {
           node: '^20.19.0 || >=22.12.0',
         },
-        pnpm: {
-          overrides: {
-            rolldown: '1.0.0-rc.13',
-          },
-        },
       },
       scanEntries: [
         {
@@ -72,6 +67,11 @@ describe('migration guards', () => {
           content: '- Migrated from tsup and unbuild to tsdown.\n',
         },
       ],
+      workspaceConfig: {
+        overrides: {
+          rolldown: '1.2.0',
+        },
+      },
     })
 
     expect(violations).toEqual([])
@@ -109,11 +109,6 @@ describe('migration guards', () => {
         engines: {
           node: '>=20',
         },
-        pnpm: {
-          overrides: {
-            rolldown: '1.0.0-beta.1',
-          },
-        },
       },
       scanEntries: [
         {
@@ -132,6 +127,11 @@ describe('migration guards', () => {
           content: `const { mokupWebpack } = require('mokup/webpack')\nmodule.exports = mokupWebpack({})\n`,
         },
       ],
+      workspaceConfig: {
+        overrides: {
+          rolldown: '1.0.0-beta.1',
+        },
+      },
     })
 
     expect(violations).toEqual(
@@ -148,7 +148,7 @@ describe('migration guards', () => {
         expect.stringContaining('public docs must use ESM import examples'),
         expect.stringContaining('public docs must use ESM config examples'),
         expect.stringContaining('root engines.node'),
-        expect.stringContaining('pnpm.overrides.rolldown'),
+        expect.stringContaining('overrides.rolldown'),
       ]),
     )
   })

@@ -136,7 +136,7 @@ describe('cli program', () => {
     const mockServer = {
       fetch: vi.fn(),
       close: vi.fn().mockResolvedValue(undefined),
-      injectWebSocket: vi.fn(),
+      websocket: { server: { options: { noServer: true } } },
     }
     mocks.createFetchServer.mockResolvedValue(mockServer)
     mocks.serve.mockImplementation((_options, callback) => {
@@ -192,7 +192,10 @@ describe('cli program', () => {
       playground: false,
     })
     expect(mocks.serve).toHaveBeenCalled()
-    expect(mockServer.injectWebSocket).toHaveBeenCalledWith(nodeServer)
+    expect(mocks.serve).toHaveBeenCalledWith(
+      expect.objectContaining({ websocket: mockServer.websocket }),
+      expect.any(Function),
+    )
 
     const shutdown = handlers.get('SIGINT')
     await shutdown?.()

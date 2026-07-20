@@ -1,6 +1,6 @@
 import type { Configuration } from 'webpack'
-import type { MokupPluginOptions } from './shared/types'
-import { createMokupWebpackPlugin } from './webpack/plugin'
+import type { MokupPluginOptions } from './shared/types.js'
+import { createMokupWebpackPlugin } from './webpack/plugin.js'
 
 export type {
   Context,
@@ -20,7 +20,7 @@ export type {
   ServiceWorkerOptions,
   VitePluginOptions,
   VitePluginOptionsInput,
-} from './shared/types'
+} from './shared/types.js'
 
 /**
  * Webpack plugin options (alias of MokupPluginOptions).

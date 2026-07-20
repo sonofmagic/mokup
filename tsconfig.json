@@ -3,8 +3,6 @@
     // 指定 ECMAScript 目标版本，ESNext 表示支持最新的 ES 特性
     "target": "ESNext",
 
-    // 统一 workspace 内 mokup 源码路径解析，避免依赖 dist 产物
-    "baseUrl": ".",
     "ignoreDeprecations": "6.0",
     // 指定模块系统，ESNext 使用原生 ES 模块 (import/export)
     "module": "ESNext",

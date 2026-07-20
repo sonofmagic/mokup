@@ -24,6 +24,6 @@
     "@vitejs/plugin-vue": "catalog:",
     "typescript": "catalog:",
     "vite": "catalog:",
-    "vite-plugin-pwa": "^1.2.0"
+    "vite-plugin-pwa": "^1.3.0"
   }
 }

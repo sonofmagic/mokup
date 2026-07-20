@@ -3,6 +3,7 @@ import { tmpdir } from 'node:os'
 import { join } from 'node:path'
 import { createAdaptorServer } from '@hono/node-server'
 import { describe, expect, it } from 'vitest'
+import { WebSocket } from 'ws'
 import { createFetchServer } from '../src/fetch-server'
 
 function listenServer(server: ReturnType<typeof createAdaptorServer>) {
@@ -54,7 +55,62 @@ function closeServer(server: ReturnType<typeof createAdaptorServer>) {
   })
 }
 
+function readWebSocketMessage(socket: WebSocket) {
+  return new Promise<unknown>((resolve, reject) => {
+    socket.once('message', (data) => {
+      resolve(JSON.parse(data.toString()))
+    })
+    socket.once('error', reject)
+  })
+}
+
 describe('node server', () => {
+  it('serves playground metrics over websocket', async () => {
+    const root = await mkdtemp(join(tmpdir(), 'mokup-node-ws-'))
+    const mockDir = join(root, 'mock')
+    await mkdir(mockDir, { recursive: true })
+    await writeFile(join(mockDir, 'ping.get.json'), '{"ok":true}', 'utf8')
+
+    const fetchServer = await createFetchServer({
+      entries: { dir: mockDir, log: false, watch: false },
+      playground: { enabled: true },
+    })
+    expect(fetchServer.websocket).toBeDefined()
+    const nodeServer = createAdaptorServer({
+      fetch: fetchServer.fetch,
+      ...(fetchServer.websocket ? { websocket: fetchServer.websocket } : {}),
+    })
+    let socket: WebSocket | undefined
+
+    try {
+      const listening = await listenServer(nodeServer)
+      if (!listening) {
+        return
+      }
+      const { host, port } = listening
+      socket = new WebSocket(`ws://${host}:${port}/__mokup/ws`)
+
+      await expect(readWebSocketMessage(socket)).resolves.toEqual({
+        type: 'snapshot',
+        total: 0,
+        perRoute: {},
+      })
+
+      const increment = readWebSocketMessage(socket)
+      await fetch(`http://${host}:${port}/ping`)
+      await expect(increment).resolves.toEqual({
+        type: 'increment',
+        routeKey: 'GET /ping',
+        total: 1,
+      })
+    }
+    finally {
+      socket?.terminate()
+      await closeServer(nodeServer)
+      await fetchServer.close?.()
+    }
+  })
+
   it('serves mock routes and playground routes', async () => {
     const root = await mkdtemp(join(tmpdir(), 'mokup-node-'))
     const mockDir = join(root, 'mock')

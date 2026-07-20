@@ -69,11 +69,11 @@ export function registerPlaygroundRoutes(params: {
     }
   }
 
-  params.app.get(playgroundPath, (c) => {
+  params.app.get(playgroundPath, async (c) => {
     try {
       const pathname = new URL(c.req.raw.url, 'http://localhost').pathname
       if (pathname.endsWith('/')) {
-        return serveIndex()
+        return await serveIndex()
       }
     }
     catch {

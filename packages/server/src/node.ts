@@ -85,4 +85,4 @@ export type { NodeWorkerInput } from './worker-node'
  * @example
  * import { serve } from '@mokup/server/node'
  */
-export { serve } from '@hono/node-server'
+export { serve, upgradeWebSocket } from '@hono/node-server'

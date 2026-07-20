@@ -1,3 +1,5 @@
+import type { WebSocketServerLike } from '@hono/node-server'
+import type { Hono } from '@mokup/shared/hono'
 import type { RouteConfigInfo, RouteIgnoreInfo, RouteSkipInfo } from './dev/scanner'
 import type { RouteTable } from './dev/types'
 
@@ -38,19 +40,19 @@ export type {
  */
 export interface FetchServer {
   /** Fetch handler for runtime requests. */
-  fetch: (request: Request) => Promise<Response>
+  fetch: (
+    request: Request,
+    env?: Parameters<Hono['fetch']>[1],
+    executionCtx?: Parameters<Hono['fetch']>[2],
+  ) => Promise<Response>
   /** Refresh the route table. */
   refresh: () => Promise<void>
   /** Read the current route table. */
   getRoutes: () => RouteTable
-  /** Inject a WebSocket server for playground metrics. */
-  injectWebSocket?: (server: NodeWebSocketServer) => void
+  /** WebSocket configuration for the Hono Node server adapter. */
+  websocket?: { server: WebSocketServerLike }
   /** Close any active watchers. */
   close?: () => Promise<void>
-}
-
-interface NodeWebSocketServer {
-  on: (event: string, listener: (...args: unknown[]) => void) => void
 }
 
 /**
@@ -77,6 +79,7 @@ export async function createFetchServer(
   const dirs = resolveAllDirs(optionList, root)
 
   const playgroundWs = createPlaygroundWs(playgroundConfig)
+  await playgroundWs.setupPlaygroundWebSocket()
 
   let routes: RouteTable = []
   let disabledRoutes: RouteSkipInfo[] = []
@@ -206,11 +209,6 @@ export async function createFetchServer(
   }
 
   await refreshRoutes({ throwOnError: true })
-  await playgroundWs.setupPlaygroundWebSocket(app)
-  const wsHandler = playgroundWs.getWsHandler()
-  if (wsHandler && playgroundConfig.enabled) {
-    app.get(`${playgroundConfig.path}/ws`, wsHandler)
-  }
 
   const scheduleRefresh = createDebouncer(80, () => {
     void refreshRoutes()
@@ -222,16 +220,18 @@ export async function createFetchServer(
     logger,
   })
 
-  const fetch = async (request: Request) => await app.fetch(request)
+  const fetch: FetchServer['fetch'] = async (request, env, executionCtx) => {
+    return await app.fetch(request, env, executionCtx)
+  }
 
   const server: FetchServer = {
     fetch,
     refresh: async () => await refreshRoutes({ throwOnError: true }),
     getRoutes: () => routes,
   }
-  const injectWebSocket = playgroundWs.getInjectWebSocket()
-  if (injectWebSocket) {
-    server.injectWebSocket = injectWebSocket
+  const websocket = playgroundWs.getWebSocketOptions()
+  if (websocket) {
+    server.websocket = websocket
   }
 
   if (watcher) {

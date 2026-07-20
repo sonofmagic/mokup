@@ -5,18 +5,25 @@ import { describe, expect, it, vi } from 'vitest'
 import { createFetchServer } from '../src/fetch-server'
 
 const wsMocks = vi.hoisted(() => ({
-  inject: vi.fn(),
+  server: null as unknown,
 }))
 
-vi.mock('@hono/node-ws', () => ({
-  createNodeWebSocket: () => ({
-    upgradeWebSocket: () => () => new Response('ok'),
-    injectWebSocket: wsMocks.inject,
-  }),
+vi.mock('@hono/node-server', () => ({
+  upgradeWebSocket: () => () => new Response('ok'),
+}))
+
+vi.mock('ws', () => ({
+  WebSocketServer: class MockWebSocketServer {
+    options = { noServer: true }
+
+    constructor() {
+      wsMocks.server = this
+    }
+  },
 }))
 
 describe('fetch server websocket integration', () => {
-  it('exposes websocket injector when available', async () => {
+  it('exposes websocket options when available', async () => {
     const root = await mkdtemp(join(tmpdir(), 'mokup-fetch-ws-'))
     const mockDir = join(root, 'mock')
     await mkdir(mockDir, { recursive: true })
@@ -27,8 +34,6 @@ describe('fetch server websocket integration', () => {
       playground: { enabled: true },
     })
 
-    expect(server.injectWebSocket).toBeDefined()
-    server.injectWebSocket?.({ on: vi.fn() })
-    expect(wsMocks.inject).toHaveBeenCalled()
+    expect(server.websocket?.server).toBe(wsMocks.server)
   })
 })

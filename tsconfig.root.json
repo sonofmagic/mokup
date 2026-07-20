@@ -3,46 +3,46 @@
   "compilerOptions": {
     "paths": {
       "@mokup/cli": [
-        "packages/cli/src/index.ts"
+        "./packages/cli/src/index.ts"
       ],
       "@mokup/cli/*": [
-        "packages/cli/src/*"
+        "./packages/cli/src/*"
       ],
       "@mokup/core": [
-        "packages/core/src/index.ts"
+        "./packages/core/src/index.ts"
       ],
       "@mokup/core/*": [
-        "packages/core/src/*"
+        "./packages/core/src/*"
       ],
       "@mokup/playground": [
-        "packages/playground/src/index.ts"
+        "./packages/playground/src/index.ts"
       ],
       "@mokup/playground/*": [
-        "packages/playground/src/*"
+        "./packages/playground/src/*"
       ],
       "@mokup/runtime": [
-        "packages/runtime/src/index.ts"
+        "./packages/runtime/src/index.ts"
       ],
       "@mokup/runtime/*": [
-        "packages/runtime/src/*"
+        "./packages/runtime/src/*"
       ],
       "@mokup/server": [
-        "packages/server/src/index.ts"
+        "./packages/server/src/index.ts"
       ],
       "@mokup/server/*": [
-        "packages/server/src/*"
+        "./packages/server/src/*"
       ],
       "@mokup/shared": [
-        "packages/shared/src/index.ts"
+        "./packages/shared/src/index.ts"
       ],
       "@mokup/shared/*": [
-        "packages/shared/src/*"
+        "./packages/shared/src/*"
       ],
       "mokup": [
-        "packages/mokup/src/index.ts"
+        "./packages/mokup/src/index.ts"
       ],
       "mokup/*": [
-        "packages/mokup/src/*"
+        "./packages/mokup/src/*"
       ]
     }
   },

@@ -73,5 +73,5 @@ import { build } from '@mokup/shared/rolldown'
 
 - 发布包统一为 ESM-only
 - 发布包统一使用 `tsdown`
-- `tsdown` 实际构建固定到 `rolldown@1.0.0-rc.13`
+- `tsdown` 实际构建固定到 `rolldown@1.2.0`
 - 单元测试、类型测试、串行 e2e 测试已通过

@@ -6,7 +6,7 @@ import { createFetchServer } from '../src/fetch-server'
 
 const wsMocks = vi.hoisted(() => ({
   getWsHandler: vi.fn(() => () => new Response('ws')),
-  getInjectWebSocket: vi.fn(() => vi.fn()),
+  getWebSocketOptions: vi.fn(() => ({ server: { options: { noServer: true } } })),
   setupPlaygroundWebSocket: vi.fn(),
   handleRouteResponse: vi.fn(),
 }))
@@ -23,7 +23,7 @@ vi.mock('../src/fetch-server/playground-ws', () => ({
     handleRouteResponse: wsMocks.handleRouteResponse,
     setupPlaygroundWebSocket: wsMocks.setupPlaygroundWebSocket,
     getWsHandler: wsMocks.getWsHandler,
-    getInjectWebSocket: wsMocks.getInjectWebSocket,
+    getWebSocketOptions: wsMocks.getWebSocketOptions,
   }),
 }))
 
@@ -62,7 +62,7 @@ describe('fetch server extra coverage', () => {
     })
 
     expect(server.getRoutes()).toBeDefined()
-    server.injectWebSocket?.({ on: vi.fn() })
+    expect(server.websocket).toBeDefined()
     await server.close?.()
     expect(watcherMocks.createWatcher).toHaveBeenCalled()
   })

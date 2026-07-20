@@ -1,5 +1,4 @@
-import type { Hono } from '@mokup/shared/hono'
-import type { Server } from 'node:http'
+import type { WebSocketServerLike } from '@hono/node-server'
 import type { resolvePlaygroundOptions } from '../dev/playground'
 import type { MiddlewareHandler, ResolvedRoute } from '../dev/types'
 
@@ -14,17 +13,17 @@ interface PlaygroundWsIncrement {
   routeKey: string
   total: number
 }
-interface NodeWebSocketServer {
-  on: (event: string, listener: (...args: unknown[]) => void) => void
-}
 type PlaygroundWsHandler = MiddlewareHandler<any, string, { outputFormat: 'ws' }>
+interface PlaygroundWebSocketOptions {
+  server: WebSocketServerLike
+}
 
 function createPlaygroundWs(playground: ReturnType<typeof resolvePlaygroundOptions>) {
   const routeCounts: RouteCounts = {}
   const wsClients = new Set<{ send: (data: string) => void }>()
   let totalCount = 0
   let wsHandler: PlaygroundWsHandler | undefined
-  let injectWebSocket: ((server: NodeWebSocketServer) => void) | undefined
+  let websocket: PlaygroundWebSocketOptions | undefined
 
   function getRouteKey(route: ResolvedRoute) {
     return `${route.method} ${route.template}`
@@ -70,14 +69,15 @@ function createPlaygroundWs(playground: ReturnType<typeof resolvePlaygroundOptio
     broadcast({ type: 'increment', routeKey, total: totalCount })
   }
 
-  async function setupPlaygroundWebSocket(app: Hono) {
+  async function setupPlaygroundWebSocket() {
     if (!playground.enabled) {
       return
     }
     try {
-      const mod = await import('@hono/node-ws')
-      const { createNodeWebSocket } = mod
-      const { upgradeWebSocket, injectWebSocket: inject } = createNodeWebSocket({ app })
+      const [{ upgradeWebSocket }, { WebSocketServer }] = await Promise.all([
+        import('@hono/node-server'),
+        import('ws'),
+      ])
       wsHandler = upgradeWebSocket(() => ({
         onOpen: (_event, ws) => {
           registerWsClient(ws)
@@ -89,8 +89,8 @@ function createPlaygroundWs(playground: ReturnType<typeof resolvePlaygroundOptio
           // ignore client messages
         },
       }))
-      injectWebSocket = (server) => {
-        inject(server as Server)
+      websocket = {
+        server: new WebSocketServer({ noServer: true }) as unknown as WebSocketServerLike,
       }
     }
     catch {
@@ -102,7 +102,7 @@ function createPlaygroundWs(playground: ReturnType<typeof resolvePlaygroundOptio
     handleRouteResponse,
     setupPlaygroundWebSocket,
     getWsHandler: () => wsHandler,
-    getInjectWebSocket: () => injectWebSocket,
+    getWebSocketOptions: () => websocket,
   }
 }
 

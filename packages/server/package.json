@@ -122,11 +122,14 @@
     "test:types": "tsd"
   },
   "dependencies": {
-    "@hono/node-server": "^1.19.13",
-    "@hono/node-ws": "^1.1.1",
+    "@hono/node-server": "^2.0.10",
     "@mokup/core": "workspace:*",
     "@mokup/playground": "workspace:*",
     "@mokup/runtime": "workspace:*",
-    "@mokup/shared": "workspace:*"
+    "@mokup/shared": "workspace:*",
+    "ws": "^8.21.1"
+  },
+  "devDependencies": {
+    "@types/ws": "^8.18.1"
   }
 }

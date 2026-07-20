@@ -28,7 +28,7 @@ vi.mock('../src/fetch-server/playground-ws', () => ({
     handleRouteResponse: vi.fn(),
     setupPlaygroundWebSocket: vi.fn(),
     getWsHandler: vi.fn(() => undefined),
-    getInjectWebSocket: vi.fn(() => undefined),
+    getWebSocketOptions: vi.fn(() => undefined),
   }),
 }))
 

@@ -2,10 +2,11 @@ import { promises as fs } from 'node:fs'
 import path from 'node:path'
 import process from 'node:process'
 import { pathToFileURL } from 'node:url'
+import { parse as parseYaml } from 'yaml'
 
 const rootDir = process.cwd()
 const expectedNodeRange = '^20.19.0 || >=22.12.0'
-const expectedRolldownVersion = '1.0.0-rc.13'
+const expectedRolldownVersion = '1.2.0'
 const allowedScanExtensions = new Set([
   '.js',
   '.jsx',
@@ -277,8 +278,8 @@ function evaluateMigrationGuards(input) {
   if (input.rootPackage.engines?.node !== expectedNodeRange) {
     violations.push(`package.json: root engines.node must be "${expectedNodeRange}"`)
   }
-  if (input.rootPackage.pnpm?.overrides?.rolldown !== expectedRolldownVersion) {
-    violations.push(`package.json: root pnpm.overrides.rolldown must stay pinned to "${expectedRolldownVersion}"`)
+  if (input.workspaceConfig.overrides?.rolldown !== expectedRolldownVersion) {
+    violations.push(`pnpm-workspace.yaml: overrides.rolldown must stay pinned to "${expectedRolldownVersion}"`)
   }
 
   return violations.sort((a, b) => a.localeCompare(b))
@@ -316,6 +317,7 @@ async function main() {
   }
 
   const rootPackage = await readJson(path.join(rootDir, 'package.json'))
+  const workspaceConfig = parseYaml(await fs.readFile(path.join(rootDir, 'pnpm-workspace.yaml'), 'utf8'))
   const scanEntries = await Promise.all(
     scanFiles.map(async (file) => {
       return {
@@ -336,6 +338,7 @@ async function main() {
     packageEntries,
     rootPackage,
     scanEntries,
+    workspaceConfig,
   })
 
   if (violations.length > 0) {

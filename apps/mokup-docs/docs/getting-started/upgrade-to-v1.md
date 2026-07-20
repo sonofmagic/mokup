@@ -73,5 +73,5 @@ This repository has already completed the migration:
 
 - Published packages are ESM-only
 - Published packages build with `tsdown`
-- `tsdown` is pinned to `rolldown@1.0.0-rc.13`
+- `tsdown` is pinned to `rolldown@1.2.0`
 - Unit tests, type tests, and serial e2e tests pass

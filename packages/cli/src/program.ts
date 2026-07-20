@@ -203,6 +203,7 @@ export function createCli() {
           fetch: server.fetch,
           hostname: host,
           port,
+          ...(server.websocket ? { websocket: server.websocket } : {}),
         },
         (info) => {
           const resolvedHost = typeof info === 'string' ? host : info?.address ?? host
@@ -213,7 +214,6 @@ export function createCli() {
           }
         },
       )
-      server.injectWebSocket?.(nodeServer)
       const shutdown = async () => {
         try {
           if (server.close) {

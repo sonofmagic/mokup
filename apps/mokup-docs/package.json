@@ -9,10 +9,7 @@
   },
   "scripts": {
     "dev": "vitepress dev docs --host",
-    "prebuild:docs": "pnpm --filter mokup build",
-    "build:docs": "vitepress build docs",
-    "build:playground": "pnpm --filter @mokup/playground build",
-    "build": "pnpm build:playground && pnpm build:docs",
+    "build": "vitepress build docs",
     "preview": "vitepress preview docs",
     "lint": "eslint .",
     "typecheck": "vue-tsc -p tsconfig.json --noEmit",
@@ -28,10 +25,10 @@
     "mokup": "workspace:*",
     "tailwindcss": "catalog:",
     "vite": "catalog:",
-    "vitepress": "^2.0.0-alpha.15",
-    "vitepress-plugin-group-icons": "^1.7.3",
-    "vitepress-plugin-llms": "^1.12.0",
-    "vue-tsc": "~3.2.0",
+    "vitepress": "2.0.0-alpha.18",
+    "vitepress-plugin-group-icons": "^1.7.5",
+    "vitepress-plugin-llms": "^1.13.3",
+    "vue-tsc": "~3.3.7",
     "wrangler": "catalog:"
   }
 }

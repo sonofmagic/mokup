@@ -22,6 +22,9 @@ function buildFetchServerApp(params: {
   wsHandler?: PlaygroundWsHandler
 }): Hono {
   const app = new HonoApp({ strict: false })
+  if (params.wsHandler && params.playground.enabled) {
+    app.get(`${params.playground.path}/ws`, params.wsHandler)
+  }
   registerPlaygroundRoutes({
     app,
     routes: params.routes,
@@ -34,9 +37,6 @@ function buildFetchServerApp(params: {
     config: params.playground,
     root: params.root,
   })
-  if (params.wsHandler && params.playground.enabled) {
-    app.get(`${params.playground.path}/ws`, params.wsHandler)
-  }
   if (params.routes.length > 0) {
     const mockAppOptions = params.onResponse ? { onResponse: params.onResponse } : {}
     const mockApp = createHonoApp(params.routes, mockAppOptions)
