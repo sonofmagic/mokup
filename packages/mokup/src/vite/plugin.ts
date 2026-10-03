@@ -16,6 +16,7 @@ import { resolveSwImportPath } from './plugin/paths'
 import { createRouteRefresher } from './plugin/refresh'
 import { createDirResolver, createHtmlAssetResolver, createSwPathResolver } from './plugin/resolvers'
 import { configureDevServer, configurePreviewServer } from './plugin/server-hooks'
+import { createServerSessions } from './plugin/server-session'
 import { buildSwLifecycleInlineScript, buildSwLifecycleScript } from './plugin/sw'
 import { loadMokupVirtualModule, resolveMokupVirtualId } from './plugin/virtual-modules'
 
@@ -39,8 +40,6 @@ export function createMokupPlugin(options: MokupPluginOptions = {}): Plugin {
     lastDiagnosticsSignature: null,
     swModuleVersion: 0,
   }
-  type PreviewWatcher = Awaited<ReturnType<typeof configurePreviewServer>>
-  let previewWatcher: PreviewWatcher | null = null
   let currentServer: ViteDevServer | PreviewServer | null = null
   const normalizedOptions = normalizeMokupOptions(options)
   const runtime = normalizedOptions.runtime ?? 'node'
@@ -115,11 +114,17 @@ export function createMokupPlugin(options: MokupPluginOptions = {}): Plugin {
     enableViteMiddleware,
     virtualModuleIds: [resolvedBundleVirtualId],
     reloadOnChange: runtime === 'worker',
+    ...(normalizedOptions.errorOn ? { errorOn: normalizedOptions.errorOn } : {}),
   }
-  if (normalizedOptions.errorOn) {
-    refreshRouteParams.errorOn = normalizedOptions.errorOn
-  }
-  const refreshRoutes = createRouteRefresher(refreshRouteParams)
+  const scanRoutes = createRouteRefresher(refreshRouteParams)
+  const sessions = createServerSessions({
+    refresh: scanRoutes,
+    onError: error => logger.error('Mock route refresh failed:', error),
+    onServerChange: (server) => { currentServer = server },
+  })
+  const refreshRoutes: typeof scanRoutes = (server, refreshOptions) => command === 'build'
+    ? scanRoutes(server, refreshOptions)
+    : sessions.refresh(server, refreshOptions)
   return {
     name: 'mokup:vite',
     enforce: 'pre',
@@ -224,8 +229,8 @@ export function createMokupPlugin(options: MokupPluginOptions = {}): Plugin {
       isSsrBuild = !!config.build.ssr
     },
     async configureServer(server) {
-      currentServer = server
-      await configureDevServer({
+      const session = sessions.start(server)
+      const watcher = await configureDevServer({
         server,
         state,
         root,
@@ -236,14 +241,15 @@ export function createMokupPlugin(options: MokupPluginOptions = {}): Plugin {
         swConfig,
         hasSwRoutes,
         enableViteMiddleware,
-        refreshRoutes,
+        refreshRoutes: (_server, refreshOptions) => session.refresh(refreshOptions),
         resolveAllDirs,
         watchEnabled,
       })
+      session.attachWatcher(watcher)
     },
     async configurePreviewServer(server) {
-      currentServer = server
-      previewWatcher = await configurePreviewServer({
+      const session = sessions.start(server)
+      const watcher = await configurePreviewServer({
         server,
         state,
         root,
@@ -254,17 +260,13 @@ export function createMokupPlugin(options: MokupPluginOptions = {}): Plugin {
         swConfig,
         hasSwRoutes,
         enableViteMiddleware,
-        refreshRoutes,
+        refreshRoutes: (_server, refreshOptions) => session.refresh(refreshOptions),
         resolveAllDirs,
         watchEnabled,
       })
-      server.httpServer?.once('close', () => {
-        previewWatcher = null
-      })
+      session.attachWatcher(watcher)
     },
     async closeBundle() {
-      previewWatcher?.close()
-      previewWatcher = null
       if (command !== 'build' || isSsrBuild || !playgroundConfig.enabled || playgroundConfig.build !== true) {
         return
       }

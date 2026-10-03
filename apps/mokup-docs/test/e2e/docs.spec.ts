@@ -1,4 +1,4 @@
-import type { Page } from '@playwright/test'
+import type { Page, TestInfo } from '@playwright/test'
 import { promises as fs } from 'node:fs'
 import { join } from 'node:path'
 import { expect, test } from '@playwright/test'
@@ -33,6 +33,46 @@ async function fetchMock(page: Page, pathname: string, headers?: Record<string, 
   }, { pathname, headers }))
 }
 
+async function attachServiceWorkerState(page: Page, testInfo: TestInfo) {
+  let state: unknown
+  try {
+    state = await page.evaluate(async () => {
+      const workers = navigator.serviceWorker
+      const registrations = await workers.getRegistrations()
+      const describeWorker = (worker: ServiceWorker | null) => worker
+        ? { scriptURL: worker.scriptURL, state: worker.state }
+        : null
+      const snapshot = {
+        url: location.href,
+        controller: describeWorker(workers.controller),
+        registrations: registrations.map(registration => ({
+          scope: registration.scope,
+          installing: describeWorker(registration.installing),
+          waiting: describeWorker(registration.waiting),
+          active: describeWorker(registration.active),
+        })),
+      }
+      try {
+        const script = await fetch(`/mokup-sw.js?diagnostic=${Date.now()}`, {
+          cache: 'no-store',
+          signal: AbortSignal.timeout(5000),
+        })
+        return { ...snapshot, scriptStatus: script.status, script: await script.text() }
+      }
+      catch (error) {
+        return { ...snapshot, scriptError: String(error) }
+      }
+    })
+  }
+  catch (error) {
+    state = { diagnosticError: String(error) }
+  }
+  await testInfo.attach('service-worker-state', {
+    body: JSON.stringify(state, null, 2),
+    contentType: 'application/json',
+  })
+}
+
 test('docs home and quick start render', async ({ page }) => {
   await page.goto('/', { waitUntil: 'domcontentloaded' })
 
@@ -45,7 +85,7 @@ test('docs home and quick start render', async ({ page }) => {
     .toMatchObject({ ok: true, example: 'basic' })
 })
 
-test('reloads ts mock response after file change', async ({ page }) => {
+test('reloads ts mock response after file change', async ({ page }, testInfo) => {
   const routeFile = join(process.cwd(), 'mock/example-auth/profile.get.ts')
   const original = await fs.readFile(routeFile, 'utf8')
   const marker = `e2e_${Date.now()}`
@@ -87,12 +127,16 @@ test('reloads ts mock response after file change', async ({ page }) => {
       .poll(() => fetchMock(page, '/api/example-auth/profile'), { timeout: 20_000 })
       .toMatchObject(expected)
   }
+  catch (error) {
+    await attachServiceWorkerState(page, testInfo)
+    throw error
+  }
   finally {
     await fs.writeFile(routeFile, original, 'utf8')
   }
 })
 
-test('reloads json mock response after file change in playground sw mode', async ({ page }) => {
+test('reloads json mock response after file change in playground sw mode', async ({ page }, testInfo) => {
   const routeFile = join(process.cwd(), 'mock/example-auth/session.get.json')
   const original = await fs.readFile(routeFile, 'utf8')
   const marker = Date.now()
@@ -150,6 +194,10 @@ test('reloads json mock response after file change in playground sw mode', async
           expiresIn: nextExpiresIn,
         },
       })
+  }
+  catch (error) {
+    await attachServiceWorkerState(page, testInfo)
+    throw error
   }
   finally {
     await fs.writeFile(routeFile, original, 'utf8')

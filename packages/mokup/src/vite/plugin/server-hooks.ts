@@ -92,11 +92,12 @@ async function configureDevServer(params: {
     return
   }
   const dirs = resolveAllDirs()
-  setupViteWatchers({
+  return setupViteWatchers({
     server,
     root,
     dirs,
     refresh: options => refreshRoutes(server, options),
+    onError: error => logger.error('Mock route refresh failed:', error),
   })
 }
 
@@ -177,6 +178,7 @@ async function configurePreviewServer(params: {
     root,
     dirs,
     refresh: options => refreshRoutes(server, options),
+    onError: error => logger.error('Mock route refresh failed:', error),
   })
   return watcher
 }

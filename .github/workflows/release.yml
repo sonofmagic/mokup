@@ -140,6 +140,19 @@ jobs:
           REPO_RELEASE_RECOVERY_SOURCE_SHA: ${{ inputs.source-sha }}
         run: pnpm exec repo release ci
 
+      - name: Preserve failed Playwright checks
+        if: ${{ failure() }}
+        uses: actions/upload-artifact@v7
+        with:
+          name: release-playwright-${{ github.run_id }}-${{ github.run_attempt }}
+          path: |
+            playwright-report
+            test-results
+            apps/*/playwright-report
+            apps/*/test-results
+          if-no-files-found: ignore
+          retention-days: 14
+
       - name: Preserve npm publish progress
         if: ${{ always() }}
         uses: actions/upload-artifact@v7
