@@ -13,24 +13,35 @@ export default async function globalSetup() {
 
   const servers = [] as NonNullable<Awaited<ReturnType<typeof startViteServer>>>[]
   const reuseExistingServer = !process.env['CI']
-  const viteServer = await startViteServer({
-    cwd: repoRoot,
-    env: {
-      VITE_USE_MOCK: 'false',
-    },
-    reuseExistingServer,
-  })
-  if (viteServer) {
-    servers.push(viteServer)
+  try {
+    const viteServer = await startViteServer({
+      cwd: repoRoot,
+      env: {
+        VITE_USE_MOCK: 'false',
+      },
+      reuseExistingServer,
+    })
+    if (viteServer) {
+      servers.push(viteServer)
+    }
+    const demoServer = await startViteServer({
+      cwd: repoRoot,
+      appDir: 'apps/mokup-vite-server-demo',
+      port: MOCK_VITE_SERVER_PORT,
+      reuseExistingServer,
+    })
+    if (demoServer) {
+      servers.push(demoServer)
+    }
   }
-  const demoServer = await startViteServer({
-    cwd: repoRoot,
-    appDir: 'apps/mokup-vite-server-demo',
-    port: MOCK_VITE_SERVER_PORT,
-    reuseExistingServer,
-  })
-  if (demoServer) {
-    servers.push(demoServer)
+  catch (error) {
+    try {
+      await stopServers(servers)
+    }
+    catch (cleanupError) {
+      throw new AggregateError([error, cleanupError], 'E2E setup and server cleanup failed')
+    }
+    throw error
   }
 
   return async () => {
