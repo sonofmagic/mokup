@@ -29,6 +29,7 @@ async function run(command, args, cwd) {
   if (stderr) {
     process.stderr.write(stderr)
   }
+  return stdout
 }
 
 async function publicPackages(root) {
@@ -99,6 +100,12 @@ async function smokeBuiltHandlers(directory) {
   ].join('\n'))
   const manifest = await readJson(path.join(directory, 'node_modules/mokup/package.json'))
   const cli = path.join(directory, 'node_modules/mokup', manifest.bin.mokup)
+  const checked = JSON.parse(await run(process.execPath, [cli, 'check', '--dir', mockDir, '--json'], directory))
+  assert.equal(checked.schemaVersion, 1)
+  assert.equal(checked.valid, true)
+  assert.equal(checked.routeCount, 1)
+  assert.deepEqual(checked.diagnostics, [])
+  await assert.rejects(fs.access(path.join(directory, '.mokup')), { code: 'ENOENT' })
   await run(process.execPath, [cli, 'build', '--dir', mockDir, '--out', outputDir], directory)
   const bundle = await import(pathToFileURL(path.join(outputDir, 'mokup.bundle.mjs')).href)
   assert.equal(bundle.default.manifest.routes.length, 1)
@@ -198,7 +205,7 @@ async function main() {
     const entries = await importPublicEntries(directory)
     await smokeBuiltHandlers(directory)
     await smokePlaygroundWebSocket(directory)
-    process.stdout.write(`runtime compatibility ok (Node ${process.version}, ${entries} exports, CLI build, HTTP handler, WebSocket metrics)\n`)
+    process.stdout.write(`runtime compatibility ok (Node ${process.version}, ${entries} exports, CLI check/build, HTTP handler, WebSocket metrics)\n`)
     return
   }
   const args = process.argv.slice(2)

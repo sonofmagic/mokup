@@ -54,7 +54,7 @@ export default defineConfig({
     },
     {
       name: 'cli',
-      testMatch: /cli\.spec\.ts/,
+      testMatch: /cli(?:-check)?\.spec\.ts/,
     },
     {
       name: 'adapters',
