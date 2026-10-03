@@ -1,11 +1,9 @@
-import { execFile } from 'node:child_process'
 import { promises as fs } from 'node:fs'
 import path from 'node:path'
 import process from 'node:process'
 import { pathToFileURL } from 'node:url'
-import { promisify } from 'node:util'
+import { execa } from 'execa'
 
-const execFileAsync = promisify(execFile)
 const rootDir = process.cwd()
 const tempPackDir = path.join(rootDir, '.tmp', 'release-pack')
 const allowedRootFiles = new Set([
@@ -136,7 +134,7 @@ function getPackViolations(pkg, files, playgroundHtml = '') {
 }
 
 async function packWorkspacePackage(pkg) {
-  const { stdout } = await execFileAsync(
+  const { stdout } = await execa(
     'pnpm',
     [
       '--filter',
@@ -149,6 +147,8 @@ async function packWorkspacePackage(pkg) {
     {
       cwd: rootDir,
       env: process.env,
+      maxBuffer: 1024 * 1024,
+      stripFinalNewline: false,
     },
   )
   return normalizePackJson(stdout)
