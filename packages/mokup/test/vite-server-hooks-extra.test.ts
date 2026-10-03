@@ -1,6 +1,6 @@
 import { resolveSwConfig } from '@mokup/core'
 import { Hono } from '@mokup/shared/hono'
-import { describe, expect, it, vi } from 'vitest'
+import { beforeEach, describe, expect, it, vi } from 'vitest'
 
 import { configureDevServer, configurePreviewServer } from '../src/vite/plugin/server-hooks'
 
@@ -73,6 +73,13 @@ async function findSwMiddleware(
 }
 
 describe('vite server hooks extra coverage', () => {
+  beforeEach(() => {
+    vi.resetAllMocks()
+    middlewareMocks.createMiddleware.mockImplementation(() => (_req: any, _res: any, next: () => void) => next())
+    watcherMocks.setupPreviewWatchers.mockImplementation(() => ({ close: vi.fn() }))
+    swMocks.buildSwScript.mockImplementation(() => 'self.skipWaiting()')
+  })
+
   it('returns 500 when sw generation fails', async () => {
     swMocks.buildSwScript.mockImplementation(() => {
       throw new Error('boom')
@@ -122,7 +129,6 @@ describe('vite server hooks extra coverage', () => {
     await swMiddleware?.({ url: '/mokup-sw.js' }, res, vi.fn())
     expect(res.statusCode).toBe(500)
     expect(logger.error).toHaveBeenCalled()
-    swMocks.buildSwScript.mockImplementation(() => 'self.skipWaiting()')
   })
 
   it('enables vite middleware and watchers when configured', async () => {
@@ -289,8 +295,8 @@ describe('vite server hooks extra coverage', () => {
     }
     await swMiddleware?.({ url: '/mokup-sw.js' }, res, vi.fn())
     expect(res.statusCode).toBe(500)
-    expect(logger.error).toHaveBeenCalled()
-    expect(middlewareMocks.createMiddleware).toHaveBeenCalled()
-    swMocks.buildSwScript.mockImplementation(() => 'self.skipWaiting()')
+    expect(res.end).toHaveBeenCalledWith('Failed to generate mokup service worker.')
+    expect(logger.error).toHaveBeenCalledWith('SW generation failed:', expect.objectContaining({ message: 'boom' }))
+    expect(middlewareMocks.createMiddleware).not.toHaveBeenCalled()
   })
 })

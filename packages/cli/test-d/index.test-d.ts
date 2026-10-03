@@ -1,4 +1,3 @@
-/* eslint-disable antfu/no-import-dist */
 import type {
   BuildOptions,
   DiagnosticCategory,
@@ -8,8 +7,7 @@ import type {
   MiddlewareRegistry,
   RouteDirectoryConfig,
   RouteRule,
-} from '../dist/index.mjs'
-import { expectAssignable, expectType } from 'tsd'
+} from '@mokup/cli'
 import {
   buildManifest,
   createCli,
@@ -17,7 +15,8 @@ import {
   onAfterAll,
   onBeforeAll,
   runCli,
-} from '../dist/index.mjs'
+} from '@mokup/cli'
+import { expectAssignable, expectType } from 'tsd'
 
 const options: BuildOptions = {
   dir: ['mock'],

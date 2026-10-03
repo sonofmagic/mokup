@@ -17,6 +17,8 @@
 
 低于这个范围的 Node.js 版本不再支持。
 
+本仓库的开发、构建和 CI 使用 Node.js 24 LTS（24.x 中不低于 24.15.0 的版本）和 pnpm 12.8.1。开发环境要求与上面的已发布包运行时范围分别维护。
+
 ## 2. 包输出改为 ESM-only
 
 所有已发布包现在只提供 ESM 输出。
@@ -73,5 +75,8 @@ import { build } from '@mokup/shared/rolldown'
 
 - 发布包统一为 ESM-only
 - 发布包统一使用 `tsdown`
-- `tsdown` 实际构建固定到 `rolldown@1.2.0`
-- 单元测试、类型测试、串行 e2e 测试已通过
+- 构建工具链使用 Rolldown 稳定版本
+- 共享工程工具统一使用 repoctl，pnpm 12 原生版本管理读取 `pnpm change` 创建的发布意图
+- 发布检查覆盖单元测试、类型测试和 e2e 测试
+
+通过 `pnpm exec repo release plan` 预览待发布变更。维护者在发布检查通过后，使用 `pnpm exec repo release stable publish` 发布稳定版本。

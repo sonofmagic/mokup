@@ -5,7 +5,7 @@
   "private": true,
   "homepage": "https://mokup.icebreaker.top",
   "engines": {
-    "node": "^20.19.0 || >=22.12.0"
+    "node": ">=24.15.0"
   },
   "scripts": {
     "dev": "vite --host",
@@ -19,17 +19,17 @@
     "worker:deploy": "vite build && wrangler deploy"
   },
   "dependencies": {
-    "better-auth": "^1.6.23",
-    "drizzle-orm": "^0.45.2",
+    "better-auth": "^1.7.7",
+    "drizzle-orm": "^0.45.3",
     "mokup": "workspace:*",
     "vue": "catalog:"
   },
   "devDependencies": {
-    "@cloudflare/vite-plugin": "^1.45.1",
-    "@cloudflare/workers-types": "^5.20260719.1",
+    "@cloudflare/vite-plugin": "catalog:",
+    "@cloudflare/workers-types": "^5.20261003.1",
     "@tailwindcss/vite": "catalog:",
     "@vitejs/plugin-vue": "catalog:",
-    "drizzle-kit": "^0.31.10",
+    "drizzle-kit": "^0.31.11",
     "tailwindcss": "catalog:",
     "typescript": "catalog:",
     "vite": "catalog:",

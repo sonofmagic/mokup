@@ -122,14 +122,20 @@
     "test:types": "tsd"
   },
   "dependencies": {
-    "@hono/node-server": "^2.0.10",
+    "@hono/node-server": "catalog:",
     "@mokup/core": "workspace:*",
     "@mokup/playground": "workspace:*",
     "@mokup/runtime": "workspace:*",
     "@mokup/shared": "workspace:*",
-    "ws": "^8.21.1"
+    "ws": "^8.22.0"
+  },
+  "tsd": {
+    "compilerOptions": {
+      "module": "NodeNext",
+      "rootDir": "."
+    }
   },
   "devDependencies": {
-    "@types/ws": "^8.18.1"
+    "@types/ws": "^8.18.2"
   }
 }

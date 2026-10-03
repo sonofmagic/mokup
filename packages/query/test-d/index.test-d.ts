@@ -1,4 +1,3 @@
-/* eslint-disable antfu/no-import-dist */
 import type {
   AxiosExecutorOptions,
   BuildMutationRequest,
@@ -10,14 +9,14 @@ import type {
   QueryFunctionContext,
   QueryKey,
   RequestExecutor,
-} from '../dist/index.mjs'
-import { expectAssignable, expectType } from 'tsd'
+} from '@mokup/query'
 import {
   applyMokupToQueryClient,
   createAxiosExecutor,
   createFetchExecutor,
   createMokupQueryClient,
-} from '../dist/index.mjs'
+} from '@mokup/query'
+import { expectAssignable, expectType } from 'tsd'
 
 const queryKey = ['GET', '/users'] as const satisfies QueryKey
 const queryContext: QueryFunctionContext = {

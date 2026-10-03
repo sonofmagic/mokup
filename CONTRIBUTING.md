@@ -2,10 +2,13 @@
 
 ## Baseline
 
-- Use Node.js `^20.19.0 || >=22.12.0`
-- Use `pnpm`
+- Use Node.js 24 LTS (24.15.0 or newer in the 24.x line) for development, builds, and CI
+- Use `pnpm@12.8.1`, as pinned in the root `package.json`
+- Preserve the published packages' runtime requirement: `^20.19.0 || >=22.12.0`
 - Keep published packages ESM-only
 - Keep published library packages on `tsdown` + `rolldown`
+
+The development Node.js minimum follows the ESLint toolchain supplied by repoctl. Shared repository tooling is configured through `repoctl.config.ts` and the `repoctl/tooling` wrappers. Dependency catalogs, overrides, and installation settings live in `pnpm-workspace.yaml`; `.npmrc` contains registry and authentication settings.
 
 ## Before Opening A PR
 
@@ -16,6 +19,26 @@
 - Run `pnpm run lint:lines` for strict line-budget checks (or `pnpm run lint:lines:guard` for CI-compatible guard mode)
 - Run `pnpm test`
 - Run `pnpm test:e2e:serial` for changes that may affect demos, dev server flow, HMR, or root Playwright E2E coverage
+- Add a release intent with `pnpm change` when publishable packages change, and review `pnpm exec repo release plan`
+
+## Repository Maintenance
+
+- `pnpm exec repo doctor` inspects the workspace and its tooling configuration.
+- `pnpm exec repo check --dry-run` previews the checks; `pnpm exec repo check` runs them.
+- `pnpm exec repo clean` deletes selected workspace package directories. Use it only when intentionally removing those packages and review the selection before confirming.
+
+## Release Workflow
+
+Release intents remain Markdown files under `.changeset/`, created with `pnpm change`. pnpm 12 handles versioning and stores changelogs in the repository; repoctl manages release preparation and publishing.
+
+1. Describe the affected packages and bump levels with `pnpm change`.
+2. Review the pending release with `pnpm exec repo release plan`.
+3. Run `pnpm run release:check` before releasing.
+4. Let the release workflow prepare and publish the release, or use `pnpm exec repo release stable publish` for an intentional manual stable release.
+
+Prereleases use a manual workflow dispatch so npm trusted publishing identifies the prepared version commit. On the matching `alpha`, `beta`, `rc`, or `next` branch, enter its lane with `pnpm exec repo release pre enter alpha` (replace `alpha` as needed), add intents with `pnpm change`, and commit the lane and intent changes. Review `pnpm exec repo release plan`, run `pnpm run release:check`, then run `pnpm version -r` locally. Commit and push the generated version, changelog, and release-ledger changes before dispatching the Release workflow on that branch with `mode=auto`. The workflow rejects pending prerelease intents because repoctl 5.7.1 changes the source commit during automatic preparation, which conflicts with the running workflow's OIDC identity. Exit the lane with `pnpm exec repo release pre exit` when returning to stable releases.
+
+Dependency maintenance should leave package versions and release intents pending for the release workflow.
 
 ## Line Budget Guard
 

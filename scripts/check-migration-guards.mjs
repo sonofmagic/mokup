@@ -2,11 +2,11 @@ import { promises as fs } from 'node:fs'
 import path from 'node:path'
 import process from 'node:process'
 import { pathToFileURL } from 'node:url'
-import { parse as parseYaml } from 'yaml'
+import { minVersion, validRange } from 'semver'
+import YAML from 'yaml'
 
 const rootDir = process.cwd()
-const expectedNodeRange = '^20.19.0 || >=22.12.0'
-const expectedRolldownVersion = '1.2.0'
+const catalogBuildDependencies = ['rolldown', 'tsdown']
 const allowedScanExtensions = new Set([
   '.js',
   '.jsx',
@@ -122,7 +122,7 @@ function getContentViolations(relativeFile, content) {
 }
 
 function toRelative(file) {
-  return path.relative(rootDir, file)
+  return path.relative(rootDir, file).split(path.sep).join('/')
 }
 
 async function readJson(file) {
@@ -141,7 +141,7 @@ async function pathExists(file) {
 
 function shouldSkipPath(file) {
   const relative = toRelative(file)
-  if (!relative || relative.startsWith(`..${path.sep}`)) {
+  if (!relative || relative === '..' || relative.startsWith('../')) {
     return true
   }
   if (skippedScanFiles.has(relative)) {
@@ -150,7 +150,7 @@ function shouldSkipPath(file) {
   if (skipFiles.has(path.basename(file))) {
     return true
   }
-  return relative.split(path.sep).some(segment => skipDirs.has(segment))
+  return relative.split('/').some(segment => skipDirs.has(segment))
 }
 
 async function walk(dir, files) {
@@ -178,7 +178,7 @@ async function walk(dir, files) {
 }
 
 function isPublishablePackageJson(relativeFile, pkg) {
-  return relativeFile.startsWith(`packages${path.sep}`) && pkg.private !== true
+  return relativeFile.startsWith('packages/') && pkg.private !== true
 }
 
 function isLibraryPackage(pkg) {
@@ -249,37 +249,80 @@ function checkPackageDeps(relativeFile, pkg, violations) {
   }
 }
 
-function checkPackageMeta(relativeFile, pkg, violations) {
+function checkPackageMeta(relativeFile, pkg, expectedNodeRange, violations) {
   if (pkg.type !== 'module') {
     violations.push(`${relativeFile}: publishable package type must be "module"`)
   }
-  if (pkg.engines?.node !== expectedNodeRange) {
+  if (expectedNodeRange && pkg.engines?.node !== expectedNodeRange) {
     violations.push(`${relativeFile}: publishable package engines.node must be "${expectedNodeRange}"`)
+  }
+}
+
+function isVersionRange(value) {
+  if (typeof value !== 'string' || value.trim() === '' || validRange(value) === null) {
+    return false
+  }
+  const minimum = minVersion(value)
+  return minimum !== null && minimum.version !== '0.0.0'
+}
+
+function checkBuildCatalog(input, violations) {
+  const catalog = input.workspace?.catalog ?? input.workspace?.catalogs?.default
+  for (const name of catalogBuildDependencies) {
+    if (!isVersionRange(catalog?.[name])) {
+      violations.push(`pnpm-workspace.yaml: default catalog.${name} must be a valid, bounded version range`)
+    }
+  }
+  const packageEntries = [{ file: 'package.json', pkg: input.rootPackage }, ...input.packageEntries]
+  for (const { file, pkg } of packageEntries) {
+    for (const field of ['dependencies', 'devDependencies', 'optionalDependencies']) {
+      for (const name of catalogBuildDependencies) {
+        if (pkg[field]?.[name] !== undefined && pkg[field][name] !== 'catalog:') {
+          violations.push(`${file}: ${field}.${name} must use "catalog:"`)
+        }
+      }
+    }
+  }
+  if (input.rootPackage.devDependencies?.tsdown === undefined) {
+    violations.push('package.json: devDependencies.tsdown must use "catalog:"')
+  }
+  const sharedPackage = input.packageEntries.find(entry => entry.file === 'packages/shared/package.json')?.pkg
+  if (sharedPackage?.dependencies?.rolldown === undefined) {
+    violations.push('packages/shared/package.json: dependencies.rolldown must use "catalog:"')
+  }
+  if (input.rootPackage.pnpm?.overrides?.rolldown !== undefined || input.workspace?.overrides?.rolldown !== undefined) {
+    violations.push('Rolldown must not use a blanket override; let each build tool resolve its compatible dependency')
   }
 }
 
 function evaluateMigrationGuards(input) {
   const violations = []
+  const developmentNodeRange = input.rootPackage.engines?.node
+  const runtimeNodeRange = input.packageEntries.find(entry => entry.file === 'packages/runtime/package.json')?.pkg.engines?.node
+
+  if (!isVersionRange(developmentNodeRange)) {
+    violations.push('package.json: root engines.node must declare a valid, bounded development Node range')
+  }
+  if (!isVersionRange(runtimeNodeRange)) {
+    violations.push('packages/runtime/package.json: engines.node must declare a valid, bounded published runtime Node range')
+  }
+  checkBuildCatalog(input, violations)
 
   for (const entry of input.scanEntries) {
     violations.push(...getContentViolations(entry.file, entry.content))
   }
 
   for (const entry of input.packageEntries) {
+    if (entry.pkg.private === true && entry.pkg.engines?.node !== developmentNodeRange) {
+      violations.push(`${entry.file}: private package engines.node must match root engines.node "${developmentNodeRange}"`)
+    }
     if (!isPublishablePackageJson(entry.file, entry.pkg)) {
       continue
     }
-    checkPackageMeta(entry.file, entry.pkg, violations)
+    checkPackageMeta(entry.file, entry.pkg, runtimeNodeRange, violations)
     checkPackageScripts(entry.file, entry.pkg, violations)
     checkPackageDeps(entry.file, entry.pkg, violations)
     checkPackageExports(entry.file, entry.pkg, violations)
-  }
-
-  if (input.rootPackage.engines?.node !== expectedNodeRange) {
-    violations.push(`package.json: root engines.node must be "${expectedNodeRange}"`)
-  }
-  if (input.workspaceConfig.overrides?.rolldown !== expectedRolldownVersion) {
-    violations.push(`pnpm-workspace.yaml: overrides.rolldown must stay pinned to "${expectedRolldownVersion}"`)
   }
 
   return violations.sort((a, b) => a.localeCompare(b))
@@ -317,7 +360,7 @@ async function main() {
   }
 
   const rootPackage = await readJson(path.join(rootDir, 'package.json'))
-  const workspaceConfig = parseYaml(await fs.readFile(path.join(rootDir, 'pnpm-workspace.yaml'), 'utf8'))
+  const workspace = YAML.parse(await fs.readFile(path.join(rootDir, 'pnpm-workspace.yaml'), 'utf8'))
   const scanEntries = await Promise.all(
     scanFiles.map(async (file) => {
       return {
@@ -338,7 +381,7 @@ async function main() {
     packageEntries,
     rootPackage,
     scanEntries,
-    workspaceConfig,
+    workspace,
   })
 
   if (violations.length > 0) {

@@ -56,5 +56,11 @@
     "test": "vitest",
     "typecheck": "tsc -p tsconfig.json --noEmit",
     "test:types": "tsd"
+  },
+  "tsd": {
+    "compilerOptions": {
+      "module": "NodeNext",
+      "rootDir": "."
+    }
   }
 }

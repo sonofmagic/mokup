@@ -39,5 +39,11 @@
   },
   "dependencies": {
     "@mokup/client": "workspace:*"
+  },
+  "tsd": {
+    "compilerOptions": {
+      "module": "NodeNext",
+      "rootDir": "."
+    }
   }
 }

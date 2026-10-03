@@ -17,6 +17,8 @@ All published packages now require:
 
 Earlier Node.js versions are no longer supported.
 
+Development, builds, and CI for this repository use Node.js 24 LTS (at least 24.15.0 within the 24.x line) and pnpm 12.8.1. This development requirement is separate from the published packages' runtime range above.
+
 ## 2. Packages are now ESM-only
 
 All published packages now ship ESM output only.
@@ -73,5 +75,8 @@ This repository has already completed the migration:
 
 - Published packages are ESM-only
 - Published packages build with `tsdown`
-- `tsdown` is pinned to `rolldown@1.2.0`
-- Unit tests, type tests, and serial e2e tests pass
+- The build toolchain uses stable Rolldown releases
+- Shared repository tooling uses repoctl; pnpm 12 native versioning consumes release intents created with `pnpm change`
+- Release checks cover unit tests, type tests, and e2e tests
+
+Preview pending releases with `pnpm exec repo release plan`. Maintainers publish stable releases through `pnpm exec repo release stable publish` after the release checks pass.

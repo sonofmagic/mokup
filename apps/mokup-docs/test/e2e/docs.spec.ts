@@ -1,8 +1,37 @@
+import type { Page } from '@playwright/test'
 import { promises as fs } from 'node:fs'
 import { join } from 'node:path'
 import { expect, test } from '@playwright/test'
 
 test.describe.configure({ mode: 'serial' })
+
+async function duringPageReload<T>(operation: () => Promise<T>): Promise<T | null> {
+  try {
+    return await operation()
+  }
+  catch (error) {
+    // Vite full reloads replace the context outside the browser callback's try/catch.
+    if (error instanceof Error && error.message.includes('Execution context was destroyed')) {
+      return null
+    }
+    throw error
+  }
+}
+
+async function fetchMock(page: Page, pathname: string, headers?: Record<string, string>) {
+  return duringPageReload(() => page.evaluate(async ({ pathname, headers }) => {
+    try {
+      const response = await fetch(`${pathname}?tick=${Date.now()}`, {
+        cache: 'no-store',
+        ...(headers ? { headers } : {}),
+      })
+      return response.ok ? await response.json() : null
+    }
+    catch {
+      return null
+    }
+  }, { pathname, headers }))
+}
 
 test('docs home and quick start render', async ({ page }) => {
   await page.goto('/', { waitUntil: 'domcontentloaded' })
@@ -12,20 +41,7 @@ test('docs home and quick start render', async ({ page }) => {
   await expect(page).toHaveURL(/getting-started\/quick-start/)
 
   await expect
-    .poll(async () => {
-      return page.evaluate(async () => {
-        try {
-          const response = await fetch('/api/example-basic/ping')
-          if (!response.ok) {
-            return null
-          }
-          return response.json()
-        }
-        catch {
-          return null
-        }
-      })
-    }, { timeout: 15_000 })
+    .poll(() => fetchMock(page, '/api/example-basic/ping'), { timeout: 15_000 })
     .toMatchObject({ ok: true, example: 'basic' })
 })
 
@@ -62,43 +78,13 @@ test('reloads ts mock response after file change', async ({ page }) => {
     await page.goto('/__mokup/', { waitUntil: 'domcontentloaded' })
 
     await expect
-      .poll(async () => {
-        return page.evaluate(async () => {
-          try {
-            const response = await fetch(`/api/example-auth/profile?warm=${Date.now()}`, {
-              cache: 'no-store',
-            })
-            if (!response.ok) {
-              return null
-            }
-            return response.json()
-          }
-          catch {
-            return null
-          }
-        })
-      }, { timeout: 15_000 })
+      .poll(() => fetchMock(page, '/api/example-auth/profile'), { timeout: 15_000 })
       .toMatchObject({ ok: true })
 
     await fs.writeFile(routeFile, updated, 'utf8')
 
     await expect
-      .poll(async () => {
-        return page.evaluate(async () => {
-          try {
-            const response = await fetch(`/api/example-auth/profile?tick=${Date.now()}`, {
-              cache: 'no-store',
-            })
-            if (!response.ok) {
-              return null
-            }
-            return response.json()
-          }
-          catch {
-            return null
-          }
-        })
-      }, { timeout: 20_000 })
+      .poll(() => fetchMock(page, '/api/example-auth/profile'), { timeout: 20_000 })
       .toMatchObject(expected)
   }
   finally {
@@ -125,7 +111,7 @@ test('reloads json mock response after file change in playground sw mode', async
 
     await expect
       .poll(async () => {
-        return await page.evaluate(async () => {
+        return duringPageReload(() => page.evaluate(async () => {
           const controlled = !!navigator.serviceWorker?.controller
             && navigator.serviceWorker.controller.scriptURL.includes('mokup-sw')
           if (!controlled) {
@@ -145,54 +131,18 @@ test('reloads json mock response after file change in playground sw mode', async
           catch {
             return false
           }
-        })
+        }))
       }, { timeout: 20_000 })
       .toBe(true)
 
     await expect
-      .poll(async () => {
-        return await page.evaluate(async () => {
-          try {
-            const response = await fetch(`/api/example-auth/session?warm=${Date.now()}`, {
-              cache: 'no-store',
-              headers: {
-                authorization: 'Bearer e2e-token',
-              },
-            })
-            if (!response.ok) {
-              return null
-            }
-            return await response.json()
-          }
-          catch {
-            return null
-          }
-        })
-      }, { timeout: 15_000 })
+      .poll(() => fetchMock(page, '/api/example-auth/session', { authorization: 'Bearer e2e-token' }), { timeout: 15_000 })
       .toMatchObject({ ok: true, session: { id: 'sess_demo' } })
 
     await fs.writeFile(routeFile, `${updated}\n`, 'utf8')
 
     await expect
-      .poll(async () => {
-        return await page.evaluate(async () => {
-          try {
-            const response = await fetch(`/api/example-auth/session?tick=${Date.now()}`, {
-              cache: 'no-store',
-              headers: {
-                authorization: 'Bearer e2e-token',
-              },
-            })
-            if (!response.ok) {
-              return null
-            }
-            return await response.json()
-          }
-          catch {
-            return null
-          }
-        })
-      }, { timeout: 20_000 })
+      .poll(() => fetchMock(page, '/api/example-auth/session', { authorization: 'Bearer e2e-token' }), { timeout: 20_000 })
       .toMatchObject({
         ok: true,
         session: {

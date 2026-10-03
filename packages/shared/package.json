@@ -214,10 +214,16 @@
   "dependencies": {
     "chokidar": "^5.0.0",
     "consola": "^3.4.2",
-    "hono": "^4.12.31",
+    "hono": "catalog:",
     "jsonc-parser": "^3.3.1",
     "pathe": "catalog:",
-    "rolldown": "1.2.0",
+    "rolldown": "catalog:",
     "tsx": "catalog:"
+  },
+  "tsd": {
+    "compilerOptions": {
+      "module": "NodeNext",
+      "rootDir": "."
+    }
   }
 }

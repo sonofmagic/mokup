@@ -6,20 +6,9 @@ import { startViteServer, stopServers } from './utils/servers'
 
 const repoRoot = fileURLToPath(new URL('../..', import.meta.url))
 
-const buildPackages = [
-  '@mokup/shared',
-  '@mokup/runtime',
-  '@mokup/playground',
-  '@mokup/server',
-  '@mokup/cli',
-  'mokup',
-]
-
 export default async function globalSetup() {
   if (!process.env['MOKUP_E2E_SKIP_BUILD']) {
-    for (const pkg of buildPackages) {
-      await runCommand('pnpm', ['--filter', pkg, 'build'], { cwd: repoRoot })
-    }
+    await runCommand('pnpm', ['run', 'build:packages'], { cwd: repoRoot })
   }
 
   const servers = [] as NonNullable<Awaited<ReturnType<typeof startViteServer>>>[]

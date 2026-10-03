@@ -18,7 +18,6 @@ jobs:
       fail-fast: false
       matrix:
         os: [ubuntu-latest, windows-latest, macos-latest]
-        node-version: [20.19.0, 22.12.0, 24]
     runs-on: ${{ matrix.os }}
     # Remote Caching enabled - configure TURBO_TOKEN and TURBO_TEAM in repository settings
     env:
@@ -27,21 +26,24 @@ jobs:
 
     steps:
       - name: Check out code
-        uses: actions/checkout@v6
+        uses: actions/checkout@v7
         with:
           fetch-depth: 2
 
-      - uses: pnpm/action-setup@v4
+      - uses: pnpm/action-setup@v6
 
       - name: Setup Node.js environment
-        uses: actions/setup-node@v6
+        uses: actions/setup-node@v7
         with:
-          node-version: ${{ matrix.node-version }}
+          node-version: 24
           cache: pnpm
           cache-dependency-path: pnpm-lock.yaml
 
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
+
+      - name: Check peer dependencies
+        run: pnpm peers check
 
       - name: Security Audit
         run: pnpm audit --audit-level=moderate
@@ -49,6 +51,12 @@ jobs:
 
       - name: Migration Guards
         run: pnpm run guard:migration
+
+      - name: Repository Doctor
+        run: pnpm exec repo doctor
+
+      - name: Release Plan
+        run: pnpm exec repo release plan --branch main --json
 
       - name: Lint
         run: pnpm lint
@@ -72,9 +80,53 @@ jobs:
         run: pnpm run release:pack-check
 
       - name: Upload coverage reports to Codecov
-        uses: codecov/codecov-action@v5
+        uses: codecov/codecov-action@v6
         env:
           CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
+
+  runtime:
+    name: Published Runtime (Node ${{ matrix.node-version }})
+    timeout-minutes: 20
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        node-version: [20.19.0, 22.12.0]
+    env:
+      HUSKY: 0
+    steps:
+      - name: Check out code
+        uses: actions/checkout@v7
+
+      - name: Locate minimum supported Node.js
+        uses: actions/setup-node@v7
+        with:
+          node-version: ${{ matrix.node-version }}
+
+      - name: Remember runtime executable
+        id: runtime
+        run: echo "node=$(node -p 'process.execPath')" >> "$GITHUB_OUTPUT"
+
+      - name: Setup build Node.js
+        uses: actions/setup-node@v7
+        with:
+          node-version: 24
+
+      - uses: pnpm/action-setup@v6
+
+      - name: Install build dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Check peer dependencies
+        run: pnpm peers check
+
+      - name: Build publishable packages
+        run: pnpm run build:packages
+
+      - name: Test isolated published artifacts on minimum Node.js
+        env:
+          RUNTIME_NODE: ${{ steps.runtime.outputs.node }}
+        run: node scripts/check-runtime-compat.mjs --node-bin "$RUNTIME_NODE"
 
   e2e:
     name: E2E Tests
@@ -87,25 +139,28 @@ jobs:
 
     steps:
       - name: Check out code
-        uses: actions/checkout@v6
+        uses: actions/checkout@v7
         with:
           fetch-depth: 2
 
-      - uses: pnpm/action-setup@v4
+      - uses: pnpm/action-setup@v6
 
       - name: Setup Node.js environment
-        uses: actions/setup-node@v6
+        uses: actions/setup-node@v7
         with:
-          node-version: 20.19.0
+          node-version: 24
           cache: pnpm
           cache-dependency-path: pnpm-lock.yaml
 
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
+      - name: Check peer dependencies
+        run: pnpm peers check
+
       - name: Cache Playwright browsers
         id: playwright-cache
-        uses: actions/cache@v4
+        uses: actions/cache@v5
         with:
           path: ~/.cache/ms-playwright
           key: ${{ runner.os }}-playwright-${{ hashFiles('pnpm-lock.yaml') }}
@@ -119,7 +174,7 @@ jobs:
 
       - name: Upload Playwright report
         if: failure()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: playwright-report
           path: |

@@ -61,6 +61,8 @@ Upgrade details: [docs/guide/migration-v1.md](docs/guide/migration-v1.md)
 
 Issues and pull requests are welcome. See [CONTRIBUTING.md](CONTRIBUTING.md).
 
+Repository development and CI use Node.js 24 LTS (24.15.0 or newer in the 24.x line), pnpm 12.8.1, and repoctl. Published packages retain the runtime requirement listed above. Create release intents with `pnpm change` and preview them with `pnpm exec repo release plan`.
+
 ### Development Checks
 
 - `pnpm run validate:fast`
