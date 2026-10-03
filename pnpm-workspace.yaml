@@ -70,3 +70,16 @@ overrides:
   js-yaml@>=3.0.0 <3.15.2: ^3.15.2
   js-yaml@>=4.0.0 <4.3.2: ^4.3.2
   fast-uri@>=3.0.0 <3.1.8: ^3.1.8
+  brace-expansion@>=1.0.0 <1.1.21: ^1.1.21
+  ip-address@>=10.0.0 <10.7.3: ^10.7.3
+  browserslist@>=4.0.0 <4.29.3: ^4.29.3
+  baseline-browser-mapping@>=2.0.0 <2.11.27: ^2.11.27
+  qs@>=6.0.0 <6.16.0: ^6.16.0
+  markdown-it@>=14.0.0 <14.3.2: ^14.3.2
+  '@humanfs/node@>=0.16.0 <0.16.8': ^0.16.8
+  '@babel/core@>=7.0.0 <7.29.7': ^7.29.7
+  body-parser@>=2.0.0 <2.3.0: ^2.3.0
+  postcss-selector-parser@>=7.0.0 <7.1.6: ^7.1.6
+  # This stable Drizzle release uses tsx; its old loader dependency is unused.
+  drizzle-kit@0.31.11>@esbuild-kit/esm-loader: '-'
+  drizzle-kit@0.31.11>tsx: ^4.23.15

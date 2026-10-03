@@ -26,6 +26,7 @@ The development Node.js minimum follows the ESLint toolchain supplied by repoctl
 - `pnpm exec repo doctor` inspects the workspace and its tooling configuration.
 - `pnpm exec repo check --dry-run` previews the checks; `pnpm exec repo check` runs them.
 - `pnpm exec repo clean` deletes selected workspace package directories. Use it only when intentionally removing those packages and review the selection before confirming.
+- See [Dependency Security Maintenance](docs/maintenance/dependency-security.md) for security overrides, remaining advisories, and recheck commands.
 
 ## Release Workflow
 
