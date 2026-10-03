@@ -1,5 +1,9 @@
+import path from 'node:path'
 import { describe, expect, it, vi } from 'vitest'
 import { setupPreviewWatchers, setupViteWatchers } from '../src/vite/plugin/watcher'
+
+const root = path.resolve('/root')
+const mockDir = path.join(root, 'mock')
 
 const previewMocks = vi.hoisted(() => {
   const handlers: Record<string, Array<(event: string, rawPath?: unknown, details?: unknown) => void>> = {
@@ -36,7 +40,7 @@ describe('vite plugin watchers', () => {
       raw: [],
     }
     const server = {
-      config: { root: '/root' },
+      config: { root },
       watcher: {
         add: vi.fn(),
         on: (event: string, handler: (file: string, details?: unknown) => void) => {
@@ -49,13 +53,13 @@ describe('vite plugin watchers', () => {
 
     setupViteWatchers({
       server: server as any,
-      root: '/root',
-      dirs: ['/root/mock'],
+      root,
+      dirs: [mockDir],
       refresh,
     })
 
-    handlers.add.forEach(handler => handler('/root/mock/users.get.json'))
-    handlers.raw.forEach(handler => handler('rename', 'mock/users.get.json', { watchedPath: '/root' }))
+    handlers.add.forEach(handler => handler(path.join(mockDir, 'users.get.json')))
+    handlers.raw.forEach(handler => handler('rename', 'mock/users.get.json', { watchedPath: root }))
 
     vi.advanceTimersByTime(80)
     expect(refresh).toHaveBeenCalled()
@@ -65,7 +69,7 @@ describe('vite plugin watchers', () => {
   it('closes preview watcher on server close', () => {
     const closeListeners: Array<() => void> = []
     const server = {
-      config: { root: '/root' },
+      config: { root },
       httpServer: {
         once: (_event: string, handler: () => void) => {
           closeListeners.push(handler)
@@ -75,8 +79,8 @@ describe('vite plugin watchers', () => {
 
     const watcher = setupPreviewWatchers({
       server: server as any,
-      root: '/root',
-      dirs: ['/root/mock'],
+      root,
+      dirs: [mockDir],
       refresh: vi.fn(),
     })
 
@@ -95,7 +99,7 @@ describe('vite plugin watchers', () => {
       raw: [],
     }
     const server = {
-      config: { root: '/root' },
+      config: { root },
       watcher: {
         add: vi.fn(),
         on: (event: string, handler: (eventName: string, rawPath?: unknown, details?: unknown) => void) => {
@@ -108,14 +112,14 @@ describe('vite plugin watchers', () => {
 
     setupViteWatchers({
       server: server as any,
-      root: '/root',
-      dirs: ['/root/mock'],
+      root,
+      dirs: [mockDir],
       refresh,
     })
 
     handlers.raw.forEach(handler => handler('change', 'mock/users.get.json'))
     handlers.raw.forEach(handler => handler('rename', { toString: () => '' }))
-    handlers.raw.forEach(handler => handler('rename', { toString: () => 'other/file.json' }, { watchedPath: '/root' }))
+    handlers.raw.forEach(handler => handler('rename', { toString: () => 'other/file.json' }, { watchedPath: root }))
 
     vi.advanceTimersByTime(80)
     expect(refresh).not.toHaveBeenCalled()
@@ -126,7 +130,7 @@ describe('vite plugin watchers', () => {
     vi.useFakeTimers()
     const refresh = vi.fn()
     const server = {
-      config: { root: '/root' },
+      config: { root },
       httpServer: {
         once: vi.fn(),
       },
@@ -134,8 +138,8 @@ describe('vite plugin watchers', () => {
 
     setupPreviewWatchers({
       server: server as any,
-      root: '/root',
-      dirs: ['/root/mock'],
+      root,
+      dirs: [mockDir],
       refresh,
     })
 
@@ -168,8 +172,8 @@ describe('vite plugin watchers', () => {
 
     setupViteWatchers({
       server: server as any,
-      root: '/root',
-      dirs: ['/root/mock'],
+      root,
+      dirs: [mockDir],
       refresh,
     })
 
@@ -194,8 +198,8 @@ describe('vite plugin watchers', () => {
 
     setupPreviewWatchers({
       server: server as any,
-      root: '/root',
-      dirs: ['/root/mock'],
+      root,
+      dirs: [mockDir],
       refresh,
     })
 
@@ -204,9 +208,9 @@ describe('vite plugin watchers', () => {
     previewMocks.handlers.raw.forEach(handler => handler(
       'rename',
       { toString: () => 'mock/users.get.json' },
-      { watchedPath: '/root' },
+      { watchedPath: root },
     ))
-    previewMocks.handlers.add.forEach(handler => handler('/root/mock/users.get.json'))
+    previewMocks.handlers.add.forEach(handler => handler(path.join(mockDir, 'users.get.json')))
 
     vi.advanceTimersByTime(80)
     expect(refresh).toHaveBeenCalled()
@@ -223,7 +227,7 @@ describe('vite plugin watchers', () => {
       raw: [],
     }
     const server = {
-      config: { root: '/root' },
+      config: { root },
       watcher: {
         add: vi.fn(),
         on: (event: string, handler: (eventName: string, rawPath?: unknown, details?: unknown) => void) => {
@@ -236,8 +240,8 @@ describe('vite plugin watchers', () => {
 
     setupViteWatchers({
       server: server as any,
-      root: '/root',
-      dirs: ['/root/mock'],
+      root,
+      dirs: [mockDir],
       refresh,
     })
 
@@ -246,18 +250,18 @@ describe('vite plugin watchers', () => {
     expect(refresh).toHaveBeenCalled()
 
     const previewServer = {
-      config: { root: '/root' },
+      config: { root },
       httpServer: { once: vi.fn() },
     }
 
     setupPreviewWatchers({
       server: previewServer as any,
-      root: '/root',
-      dirs: ['/root/mock'],
+      root,
+      dirs: [mockDir],
       refresh,
     })
 
-    previewMocks.handlers.add.forEach(handler => handler('/root/other/users.get.json'))
+    previewMocks.handlers.add.forEach(handler => handler(path.join(root, 'other/users.get.json')))
     vi.advanceTimersByTime(80)
     expect(refresh).toHaveBeenCalledTimes(1)
     vi.useRealTimers()
@@ -286,8 +290,8 @@ describe('vite plugin watchers', () => {
 
     setupViteWatchers({
       server: server as any,
-      root: '/root',
-      dirs: ['/root/mock'],
+      root,
+      dirs: [mockDir],
       refresh,
     })
 
@@ -301,8 +305,8 @@ describe('vite plugin watchers', () => {
     }
     setupPreviewWatchers({
       server: previewServer as any,
-      root: '/root',
-      dirs: ['/root/mock'],
+      root,
+      dirs: [mockDir],
       refresh,
     })
 
