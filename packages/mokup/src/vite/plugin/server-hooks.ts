@@ -12,6 +12,7 @@ import {
   resolveSwRuntimeImportPath,
 } from './paths'
 import { patchPlaygroundPrintUrls } from './playground'
+import { createStaticPlaygroundPreviewMiddleware } from './preview-playground'
 import { setupPreviewWatchers, setupViteWatchers } from './watcher'
 
 async function configureDevServer(params: {
@@ -123,7 +124,9 @@ async function configurePreviewServer(params: {
     server,
     state,
     root,
+    base,
     logger,
+    playgroundConfig,
     playgroundMiddleware,
     enableViteMiddleware,
     refreshRoutes,
@@ -132,10 +135,20 @@ async function configurePreviewServer(params: {
   } = params
 
   await refreshRoutes(server)
-  if (enableViteMiddleware) {
-    addMiddlewareFirst(server, createMiddleware(() => state.app, logger))
+  const mockMiddleware = enableViteMiddleware ? createMiddleware(() => state.app, logger) : null
+  if (playgroundConfig.enabled && playgroundConfig.build) {
+    addMiddlewareFirst(server, createStaticPlaygroundPreviewMiddleware({
+      base,
+      playgroundPath: playgroundConfig.path,
+      mockMiddleware,
+    }))
   }
-  addMiddlewareFirst(server, playgroundMiddleware)
+  else {
+    if (mockMiddleware) {
+      addMiddlewareFirst(server, mockMiddleware)
+    }
+    addMiddlewareFirst(server, playgroundMiddleware)
+  }
   // Vite serves the bundled SW from its output directory. Raw source needs the dev transformer.
   if (!watchEnabled) {
     return null

@@ -65,6 +65,10 @@ export default {
 
 Playground 构建目录必须是 `outDir` 内的独立子目录。归一化后指向 `outDir` 自身或外部、以及经过 `outDir` 内现有符号链接的路径，会在替换输出文件前被拒绝。
 
+Vite 相对于项目 `root` 解析 `build.outDir`，Playground 遵循同一规则。`playground.path` 已包含 `base` 时，磁盘路径不会重复添加该前缀。例如，`base: '/workspace/'` 与 `playground.path: '/workspace/inspect/mocks'` 会输出到 `<outDir>/inspect/mocks`，访问地址为 `/workspace/inspect/mocks/`。
+
+设置 `playground.build: true` 后，`vite preview` 使用构建好的 Playground HTML、资源和路由清单；修改 mock 源文件后需要重新构建，才会更新这些产物。该挂载路径优先于服务端 mock 路由，其他路径仍按原有规则处理。设置 `playground.build: false` 时，预览中的 Playground 继续读取当前 mock 源文件。
+
 注意：
 
 - `sw.basePath` 用于控制 SW 拦截的请求路径，默认继承 entry 的 `prefix`。

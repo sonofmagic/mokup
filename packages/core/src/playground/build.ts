@@ -6,7 +6,7 @@ import { relative, sep } from 'node:path'
 import { isInDirs, normalizePathForComparison } from '@mokup/shared/path-utils'
 import { join, normalize, resolve } from '@mokup/shared/pathe'
 import { resolvePlaygroundDist } from './assets'
-import { normalizePlaygroundPath, resolvePlaygroundRequestPath } from './config'
+import { normalizeBase, normalizePlaygroundPath, resolvePlaygroundRequestPath } from './config'
 import { resolveGroupRoot, resolveGroups } from './grouping'
 import { injectPlaygroundSw } from './inject'
 import {
@@ -35,9 +35,14 @@ interface PlaygroundBuildParams {
   resolvePlaygroundDist?: PlaygroundDistResolver
 }
 
-function resolvePlaygroundOutDir(outDir: string, playgroundPath: string) {
+function resolvePlaygroundOutDir(outDir: string, base: string, playgroundPath: string) {
+  const normalizedBase = normalizeBase(base)
   const normalized = normalizePlaygroundPath(playgroundPath)
-  const trimmed = normalized.replace(LEADING_SLASH_RE, '')
+  // Vite removes the public base before looking up files in its output root.
+  const outputPath = normalizedBase && (normalized === normalizedBase || normalized.startsWith(`${normalizedBase}/`))
+    ? normalized.slice(normalizedBase.length)
+    : normalized
+  const trimmed = outputPath.replace(LEADING_SLASH_RE, '')
   return trimmed ? join(outDir, normalize(trimmed)) : outDir
 }
 
@@ -111,7 +116,7 @@ async function removeLegacySwAsset(targetDir: string) {
 export async function writePlaygroundBuild(params: PlaygroundBuildParams) {
   const distDir = resolvePlaygroundDist(params.resolvePlaygroundDist)
   const outDir = resolve(params.outDir)
-  const targetDir = resolvePlaygroundOutDir(outDir, params.playgroundPath)
+  const targetDir = resolvePlaygroundOutDir(outDir, params.base, params.playgroundPath)
   if (normalizePathForComparison(targetDir) === normalizePathForComparison(outDir)
     || !isInDirs(targetDir, [outDir])) {
     params.logger.error('Playground build path must be a strict subdirectory of the Vite outDir. Aborting output.')

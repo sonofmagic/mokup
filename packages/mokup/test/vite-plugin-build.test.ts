@@ -1,5 +1,10 @@
+import { tmpdir } from 'node:os'
+import { join } from '@mokup/shared/pathe'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 import { createMokupPlugin } from '../src/vite/plugin'
+
+const projectRoot = join(tmpdir(), 'mokup-vite-build-project')
+const absoluteOutput = join(tmpdir(), 'mokup-vite-build-output')
 
 const refreshMocks = vi.hoisted(() => ({
   createRouteRefresher: vi.fn(),
@@ -52,6 +57,51 @@ describe('vite plugin build lifecycle', () => {
 
     await plugin.closeBundle?.()
     expect(playgroundMocks.writePlaygroundBuild).toHaveBeenCalled()
+  })
+
+  it.each([
+    { name: 'relative', outDir: 'build/public', expectedDir: join(projectRoot, 'build/public') },
+    { name: 'default', outDir: undefined, expectedDir: join(projectRoot, 'dist') },
+    { name: 'absolute', outDir: absoluteOutput, expectedDir: absoluteOutput },
+  ])('uses the configured Vite root for a $name build output directory', async ({ outDir, expectedDir }) => {
+    refreshMocks.createRouteRefresher.mockImplementation(() => async () => {})
+    const plugin = createMokupPlugin({
+      entries: { dir: 'mock' },
+      playground: { path: '/workspace/__mokup', build: true },
+    })
+    plugin.configResolved?.({
+      root: projectRoot,
+      base: '/workspace/',
+      command: 'build',
+      build: { outDir, assetsDir: 'assets', ssr: false },
+    } as any)
+
+    await plugin.closeBundle?.()
+
+    expect(playgroundMocks.writePlaygroundBuild).toHaveBeenCalledExactlyOnceWith(expect.objectContaining({
+      root: projectRoot,
+      outDir: expectedDir,
+      base: '/workspace/',
+      playgroundPath: '/workspace/__mokup',
+    }))
+  })
+
+  it('does not write a playground into an SSR build output', async () => {
+    refreshMocks.createRouteRefresher.mockImplementation(() => async () => {})
+    const plugin = createMokupPlugin({
+      entries: { dir: 'mock' },
+      playground: { build: true },
+    })
+    plugin.configResolved?.({
+      root: projectRoot,
+      base: '/',
+      command: 'build',
+      build: { outDir: 'dist/server', assetsDir: 'assets', ssr: 'src/server.ts' },
+    } as any)
+
+    await plugin.closeBundle?.()
+
+    expect(playgroundMocks.writePlaygroundBuild).not.toHaveBeenCalled()
   })
 
   it('skips closeBundle when not in build mode', async () => {

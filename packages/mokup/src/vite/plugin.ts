@@ -7,6 +7,7 @@ import {
   createSwConflictDiagnosticSections,
   reportDiagnostics,
 } from '@mokup/shared/diagnostics'
+import { resolve } from '@mokup/shared/pathe'
 import { createPlaygroundMiddleware, resolvePlaygroundOptions, resolveSwConfig, resolveSwUnregisterConfig, writePlaygroundBuild } from '../internal/core'
 import { resolvePlaygroundDist } from '../playground/assets'
 import { createLogger } from '../shared/logger'
@@ -230,7 +231,7 @@ export function createMokupPlugin(options: MokupPluginOptions = {}): Plugin {
       base = config.base ?? '/'
       command = config.command
       assetsDir = config.build.assetsDir ?? 'assets'
-      outDir = config.build.outDir ?? 'dist'
+      outDir = resolve(config.root, config.build.outDir ?? 'dist')
       isSsrBuild = !!config.build.ssr
     },
     async configureServer(server) {

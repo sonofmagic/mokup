@@ -65,6 +65,10 @@ This is ideal for static hosting because mock requests are handled in the browse
 
 A Playground build must target a separate directory within `outDir`. Paths that resolve to `outDir` itself, leave it, or traverse an existing symbolic link beneath it are rejected before output is replaced.
 
+Vite resolves a relative `build.outDir` from the project `root`. The Playground follows the same rule, and a `playground.path` that already includes `base` does not add that prefix again on disk. For example, `base: '/workspace/'` with `playground.path: '/workspace/inspect/mocks'` writes to `<outDir>/inspect/mocks` and is served at `/workspace/inspect/mocks/`.
+
+With `playground.build: true`, `vite preview` serves the built Playground HTML, assets, and route list. Changes to mock source files appear there after the next build. This mount takes precedence over server mock routes; requests elsewhere retain their usual mock behavior. With `playground.build: false`, the preview Playground continues to use the current mock source files.
+
 Notes:
 
 - `sw.basePath` controls which requests the SW intercepts. If omitted, it inherits the entry `prefix`.
