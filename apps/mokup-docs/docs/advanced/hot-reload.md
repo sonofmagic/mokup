@@ -37,6 +37,12 @@ it loads, so its dependency refresh behavior follows that graph.
 
 ## Vite refresh
 
+A refresh publishes its route table, Playground metadata, and Service Worker
+route data together, after scanning and app construction succeed. If `errorOn`
+rejects a diagnostic or app construction fails, the previous successful route
+snapshot stays active. Diagnostics still describe the latest scan; fixing the
+mock or configuration allows the next successful refresh to take effect.
+
 With watching enabled, Node mock routes update in both Vite dev and preview even
 when the configured mock directory is empty at startup. Adding the first valid
 route takes effect after the watcher refreshes, without restarting the server.
