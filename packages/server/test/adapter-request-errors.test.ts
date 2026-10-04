@@ -7,6 +7,16 @@ import { toRuntimeRequestFromNode } from '../src/internal'
 import { createKoaMiddleware } from '../src/koa'
 
 const manifest = { version: 1 as const, routes: [] }
+const unsupportedTargets = [
+  'ftp://example.com/users',
+  'FTP://example.com/users',
+  'ws://example.com/users',
+  'wss://example.com/users',
+  'file:///users',
+  'javascript:/users',
+  'data:/users',
+  'blob:https://example.com/users',
+]
 
 function request(url = '/') {
   return { method: 'GET', url, headers: {}, body: '', on: vi.fn() }
@@ -14,6 +24,14 @@ function request(url = '/') {
 
 function response() {
   return { statusCode: 0, setHeader: vi.fn(), end: vi.fn() }
+}
+
+function trackedRequest(url: string) {
+  const readBody = vi.fn(() => '')
+  return {
+    readBody,
+    req: { ...request(url), get body() { return readBody() } },
+  }
 }
 
 describe('HTTP request URL validation', () => {
@@ -44,9 +62,28 @@ describe('HTTP request URL validation', () => {
       .toMatchObject({ status: 400, statusCode: 400 })
   })
 
-  it.each(['//[', '//example.com/users', '/ordinary'])('preserves origin-form path %j', async (path) => {
+  it.each(unsupportedTargets)('rejects non-HTTP target %j before reading or observing the body', async (url) => {
+    const { req, readBody } = trackedRequest(url)
+    await expect(toRuntimeRequestFromNode(req)).rejects.toMatchObject({
+      message: 'Invalid request URL',
+      status: 400,
+      statusCode: 400,
+      expose: true,
+      cause: expect.any(TypeError),
+    })
+    expect(readBody).not.toHaveBeenCalled()
+    expect(req.on).not.toHaveBeenCalled()
+  })
+
+  it.each(['//[', '//example.com/users', '/ordinary', '/ftp://example.com/users', '/javascript:/users'])('preserves origin-form path %j', async (path) => {
     const result = await toRuntimeRequestFromNode(request(`${path}?q=1`))
     expect(result.path).toBe(path)
+    expect(result.query).toEqual({ q: '1' })
+  })
+
+  it.each(['http:', 'https:', 'HTTP:', 'HtTpS:'])('accepts %s absolute targets', async (protocol) => {
+    const result = await toRuntimeRequestFromNode(request(`${protocol}//example.com/users?q=1`))
+    expect(result.path).toBe('/users')
     expect(result.query).toEqual({ q: '1' })
   })
 
@@ -60,6 +97,22 @@ describe.each([
   ['Connect', createConnectMiddleware],
   ['Express', createExpressMiddleware],
 ] as const)('%s adapter error boundaries', (_name, createMiddleware) => {
+  it.each(unsupportedTargets)('passes %j to the error handler before loading routes or observing the body', async (url) => {
+    const { req, readBody } = trackedRequest(url)
+    const loadManifest = vi.fn().mockResolvedValue(manifest)
+    const middleware = createMiddleware({ manifest: loadManifest })
+    const res = response()
+    const next = vi.fn()
+
+    await middleware(req, res, next)
+
+    expect(next).toHaveBeenCalledExactlyOnceWith(expect.objectContaining({ status: 400, statusCode: 400 }))
+    expect(loadManifest).not.toHaveBeenCalled()
+    expect(readBody).not.toHaveBeenCalled()
+    expect(req.on).not.toHaveBeenCalled()
+    expect(res.end).not.toHaveBeenCalled()
+  })
+
   it('passes invalid client input to the error handler before loading routes', async () => {
     const loadManifest = vi.fn().mockResolvedValue(manifest)
     const middleware = createMiddleware({ manifest: loadManifest })
@@ -132,6 +185,41 @@ describe.each([
 })
 
 describe('promise-based adapter errors', () => {
+  it.each(unsupportedTargets)('lets Koa handle %j before loading routes or observing the body', async (url) => {
+    const { req, readBody } = trackedRequest(url)
+    const loadManifest = vi.fn().mockResolvedValue(manifest)
+    const middleware = createKoaMiddleware({ manifest: loadManifest })
+    const ctx = { req, set: vi.fn() }
+    const next = vi.fn()
+
+    await expect(middleware(ctx, next)).rejects.toMatchObject({ status: 400, statusCode: 400 })
+    expect(loadManifest).not.toHaveBeenCalled()
+    expect(readBody).not.toHaveBeenCalled()
+    expect(req.on).not.toHaveBeenCalled()
+    expect(next).not.toHaveBeenCalled()
+    expect(ctx.set).not.toHaveBeenCalled()
+  })
+
+  it.each(unsupportedTargets)('lets Fastify handle %j before loading routes or observing the body', async (url) => {
+    type Instance = Parameters<ReturnType<typeof createFastifyPlugin>>[0]
+    type Hook = Parameters<Instance['addHook']>[1]
+    let hook: Hook | undefined
+    const { req, readBody } = trackedRequest(url)
+    const loadManifest = vi.fn().mockResolvedValue(manifest)
+    await createFastifyPlugin({ manifest: loadManifest })({
+      addHook: (_name, handler) => {
+        hook = handler
+      },
+    })
+    const reply = { status: vi.fn().mockReturnThis(), header: vi.fn().mockReturnThis(), send: vi.fn() }
+
+    await expect(hook?.({ raw: req }, reply)).rejects.toMatchObject({ status: 400, statusCode: 400 })
+    expect(loadManifest).not.toHaveBeenCalled()
+    expect(readBody).not.toHaveBeenCalled()
+    expect(req.on).not.toHaveBeenCalled()
+    expect(reply.send).not.toHaveBeenCalled()
+  })
+
   it('lets Koa handle bad requests and application errors', async () => {
     const middleware = createKoaMiddleware({ manifest })
     const ctx = { req: { ...request(), headers: { host: '[' } }, set: vi.fn() }

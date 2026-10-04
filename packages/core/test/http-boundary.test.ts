@@ -64,14 +64,16 @@ describe('HTTP middleware request and response boundaries', () => {
       : `const middleware = createPlaygroundMiddleware({ getRoutes: () => [], logger,
            config: { enabled: true, path: '/__mokup', build: false },
            resolvePlaygroundDist: () => '/not-read-by-routes-endpoint' })`
-    const [normal, invalid, afterError, doubleSlash, absolute] = runHttpScenario(`
+    const [normal, invalid, afterError, doubleSlash, absolute, secureAbsolute, protocolPath] = runHttpScenario(`
       ${setup}
       await withServer(middleware, async read => [
         await read(${JSON.stringify(`${path}?value=normal`)}),
         await read('http://['),
         await read(${JSON.stringify(path)}),
         await read(${JSON.stringify(`//[${path}`)}),
-        await read(${JSON.stringify(`http://mokup.local${path}?value=absolute`)}),
+        await read(${JSON.stringify(`hTtP://mokup.local${path}?value=absolute`)}),
+        await read(${JSON.stringify(`HTTPS://mokup.local${path}?value=secure`)}),
+        await read('/ftp://path'),
       ])
     `)
 
@@ -81,9 +83,39 @@ describe('HTTP middleware request and response boundaries', () => {
     expect(afterError?.status).toBe(200)
     expect(doubleSlash).toMatchObject({ status: 404, body: 'next' })
     expect(absolute?.status).toBe(200)
+    expect(secureAbsolute?.status).toBe(200)
+    expect(protocolPath).toMatchObject({ status: 404, body: 'next' })
     if (kind === 'mock') {
       expect(JSON.parse(normal!.body)).toEqual({ query: 'normal' })
       expect(JSON.parse(absolute!.body)).toEqual({ query: 'absolute' })
+      expect(JSON.parse(secureAbsolute!.body)).toEqual({ query: 'secure' })
+    }
+  }, 20_000)
+
+  it.each(['mock', 'playground'])('rejects non-HTTP protocols before %s middleware handles a request', (kind) => {
+    const path = kind === 'mock' ? '/ok' : '/__mokup/routes'
+    const setup = kind === 'mock'
+      ? `const app = createHonoApp([route('/ok', () => 'healthy')]);
+         const middleware = createMiddleware(() => app, logger)`
+      : `const middleware = createPlaygroundMiddleware({ getRoutes: () => [], logger,
+           config: { enabled: true, path: '/__mokup', build: false },
+           resolvePlaygroundDist: () => '/not-read-by-routes-endpoint' })`
+    const targets = [`ftp://mokup.local${path}`, `ws://mokup.local${path}`, `wss://mokup.local${path}`, `file://${path}`]
+    const results = runHttpScenario(`
+      ${setup}
+      await withServer(middleware, async read => {
+        const results = []
+        for (const target of ${JSON.stringify(targets)}) {
+          results.push(await read(target), await read(${JSON.stringify(path)}))
+        }
+        return results
+      })
+    `)
+
+    for (const [index, target] of targets.entries()) {
+      expect(results[index * 2], target).toMatchObject({ status: 400, body: 'Invalid request URL.' })
+      expect(results[index * 2]?.headers['content-type'], target).toBe('text/plain; charset=utf-8')
+      expect(results[index * 2 + 1]?.status, `normal request after ${target}`).toBe(200)
     }
   }, 20_000)
 

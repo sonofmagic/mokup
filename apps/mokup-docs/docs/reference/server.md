@@ -62,6 +62,8 @@ Adapters match the request method and path before reading its body. Mokup does n
 
 Custom adapters can perform the same check with [`runtime.hasRoute({ method, path })`](./runtime.md#check-a-route-before-reading-the-request-body) before parsing the body and calling `runtime.handle`.
 
+Node adapters accept path targets and absolute HTTP(S) URLs. Malformed URLs and other schemes, such as `ftp:`, `ws:`, and `file:`, produce a `400` error before routes are loaded or the body is read. Connect and Express pass this error to `next(error)`; Koa and Fastify use their framework error handlers. The development mock and Playground middleware also reject these targets. Leading double slashes remain part of the path.
+
 The Hono adapter runs anywhere Hono can run. Use the Worker entry for Cloudflare Workers.
 
 Demo:

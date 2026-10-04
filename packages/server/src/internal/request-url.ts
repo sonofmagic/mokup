@@ -10,9 +10,13 @@ export function resolveNodeRequestUrl(input: string, headers: Record<string, str
       throw new TypeError('Invalid Host header')
     }
     const base = resolveUrl('/', headers)
-    return input.startsWith('/')
+    const url = input.startsWith('/')
       ? new URL(`${base.origin}${input}`)
       : resolveUrl(input, headers)
+    if (url.protocol !== 'http:' && url.protocol !== 'https:') {
+      throw new TypeError('Invalid request URL protocol')
+    }
+    return url
   }
   catch (cause) {
     throw Object.assign(new Error('Invalid request URL', { cause }), {

@@ -61,6 +61,8 @@ export interface ServerOptions {
 
 自定义适配器可以先调用 [`runtime.hasRoute({ method, path })`](./runtime.md#读取请求体前查询路由)，命中后再解析请求体并调用 `runtime.handle`。
 
+Node 适配器接受路径形式的请求目标和完整的 HTTP(S) URL。格式错误的 URL，以及 `ftp:`、`ws:`、`file:` 等其他协议，会在加载路由或读取请求体前产生 `400` 错误。Connect 和 Express 将错误传给 `next(error)`；Koa 和 Fastify 交由框架的错误处理器处理。开发环境的 mock 与 Playground 中间件也会拒绝这些请求目标。开头的双斜杠仍作为路径的一部分。
+
 Hono 适配器可在 Hono 支持的运行时中使用，Cloudflare Worker 请使用专用入口。
 
 示例：

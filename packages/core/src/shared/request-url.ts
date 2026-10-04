@@ -5,7 +5,8 @@ const requestOrigin = 'http://mokup.local'
 export function parseRequestUrl(target: string): URL | null {
   try {
     // Origin-form targets keep leading double slashes as part of the path.
-    return new URL(target.startsWith('/') ? `${requestOrigin}${target}` : target, requestOrigin)
+    const url = new URL(target.startsWith('/') ? `${requestOrigin}${target}` : target, requestOrigin)
+    return url.protocol === 'http:' || url.protocol === 'https:' ? url : null
   }
   catch {
     return null
