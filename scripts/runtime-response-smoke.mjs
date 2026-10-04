@@ -1,12 +1,83 @@
 import assert from 'node:assert/strict'
 import { once } from 'node:events'
 import { promises as fs } from 'node:fs'
+import { createServer } from 'node:http'
 import path from 'node:path'
 import process from 'node:process'
 import { pathToFileURL } from 'node:url'
 
 const cookies = ['session=abc; HttpOnly', 'theme=dark; Expires=Wed, 21 Oct 2037 07:28:00 GMT']
 const bytes = [0, 97, 115, 109, 255, 128, 0]
+
+async function smokeRequestFallthrough(bundle) {
+  const payload = '{"hello":"world"}'
+  const { createRuntime } = await import('@mokup/runtime')
+  const runtime = createRuntime(bundle)
+  assert.equal(await runtime.hasRoute({ method: 'POST', path: '/echo' }), true)
+  assert.equal(await runtime.hasRoute({ method: 'POST', path: '/resource' }), false)
+  assert.equal(await runtime.hasRoute({ method: 'HEAD', path: '/resource' }), true)
+
+  const { createFetchHandler } = await import('mokup/server/fetch')
+  const handler = createFetchHandler(bundle)
+  for (const pathname of ['/native', '/resource']) {
+    const request = new Request(`http://localhost${pathname}`, { method: 'POST', body: payload })
+    assert.equal(await handler(request), null)
+    assert.equal(request.bodyUsed, false)
+    assert.equal(await request.text(), payload)
+  }
+  const mocked = await handler(new Request('http://localhost/echo', {
+    method: 'POST',
+    headers: { 'content-type': 'application/json' },
+    body: payload,
+  }))
+  assert.deepEqual(await mocked.json(), { received: { hello: 'world' } })
+
+  const { createConnectMiddleware } = await import('@mokup/server/connect')
+  const middleware = createConnectMiddleware(bundle)
+  const server = createServer((req, res) => {
+    void middleware(req, res, (error) => {
+      if (error) {
+        res.statusCode = 500
+        res.end(String(error))
+        return
+      }
+      void (async () => {
+        let body = ''
+        for await (const chunk of req) {
+          body += chunk.toString()
+        }
+        res.end(body)
+      })().catch(error => res.destroy(error))
+    })
+  })
+  try {
+    server.listen(0, '127.0.0.1')
+    await once(server, 'listening')
+    const address = server.address()
+    assert.ok(address && typeof address === 'object')
+    for (const pathname of ['/native', '/echo']) {
+      const response = await fetch(`http://127.0.0.1:${address.port}${pathname}`, {
+        method: 'POST',
+        headers: { 'content-type': 'application/json' },
+        body: payload,
+        signal: AbortSignal.timeout(10_000),
+      })
+      assert.equal(response.status, 200)
+      if (pathname === '/native') {
+        assert.equal(await response.text(), payload)
+      }
+      else {
+        assert.deepEqual(await response.json(), { received: { hello: 'world' } })
+      }
+    }
+  }
+  finally {
+    server.closeAllConnections()
+    if (server.listening) {
+      await new Promise((resolve, reject) => server.close(error => error ? reject(error) : resolve()))
+    }
+  }
+}
 
 async function checkResponses(fetchResponse) {
   const get = await fetchResponse('/resource')
@@ -51,6 +122,7 @@ export async function smokeResponseContracts(directory, cli, run) {
     'resource.head.ts': { handler: '() => new Response(\'HEAD\', { headers: { \'x-route\': \'head\', \'content-length\': \'4\' } })' },
     'cookies.get.ts': { handler: `() => new Response('cookies', { headers: ${JSON.stringify(cookieHeaders)} })` },
     'binary.get.ts': { handler: `() => new Response(new Uint8Array(${JSON.stringify(bytes)}), { headers: { 'content-type': 'application/wasm' } })` },
+    'echo.post.ts': { handler: 'async (c) => c.json({ received: await c.req.json() })' },
   }
   for (const status of [204, 205, 304]) {
     fixtures[`empty-${status}.get.ts`] = {
@@ -63,6 +135,7 @@ export async function smokeResponseContracts(directory, cli, run) {
   }
   await run(process.execPath, [cli, 'build', '--dir', mockDir, '--out', outputDir], directory)
   const { default: bundle } = await import(pathToFileURL(path.join(outputDir, 'mokup.bundle.mjs')).href)
+  await smokeRequestFallthrough(bundle)
   const { createFetchHandler } = await import('mokup/server/fetch')
   const handler = createFetchHandler({ ...bundle, onNotFound: 'response' })
   await checkResponses((pathname, method = 'GET') => handler(new Request(`http://localhost${pathname}`, { method })))

@@ -52,6 +52,10 @@ export interface ServerOptions {
 
 `onNotFound` defaults to `'next'`. Use `'response'` to return 404 instead of falling through.
 
+Adapters match the request method and path before reading its body. Mokup does not consume the body of an unmatched request: Node streams remain available to downstream middleware, and an unread Fetch `Request` keeps `bodyUsed === false`. This also applies when `onNotFound` is set to `'response'`.
+
+Custom adapters can perform the same check with [`runtime.hasRoute({ method, path })`](./runtime.md#check-a-route-before-reading-the-request-body) before parsing the body and calling `runtime.handle`.
+
 The Hono adapter runs anywhere Hono can run. Use the Worker entry for Cloudflare Workers.
 
 Demo:

@@ -28,6 +28,8 @@ const options: RuntimeOptions = {
 
 const runtime = createRuntime(options)
 expectType<(req: RuntimeRequest) => Promise<RuntimeResult | null>>(runtime.handle)
+expectType<(req: Pick<RuntimeRequest, 'method' | 'path'>) => Promise<boolean>>(runtime.hasRoute)
+expectType<Promise<boolean>>(runtime.hasRoute({ method: 'POST', path: '/api/ping' }))
 
 const appPromise = createRuntimeApp(options)
 expectType<Promise<Hono>>(appPromise)

@@ -24,6 +24,18 @@ const result = await runtime.handle({
 })
 ```
 
+### 读取请求体前查询路由
+
+`runtime.hasRoute({ method, path })` 返回 `Promise<boolean>`，与 `runtime.handle` 使用相同的路由匹配规则。`HEAD` 请求优先匹配显式 `HEAD` 路由，没有匹配时才回退到 `GET`。
+
+这个查询不会执行处理器或中间件、导入处理器模块、应用延迟，也不会读取请求体。它会按需加载并缓存 manifest，因此首次调用可能执行 `RuntimeOptions` 中传入的 `manifest` 加载函数。
+
+```ts
+const matched = await runtime.hasRoute({ method: 'POST', path: '/users' })
+```
+
+自定义适配器可以先查询路由，再解析已匹配请求的请求体，让未匹配请求继续交给下游处理。命中后仍调用上方示例中的 `runtime.handle`，传入完整的标准化请求；`handle` 继续返回 mock 结果，未匹配时返回 `null`。
+
 ## 直接使用 CLI bundle
 
 可直接加载 CLI 生成的 bundle：

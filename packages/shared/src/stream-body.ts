@@ -83,6 +83,93 @@ function mergeChunks(chunks: Uint8Array[]): Uint8Array | null {
   return result
 }
 
+/** Watch request failures during asynchronous work without consuming the body. */
+export function withStreamLifecycle<T>(stream: BodyReadableStream, task: () => T | PromiseLike<T>): Promise<T> {
+  let target: BodyReadableStream | undefined = stream
+  let operation: (() => T | PromiseLike<T>) | undefined = task
+  return new Promise((resolve, reject) => {
+    const listeners = new Map<string, StreamListener>()
+    let settled = false
+    const cleanup = () => {
+      const current = target
+      target = undefined
+      operation = undefined
+      if (current) {
+        for (const [event, listener] of listeners) {
+          removeListener(current, event, listener)
+        }
+      }
+      listeners.clear()
+    }
+    const fail = (error: unknown, queuedError = false) => {
+      if (settled) {
+        return
+      }
+      settled = true
+      if (target && (queuedError || target.closed === false)) {
+        guardQueuedError(target)
+      }
+      cleanup()
+      reject(error)
+    }
+    const checkFailure = () => {
+      const error = target?.errored ?? (!target?.readableEnded
+        && (target?.destroyed || target?.closed || target?.aborted || target?.readableAborted)
+        ? prematureCloseError()
+        : null)
+      if (error != null) {
+        fail(error, true)
+        return true
+      }
+      return false
+    }
+    const finish = (value: T) => {
+      if (settled || checkFailure()) {
+        return
+      }
+      settled = true
+      if (target?.closed === false) {
+        guardQueuedError(target)
+      }
+      cleanup()
+      resolve(value)
+    }
+    const onClose = () => {
+      if (!settled && !checkFailure() && !target?.readableEnded) {
+        fail(prematureCloseError())
+      }
+    }
+    const onAborted = () => {
+      if (!settled && !target?.readableEnded) {
+        fail(target?.errored ?? prematureCloseError(), true)
+      }
+    }
+    try {
+      for (const [event, listener] of [
+        ['error', (error: unknown) => fail(error)],
+        ['close', onClose],
+        ['aborted', onAborted],
+      ] as const) {
+        if (settled) {
+          break
+        }
+        listeners.set(event, listener)
+        target?.on(event, listener)
+      }
+      if (!settled && !checkFailure() && operation) {
+        const run = operation
+        operation = undefined
+        // Keep both handlers attached even if the stream settles first, so a
+        // later task rejection never escapes as an unhandled rejection.
+        void Promise.resolve(run()).then(finish, fail)
+      }
+    }
+    catch (error) {
+      fail(error)
+    }
+  })
+}
+
 /** Read the remaining body, or settle immediately if the stream has ended. */
 export function readStreamBody(stream: BodyReadableStream): Promise<Uint8Array | null> {
   return new Promise((resolve, reject) => {

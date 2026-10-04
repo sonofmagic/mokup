@@ -1,7 +1,8 @@
 import type { FetchHandler, ServerOptions } from './types'
 
 import { createRuntime } from '@mokup/runtime'
-import { toArrayBuffer, toRuntimeOptions, toRuntimeRequestFromFetch } from './internal'
+import { toArrayBuffer, toRuntimeOptions } from './internal'
+import { handleFetchRequest } from './internal/handle-request'
 import { resolveResponseHeaders } from './internal/response-headers'
 
 /**
@@ -22,8 +23,7 @@ export function createFetchHandler(
   const onNotFound = options.onNotFound ?? 'next'
 
   return async (request) => {
-    const runtimeRequest = await toRuntimeRequestFromFetch(request)
-    const result = await runtime.handle(runtimeRequest)
+    const result = await handleFetchRequest(runtime, request)
     if (!result) {
       if (onNotFound === 'response') {
         return new Response(null, { status: 404 })

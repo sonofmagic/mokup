@@ -3,7 +3,8 @@ import type { ServerOptions } from './types'
 
 import { Buffer } from 'node:buffer'
 import { createRuntime } from '@mokup/runtime'
-import { toRuntimeOptions, toRuntimeRequestFromNode } from './internal'
+import { toRuntimeOptions } from './internal'
+import { handleNodeRequest } from './internal/handle-request'
 import { resolveResponseHeaders } from './internal/response-headers'
 
 interface KoaContextLike {
@@ -39,11 +40,11 @@ export function createKoaMiddleware(
   const onNotFound = options.onNotFound ?? 'next'
 
   return async (ctx: KoaContextLike, next: KoaNext) => {
-    const runtimeRequest = await toRuntimeRequestFromNode(
+    const result = await handleNodeRequest(
+      runtime,
       ctx.req,
       ctx.request?.body,
     )
-    const result = await runtime.handle(runtimeRequest)
     if (!result) {
       if (onNotFound === 'response') {
         ctx.body = null

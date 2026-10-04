@@ -3,7 +3,8 @@ import type { ServerOptions } from './types'
 
 import { createRuntime } from '@mokup/runtime'
 import fastifyPlugin from 'fastify-plugin'
-import { toBinaryBody, toRuntimeOptions, toRuntimeRequestFromNode } from './internal'
+import { toBinaryBody, toRuntimeOptions } from './internal'
+import { handleNodeRequest } from './internal/handle-request'
 import { resolveResponseHeaders } from './internal/response-headers'
 
 type FastifyRequestLike = (NodeRequestLike & { raw?: NodeRequestLike }) | {
@@ -47,11 +48,11 @@ export function createFastifyPlugin(
   const plugin = async (instance: FastifyInstanceLike) => {
     instance.addHook('onRequest', async (request, reply) => {
       const rawRequest = (request.raw ?? request) as NodeRequestLike
-      const runtimeRequest = await toRuntimeRequestFromNode(
+      const result = await handleNodeRequest(
+        runtime,
         rawRequest,
         request.body,
       )
-      const result = await runtime.handle(runtimeRequest)
       if (!result) {
         if (onNotFound === 'response') {
           reply.status(404).send()

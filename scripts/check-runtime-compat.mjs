@@ -208,7 +208,7 @@ async function main() {
     const entries = await importPublicEntries(directory)
     await smokeBuiltHandlers(directory)
     await smokePlaygroundWebSocket(directory)
-    process.stdout.write(`runtime compatibility ok (Node ${process.version}, ${entries} exports, CLI check/build, HTTP/HEAD/cookies/binary/bodyless responses, WebSocket metrics)\n`)
+    process.stdout.write(`runtime compatibility ok (Node ${process.version}, ${entries} exports, CLI check/build, HTTP/HEAD/cookies/binary/bodyless responses, request body fallthrough, WebSocket metrics)\n`)
     return
   }
   const args = process.argv.slice(2)

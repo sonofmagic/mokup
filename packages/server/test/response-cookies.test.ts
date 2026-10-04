@@ -7,7 +7,7 @@ import { createKoaMiddleware } from '../src/koa'
 const runtimeHandle = vi.hoisted(() => vi.fn())
 vi.mock('@mokup/runtime', async importOriginal => ({
   ...await importOriginal<typeof import('@mokup/runtime')>(),
-  createRuntime: () => ({ handle: runtimeHandle }),
+  createRuntime: () => ({ hasRoute: async () => true, handle: runtimeHandle }),
 }))
 
 const cookies = ['a=one; Expires=Wed, 21 Oct 2037 07:28:00 GMT', 'b=two; Path=/']

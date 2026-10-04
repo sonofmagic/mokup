@@ -51,6 +51,10 @@ export interface ServerOptions {
 
 `onNotFound` 默认是 `'next'`，设为 `'response'` 会直接返回 404。
 
+适配器会先匹配请求方法与路径，命中后才读取请求体。Mokup 不会消耗未匹配请求的请求体：下游中间件仍可读取 Node 请求流，原本未读取的 Fetch `Request` 也会保持 `bodyUsed === false`。设置 `onNotFound: 'response'` 时同样如此。
+
+自定义适配器可以先调用 [`runtime.hasRoute({ method, path })`](./runtime.md#读取请求体前查询路由)，命中后再解析请求体并调用 `runtime.handle`。
+
 Hono 适配器可在 Hono 支持的运行时中使用，Cloudflare Worker 请使用专用入口。
 
 示例：
