@@ -118,6 +118,11 @@
       "import": "./dist/scan-utils.mjs",
       "default": "./dist/scan-utils.mjs"
     },
+    "./stream-body": {
+      "types": "./dist/stream-body.d.ts",
+      "import": "./dist/stream-body.mjs",
+      "default": "./dist/stream-body.mjs"
+    },
     "./timing": {
       "types": "./dist/timing.d.ts",
       "import": "./dist/timing.mjs",
@@ -191,6 +196,9 @@
       ],
       "scan-utils": [
         "dist/scan-utils.d.ts"
+      ],
+      "stream-body": [
+        "dist/stream-body.d.ts"
       ],
       "timing": [
         "dist/timing.d.ts"

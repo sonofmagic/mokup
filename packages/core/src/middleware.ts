@@ -2,9 +2,9 @@ import type { Context } from '@mokup/shared/hono'
 import type { IncomingMessage, ServerResponse } from 'node:http'
 
 import type { Logger, ResolvedRoute, RouteTable } from './shared/types'
-import { Buffer } from 'node:buffer'
 import { validateHeaderName, validateHeaderValue } from 'node:http'
 import { Hono, PatternRouter } from '@mokup/shared/hono'
+import { readStreamBody } from '@mokup/shared/stream-body'
 import { parseRequestUrl, sendInvalidRequestUrl } from './shared/request-url'
 import { delay, normalizeMethod } from './shared/utils'
 
@@ -179,31 +179,6 @@ export function createHonoApp(routes: RouteTable): Hono {
   return app
 }
 
-async function readRawBody(req: IncomingMessage) {
-  return await new Promise<Uint8Array | null>((resolve, reject) => {
-    const chunks: Uint8Array[] = []
-    req.on('data', (chunk) => {
-      if (typeof chunk === 'string') {
-        chunks.push(Buffer.from(chunk))
-        return
-      }
-      if (chunk instanceof Uint8Array) {
-        chunks.push(chunk)
-        return
-      }
-      chunks.push(Buffer.from(String(chunk)))
-    })
-    req.on('end', () => {
-      if (chunks.length === 0) {
-        resolve(null)
-        return
-      }
-      resolve(Buffer.concat(chunks))
-    })
-    req.on('error', reject)
-  })
-}
-
 function buildHeaders(headers: IncomingMessage['headers']) {
   const result = new Headers()
   for (const [key, value] of Object.entries(headers)) {
@@ -224,7 +199,7 @@ async function toRequest(req: IncomingMessage, url: URL) {
   const method = req.method ?? 'GET'
   const headers = buildHeaders(req.headers)
   const init: RequestInit = { method, headers }
-  const rawBody = await readRawBody(req)
+  const rawBody = await readStreamBody(req)
   if (rawBody && method !== 'GET' && method !== 'HEAD') {
     init.body = rawBody as BodyInit
   }

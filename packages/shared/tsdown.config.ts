@@ -23,6 +23,7 @@ export default createPackageConfig({
     'src/route-constants',
     'src/route-utils',
     'src/scan-utils',
+    'src/stream-body',
     'src/timing',
     'src/jsonc-parser',
   ],

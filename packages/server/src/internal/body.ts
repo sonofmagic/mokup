@@ -1,7 +1,7 @@
 import type { ReadableStreamLike } from './types'
+import { readStreamBody } from '@mokup/shared/stream-body'
 
 const textDecoder = new TextDecoder()
-const textEncoder = new TextEncoder()
 
 /**
  * Parse raw body text based on content type.
@@ -76,58 +76,6 @@ export function toArrayBuffer(body: Uint8Array): ArrayBuffer {
   const copy = new Uint8Array(byteLength)
   copy.set(body)
   return copy.buffer
-}
-
-function concatChunks(chunks: Uint8Array[]): Uint8Array {
-  if (chunks.length === 1) {
-    return chunks[0] ?? new Uint8Array()
-  }
-  let totalLength = 0
-  for (const chunk of chunks) {
-    totalLength += chunk.length
-  }
-  const merged = new Uint8Array(totalLength)
-  let offset = 0
-  for (const chunk of chunks) {
-    merged.set(chunk, offset)
-    offset += chunk.length
-  }
-  return merged
-}
-
-async function readStreamBody(
-  stream: ReadableStreamLike,
-): Promise<Uint8Array | null> {
-  return await new Promise((resolve, reject) => {
-    const chunks: Uint8Array[] = []
-    let hasData = false
-    stream.on('data', (chunk: unknown) => {
-      hasData = true
-      if (typeof chunk === 'string') {
-        chunks.push(textEncoder.encode(chunk))
-        return
-      }
-      if (chunk instanceof Uint8Array) {
-        chunks.push(chunk)
-        return
-      }
-      if (chunk instanceof ArrayBuffer) {
-        chunks.push(new Uint8Array(chunk))
-        return
-      }
-      chunks.push(textEncoder.encode(String(chunk)))
-    })
-    stream.on('end', () => {
-      if (!hasData) {
-        resolve(null)
-        return
-      }
-      resolve(concatChunks(chunks))
-    })
-    stream.on('error', (error) => {
-      reject(error)
-    })
-  })
 }
 
 async function resolveBody(

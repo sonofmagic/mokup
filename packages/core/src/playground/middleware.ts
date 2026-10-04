@@ -8,7 +8,7 @@ import { promises as fs } from 'node:fs'
 import { extname, join, normalize } from '@mokup/shared/pathe'
 import { parseRequestUrl, sendInvalidRequestUrl } from '../shared/request-url'
 import { mimeTypes, resolvePlaygroundDist, sendFile, sendJson } from './assets'
-import { resolvePlaygroundRequestPath } from './config'
+import { matchPlaygroundRequestPath } from './config'
 import { resolveGroupRoot, resolveGroups } from './grouping'
 import { injectPlaygroundHmr, injectPlaygroundSw, isViteDevServer } from './inject'
 import {
@@ -68,24 +68,18 @@ export function createPlaygroundMiddleware(params: {
       return next()
     }
     const server = params.getServer?.()
-    const requestPath = resolvePlaygroundRequestPath(server?.config?.base ?? '/', playgroundPath)
     const requestUrl = req.url ?? '/'
     const url = parseRequestUrl(requestUrl)
     if (!url) {
       sendInvalidRequestUrl(res)
       return
     }
-    const pathname = url.pathname
-    const matchedPath = pathname.startsWith(requestPath)
-      ? requestPath
-      : pathname.startsWith(playgroundPath)
-        ? playgroundPath
-        : null
-    if (!matchedPath) {
+    const match = matchPlaygroundRequestPath(url.pathname, server?.config?.base ?? '/', playgroundPath)
+    if (!match) {
       return next()
     }
 
-    const subPath = pathname.slice(matchedPath.length)
+    const { mountPath: matchedPath, subPath } = match
     if (subPath === '') {
       const suffix = url.search ?? ''
       res.statusCode = 302
@@ -93,7 +87,7 @@ export function createPlaygroundMiddleware(params: {
       res.end()
       return
     }
-    if (subPath === '' || subPath === '/' || subPath === '/index.html') {
+    if (subPath === '/' || subPath === '/index.html') {
       try {
         const html = await fs.readFile(indexPath, 'utf8')
         let output = html

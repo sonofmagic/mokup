@@ -1,3 +1,5 @@
+import type { BodyReadableStream } from '@mokup/shared/stream-body'
+
 /**
  * Minimal readable stream shape used by adapters.
  *
@@ -8,9 +10,7 @@
  *   on: () => {},
  * }
  */
-export interface ReadableStreamLike {
-  on: (event: string, listener: (...args: unknown[]) => void) => void
-}
+export interface ReadableStreamLike extends BodyReadableStream {}
 
 /**
  * Minimal Node request shape used by adapters.
