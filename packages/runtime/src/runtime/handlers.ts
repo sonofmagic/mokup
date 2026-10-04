@@ -1,14 +1,15 @@
 import type { Context } from '@mokup/shared/hono'
 import type { RuntimeRule } from '../module'
 import type { ManifestRoute, MiddlewareHandler, ModuleMap, RuntimeOptions } from '../types'
-import { prioritizeHeadRoutes, registerHonoRoute } from '@mokup/shared/head-routes'
+import { prioritizeHeadRoutes } from '@mokup/shared/head-routes'
 import { Hono, PatternRouter } from '@mokup/shared/hono'
+import { registerTokenRoute } from '@mokup/shared/hono-routes'
 import { applyContextResponseOverrides } from '@mokup/shared/response-overrides'
 import { executeRule, loadModuleMiddleware, loadModuleRule } from '../module'
 import { delay } from '../normalize'
 import { decodeBase64 } from '../response'
 import { resolveResponse } from './response'
-import { compileRoutes, toHonoPath } from './routes'
+import { compileRoutes } from './routes'
 
 function normalizeHandlerValue(c: Context, value: unknown): Response {
   if (value instanceof Response) {
@@ -117,10 +118,10 @@ async function buildApp(params: {
       ...(typeof params.moduleMap !== 'undefined' ? { moduleMap: params.moduleMap } : {}),
     })
 
-    registerHonoRoute(
+    registerTokenRoute(
       app,
       entry.method,
-      toHonoPath(entry.tokens),
+      entry.tokens,
       [createFinalizeMiddleware(entry.route), ...middlewares, handler],
     )
   }

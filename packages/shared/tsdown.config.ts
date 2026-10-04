@@ -7,6 +7,7 @@ export default createPackageConfig({
     'src/rolldown',
     'src/hono',
     'src/head-routes',
+    'src/hono-routes',
     'src/logger',
     'src/logger.browser',
     'src/config-core',

@@ -137,6 +137,11 @@
       "types": "./dist/timing.d.ts",
       "import": "./dist/timing.mjs",
       "default": "./dist/timing.mjs"
+    },
+    "./hono-routes": {
+      "types": "./dist/hono-routes.d.ts",
+      "import": "./dist/hono-routes.mjs",
+      "default": "./dist/hono-routes.mjs"
     }
   },
   "publishConfig": {
@@ -218,6 +223,9 @@
       ],
       "timing": [
         "dist/timing.d.ts"
+      ],
+      "hono-routes": [
+        "dist/hono-routes.d.ts"
       ]
     }
   },

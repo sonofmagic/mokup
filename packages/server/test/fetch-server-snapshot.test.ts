@@ -1,5 +1,6 @@
 import type { ResolvedRoute } from '../src/dev/types'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
+import { createHonoApp } from '../src/dev/hono'
 import { createFetchServer } from '../src/fetch-server'
 
 const mocks = vi.hoisted(() => ({
@@ -9,6 +10,7 @@ const mocks = vi.hoisted(() => ({
   logger: { info: vi.fn(), warn: vi.fn(), error: vi.fn(), log: vi.fn() },
 }))
 
+vi.mock('../src/dev/hono', { spy: true })
 vi.mock('../src/dev/scanner', () => ({ scanRoutes: mocks.scanRoutes }))
 vi.mock('../src/dev/logger', () => ({ createLogger: () => mocks.logger }))
 vi.mock('../src/fetch-server/watcher', () => ({
@@ -48,11 +50,10 @@ describe('fetch server refresh snapshots', () => {
     const server = await createFetchServer({ entries: { dir: '/mock', log: false }, playground: true })
     const initialRoutes = server.getRoutes()
     try {
-      mocks.scanRoutes.mockResolvedValueOnce([{
-        ...route('broken'),
-        template: '/[123]',
-        tokens: [{ type: 'param', name: '123' }],
-      }])
+      mocks.scanRoutes.mockResolvedValueOnce([route('broken')])
+      vi.mocked(createHonoApp).mockImplementationOnce(() => {
+        throw new Error('App construction failed')
+      })
       await expect(server.refresh()).resolves.toBeUndefined()
       expect(mocks.logger.error).toHaveBeenCalledWith('Failed to scan mock routes:', expect.any(Error))
       expect(server.getRoutes()).toBe(initialRoutes)

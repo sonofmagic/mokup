@@ -12,9 +12,15 @@ function prioritizeHeadRoutes<T extends { method: string }>(routes: readonly T[]
 }
 
 /** Register a complete HEAD chain for Hono's GET-based HEAD dispatch. */
-function registerHonoRoute(app: Hono, method: string, path: string, handlers: MiddlewareHandler[]) {
+function registerHonoRoute(
+  app: Hono,
+  method: string,
+  path: string,
+  handlers: MiddlewareHandler[],
+  mapHandler: (handler: MiddlewareHandler) => MiddlewareHandler = handler => handler,
+) {
   for (const handler of handlers) {
-    app.on(method, path, handler)
+    app.on(method, path, mapHandler(handler))
   }
   if (method !== 'HEAD') {
     return
@@ -23,7 +29,7 @@ function registerHonoRoute(app: Hono, method: string, path: string, handlers: Mi
     const guarded: MiddlewareHandler = (c, next) => c.req.method === 'HEAD'
       ? handler(c, next)
       : next()
-    app.on('GET', path, Object.assign(guarded, { [headFallbackHandler]: true }))
+    app.on('GET', path, Object.assign(mapHandler(guarded), { [headFallbackHandler]: true }))
   }
 }
 

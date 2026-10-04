@@ -1,29 +1,11 @@
 import type { Context } from '@mokup/shared/hono'
 
 import type { ResolvedRoute, RouteTable } from './types'
-import { prioritizeHeadRoutes, registerHonoRoute } from '@mokup/shared/head-routes'
+import { prioritizeHeadRoutes } from '@mokup/shared/head-routes'
 import { Hono, PatternRouter } from '@mokup/shared/hono'
+import { registerTokenRoute } from '@mokup/shared/hono-routes'
 import { applyContextResponseOverrides } from '@mokup/shared/response-overrides'
 import { delay } from './utils'
-
-function toHonoPath(route: ResolvedRoute) {
-  if (!route.tokens || route.tokens.length === 0) {
-    return '/'
-  }
-  const segments = route.tokens.map((token) => {
-    if (token.type === 'static') {
-      return token.value
-    }
-    if (token.type === 'param') {
-      return `:${token.name}`
-    }
-    if (token.type === 'catchall') {
-      return `:${token.name}{.+}`
-    }
-    return `:${token.name}{.+}?`
-  })
-  return `/${segments.join('/')}`
-}
 
 function resolveResponse(value: unknown, fallback: Response) {
   if (value instanceof Response) {
@@ -148,10 +130,10 @@ export function createHonoApp(
 
   for (const route of prioritizeHeadRoutes(routes)) {
     const { before, normal, after } = splitRouteMiddlewares(route)
-    registerHonoRoute(
+    registerTokenRoute(
       app,
       route.method,
-      toHonoPath(route),
+      route.tokens ?? [],
       [createFinalizeMiddleware(route, options.onResponse), ...before, ...normal, ...after, createRouteHandler(route)],
     )
   }
