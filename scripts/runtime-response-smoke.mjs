@@ -144,6 +144,12 @@ export async function smokeResponseContracts(directory, cli, run) {
   const dev = await createFetchServer({ entries: { dir: mockDir, watch: false, log: false }, playground: false })
   let server
   try {
+    await fs.writeFile(path.join(mockDir, 'refreshed.get.json'), '{"refreshed":true}\n')
+    await Promise.all([dev.refresh(), dev.refresh()])
+    const refreshed = await dev.fetch(new Request('http://localhost/refreshed'))
+    assert.equal(refreshed.status, 200)
+    assert.deepEqual(await refreshed.json(), { refreshed: true })
+    assert.ok(dev.getRoutes().some(route => route.template === '/refreshed'))
     server = serve({ fetch: dev.fetch, hostname: '127.0.0.1', port: 0 })
     if (!server.listening) {
       await once(server, 'listening')
