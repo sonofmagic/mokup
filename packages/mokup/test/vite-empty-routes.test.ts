@@ -4,6 +4,7 @@ import { promises as fs } from 'node:fs'
 import { tmpdir } from 'node:os'
 import path from 'node:path'
 import chokidar from '@mokup/shared/chokidar'
+import { normalizePathForComparison } from '@mokup/shared/path-utils'
 import { createServer, preview } from 'vite'
 import { describe, expect, it, vi } from 'vitest'
 import mokup from '../src/vite'
@@ -32,6 +33,7 @@ describe.each(['dev', 'preview'] as const)('empty %s mock routes', (kind) => {
     // Match Vite's canonical paths, including /var -> /private/var on macOS.
     const root = await fs.realpath(await fs.mkdtemp(path.join(tmpdir(), `mokup-vite-empty-${kind}-`)))
     const mockDir = path.join(root, 'mock')
+    const normalizedMockDir = normalizePathForComparison(mockDir)
     const routeFile = path.join(mockDir, 'ping.get.json')
     let server: ViteDevServer | PreviewServer | undefined
     // Observe the real preview watcher only to await its initial directory scan.
@@ -63,14 +65,17 @@ describe.each(['dev', 'preview'] as const)('empty %s mock routes', (kind) => {
       }
       else {
         server = await preview(config)
-        const watchIndex = watch?.mock.calls.findIndex(([dirs]) => Array.isArray(dirs) && dirs.includes(mockDir)) ?? -1
+        const watchIndex = watch?.mock.calls.findIndex(([dirs]) => (Array.isArray(dirs) ? dirs : [dirs])
+          .some(dir => normalizePathForComparison(dir) === normalizedMockDir)) ?? -1
         const result = watch?.mock.results[watchIndex]
         if (result?.type === 'return') {
           watcher = result.value
         }
       }
       expect(watcher, 'the mock directory must have a real filesystem watcher').toBeDefined()
-      await expect.poll(() => watcher?.getWatched()[mockDir], { timeout: 5000 }).toBeDefined()
+      // Vite, pathe and chokidar can use different separators and drive casing.
+      await expect.poll(() => Object.keys(watcher?.getWatched() ?? {}).map(normalizePathForComparison), { timeout: 5000 })
+        .toContain(normalizedMockDir)
 
       const address = server.httpServer?.address()
       if (!address || typeof address === 'string') {

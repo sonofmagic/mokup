@@ -21,7 +21,13 @@ export async function startEmptySwServer(runtime: 'node' | 'worker', register = 
       base: '/workspace/',
       configFile: false,
       logLevel: 'silent',
-      server: { host: '127.0.0.1', port: 0, fs: { allow: [root, repoRoot] } },
+      server: {
+        host: '127.0.0.1',
+        port: 0,
+        fs: { allow: [root, repoRoot] },
+        // Exercise atomic unlink/add handling on macOS as well as Linux CI.
+        watch: { atomic: true, useFsEvents: false, usePolling: false },
+      },
       plugins: [
         createMokupPlugin({
           runtime,

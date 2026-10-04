@@ -1,54 +1,60 @@
-import type { CDPSession } from '@playwright/test'
 import { unlink } from 'node:fs/promises'
 import { expect, test } from '@playwright/test'
 import { startEmptySwServer } from './utils/empty-sw-server'
 import { writeJson } from './utils/fs'
 
 for (const runtime of ['node', 'worker'] as const) {
-  test(`${runtime} activates first SW routes and recovers after deleting every route`, async ({ page, context }) => {
+  test(`${runtime} activates first SW routes and recovers after deleting every route`, async ({ page }) => {
     const fixture = await startEmptySwServer(runtime)
-    let cdp: CDPSession | undefined
-    const activated = new Set<string>()
     try {
-      cdp = await context.newCDPSession(page)
-      cdp.on('ServiceWorker.workerVersionUpdated', ({ versions }) => {
-        for (const version of versions) {
-          if (version.status === 'activated' && version.scriptURL === `${fixture.url}mokup-sw.js`) {
-            activated.add(version.versionId)
-          }
-        }
-      })
-      await cdp.send('ServiceWorker.enable')
       await expect.poll(() => Object.keys(fixture.server.watcher.getWatched())).toContain(fixture.mockDir)
       const connected = page.waitForEvent('websocket').then(socket => socket.waitForEvent('framereceived', {
         predicate: frame => frame.payload.toString().includes('"type":"connected"'),
       }))
       await Promise.all([page.goto(fixture.url), connected])
       const read = () => page.evaluate(async () => {
+        const registration = await navigator.serviceWorker.getRegistration('/workspace/')
+        // Let a pending worker activate without repeatedly dispatching requests to the old one.
+        if (registration && (registration.installing || registration.waiting || registration.active?.state !== 'activated')) {
+          return null
+        }
         const response = await fetch('/workspace/api/value', { cache: 'no-store' })
-        return { status: response.status, body: await response.json() }
+        return { status: response.status, body: await response.json(), controlled: !!navigator.serviceWorker.controller }
+      }).catch((error: unknown) => {
+        if (error instanceof Error && error.message.includes('Execution context was destroyed') && !page.isClosed()) {
+          return null
+        }
+        throw error
       })
-      await expect.poll(read).toEqual({ status: 207, body: { source: 'network' } })
+      await expect.poll(read).toEqual({ status: 207, body: { source: 'network' }, controlled: false })
       expect(await page.evaluate(() => navigator.serviceWorker.getRegistrations().then(list => list.length))).toBe(0)
 
       for (const revision of [1, 2]) {
-        const beforeAdd = activated.size
         await writeJson(fixture.routeFile, { source: 'mock', revision })
         // No test-driven page reload or manual registration: Vite must bootstrap it.
-        await expect.poll(() => activated.size).toBeGreaterThan(beforeAdd)
-        await expect.poll(() => page.evaluate(() => !!navigator.serviceWorker.controller)).toBe(true)
-        expect(await read()).toEqual({ status: 200, body: { source: 'mock', revision } })
+        await expect.poll(read, { intervals: [250, 500, 1000] }).toEqual({ status: 200, body: { source: 'mock', revision }, controlled: true })
         // The Node fallback is disabled, so a successful browser response proves SW interception.
         const network = await fetch(`${fixture.url}api/value`)
         expect(network.status).toBe(207)
         expect(await network.json()).toEqual({ source: 'network' })
 
-        const beforeDelete = activated.size
         await unlink(fixture.routeFile)
-        // Observe activation without keeping the old worker busy with repeated fetches.
-        await expect.poll(() => activated.size).toBeGreaterThan(beforeDelete)
-        await expect.poll(read).toEqual({ status: 207, body: { source: 'network' } })
+        await expect.poll(read, { intervals: [250, 500, 1000] }).toEqual({ status: 207, body: { source: 'network' }, controlled: true })
       }
+    }
+    catch (error) {
+      const state = await page.evaluate(async () => ({
+        registrations: (await navigator.serviceWorker.getRegistrations()).map(registration => ({
+          active: registration.active?.state,
+          installing: registration.installing?.state,
+          waiting: registration.waiting?.state,
+        })),
+        response: await fetch('/workspace/api/value', { signal: AbortSignal.timeout(2000) })
+          .then(async response => ({ status: response.status, body: await response.text() }))
+          .catch(fetchError => ({ fetchError: String(fetchError) })),
+      })).catch(diagnosticError => ({ diagnosticError: String(diagnosticError) }))
+      await test.info().attach('worker-state', { body: JSON.stringify(state), contentType: 'application/json' })
+      throw error
     }
     finally {
       try {
@@ -59,12 +65,7 @@ for (const runtime of ['node', 'worker'] as const) {
         }
       }
       finally {
-        try {
-          await cdp?.detach()
-        }
-        finally {
-          await fixture.close()
-        }
+        await fixture.close()
       }
     }
   })
