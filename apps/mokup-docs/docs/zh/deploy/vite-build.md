@@ -41,6 +41,8 @@ bunx mokup build --dir mock --out .mokup
 
 当在 Vite 插件中设置 `mode: 'sw'` 时，Service Worker 脚本会在 `vite build` 期间输出（默认 `/mokup-sw.js`）。插件会自动注入注册脚本，除非设置 `sw.register: false`。
 
+`sw.path` 可以包含完整的 Vite `base` 前缀。例如 `base: '/workspace/'` 时，`/mokup-sw.js` 和 `/workspace/mokup-sw.js` 都会输出 `dist/mokup-sw.js`，并注册 `/workspace/mokup-sw.js`，不会在构建目录中重复添加 `workspace`。
+
 ```ts
 import mokup from 'mokup/vite'
 

@@ -7,6 +7,7 @@ import { createMokupPlugin } from '../../../packages/mokup/src/vite/plugin'
 import { repoRoot } from './paths'
 
 interface PreviewSwOptions {
+  workerPath?: string
   playground?: boolean
   removeSource?: boolean
   removeWorker?: boolean
@@ -62,6 +63,7 @@ export async function startPreviewSwServer(runtime: 'node' | 'worker', register 
             prefix: '/workspace/api',
             mode: 'sw',
             sw: {
+              ...(options.workerPath ? { path: options.workerPath } : {}),
               fallback: false,
               register: building ? options.buildRegister ?? register : register,
               unregister: !building && options.unregister === true,
@@ -107,6 +109,7 @@ export async function startPreviewSwServer(runtime: 'node' | 'worker', register 
     return {
       url: `http://127.0.0.1:${address.port}/workspace/`,
       worker,
+      readOutput: (file: string) => readFile(path.join(root, 'dist', file), 'utf8'),
       removeWorker: () => rm(workerFile, { force: true }),
       async close() {
         try {

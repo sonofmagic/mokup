@@ -13,7 +13,7 @@ import { resolvePlaygroundDist } from '../playground/assets'
 import { createLogger } from '../shared/logger'
 import { transformMokupIndexHtml } from './plugin/html-transform'
 import { normalizeMokupOptions, normalizeOptions } from './plugin/options'
-import { resolveRegisterPath, resolveSwImportPath } from './plugin/paths'
+import { resolveRegisterPath, resolveSwImportPath, resolveSwOutputFileName } from './plugin/paths'
 import { buildPlaygroundSwLifecycleScript } from './plugin/playground-sw'
 import { createRouteRefresher } from './plugin/refresh'
 import { createDirResolver, createHtmlAssetResolver, createSwPathResolver } from './plugin/resolvers'
@@ -202,13 +202,10 @@ export function createMokupPlugin(options: MokupPluginOptions = {}): Plugin {
       if (!swConfig || !hasSwRoutes()) {
         return
       }
-      const fileName = swConfig.path.startsWith('/')
-        ? swConfig.path.slice(1)
-        : swConfig.path
       this.emitFile({
         type: 'chunk',
         id: swVirtualId,
-        fileName,
+        fileName: resolveSwOutputFileName(base, swConfig.path),
       })
     },
     async transformIndexHtml(html) {

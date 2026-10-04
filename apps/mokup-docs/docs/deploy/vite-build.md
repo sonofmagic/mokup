@@ -41,6 +41,8 @@ Output structure:
 
 When you set `mode: 'sw'` in the Vite plugin, the service worker script is emitted during `vite build` (default `/mokup-sw.js`). The plugin also injects a registration snippet unless `sw.register` is `false`.
 
+`sw.path` may include the full Vite `base` prefix. With `base: '/workspace/'`, both `/mokup-sw.js` and `/workspace/mokup-sw.js` produce `dist/mokup-sw.js` and register `/workspace/mokup-sw.js`; the build does not add a duplicate `workspace` directory.
+
 ```ts
 import mokup from 'mokup/vite'
 
