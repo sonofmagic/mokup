@@ -36,6 +36,8 @@ const matched = await runtime.hasRoute({ method: 'POST', path: '/users' })
 
 Custom adapters can use this query before parsing a body, leaving unmatched requests available to downstream handlers. For matched requests, continue calling `runtime.handle` with the complete normalized request shown above. `handle` still returns the mock result or `null` when no route matches.
 
+For matched requests, adapters can provide `rawBodyBytes?: Uint8Array` to preserve binary payloads. The runtime prefers these bytes, including an empty array, over `rawBody?: string` and then the parsed `body`. It copies the supplied byte view, including Buffer slices and SharedArrayBuffer views, before constructing the Fetch request. `GET` and `HEAD` requests remain bodyless.
+
 ## Direct usage with CLI bundle
 
 Use the CLI bundle to load a manifest and handler module map in your runtime:

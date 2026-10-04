@@ -177,6 +177,8 @@ export interface RuntimeRequest {
   body: unknown
   /** Raw body text (if available). */
   rawBody?: string
+  /** Original body bytes, preferred over rawBody and body when available. */
+  rawBodyBytes?: Uint8Array
   /** Path params captured during matching. */
   params?: Record<string, string | string[]>
 }

@@ -3,6 +3,12 @@ import { readStreamBody } from '@mokup/shared/stream-body'
 
 const textDecoder = new TextDecoder()
 
+interface ResolvedRequestBody {
+  body: unknown
+  rawBody?: string
+  rawBodyBytes?: Uint8Array
+}
+
 /**
  * Parse raw body text based on content type.
  *
@@ -34,8 +40,11 @@ export function parseBody(rawText: string, contentType: string) {
   return rawText
 }
 
-function decodeText(data: Uint8Array): string {
-  return textDecoder.decode(data)
+function resolveByteBody(data: Uint8Array, contentType: string): ResolvedRequestBody {
+  // Snapshot only this view before asynchronous runtime work can observe mutations.
+  const rawBodyBytes = new Uint8Array(data)
+  const rawBody = textDecoder.decode(rawBodyBytes)
+  return { body: parseBody(rawBody, contentType), rawBody, rawBodyBytes }
 }
 
 /**
@@ -82,7 +91,7 @@ async function resolveBody(
   body: unknown,
   contentType: string,
   stream?: ReadableStreamLike,
-): Promise<{ body: unknown, rawBody?: string }> {
+): Promise<ResolvedRequestBody> {
   if (typeof body !== 'undefined') {
     if (typeof body === 'string') {
       return {
@@ -91,18 +100,10 @@ async function resolveBody(
       }
     }
     if (body instanceof Uint8Array) {
-      const rawText = decodeText(body)
-      return {
-        body: parseBody(rawText, contentType),
-        rawBody: rawText,
-      }
+      return resolveByteBody(body, contentType)
     }
     if (body instanceof ArrayBuffer) {
-      const rawText = decodeText(new Uint8Array(body))
-      return {
-        body: parseBody(rawText, contentType),
-        rawBody: rawText,
-      }
+      return resolveByteBody(new Uint8Array(body), contentType)
     }
     return {
       body,
@@ -114,14 +115,13 @@ async function resolveBody(
   }
 
   const rawBytes = await readStreamBody(stream)
-  if (!rawBytes || rawBytes.length === 0) {
+  if (!rawBytes) {
     return { body: undefined }
   }
-  const rawText = decodeText(rawBytes)
-  return {
-    body: parseBody(rawText, contentType),
-    rawBody: rawText,
+  if (rawBytes.length === 0) {
+    return { body: undefined, rawBodyBytes: new Uint8Array(0) }
   }
+  return resolveByteBody(rawBytes, contentType)
 }
 
-export { resolveBody }
+export { resolveBody, type ResolvedRequestBody }

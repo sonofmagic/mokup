@@ -65,6 +65,7 @@ describe('request dispatch before reading bodies', () => {
         headers: { 'content-type': 'application/json' },
         body: { ok: true },
         rawBody: '{"ok":true}',
+        rawBodyBytes: new TextEncoder().encode('{"ok":true}'),
       })
     }
     finally {

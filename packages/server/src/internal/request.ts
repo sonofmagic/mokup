@@ -1,13 +1,9 @@
 import type { RuntimeRequest } from '@mokup/runtime'
+import type { ResolvedRequestBody } from './body'
 import type { NodeRequestLike } from './types'
-import { parseBody, resolveBody } from './body'
+import { resolveBody } from './body'
 import { normalizeHeaders, normalizeNodeHeaders, normalizeQuery } from './normalize'
 import { resolveNodeRequestUrl } from './request-url'
-
-interface ResolvedRequestBody {
-  body: unknown
-  rawBody?: string
-}
 
 interface PreparedRequest {
   request: RuntimeRequest
@@ -30,8 +26,8 @@ function prepareRequest(
   return {
     request,
     async readBody() {
-      const { body, rawBody } = await readBody()
-      return { ...request, body, ...(rawBody ? { rawBody } : {}) }
+      const { body, rawBody, rawBodyBytes } = await readBody()
+      return { ...request, body, ...(rawBody ? { rawBody } : {}), ...(rawBodyBytes ? { rawBodyBytes } : {}) }
     },
   }
 }
@@ -42,8 +38,9 @@ export function prepareFetchRequest(request: Request): PreparedRequest {
   const headers = normalizeHeaders(request.headers)
   const contentType = (headers['content-type'] ?? '').split(';')[0]?.trim() ?? ''
   return prepareRequest(url, request.method, headers, async () => {
-    const rawBody = await request.text()
-    return { body: parseBody(rawBody, contentType), rawBody }
+    const hasBody = request.body !== null
+    const bytes = await request.arrayBuffer()
+    return hasBody ? resolveBody(bytes, contentType) : { body: undefined }
   })
 }
 
