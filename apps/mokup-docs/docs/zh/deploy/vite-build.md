@@ -63,6 +63,8 @@ export default {
 
 这种方式适合纯静态部署，因为 mock 请求在浏览器侧处理。如果你还需要 playground，可设置 `playground: { build: true }`，在 `vite build` 时输出 Playground 资源与 `/__mokup/routes`。或者继续用 `mokup build` 或脚本生成 `/__mokup/routes` 并随站点发布。
 
+Playground 构建目录必须是 `outDir` 内的独立子目录。归一化后指向 `outDir` 自身或外部、以及经过 `outDir` 内现有符号链接的路径，会在替换输出文件前被拒绝。
+
 注意：
 
 - `sw.basePath` 用于控制 SW 拦截的请求路径，默认继承 entry 的 `prefix`。

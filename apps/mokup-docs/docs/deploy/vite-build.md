@@ -63,6 +63,8 @@ export default {
 
 This is ideal for static hosting because mock requests are handled in the browser. If you also ship the playground, set `playground: { build: true }` so `vite build` emits the Playground assets and `/__mokup/routes`. As an alternative, you can generate `/__mokup/routes` with `mokup build` or a small script and publish it alongside the site.
 
+A Playground build must target a separate directory within `outDir`. Paths that resolve to `outDir` itself, leave it, or traverse an existing symbolic link beneath it are rejected before output is replaced.
+
 Notes:
 
 - `sw.basePath` controls which requests the SW intercepts. If omitted, it inherits the entry `prefix`.
