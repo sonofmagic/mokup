@@ -64,6 +64,10 @@ export default defineConfig({
       name: 'worker',
       testMatch: /worker\.spec\.ts/,
     },
+    {
+      name: 'service-worker',
+      testMatch: /service-worker-update\.spec\.ts/,
+    },
   ],
   globalSetup: './tests/e2e/global-setup.ts',
 })

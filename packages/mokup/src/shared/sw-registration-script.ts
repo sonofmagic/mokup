@@ -36,7 +36,9 @@ export function buildSwRegistrationScript(importPath: string, path: string, scop
     '    try {',
     '      const registration = await registrationPromise',
     '      while (active && pending && registration) {',
-    '        if (![registration.waiting, registration.active].some((worker) => worker && worker.state !== \'redundant\')) {',
+    // Preserve pending changes until the native update job finishes its installation.
+    '        const installing = registration.installing && registration.installing.state !== \'redundant\'',
+    '        if (installing || ![registration.waiting, registration.active].some((worker) => worker && worker.state !== \'redundant\')) {',
     '          watchInstallation(registration)',
     '          break',
     '        }',

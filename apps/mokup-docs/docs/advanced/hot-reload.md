@@ -24,6 +24,9 @@ Set `watch: false` to disable file watching.
 ## Debug tips
 
 - Playground refreshes on route changes (`mokup:routes-changed`).
+- In Service Worker mode, edits made while a worker is installing are queued and
+  applied after installation finishes. You do not need to reload the page to pick
+  up those edits.
 - Ensure file names include method suffixes.
 - Handler logs appear in Vite dev output.
 

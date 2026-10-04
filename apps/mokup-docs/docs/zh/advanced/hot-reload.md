@@ -24,6 +24,7 @@ export default {
 ## 调试建议
 
 - 路由变化后 Playground 会自动刷新（`mokup:routes-changed`）。
+- Service Worker 模式下，安装过程中发生的 mock 修改会排队等待，安装完成后自动更新，无需手动刷新页面。
 - 若某个接口不生效，请先检查文件名是否包含 method 后缀。
 - TS 处理器支持 `console.log` 输出，Vite dev 会显示日志。
 
