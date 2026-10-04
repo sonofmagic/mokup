@@ -73,6 +73,8 @@ export function createMokupPlugin(options: MokupPluginOptions = {}): Plugin {
   if (swDiagnosticError) {
     throw swDiagnosticError
   }
+  const hasAutoSwRegistration = !!swConfig && swConfig.register !== false && !unregisterConfig.unregister
+  const hasServerEntries = optionList.some(entry => entry.mode !== 'sw' || entry.sw?.fallback !== false)
   const resolveAllDirs = createDirResolver(optionList, () => root)
   const hasSwRoutes = () => !!swConfig && state.swRoutes.length > 0
   const { resolveSwRequestPath, resolveSwRegisterScope } = createSwPathResolver(() => base)
@@ -113,8 +115,10 @@ export function createMokupPlugin(options: MokupPluginOptions = {}): Plugin {
     logger,
     enableViteMiddleware,
     virtualModuleIds: [resolvedBundleVirtualId],
-    reloadOnChange: runtime === 'worker',
-    reloadOnFirstSwRoute: !!swConfig && swConfig.register !== false && !unregisterConfig.unregister,
+    // Browser-only routes already have an automatic SW updater. Preserve that
+    // page and its update queue unless a server bundle also needs refreshing.
+    reloadOnChange: runtime === 'worker' && (hasServerEntries || !hasAutoSwRegistration),
+    reloadOnFirstSwRoute: hasAutoSwRegistration,
     ...(normalizedOptions.errorOn ? { errorOn: normalizedOptions.errorOn } : {}),
   }
   const scanRoutes = createRouteRefresher(refreshRouteParams)

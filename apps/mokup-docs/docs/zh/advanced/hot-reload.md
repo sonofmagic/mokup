@@ -33,6 +33,10 @@ Vite dev 对其加载的模块使用 Vite 的模块图失效机制，依赖更�
 
 ## Vite 刷新
 
+Vite 开发模式下，当所有条目均使用 SW 模式、自动注册且设置 `sw.fallback: false` 时，两种 runtime 都通过 SW 更新器刷新 mock 响应，不会在每次编辑时重载页面。
+路由从空变为非空时仍可能重载页面，以启动注册流程。
+Worker runtime 中启用服务端 fallback、混合服务端路由或手动注册 SW 的配置继续保留整页刷新行为。
+
 刷新会在扫描和路由 app 构建成功后，同时更新路由表、Playground 元数据和 Service Worker 路由数据。
 如果 `errorOn` 将诊断提升为错误，或路由 app 构建失败，上一次成功的路由快照会继续生效。
 诊断仍反映最近一次扫描；修正 mock 或配置后，下一次成功刷新即可生效。

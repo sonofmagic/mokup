@@ -37,6 +37,12 @@ it loads, so its dependency refresh behavior follows that graph.
 
 ## Vite refresh
 
+During Vite dev, when every entry uses SW mode with automatic registration and `sw.fallback: false`,
+both runtime modes update mock responses through the SW updater without reloading the
+page on every edit. An empty-to-nonempty transition can still reload the page to
+bootstrap registration. Worker runtime entries with server fallback, mixed
+server routes, or manual SW registration retain their full-page refresh behavior.
+
 A refresh publishes its route table, Playground metadata, and Service Worker
 route data together, after scanning and app construction succeed. If `errorOn`
 rejects a diagnostic or app construction fails, the previous successful route

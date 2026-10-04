@@ -38,8 +38,16 @@ for (const runtime of ['node', 'worker'] as const) {
         expect(network.status).toBe(207)
         expect(await network.json()).toEqual({ source: 'network' })
 
-        await unlink(fixture.routeFile)
-        await expect.poll(read, { intervals: [250, 500, 1000] }).toEqual({ status: 207, body: { source: 'network' }, controlled: true })
+        const documentHandle = await page.evaluateHandle(() => document)
+        try {
+          await unlink(fixture.routeFile)
+          await expect.poll(read, { intervals: [250, 500, 1000] }).toEqual({ status: 207, body: { source: 'network' }, controlled: true })
+          // Browser-only SW changes must keep the page and its update queue alive.
+          expect(await documentHandle.evaluate(value => value === document)).toBe(true)
+        }
+        finally {
+          await documentHandle.dispose()
+        }
       }
     }
     catch (error) {
