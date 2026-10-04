@@ -26,4 +26,27 @@ describe('fetch adapter', () => {
     expect(headers['x-test']).toBe('1')
     expect(headers['x-mokup']).toBe('1')
   })
+
+  it('preserves repeated case-insensitive tuple headers', async () => {
+    const resolver = {
+      resolve: vi.fn(request => ({ mode: 'real' as const, url: request.url, headers: {} })),
+      setUseMock: vi.fn(),
+      getUseMock: () => false,
+    }
+    const fetchMock = vi.fn(async () => new Response('ok'))
+    const adapter = createFetchAdapter({ fetch: fetchMock, resolver })
+
+    await adapter('/source', {
+      headers: [
+        ['Accept', 'application/json'],
+        ['accept', 'application/problem+json'],
+      ],
+    })
+
+    expect(resolver.resolve).toHaveBeenCalledWith(expect.objectContaining({
+      headers: { accept: 'application/json, application/problem+json' },
+    }))
+    expect((fetchMock.mock.calls[0]?.[1]?.headers as Record<string, string>).accept)
+      .toBe('application/json, application/problem+json')
+  })
 })

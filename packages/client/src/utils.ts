@@ -44,7 +44,11 @@ export function normalizeHeaders(input?: HeadersInit | null): HeaderRecord {
   }
   if (Array.isArray(input)) {
     for (const [key, value] of input) {
-      record[String(key).toLowerCase()] = String(value)
+      const normalizedKey = String(key).toLowerCase()
+      const normalizedValue = String(value)
+      record[normalizedKey] = Object.hasOwn(record, normalizedKey)
+        ? `${record[normalizedKey]}, ${normalizedValue}`
+        : normalizedValue
     }
     return record
   }
