@@ -12,6 +12,7 @@ import { smokeClientRequests } from './runtime-client-smoke.mjs'
 import { smokeModuleRefresh } from './runtime-module-smoke.mjs'
 import { smokeResponseContracts } from './runtime-response-smoke.mjs'
 import { smokeRouteGrammar } from './runtime-route-smoke.mjs'
+import { smokeTypeScriptModules, smokeTypeScriptSymlinks } from './runtime-typescript-smoke.mjs'
 
 const execFileAsync = promisify(execFile)
 const scriptFile = fileURLToPath(import.meta.url)
@@ -75,6 +76,7 @@ async function prepareConsumer(root, directory, packages) {
   await fs.copyFile(new URL('./runtime-client-smoke.mjs', import.meta.url), path.join(directory, 'runtime-client-smoke.mjs'))
   await fs.copyFile(new URL('./runtime-module-smoke.mjs', import.meta.url), path.join(directory, 'runtime-module-smoke.mjs'))
   await fs.copyFile(new URL('./runtime-route-smoke.mjs', import.meta.url), path.join(directory, 'runtime-route-smoke.mjs'))
+  await fs.copyFile(new URL('./runtime-typescript-smoke.mjs', import.meta.url), path.join(directory, 'runtime-typescript-smoke.mjs'))
   // Install only tarball dependencies on the build Node; no workspace tooling or optional peers.
   await run('npm', ['install', '--omit=dev', '--legacy-peer-deps', '--ignore-scripts', '--no-audit', '--no-fund'], directory)
 }
@@ -210,14 +212,22 @@ async function smokePlaygroundWebSocket(directory) {
 }
 
 async function main() {
+  if (process.argv[2] === '--typescript-symlinks') {
+    await smokeTypeScriptSymlinks(path.dirname(scriptFile))
+    process.stdout.write('TypeScript symlink package scopes passed\n')
+    return
+  }
   if (process.argv[2] === '--consumer') {
     const directory = path.dirname(scriptFile)
     const entries = await importPublicEntries(directory)
+    await smokeTypeScriptModules(directory)
+    await smokeTypeScriptSymlinks(directory)
+    await run(process.execPath, ['--preserve-symlinks', scriptFile, '--typescript-symlinks'], directory)
     await smokeBuiltHandlers(directory)
     await smokePlaygroundWebSocket(directory)
     await smokeClientRequests()
     await smokeModuleRefresh(directory)
-    process.stdout.write(`runtime compatibility ok (Node ${process.version}, ${entries} exports, CLI check/build, HTTP/HEAD/cookies/binary/bodyless responses, request body fallthrough, WebSocket metrics, Fetch Request, Query HTTP/JSON and Axios URL semantics, native module refresh, literal route grammar)\n`)
+    process.stdout.write(`runtime compatibility ok (Node ${process.version}, ${entries} exports, CLI check/build, HTTP/HEAD/cookies/binary/bodyless responses, request body fallthrough, WebSocket metrics, Fetch Request, Query HTTP/JSON and Axios URL semantics, native module refresh, CommonJS/ESM TypeScript, literal route grammar)\n`)
     return
   }
   const args = process.argv.slice(2)

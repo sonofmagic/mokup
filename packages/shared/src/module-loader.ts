@@ -5,7 +5,9 @@ import { tmpdir } from 'node:os'
 import process from 'node:process'
 import { pathToFileURL } from 'node:url'
 
+import { isTypeScriptModule } from './module-format'
 import { extname, resolve } from './pathe'
+import { ensureTsxCommonJsRegister, resetTsxCommonJsForTests, syncTsxCommonJsConfig } from './tsx-commonjs'
 
 interface TsxConfigOptions {
   baseUrl: string
@@ -30,6 +32,7 @@ let tsxRegisterPromise: Promise<void> | null = null
 let tsxRegisteredConfig: string | null = null
 
 export function resetModuleLoaderForTests() {
+  resetTsxCommonJsForTests()
   sourceMapsEnabled = false
   tsxRegisterPromise = null
   tsxRegisteredConfig = null
@@ -57,6 +60,7 @@ export async function ensureTsxRegister(tsconfigPath?: string | null) {
         ensureSourceMapsEnabled()
         const { register } = await import('tsx/esm/api')
         register({ tsconfig: desired })
+        syncTsxCommonJsConfig(desired)
         tsxRegisteredConfig = desired
       })()
       await tsxRegisterPromise
@@ -91,6 +95,15 @@ export async function loadModule(
   }
   if (ext === '.ts') {
     await ensureTsxRegister(options?.tsconfigPath ?? null)
+    const require = createRequire(import.meta.url)
+    const resolved = require.resolve(file)
+    if (!isTypeScriptModule(resolved)) {
+      ensureTsxCommonJsRegister(tsxRegisteredConfig)
+      // CJS imports use the resolved filename as their identity, not URL queries.
+      // Refresh only the entry so its dependencies retain their shared state.
+      delete require.cache[resolved]
+      return require(resolved)
+    }
   }
   if (ext === '.js' || ext === '.mjs' || ext === '.ts') {
     // Each evaluation needs its own identity, including across loader instances and clock resets.

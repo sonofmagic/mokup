@@ -24,8 +24,12 @@ export default {
 ## 原生模块刷新
 
 通过原生加载器运行时，例如独立的 [Fetch 服务](../reference/server.md#fetch-入口-node)，
-ESM 格式的 `.js`、`.mjs`、`.ts` 入口和 CommonJS 格式的 `.cjs` 入口刷新不依赖系统时钟前进。
+ESM 格式的 `.js`、`.mjs` 入口、CommonJS 格式的 `.cjs` 入口及 TypeScript `.ts` 入口刷新不依赖系统时钟前进。
 即使连续刷新发生在同一毫秒内，或系统时间被调整，入口仍会重新加载；通过符号链接访问的入口也可以刷新。
+
+TypeScript 遵循最近的 `package.json`：`"type": "module"` 使用 ESM，CommonJS 或未声明 `type` 时使用 CommonJS。
+两种格式都支持 TypeScript 默认导出，ESM 保留顶层 await。
+原生加载器沿用进程级 tsconfig；多个项目需要独立的 TypeScript 别名配置时，应使用不同进程。
 
 这种刷新针对 mock 或配置入口本身。入口已经 `import` 或 `require` 的辅助模块、共享依赖仍会保留缓存；
 修改这些依赖后，即使刷新了入口，也可能需要重启使用原生加载器的服务进程。

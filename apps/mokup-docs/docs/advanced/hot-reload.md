@@ -24,10 +24,16 @@ Set `watch: false` to disable file watching.
 ## Native module refresh
 
 Native loading, such as the standalone [Fetch server](../reference/server.md#fetch-server-node),
-refreshes ESM `.js`, `.mjs`, and `.ts` entries and CommonJS `.cjs` entries without
+refreshes ESM `.js` and `.mjs` entries, CommonJS `.cjs` entries, and TypeScript `.ts` entries without
 depending on the system clock advancing. Consecutive refreshes in the same
 millisecond or after a clock adjustment reload the entry, including when its
 path is a symbolic link.
+
+TypeScript follows the nearest `package.json`: `"type": "module"` uses ESM,
+while CommonJS or missing `type` uses CommonJS. Both support TypeScript default
+exports. ESM keeps top-level await.
+The native loader uses a process-wide tsconfig, as before; use separate processes
+when projects need independent TypeScript alias configurations.
 
 This refresh applies to the mock or configuration entry itself. Helpers and
 shared dependencies that it has already imported or required remain cached;
