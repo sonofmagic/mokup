@@ -27,7 +27,12 @@ describe('fetch adapter', () => {
     expect(headers['x-mokup']).toBe('1')
   })
 
-  it('preserves repeated case-insensitive tuple headers', async () => {
+  it.each(['string', 'URL'] as const)('preserves repeated case-insensitive tuple headers for %s input', async (kind) => {
+    const tuples = [
+      ['Accept', ' application/json '],
+      ['accept', 'application/problem+json'],
+    ] as const
+    const expected = new Headers(tuples).get('accept')
     const resolver = {
       resolve: vi.fn(request => ({ mode: 'real' as const, url: request.url, headers: {} })),
       setUseMock: vi.fn(),
@@ -36,17 +41,16 @@ describe('fetch adapter', () => {
     const fetchMock = vi.fn(async () => new Response('ok'))
     const adapter = createFetchAdapter({ fetch: fetchMock, resolver })
 
-    await adapter('/source', {
+    await adapter(kind === 'URL' ? new URL('http://localhost/source') : '/source', {
       headers: [
-        ['Accept', 'application/json'],
-        ['accept', 'application/problem+json'],
+        ...tuples,
       ],
     })
 
     expect(resolver.resolve).toHaveBeenCalledWith(expect.objectContaining({
-      headers: { accept: 'application/json, application/problem+json' },
+      headers: { accept: expected },
     }))
     expect((fetchMock.mock.calls[0]?.[1]?.headers as Record<string, string>).accept)
-      .toBe('application/json, application/problem+json')
+      .toBe(expected)
   })
 })

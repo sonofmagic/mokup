@@ -43,6 +43,13 @@ export function normalizeHeaders(input?: HeadersInit | null): HeaderRecord {
     return record
   }
   if (Array.isArray(input)) {
+    if (typeof Headers !== 'undefined') {
+      const headers = new Headers(input)
+      headers.forEach((value, key) => {
+        record[key] = value
+      })
+      return record
+    }
     for (const [key, value] of input) {
       const normalizedKey = String(key).toLowerCase()
       const normalizedValue = String(value)
