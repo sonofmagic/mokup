@@ -4,6 +4,7 @@ import type { Logger } from '../../shared/types'
 import type { MiddlewareHandler } from './middleware'
 import type { PluginState } from './state'
 import { buildSwScript, createMiddleware } from '../../internal/core'
+import { parseHttpRequestUrl } from '../../shared/http-request'
 import { addMiddlewareFirst } from './middleware'
 import {
   resolveRegisterPath,
@@ -59,8 +60,10 @@ async function configureDevServer(params: {
   const swPath = swConfig ? resolveRegisterPath(base, swConfig.path) : null
   if (swPath && hasSwRoutes()) {
     server.middlewares.use(async (req, res, next) => {
-      const requestUrl = req.url ?? '/'
-      const parsed = new URL(requestUrl, 'http://mokup.local')
+      const parsed = parseHttpRequestUrl(req, res)
+      if (!parsed) {
+        return
+      }
       if (parsed.pathname !== swPath) {
         return next()
       }
@@ -142,8 +145,10 @@ async function configurePreviewServer(params: {
   const swPath = swConfig ? resolveRegisterPath(base, swConfig.path) : null
   if (swPath && hasSwRoutes()) {
     server.middlewares.use(async (req, res, next) => {
-      const requestUrl = req.url ?? '/'
-      const parsed = new URL(requestUrl, 'http://mokup.local')
+      const parsed = parseHttpRequestUrl(req, res)
+      if (!parsed) {
+        return
+      }
       if (parsed.pathname !== swPath) {
         return next()
       }

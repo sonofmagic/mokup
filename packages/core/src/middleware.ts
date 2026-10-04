@@ -3,7 +3,9 @@ import type { IncomingMessage, ServerResponse } from 'node:http'
 
 import type { Logger, ResolvedRoute, RouteTable } from './shared/types'
 import { Buffer } from 'node:buffer'
+import { validateHeaderName, validateHeaderValue } from 'node:http'
 import { Hono, PatternRouter } from '@mokup/shared/hono'
+import { parseRequestUrl, sendInvalidRequestUrl } from './shared/request-url'
 import { delay, normalizeMethod } from './shared/utils'
 
 function toHonoPath(route: ResolvedRoute) {
@@ -218,8 +220,7 @@ function buildHeaders(headers: IncomingMessage['headers']) {
   return result
 }
 
-async function toRequest(req: IncomingMessage) {
-  const url = new URL(req.url ?? '/', 'http://mokup.local')
+async function toRequest(req: IncomingMessage, url: URL) {
   const method = req.method ?? 'GET'
   const headers = buildHeaders(req.headers)
   const init: RequestInit = { method, headers }
@@ -231,15 +232,20 @@ async function toRequest(req: IncomingMessage) {
 }
 
 async function sendResponse(res: ServerResponse, response: Response) {
+  const buffer = response.body ? new Uint8Array(await response.arrayBuffer()) : null
+  const headers = Array.from(response.headers)
+  for (const [key, value] of headers) {
+    validateHeaderName(key)
+    validateHeaderValue(key, value)
+  }
   res.statusCode = response.status
-  response.headers.forEach((value, key) => {
+  for (const [key, value] of headers) {
     res.setHeader(key, value)
-  })
-  if (!response.body) {
+  }
+  if (!buffer) {
     res.end()
     return
   }
-  const buffer = new Uint8Array(await response.arrayBuffer())
   res.end(buffer)
 }
 
@@ -276,7 +282,11 @@ export function createMiddleware(
     }
 
     const url = req.url ?? '/'
-    const parsedUrl = new URL(url, 'http://mokup.local')
+    const parsedUrl = parseRequestUrl(url)
+    if (!parsedUrl) {
+      sendInvalidRequestUrl(res)
+      return
+    }
     const pathname = parsedUrl.pathname
     const method = normalizeMethod(req.method) ?? 'GET'
 
@@ -286,7 +296,7 @@ export function createMiddleware(
 
     const startedAt = Date.now()
     try {
-      const response = await app.fetch(await toRequest(req))
+      const response = await app.fetch(await toRequest(req, parsedUrl))
       if (res.writableEnded) {
         return
       }

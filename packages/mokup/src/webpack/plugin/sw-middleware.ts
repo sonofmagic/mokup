@@ -1,4 +1,5 @@
 import type { IncomingMessage, ServerResponse } from 'node:http'
+import { parseHttpRequestUrl } from '../../shared/http-request'
 import { resolveRegisterPath } from './paths'
 
 function createSwMiddleware(params: {
@@ -16,8 +17,10 @@ function createSwMiddleware(params: {
     if (!params.swConfig || !params.hasSwRoutes()) {
       return next()
     }
-    const requestUrl = req.url ?? '/'
-    const parsed = new URL(requestUrl, 'http://mokup.local')
+    const parsed = parseHttpRequestUrl(req, res)
+    if (!parsed) {
+      return
+    }
     const swPath = resolveRegisterPath(params.getBase(), params.swConfig.path)
     if (parsed.pathname !== swPath) {
       return next()

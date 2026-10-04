@@ -32,17 +32,23 @@ export function createConnectMiddleware(
     res: NodeResponseLike,
     next: NextFunction,
   ) => {
-    const runtimeRequest = await toRuntimeRequestFromNode(req)
-    const result = await runtime.handle(runtimeRequest)
-    if (!result) {
+    try {
+      const runtimeRequest = await toRuntimeRequestFromNode(req)
+      const result = await runtime.handle(runtimeRequest)
+      if (result) {
+        applyRuntimeResultToNode(res, result)
+        return
+      }
       if (onNotFound === 'response') {
         res.statusCode = 404
         res.end()
         return
       }
-      next()
+    }
+    catch (error) {
+      next(error)
       return
     }
-    applyRuntimeResultToNode(res, result)
+    next()
   }
 }

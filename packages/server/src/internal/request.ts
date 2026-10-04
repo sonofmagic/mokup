@@ -1,7 +1,8 @@
 import type { RuntimeRequest } from '@mokup/runtime'
 import type { NodeRequestLike } from './types'
 import { parseBody, resolveBody } from './body'
-import { normalizeHeaders, normalizeNodeHeaders, normalizeQuery, resolveUrl } from './normalize'
+import { normalizeHeaders, normalizeNodeHeaders, normalizeQuery } from './normalize'
+import { resolveNodeRequestUrl } from './request-url'
 
 function buildRuntimeRequest(
   url: URL,
@@ -69,7 +70,7 @@ export async function toRuntimeRequestFromNode(
 ): Promise<RuntimeRequest> {
   const headers = normalizeNodeHeaders(req.headers)
   const contentType = (headers['content-type'] ?? '').split(';')[0]?.trim() ?? ''
-  const url = resolveUrl(req.url ?? req.originalUrl ?? '/', headers)
+  const url = resolveNodeRequestUrl(req.url ?? req.originalUrl ?? '/', headers)
   const resolvedBody = await resolveBody(
     typeof bodyOverride === 'undefined' ? req.body : bodyOverride,
     contentType,

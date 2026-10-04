@@ -6,6 +6,7 @@ import type { PlaygroundDistResolver } from './assets'
 import type { PlaygroundConfig } from './config'
 import { promises as fs } from 'node:fs'
 import { extname, join, normalize } from '@mokup/shared/pathe'
+import { parseRequestUrl, sendInvalidRequestUrl } from '../shared/request-url'
 import { mimeTypes, resolvePlaygroundDist, sendFile, sendJson } from './assets'
 import { resolvePlaygroundRequestPath } from './config'
 import { resolveGroupRoot, resolveGroups } from './grouping'
@@ -69,7 +70,11 @@ export function createPlaygroundMiddleware(params: {
     const server = params.getServer?.()
     const requestPath = resolvePlaygroundRequestPath(server?.config?.base ?? '/', playgroundPath)
     const requestUrl = req.url ?? '/'
-    const url = new URL(requestUrl, 'http://mokup.local')
+    const url = parseRequestUrl(requestUrl)
+    if (!url) {
+      sendInvalidRequestUrl(res)
+      return
+    }
     const pathname = url.pathname
     const matchedPath = pathname.startsWith(requestPath)
       ? requestPath
