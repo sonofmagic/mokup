@@ -102,6 +102,32 @@ describe('playground mount boundaries', () => {
     const response = await request('/base/__mokup/routes', '/base/__mokup', '/base/')
     expect(JSON.parse(response.body)).toMatchObject({ basePath: '/base/__mokup' })
   })
+
+  it('does not serve assets through symlinks outside the distribution directory', async () => {
+    const outsideDir = await fs.mkdtemp(join(tmpdir(), 'mokup-core-outside-'))
+    const linkedDir = join(distDir, 'assets', 'external')
+    await fs.writeFile(join(outsideDir, 'secret.js'), 'outside-secret')
+    try {
+      await fs.symlink(outsideDir, linkedDir, process.platform === 'win32' ? 'junction' : 'dir')
+    }
+    catch (error) {
+      await fs.rm(outsideDir, { recursive: true, force: true })
+      if (process.platform === 'win32') {
+        return
+      }
+      throw error
+    }
+
+    try {
+      const response = await request('/__mokup/assets/external/secret.js')
+      expect(response.next).toHaveBeenCalledExactlyOnceWith()
+      expect(response.body).toBe('')
+    }
+    finally {
+      await fs.rm(linkedDir, { recursive: true, force: true })
+      await fs.rm(outsideDir, { recursive: true, force: true })
+    }
+  })
 })
 
 describe('playground lifecycle injection', () => {

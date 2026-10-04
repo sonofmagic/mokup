@@ -5,6 +5,7 @@ import type { Logger, RouteTable } from '../shared/types'
 import type { PlaygroundDistResolver } from './assets'
 import type { PlaygroundConfig } from './config'
 import { promises as fs } from 'node:fs'
+import { isInDirs } from '@mokup/shared/path-utils'
 import { extname, join, normalize } from '@mokup/shared/pathe'
 import { parseRequestUrl, sendInvalidRequestUrl } from '../shared/request-url'
 import { mimeTypes, resolvePlaygroundDist, sendFile, sendJson } from './assets'
@@ -19,6 +20,17 @@ import {
 } from './serialize'
 
 const LEADING_SLASH_RE = /^\/+/
+
+async function resolvePlaygroundAsset(distDir: string, filePath: string) {
+  const [resolvedRoot, resolvedFile] = await Promise.all([
+    fs.realpath(distDir),
+    fs.realpath(filePath),
+  ])
+  if (!isInDirs(resolvedFile, [resolvedRoot])) {
+    throw new Error('Playground asset path escapes the distribution directory.')
+  }
+  return resolvedFile
+}
 
 /**
  * Create middleware that serves the playground UI and routes data.
@@ -89,7 +101,10 @@ export function createPlaygroundMiddleware(params: {
     }
     if (subPath === '/' || subPath === '/index.html') {
       try {
-        const html = await fs.readFile(indexPath, 'utf8')
+        const html = await fs.readFile(
+          await resolvePlaygroundAsset(distDir, indexPath),
+          'utf8',
+        )
         let output = html
         if (isViteDevServer(server)) {
           output = injectPlaygroundHmr(output, server.config.base ?? '/')
@@ -139,8 +154,9 @@ export function createPlaygroundMiddleware(params: {
     const normalizedPath = normalize(relPath)
     const filePath = join(distDir, normalizedPath)
     try {
-      const content = await fs.readFile(filePath)
-      const ext = extname(filePath)
+      const safeFilePath = await resolvePlaygroundAsset(distDir, filePath)
+      const content = await fs.readFile(safeFilePath)
+      const ext = extname(safeFilePath)
       const contentType = mimeTypes[ext] ?? 'application/octet-stream'
       sendFile(res, content, contentType)
     }
