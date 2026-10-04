@@ -103,6 +103,12 @@ const options = {
 
 上面的 `options` 可直接传给任意适配器，下方示例为简洁起见直接传 `manifest`。
 
+## 响应 Cookie
+
+适配器会保留 handler 返回的 `Response` 中每一条独立的 `Set-Cookie`，包括 `Expires` 日期里的逗号。Node/Express 响应使用 `appendHeader`，Koa 使用 `append`；Fastify、Fetch、Hono 和 Worker 适配器也会保留完整列表。
+
+自定义 Node 响应对象若只实现 `setHeader(name, string)`，或自定义 Koa context 只实现 `set(Record<string, string>)`，则保持原有标量行为，只输出最后一条 Cookie。要保留全部 Cookie，请补充可选的 `appendHeader(name, string)` 或 `append(name, string)` 方法；已有必选方法的签名无需修改。
+
 ## Express
 
 使用场景：

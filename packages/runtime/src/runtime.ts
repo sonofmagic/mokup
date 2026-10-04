@@ -103,15 +103,13 @@ export function createRuntime(options: RuntimeOptions) {
 
   const handle = async (req: RuntimeRequest): Promise<RuntimeResult | null> => {
     const method = normalizeMethod(req.method) ?? 'GET'
-    const matchMethod = method === 'HEAD' ? 'GET' : method
+    const matchMethods = method === 'HEAD' ? ['HEAD', 'GET'] : [method]
     const pathname = normalizePathname(req.path)
     const compiled = await getCompiled()
     let matchedRoute: ManifestRoute | null = null
-    for (const entry of compiled) {
-      if (entry.method !== matchMethod) {
-        continue
-      }
-      if (matchRouteTokens(entry.tokens, pathname)) {
+    for (const matchMethod of matchMethods) {
+      const entry = compiled.find(entry => entry.method === matchMethod && matchRouteTokens(entry.tokens, pathname))
+      if (entry) {
         matchedRoute = entry.route
         break
       }
@@ -127,7 +125,7 @@ export function createRuntime(options: RuntimeOptions) {
     }
     const app = await getApp()
     const response = await app.fetch(toFetchRequest(req))
-    const resolvedResponse = applyRouteOverrides(response, matchedRoute)
+    const resolvedResponse = applyRouteOverrides(response, matchedRoute, method)
     return await toRuntimeResult(resolvedResponse)
   }
 

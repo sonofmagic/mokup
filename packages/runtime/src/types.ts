@@ -201,11 +201,14 @@ export interface RuntimeResult {
    */
   status: number
   /**
-   * Response headers.
+   * Response headers. Set-Cookie retains its last scalar value; use setCookies
+   * when present to emit all cookie fields.
    *
    * @default {}
    */
   headers: Record<string, string>
+  /** All Set-Cookie field values when the response contains multiple cookies. */
+  setCookies?: string[]
   /** Response body as text or binary. */
   body: string | Uint8Array | null
 }

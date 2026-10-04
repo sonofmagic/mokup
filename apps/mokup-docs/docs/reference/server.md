@@ -104,6 +104,12 @@ const options = {
 
 Pass `options` to any adapter below. For brevity, the examples use `manifest` directly.
 
+## Response cookies
+
+Adapters preserve separate `Set-Cookie` fields from a handler's `Response`, including commas inside `Expires` dates. Node/Express responses use `appendHeader`, Koa uses `append`, and Fastify, Fetch, Hono, and Worker adapters retain the complete cookie list.
+
+Custom Node response objects that implement only `setHeader(name, string)` and custom Koa contexts that implement only `set(Record<string, string>)` keep the legacy scalar behavior: only the last cookie is emitted. Add the optional `appendHeader(name, string)` or `append(name, string)` method to preserve all cookies. Existing required method signatures remain unchanged.
+
 ## Express
 
 Use cases:

@@ -1,3 +1,4 @@
+import { Buffer } from 'node:buffer'
 import { afterEach, describe, expect, it, vi } from 'vitest'
 import { createConnectMiddleware, createFastifyPlugin, createKoaMiddleware } from '../src/node'
 
@@ -72,7 +73,7 @@ describe('server adapters extra branches', () => {
       set: vi.fn(),
     }
     await middleware(ctxBin as any, async () => {})
-    expect(ctxBin.body).toEqual(new Uint8Array([1, 2]))
+    expect(ctxBin.body).toEqual(Buffer.from([1, 2]))
   })
 
   it('fastify plugin handles not found and binary bodies', async () => {

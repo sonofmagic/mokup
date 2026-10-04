@@ -56,6 +56,11 @@
       "import": "./dist/hono.mjs",
       "default": "./dist/hono.mjs"
     },
+    "./head-routes": {
+      "types": "./dist/head-routes.d.ts",
+      "import": "./dist/head-routes.mjs",
+      "default": "./dist/head-routes.mjs"
+    },
     "./jsonc-parser": {
       "types": "./dist/jsonc-parser.d.ts",
       "import": "./dist/jsonc-parser.mjs",
@@ -107,6 +112,11 @@
       "types": "./dist/route-constants.d.ts",
       "import": "./dist/route-constants.mjs",
       "default": "./dist/route-constants.mjs"
+    },
+    "./response-overrides": {
+      "types": "./dist/response-overrides.d.ts",
+      "import": "./dist/response-overrides.mjs",
+      "default": "./dist/response-overrides.mjs"
     },
     "./route-utils": {
       "types": "./dist/route-utils.d.ts",
@@ -161,6 +171,9 @@
       "hono": [
         "dist/hono.d.ts"
       ],
+      "head-routes": [
+        "dist/head-routes.d.ts"
+      ],
       "jsonc-parser": [
         "dist/jsonc-parser.d.ts"
       ],
@@ -190,6 +203,9 @@
       ],
       "route-constants": [
         "dist/route-constants.d.ts"
+      ],
+      "response-overrides": [
+        "dist/response-overrides.d.ts"
       ],
       "route-utils": [
         "dist/route-utils.d.ts"

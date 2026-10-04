@@ -127,6 +127,7 @@
     "@mokup/playground": "workspace:*",
     "@mokup/runtime": "workspace:*",
     "@mokup/shared": "workspace:*",
+    "fastify-plugin": "^6.0.0",
     "ws": "^8.22.0"
   },
   "tsd": {
@@ -136,6 +137,9 @@
     }
   },
   "devDependencies": {
-    "@types/ws": "^8.18.2"
+    "@types/koa": "^3.0.3",
+    "@types/ws": "^8.18.2",
+    "fastify": "^5.12.5",
+    "koa": "^3.2.1"
   }
 }

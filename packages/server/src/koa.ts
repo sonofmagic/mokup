@@ -1,8 +1,10 @@
 import type { NodeRequestLike } from './internal'
 import type { ServerOptions } from './types'
 
+import { Buffer } from 'node:buffer'
 import { createRuntime } from '@mokup/runtime'
-import { toBinaryBody, toRuntimeOptions, toRuntimeRequestFromNode } from './internal'
+import { toRuntimeOptions, toRuntimeRequestFromNode } from './internal'
+import { resolveResponseHeaders } from './internal/response-headers'
 
 interface KoaContextLike {
   req: NodeRequestLike
@@ -13,6 +15,8 @@ interface KoaContextLike {
   status?: number
   body?: unknown
   set: (header: Record<string, string>) => void
+  /** Append a separate header field, required to preserve multiple Set-Cookie values. */
+  append?: (name: string, value: string) => void
 }
 
 type KoaNext = () => Promise<unknown>
@@ -42,23 +46,25 @@ export function createKoaMiddleware(
     const result = await runtime.handle(runtimeRequest)
     if (!result) {
       if (onNotFound === 'response') {
-        ctx.status = 404
         ctx.body = null
+        ctx.status = 404
         return
       }
       await next()
       return
     }
+    ctx.body = result.body instanceof Uint8Array ? Buffer.from(result.body) : result.body
     ctx.status = result.status
-    ctx.set(result.headers)
-    if (result.body === null) {
-      ctx.body = null
-      return
+    const { headers, setCookies } = ctx.append
+      ? resolveResponseHeaders(result)
+      : { headers: result.headers, setCookies: [] }
+    ctx.set(headers)
+    const [firstCookie, ...additionalCookies] = setCookies
+    if (firstCookie !== undefined) {
+      ctx.set({ 'set-cookie': firstCookie })
+      for (const cookie of additionalCookies) {
+        ctx.append?.('set-cookie', cookie)
+      }
     }
-    if (typeof result.body === 'string') {
-      ctx.body = result.body
-      return
-    }
-    ctx.body = toBinaryBody(result.body)
   }
 }

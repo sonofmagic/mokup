@@ -1,7 +1,9 @@
 import type { Context } from '@mokup/shared/hono'
 
 import type { ResolvedRoute, RouteTable } from './types'
+import { prioritizeHeadRoutes, registerHonoRoute } from '@mokup/shared/head-routes'
 import { Hono, PatternRouter } from '@mokup/shared/hono'
+import { applyContextResponseOverrides } from '@mokup/shared/response-overrides'
 import { delay } from './utils'
 
 function toHonoPath(route: ResolvedRoute) {
@@ -21,38 +23,6 @@ function toHonoPath(route: ResolvedRoute) {
     return `:${token.name}{.+}?`
   })
   return `/${segments.join('/')}`
-}
-
-function isValidStatus(status: unknown): status is number {
-  return typeof status === 'number'
-    && Number.isFinite(status)
-    && status >= 200
-    && status <= 599
-}
-
-function resolveStatus(routeStatus: number | undefined, responseStatus: number) {
-  if (isValidStatus(routeStatus)) {
-    return routeStatus
-  }
-  if (isValidStatus(responseStatus)) {
-    return responseStatus
-  }
-  return 200
-}
-
-function applyRouteOverrides(response: Response, route: ResolvedRoute) {
-  const headers = new Headers(response.headers)
-  const hasHeaders = !!route.headers && Object.keys(route.headers).length > 0
-  if (route.headers) {
-    for (const [key, value] of Object.entries(route.headers)) {
-      headers.set(key, value)
-    }
-  }
-  const status = resolveStatus(route.status, response.status)
-  if (status === response.status && !hasHeaders) {
-    return response
-  }
-  return new Response(response.body, { status, headers })
 }
 
 function resolveResponse(value: unknown, fallback: Response) {
@@ -113,8 +83,7 @@ function createFinalizeMiddleware(route: ResolvedRoute, onResponse?: RouteRespon
     if (route.delay && route.delay > 0) {
       await delay(route.delay)
     }
-    const overridden = applyRouteOverrides(resolved, route)
-    c.res = overridden
+    const overridden = applyContextResponseOverrides(c, resolved, route)
     if (onResponse) {
       try {
         const result = onResponse(route, overridden)
@@ -177,16 +146,13 @@ export function createHonoApp(
 ): Hono {
   const app = new Hono({ router: new PatternRouter(), strict: false })
 
-  for (const route of routes) {
+  for (const route of prioritizeHeadRoutes(routes)) {
     const { before, normal, after } = splitRouteMiddlewares(route)
-    app.on(
+    registerHonoRoute(
+      app,
       route.method,
       toHonoPath(route),
-      createFinalizeMiddleware(route, options.onResponse),
-      ...before,
-      ...normal,
-      ...after,
-      createRouteHandler(route),
+      [createFinalizeMiddleware(route, options.onResponse), ...before, ...normal, ...after, createRouteHandler(route)],
     )
   }
 

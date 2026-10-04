@@ -2,10 +2,13 @@ import type { NodeRequestLike } from './internal'
 import type { ServerOptions } from './types'
 
 import { createRuntime } from '@mokup/runtime'
+import fastifyPlugin from 'fastify-plugin'
 import { toBinaryBody, toRuntimeOptions, toRuntimeRequestFromNode } from './internal'
+import { resolveResponseHeaders } from './internal/response-headers'
 
-interface FastifyRequestLike extends NodeRequestLike {
-  raw?: NodeRequestLike
+type FastifyRequestLike = (NodeRequestLike & { raw?: NodeRequestLike }) | {
+  raw: NodeRequestLike
+  body?: unknown
 }
 
 interface FastifyReplyLike {
@@ -16,7 +19,7 @@ interface FastifyReplyLike {
 
 interface FastifyInstanceLike {
   addHook: (
-    name: 'onRequest' | 'preHandler',
+    name: 'onRequest',
     handler: (
       request: FastifyRequestLike,
       reply: FastifyReplyLike,
@@ -41,10 +44,11 @@ export function createFastifyPlugin(
   const runtime = createRuntime(toRuntimeOptions(options))
   const onNotFound = options.onNotFound ?? 'next'
 
-  return async (instance: FastifyInstanceLike) => {
+  const plugin = async (instance: FastifyInstanceLike) => {
     instance.addHook('onRequest', async (request, reply) => {
+      const rawRequest = (request.raw ?? request) as NodeRequestLike
       const runtimeRequest = await toRuntimeRequestFromNode(
-        request.raw ?? request,
+        rawRequest,
         request.body,
       )
       const result = await runtime.handle(runtimeRequest)
@@ -55,8 +59,12 @@ export function createFastifyPlugin(
         return
       }
       reply.status(result.status)
-      for (const [key, value] of Object.entries(result.headers)) {
+      const { headers, setCookies } = resolveResponseHeaders(result)
+      for (const [key, value] of Object.entries(headers)) {
         reply.header(key, value)
+      }
+      for (const cookie of setCookies) {
+        reply.header('set-cookie', cookie)
       }
       if (result.body === null) {
         reply.send()
@@ -69,4 +77,6 @@ export function createFastifyPlugin(
       reply.send(toBinaryBody(result.body))
     })
   }
+  fastifyPlugin(plugin, { name: 'mokup' })
+  return plugin
 }
