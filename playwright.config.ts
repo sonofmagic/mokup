@@ -40,7 +40,7 @@ export default defineConfig({
     },
     {
       name: 'playground',
-      testMatch: ['**/playground.spec.ts', '**/playground-preview.spec.ts'],
+      testMatch: ['**/playground.spec.ts', '**/playground-preview.spec.ts', '**/playground-copy.spec.ts'],
       use: {
         baseURL: webBaseURL,
       },
