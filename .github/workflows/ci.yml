@@ -200,7 +200,7 @@ jobs:
         run: pnpm exec playwright install chrome --with-deps
 
       - name: E2E Tests
-        run: pnpm test:e2e
+        run: pnpm run test:e2e:serial
 
       - name: Upload Playwright report
         if: failure()
