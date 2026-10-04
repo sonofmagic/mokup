@@ -11,7 +11,11 @@ import {
   createMockResolver,
 
 } from '@mokup/client'
+import { prepareFetchBody } from './fetch-body'
+import { defaultTransformResponse } from './fetch-response'
 import { isRecord, isRequestDescriptor, normalizeRequest } from './request-utils'
+
+export { MokupHttpError } from './fetch-response'
 
 export type QueryKey = readonly unknown[]
 
@@ -52,6 +56,7 @@ export interface FetchExecutorOptions {
   fetch?: typeof fetch
   resolver?: MockResolver
   resolverOptions?: MockResolverOptions
+  /** Replaces default HTTP status checking and response parsing, including for non-2xx responses. */
   transformResponse?: (response: Response) => Promise<unknown>
 }
 
@@ -75,6 +80,7 @@ export interface MokupQueryOptions {
   buildMutationRequest?: BuildMutationRequest
   executor?: RequestExecutor
   fetch?: typeof fetch
+  /** Replaces default HTTP status checking and response parsing, including for non-2xx responses. */
   transformResponse?: (response: Response) => Promise<unknown>
 }
 
@@ -131,19 +137,20 @@ function defaultBuildMutationRequest(variables: unknown): RequestDescriptor | nu
   return null
 }
 
-function defaultTransformResponse(response: Response): Promise<unknown> {
-  const contentType = response.headers.get('content-type') ?? ''
-  if (contentType.includes('application/json')) {
-    return response.json()
-  }
-  return response.text()
-}
-
 export function createFetchExecutor(options: FetchExecutorOptions = {}): RequestExecutor {
   const resolver = options.resolver ?? createMockResolver(options.resolverOptions)
+  const fetchImpl = options.fetch ?? globalThis.fetch
   const adapter = createFetchAdapter({
     resolver,
-    ...(options.fetch ? { fetch: options.fetch } : {}),
+    ...(fetchImpl
+      ? {
+          fetch: (input, init) => {
+            // Resolvers inspect the original body; encode only at the transport boundary.
+            const { body, ...rest } = init ?? {}
+            return fetchImpl(input, { ...rest, ...prepareFetchBody(body, rest.headers) })
+          },
+        }
+      : {}),
   })
   const transform = options.transformResponse ?? defaultTransformResponse
 

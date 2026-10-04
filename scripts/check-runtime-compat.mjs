@@ -211,7 +211,7 @@ async function main() {
     await smokeBuiltHandlers(directory)
     await smokePlaygroundWebSocket(directory)
     await smokeClientRequests()
-    process.stdout.write(`runtime compatibility ok (Node ${process.version}, ${entries} exports, CLI check/build, HTTP/HEAD/cookies/binary/bodyless responses, request body fallthrough, WebSocket metrics, Fetch Request and Axios URL semantics)\n`)
+    process.stdout.write(`runtime compatibility ok (Node ${process.version}, ${entries} exports, CLI check/build, HTTP/HEAD/cookies/binary/bodyless responses, request body fallthrough, WebSocket metrics, Fetch Request, Query HTTP/JSON and Axios URL semantics)\n`)
     return
   }
   const args = process.argv.slice(2)

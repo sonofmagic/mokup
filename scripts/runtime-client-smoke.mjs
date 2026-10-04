@@ -15,6 +15,11 @@ export async function smokeClientRequests() {
         response.writeHead(307, { location: '/echo' }).end()
         return
       }
+      if (request.url === '/error') {
+        response.writeHead(503, { 'content-type': 'application/json' })
+        response.end('{"message":"try later"}')
+        return
+      }
       response.setHeader('content-type', 'application/json')
       response.end(JSON.stringify({
         method: request.method,
@@ -77,6 +82,10 @@ export async function smokeClientRequests() {
     assert.equal(await executor({ url: '/users' }), `${origin}/api/v1/users`)
     axios.defaults.baseURL = `${origin}/api/v2`
     assert.equal(await executor({ url: '/users' }), `${origin}/api/v2/users`)
+    const rawError = await plain(`${origin}/error`)
+    assert.equal(rawError.status, 503)
+    assert.deepEqual(await rawError.json(), { message: 'try later' })
+    await smokeQueryRequests(origin)
   }
   finally {
     server.closeAllConnections()
@@ -84,4 +93,57 @@ export async function smokeClientRequests() {
       await new Promise((resolve, reject) => server.close(error => error ? reject(error) : resolve()))
     }
   }
+}
+
+async function smokeQueryRequests(origin) {
+  const { createMokupQueryClient, createFetchExecutor, MokupHttpError } = await import('@mokup/query')
+  const resolverOptions = { realBase: origin, markers: { header: true } }
+  const { queryFn, mutationFn } = createMokupQueryClient({ resolverOptions })
+  const body = { name: 'mokup', nested: { enabled: true } }
+  const result = await mutationFn({ url: '/echo', method: 'POST', body, params: { page: 2 } })
+  assert.equal(result.url, '/echo?page=2')
+  assert.equal(result.contentType, 'application/json')
+  assert.equal(result.marker, 'real')
+  assert.deepEqual(JSON.parse(Buffer.from(result.body, 'base64').toString()), body)
+
+  const array = await queryFn({
+    queryKey: ['POST', '/echo', { body: [1, 2], headers: { 'Content-Type': 'application/vnd.mokup+json' } }],
+    signal: AbortSignal.timeout(10_000),
+  })
+  assert.equal(array.contentType, 'application/vnd.mokup+json')
+  assert.equal(Buffer.from(array.body, 'base64').toString(), '[1,2]')
+
+  const bytes = new Uint8Array([0, 255, 128, 1])
+  const binary = await mutationFn({ url: '/echo', method: 'POST', body: bytes.subarray(1, 3) })
+  assert.deepEqual(Buffer.from(binary.body, 'base64'), Buffer.from([255, 128]))
+  assert.equal(binary.contentType, undefined)
+  const form = new FormData()
+  form.set('name', 'mokup')
+  form.set('file', new Blob([bytes]), 'query.bin')
+  const multipart = await mutationFn({ url: '/echo', method: 'POST', body: form })
+  const decoded = await new Response(Buffer.from(multipart.body, 'base64'), {
+    headers: { 'content-type': multipart.contentType },
+  }).formData()
+  assert.equal(decoded.get('name'), 'mokup')
+  assert.deepEqual(new Uint8Array(await decoded.get('file').arrayBuffer()), bytes)
+
+  let httpError
+  await assert.rejects(queryFn({ queryKey: ['/error'], signal: AbortSignal.timeout(10_000) }), (error) => {
+    assert.ok(error instanceof MokupHttpError)
+    assert.equal(error.name, 'MokupHttpError')
+    assert.equal(error.status, 503)
+    assert.equal(error.statusText, 'Service Unavailable')
+    assert.equal(error.response.bodyUsed, false)
+    httpError = error
+    return true
+  })
+  assert.deepEqual(await httpError.response.json(), { message: 'try later' })
+  const custom = createFetchExecutor({
+    resolverOptions,
+    async transformResponse(response) {
+      await response.text()
+      return response.status
+    },
+  })
+  assert.equal(await custom({ url: '/error' }), 503)
 }
