@@ -1,3 +1,4 @@
+import { randomUUID } from 'node:crypto'
 import { writeFileSync } from 'node:fs'
 import { createRequire } from 'node:module'
 import { tmpdir } from 'node:os'
@@ -84,15 +85,16 @@ export async function loadModule(
   const ext = extname(file).toLowerCase()
   if (ext === '.cjs') {
     const require = createRequire(import.meta.url)
-    delete require.cache[file]
-    return require(file)
-  }
-  if (ext === '.js' || ext === '.mjs') {
-    return import(`${pathToFileURL(file).href}?t=${Date.now()}`)
+    const resolved = require.resolve(file)
+    delete require.cache[resolved]
+    return require(resolved)
   }
   if (ext === '.ts') {
     await ensureTsxRegister(options?.tsconfigPath ?? null)
-    return import(`${pathToFileURL(file).href}?t=${Date.now()}`)
+  }
+  if (ext === '.js' || ext === '.mjs' || ext === '.ts') {
+    // Each evaluation needs its own identity, including across loader instances and clock resets.
+    return import(`${pathToFileURL(file).href}?t=${randomUUID()}`)
   }
   return null
 }

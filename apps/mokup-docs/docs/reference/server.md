@@ -36,6 +36,8 @@ const response = await app.fetch(new Request('http://localhost/api/users'))
 
 Call `await app.refresh()` to reload mock files explicitly. Refreshes run one at a time, and requests received during a scan share a follow-up scan. The route table, request handler, and playground metadata switch together after the new snapshot is built successfully; a failed refresh keeps the previous snapshot available.
 
+See [Native module refresh](../advanced/hot-reload.md#native-module-refresh) for entry reload behavior and the limits on refreshing imported helpers.
+
 When file watching is active, `await app.close?.()` stops the watcher, cancels scheduled background refreshes, and waits for active scans to finish. You can still call `app.refresh()` explicitly afterward. Close the HTTP server returned by `serve()` separately when shutting down its listening socket.
 
 ## Options

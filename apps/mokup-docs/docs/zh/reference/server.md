@@ -35,6 +35,8 @@ const response = await app.fetch(new Request('http://localhost/api/users'))
 
 调用 `await app.refresh()` 可以手动重新加载 mock 文件。刷新会串行执行，扫描期间收到的刷新请求会合并到下一次扫描。新快照构建成功后，路由表、请求处理器和 playground 元数据会一起更新；刷新失败时仍保留上一份可用快照。
 
+入口的重新加载行为和已导入辅助模块的刷新限制见[原生模块刷新](../advanced/hot-reload.md#原生模块刷新)。
+
 开启文件监听时，`await app.close?.()` 会停止 watcher、取消尚未开始的后台刷新，并等待正在执行的扫描结束。此后仍可显式调用 `app.refresh()`。关闭监听端口时，还需要单独关闭 `serve()` 返回的 HTTP server。
 
 ## 选项

@@ -21,6 +21,20 @@ export default {
 
 Set `watch: false` to disable file watching.
 
+## Native module refresh
+
+Native loading, such as the standalone [Fetch server](../reference/server.md#fetch-server-node),
+refreshes ESM `.js`, `.mjs`, and `.ts` entries and CommonJS `.cjs` entries without
+depending on the system clock advancing. Consecutive refreshes in the same
+millisecond or after a clock adjustment reload the entry, including when its
+path is a symbolic link.
+
+This refresh applies to the mock or configuration entry itself. Helpers and
+shared dependencies that it has already imported or required remain cached;
+changing them may require restarting the native server process, even after
+refreshing the entry. Vite dev uses Vite's module graph invalidation for modules
+it loads, so its dependency refresh behavior follows that graph.
+
 ## Debug tips
 
 - Playground refreshes on route changes (`mokup:routes-changed`).

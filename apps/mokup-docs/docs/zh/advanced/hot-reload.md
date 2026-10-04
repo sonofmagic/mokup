@@ -21,6 +21,16 @@ export default {
 
 若不需要监听（例如预览环境），可设 `watch: false`。
 
+## 原生模块刷新
+
+通过原生加载器运行时，例如独立的 [Fetch 服务](../reference/server.md#fetch-入口-node)，
+ESM 格式的 `.js`、`.mjs`、`.ts` 入口和 CommonJS 格式的 `.cjs` 入口刷新不依赖系统时钟前进。
+即使连续刷新发生在同一毫秒内，或系统时间被调整，入口仍会重新加载；通过符号链接访问的入口也可以刷新。
+
+这种刷新针对 mock 或配置入口本身。入口已经 `import` 或 `require` 的辅助模块、共享依赖仍会保留缓存；
+修改这些依赖后，即使刷新了入口，也可能需要重启使用原生加载器的服务进程。
+Vite dev 对其加载的模块使用 Vite 的模块图失效机制，依赖更新遵循该模块图。
+
 ## 调试建议
 
 - 路由变化后 Playground 会自动刷新（`mokup:routes-changed`）。
