@@ -13,6 +13,10 @@ export async function startSwUpdateServer(mode: 'playground' | 'registration') {
     const listeners = new Map()
     let registrationChecks = 0
     let pendingUpdates = 0
+    let activatedRevision = 0
+    navigator.serviceWorker.addEventListener('message', event => {
+      activatedRevision = event.data.revision
+    })
     const update = ServiceWorkerRegistration.prototype.update
     ServiceWorkerRegistration.prototype.update = async function () {
       pendingUpdates++
@@ -38,6 +42,7 @@ export async function startSwUpdateServer(mode: 'playground' | 'registration') {
       listening() { return listeners.has('mokup:routes-changed') },
       checks() { return registrationChecks },
       pendingUpdates() { return pendingUpdates },
+      activatedRevision() { return activatedRevision },
     }
     globalThis.__MOKUP_PLAYGROUND__ = { reloadRoutes() {} }
     </script>`
@@ -69,7 +74,12 @@ export async function startSwUpdateServer(mode: 'playground' | 'registration') {
             await self.skipWaiting()
           })())
         })
-        self.addEventListener('activate', event => event.waitUntil(self.clients.claim()))
+        self.addEventListener('activate', event => {
+          event.waitUntil((async () => {
+            await self.clients.claim()
+            for (const client of await self.clients.matchAll()) client.postMessage({ revision })
+          })())
+        })
         self.addEventListener('fetch', event => {
           if (new URL(event.request.url).pathname === '/value') {
             event.respondWith(Response.json({ revision }))
