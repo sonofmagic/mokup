@@ -16,6 +16,7 @@ import {
   createFetchExecutor,
   createMokupQueryClient,
 } from '@mokup/query'
+import axios from 'axios'
 import { expectAssignable, expectType } from 'tsd'
 
 const queryKey = ['GET', '/users'] as const satisfies QueryKey
@@ -47,6 +48,10 @@ const axiosExecutorOptions: AxiosExecutorOptions = {
 }
 const axiosExecutor = createAxiosExecutor(axiosExecutorOptions)
 expectType<RequestExecutor>(axiosExecutor)
+
+expectType<RequestExecutor>(createAxiosExecutor({
+  axios: axios.create({ baseURL: 'https://api.example.com/api/v1', allowAbsoluteUrls: false }),
+}))
 
 const buildRequest: BuildRequest = key => ({
   url: String(key[1] ?? '/users'),

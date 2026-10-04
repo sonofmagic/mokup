@@ -8,6 +8,7 @@ import path from 'node:path'
 import process from 'node:process'
 import { fileURLToPath, pathToFileURL } from 'node:url'
 import { promisify } from 'node:util'
+import { smokeClientRequests } from './runtime-client-smoke.mjs'
 import { smokeResponseContracts } from './runtime-response-smoke.mjs'
 
 const execFileAsync = promisify(execFile)
@@ -69,6 +70,7 @@ async function prepareConsumer(root, directory, packages) {
   await fs.writeFile(path.join(directory, 'runtime-packages.json'), JSON.stringify(packages))
   await fs.copyFile(scriptFile, path.join(directory, 'smoke.mjs'))
   await fs.copyFile(new URL('./runtime-response-smoke.mjs', import.meta.url), path.join(directory, 'runtime-response-smoke.mjs'))
+  await fs.copyFile(new URL('./runtime-client-smoke.mjs', import.meta.url), path.join(directory, 'runtime-client-smoke.mjs'))
   // Install only tarball dependencies on the build Node; no workspace tooling or optional peers.
   await run('npm', ['install', '--omit=dev', '--legacy-peer-deps', '--ignore-scripts', '--no-audit', '--no-fund'], directory)
 }
@@ -208,7 +210,8 @@ async function main() {
     const entries = await importPublicEntries(directory)
     await smokeBuiltHandlers(directory)
     await smokePlaygroundWebSocket(directory)
-    process.stdout.write(`runtime compatibility ok (Node ${process.version}, ${entries} exports, CLI check/build, HTTP/HEAD/cookies/binary/bodyless responses, request body fallthrough, WebSocket metrics)\n`)
+    await smokeClientRequests()
+    process.stdout.write(`runtime compatibility ok (Node ${process.version}, ${entries} exports, CLI check/build, HTTP/HEAD/cookies/binary/bodyless responses, request body fallthrough, WebSocket metrics, Fetch Request and Axios URL semantics)\n`)
     return
   }
   const args = process.argv.slice(2)

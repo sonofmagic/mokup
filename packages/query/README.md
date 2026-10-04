@@ -90,6 +90,12 @@ const executor = createAxiosExecutor({
 applyMokupToQueryClient(queryClient, { executor })
 ```
 
+You can also pass an Axios instance created with `axios.create()`. The executor
+reads its current `defaults.baseURL` and `defaults.allowAbsoluteUrls` on every
+request, combines the URL using Axios rules, then applies the Mokup resolver.
+For example, a base URL ending in `/api/v1` and a query URL `/users` retain the
+`/api/v1/users` path. No request interceptor is installed on the instance.
+
 ## Using fetch
 
 ```ts

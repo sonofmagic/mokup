@@ -19,7 +19,7 @@
   },
   "dependencies": {
     "@faker-js/faker": "catalog:",
-    "axios": "^1.20.0",
+    "axios": "catalog:",
     "hono": "catalog:",
     "mokup": "workspace:*",
     "vue": "catalog:",

@@ -17,6 +17,7 @@ import {
   createMockResolver,
 } from '@mokup/client'
 import { createFetchAdapter as createFetchAdapterFromSubpath } from '@mokup/client/fetch'
+import axios from 'axios'
 import { expectAssignable, expectType } from 'tsd'
 
 const resolverOptions: MockResolverOptions = {
@@ -82,3 +83,10 @@ const instance = {
 } satisfies AxiosInstanceLike
 
 expectType<void>(applyMokupToAxios(instance, axiosOptions))
+
+const nativeAxios = axios.create({
+  baseURL: 'https://api.example.com/api/v1',
+  allowAbsoluteUrls: false,
+})
+expectType<void>(applyMokupToAxios(nativeAxios, axiosOptions))
+expectAssignable<AxiosRequestConfig>({ url: '/users', allowAbsoluteUrls: false })

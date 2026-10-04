@@ -58,6 +58,10 @@ export interface FetchExecutorOptions {
 export interface AxiosExecutorOptions {
   axios: {
     request: (config: Record<string, unknown>) => Promise<unknown>
+    defaults?: {
+      baseURL?: string
+      allowAbsoluteUrls?: boolean
+    }
   }
   resolver?: MockResolver
   resolverOptions?: MockResolverOptions
@@ -170,8 +174,11 @@ export function createAxiosExecutor(options: AxiosExecutorOptions): RequestExecu
 
   return async (descriptor, context) => {
     const normalized = normalizeRequest(descriptor, descriptor.meta as Record<string, unknown> | undefined)
+    const defaults = options.axios.defaults
     const config: AxiosRequestConfig = {
       url: normalized.url,
+      ...(typeof defaults?.baseURL === 'string' ? { baseURL: defaults.baseURL } : {}),
+      ...(typeof defaults?.allowAbsoluteUrls === 'boolean' ? { allowAbsoluteUrls: defaults.allowAbsoluteUrls } : {}),
       ...(normalized.method ? { method: normalized.method } : {}),
       ...(normalized.headers ? { headers: normalized.headers as Record<string, string> } : {}),
       ...(typeof normalized.body !== 'undefined' ? { data: normalized.body } : {}),
@@ -181,7 +188,7 @@ export function createAxiosExecutor(options: AxiosExecutorOptions): RequestExecu
     }
     const resolvedConfig = await interceptor(config)
 
-    const response = await options.axios.request(resolvedConfig)
+    const response = await options.axios.request({ ...resolvedConfig })
     return select(response)
   }
 }

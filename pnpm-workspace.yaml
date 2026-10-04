@@ -9,6 +9,7 @@ catalog:
   '@tailwindcss/vite': ^4.3.3
   '@types/node': ^24.19.1
   '@vitejs/plugin-vue': ^6.0.9
+  axios: ^1.20.0
   hono: ^4.13.12
   pathe: ^2.0.3
   rolldown: 1.2.12
