@@ -45,6 +45,10 @@ Worker runtime 中启用服务端 fallback、混合服务端路由或手动注�
 新增第一条有效路由后，文件监听器会刷新路由表，无需重启服务器。
 删除全部路由后，请求会继续交给应用的后续中间件；再次新增路由后恢复 mock。
 
+Vite preview 提供构建时生成的 Service Worker，包括已经打包的处理器和中间件。
+修改 SW mock 后需要重新构建才能在 preview 中生效；仅编辑源文件不会替换已构建的快照。
+SW 的自动或手动注册方式遵循构建时的 `sw.register` 设置。
+
 在 Vite dev 中，启用 HMR 和 Service Worker 自动注册时，向空路由表新增第一条 SW 路由会自动刷新页面，
 以加载注册脚本。删除全部 SW 路由后，已注册的 worker 会更新为空路由表，让请求透传到网络。
 `sw.register: false` 仍会关闭自动注册。

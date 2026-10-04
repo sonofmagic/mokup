@@ -243,7 +243,7 @@ describe('vite server hooks extra coverage', () => {
     expect(getApp?.()).toBe(state.app)
   })
 
-  it('reports preview sw generation errors', async () => {
+  it('keeps preview SW requests untouched even when source generation would fail', async () => {
     swMocks.buildSwScript.mockImplementation(() => {
       throw new Error('boom')
     })
@@ -279,19 +279,17 @@ describe('vite server hooks extra coverage', () => {
       watchEnabled: false,
     })
 
-    const swMiddleware = await findSwMiddleware(server.middlewares.stack)
-    const res = {
-      statusCode: 0,
-      headers: {} as Record<string, string>,
-      setHeader: (name: string, value: string) => {
-        res.headers[name.toLowerCase()] = value
-      },
-      end: vi.fn(),
+    const res = { statusCode: 0, setHeader: vi.fn(), end: vi.fn() }
+    for (const entry of server.middlewares.stack) {
+      const next = vi.fn()
+      await entry.handle({ url: '/mokup-sw.js' }, res, next)
+      expect(next).toHaveBeenCalledExactlyOnceWith()
     }
-    await swMiddleware?.({ url: '/mokup-sw.js' }, res, vi.fn())
-    expect(res.statusCode).toBe(500)
-    expect(res.end).toHaveBeenCalledWith('Failed to generate mokup service worker.')
-    expect(logger.error).toHaveBeenCalledWith('SW generation failed:', expect.objectContaining({ message: 'boom' }))
+    expect(res.statusCode).toBe(0)
+    expect(res.setHeader).not.toHaveBeenCalled()
+    expect(res.end).not.toHaveBeenCalled()
+    expect(swMocks.buildSwScript).not.toHaveBeenCalled()
+    expect(logger.error).not.toHaveBeenCalled()
     expect(middlewareMocks.createMiddleware).toHaveBeenCalledOnce()
   })
 })

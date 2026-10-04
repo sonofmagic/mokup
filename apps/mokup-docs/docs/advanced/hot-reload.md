@@ -55,6 +55,11 @@ route takes effect after the watcher refreshes, without restarting the server.
 Deleting all routes lets requests pass through to the application's remaining
 middleware; adding a route again restores mocking.
 
+Vite preview serves the Service Worker emitted by the build, including its
+bundled handlers and middleware. Rebuild to include SW mock changes in preview;
+editing source files alone does not replace that built snapshot. Automatic and
+manual SW registration follow the build's `sw.register` setting.
+
 During Vite dev, with HMR and automatic Service Worker registration enabled,
 adding the first SW route to an empty route table reloads the page to load the
 registration script. Removing all SW routes updates the registered worker to an

@@ -123,10 +123,8 @@ async function configurePreviewServer(params: {
     server,
     state,
     root,
-    base,
     logger,
     playgroundMiddleware,
-    swConfig,
     enableViteMiddleware,
     refreshRoutes,
     resolveAllDirs,
@@ -138,38 +136,7 @@ async function configurePreviewServer(params: {
     addMiddlewareFirst(server, createMiddleware(() => state.app, logger))
   }
   addMiddlewareFirst(server, playgroundMiddleware)
-  const swPath = swConfig ? resolveRegisterPath(base, swConfig.path) : null
-  if (swPath) {
-    server.middlewares.use(async (req, res, next) => {
-      const parsed = parseHttpRequestUrl(req, res)
-      if (!parsed) {
-        return
-      }
-      if (parsed.pathname !== swPath) {
-        return next()
-      }
-      try {
-        const code = buildSwScript({
-          routes: state.swRoutes,
-          root,
-          basePaths: swConfig?.basePaths ?? [],
-          ...(typeof state.swModuleVersion !== 'undefined'
-            ? { moduleVersion: state.swModuleVersion }
-            : {}),
-        })
-        res.statusCode = 200
-        res.setHeader('Content-Type', 'application/javascript; charset=utf-8')
-        res.setHeader('Cache-Control', 'no-cache')
-        res.end(code)
-      }
-      catch (error) {
-        res.statusCode = 500
-        res.setHeader('Content-Type', 'text/plain; charset=utf-8')
-        res.end('Failed to generate mokup service worker.')
-        logger.error('SW generation failed:', error)
-      }
-    })
-  }
+  // Vite serves the bundled SW from its output directory. Raw source needs the dev transformer.
   if (!watchEnabled) {
     return null
   }

@@ -1,13 +1,13 @@
 import type { IncomingMessage, ServerResponse } from 'node:http'
-import type { PreviewServer, ViteDevServer } from 'vite'
+import type { ViteDevServer } from 'vite'
 import type { MiddlewareHandler } from '../src/vite/plugin/middleware'
 import type { PluginState } from '../src/vite/plugin/state'
 import { resolveSwConfig } from '@mokup/core'
 import { describe, expect, it, vi } from 'vitest'
-import { configureDevServer, configurePreviewServer } from '../src/vite/plugin/server-hooks'
+import { configureDevServer } from '../src/vite/plugin/server-hooks'
 import { createSwMiddleware } from '../src/webpack/plugin/sw-middleware'
 
-async function viteMiddleware(preview: boolean): Promise<MiddlewareHandler> {
+async function viteMiddleware(): Promise<MiddlewareHandler> {
   const handlers: MiddlewareHandler[] = []
   const server = {
     config: { root: '/' },
@@ -40,18 +40,12 @@ async function viteMiddleware(preview: boolean): Promise<MiddlewareHandler> {
     resolveAllDirs: () => [],
     watchEnabled: false,
   }
-  if (preview) {
-    await configurePreviewServer({ ...options, server: server as unknown as PreviewServer })
-  }
-  else {
-    await configureDevServer({ ...options, server: server as unknown as ViteDevServer })
-  }
+  await configureDevServer({ ...options, server: server as unknown as ViteDevServer })
   return handlers.at(-1)!
 }
 
 const factories = [
-  { name: 'Vite dev', create: () => viteMiddleware(false) },
-  { name: 'Vite preview', create: () => viteMiddleware(true) },
+  { name: 'Vite dev', create: viteMiddleware },
   {
     name: 'Webpack',
     create: async () => createSwMiddleware({
