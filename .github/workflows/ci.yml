@@ -10,10 +10,17 @@ on:
 permissions:
   contents: read
 
+concurrency:
+  # Release PRs can emit both opened and synchronize events for the same bot
+  # commit. Keep one authoritative run per PR and avoid competing Windows
+  # process trees.
+  group: ci-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
 jobs:
   build:
     name: Build and Test
-    timeout-minutes: 15
+    timeout-minutes: 30
     strategy:
       fail-fast: false
       matrix:
@@ -59,7 +66,9 @@ jobs:
         run: pnpm exec repo release plan --branch main --json
 
       - name: Lint
-        run: pnpm lint
+        # Running the workspace scripts directly avoids the intermittent
+        # Turbo process-tree hang observed after all Windows lint tasks finish.
+        run: pnpm -r --if-present --workspace-concurrency=8 run lint
 
       - name: Line Budget (guard)
         run: pnpm run lint:lines:guard
