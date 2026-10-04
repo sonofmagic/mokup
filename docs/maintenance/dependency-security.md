@@ -16,20 +16,24 @@ Keep the stable Drizzle Kit migration format. The available 1.0 prereleases also
 
 When upgrading Drizzle Kit, inspect every published entry point again and remove this scoped workaround once upstream removes the unused dependency. Resolve the installed package's real path before checking its internal tsx version. Validate `generate`, `check`, a second generation with no schema changes, and a schema change in a temporary copy of the D1 demo. Validate the generated SQL using a disposable SQLite database.
 
-## Advisories Awaiting Upstream Fixes
+## Advisory Reviews
 
-The following versions had no published patched release when reviewed on 2026-10-04. These mitigations reduce exposure and require continued review.
+The following findings were reviewed on 2026-10-04. Registry audit metadata, published releases, and behavior checks can disagree; review each separately before claiming remediation.
 
-### http-cache-semantics 4.2.0
+### http-cache-semantics 4.3.0
 
 - Advisory: [GHSA-ch52-4w7c-c8xp](https://github.com/advisories/GHSA-ch52-4w7c-c8xp), high severity.
-- Representative path: `repoctl → @icebreakers/monorepo → pacote → npm-registry-fetch → make-fetch-happen → http-cache-semantics`.
-- Trigger: a shared cache contains another user's sensitive response whose lifetime was zeroed for security reasons. A request for the same URL with a large `max-stale` value can reuse it and disclose data such as `Set-Cookie` credentials.
-- Mitigation: isolate package and CI caches across users, credentials, and trust boundaries. Do not expose installation caches as a shared HTTP cache accepting untrusted requests. This tooling dependency still needs an upstream fix.
+- Status: the npm audit snapshot labels `>=4.3.0` as patched. GitHub lists affected versions as `<=4.2.0`, but its [advisory API](https://api.github.com/advisories/GHSA-ch52-4w7c-c8xp) still has `first_patched_version: null`. The [maintainer disputes the report](https://github.com/kornelski/http-cache-semantics/issues/56#issuecomment-5975759591), noting that `Set-Cookie` alone does not prohibit caching and that `Cache-Control: private` controls shared storage.
+- Behavior check: integrity-verified 4.2.0 and 4.3.0 packages behaved identically in a synthetic shared-cache test. A retained response with `Set-Cookie` had a zero freshness lifetime, but a request containing `max-stale` could reuse it without revalidation. The version update is therefore not evidence of a verified behavioral fix.
+- Repository path: `repoctl → @icebreakers/monorepo → pacote → npm-registry-fetch → make-fetch-happen → http-cache-semantics`. The current `pnpm why -r --prod http-cache-semantics` check returns no production dependency path. Both installed make-fetch-happen versions accept 4.3.0 within their `^4.1.1` dependency range.
+- Consumer boundary: make-fetch-happen 14.0.3 and 15.0.6 use [`shared: false`](https://github.com/npm/make-fetch-happen/blob/a5a170ca2ee94d542f9ebfecd1094ed8cb667fb0/lib/cache/policy.js#L5) and exclude `Set-Cookie` from their [default cached response headers](https://github.com/npm/make-fetch-happen/blob/a5a170ca2ee94d542f9ebfecd1094ed8cb667fb0/lib/cache/entry.js#L29). This differs from the shared HTTP-cache scenario in the advisory; it does not establish that sharing cache directories across credentials or trust boundaries is safe.
+- Installed-consumer check: both make-fetch-happen versions now resolve 4.3.0. Local HTTP tests confirmed that cached responses omit `Set-Cookie`, but deliberately reusing one cache directory across synthetic identities can reuse the first identity's body, including expired entries requested with `max-stale`.
+- Mitigation: isolate package and CI caches across users, credentials, and trust boundaries. Recheck the advisory, consumer options, and behavior when upgrading; do not treat a clean audit result alone as proof of remediation.
 
 ### braces 3.0.3
 
 - Advisory: [GHSA-vfj7-8cjw-p6xm](https://github.com/advisories/GHSA-vfj7-8cjw-p6xm), high severity.
+- Release status: the pre-update audit snapshot labelled `>=3.0.4` as patched, while the refreshed audit returned no patched version. The official registry's latest version remains 3.0.3 and both the 3.0.4 metadata and tarball return HTTP 404. GitHub does not identify a first patched version, and the [upstream fix](https://github.com/micromatch/braces/pull/72) remains unmerged with [no official release date](https://github.com/micromatch/braces/pull/72#issuecomment-5968828527). Keep the finding visible until a compatible published version can be installed and verified.
 - Representative paths: `stylelint → micromatch → braces`, repoctl's tooling dependencies, and `webpack-dev-server → http-proxy-middleware → micromatch → braces`.
 - Trigger: attacker-controlled, deeply nested brace patterns reach recursive AST processing. Patterns can stay below the character limit while exhausting the call stack and terminating the process with an uncaught `RangeError`.
 - Mitigation: keep glob and proxy patterns controlled by repository configuration. If external patterns are accepted, limit both length and nesting depth before processing. A normal HTTP request does not by itself demonstrate that the vulnerable pattern processing is reachable.
