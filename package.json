@@ -66,7 +66,8 @@
     "repo:new": "repo new",
     "repo:check": "repo check",
     "repo:doctor": "repo doctor",
-    "test:runtime": "node scripts/check-runtime-compat.mjs"
+    "test:runtime": "node scripts/check-runtime-compat.mjs",
+    "test:vite-compat": "node scripts/check-vite-compat.mjs"
   },
   "devDependencies": {
     "@commitlint/cli": "^21.2.3",

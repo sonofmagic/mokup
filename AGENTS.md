@@ -10,6 +10,7 @@ This pnpm + Turbo monorepo keeps runnable demos and docs under `apps/` (for exam
 - `pnpm dev` — run `turbo run dev --parallel` for all apps that expose a `dev` script.
 - `pnpm build` — execute `turbo run build` to build every workspace with caching.
 - `pnpm test` / `pnpm test:dev` — run Vitest suites once or in watch mode across packages.
+- `pnpm run test:vite-compat` — after `pnpm run build:packages`, check the packed loader against supported Vite 5–8 releases in an isolated consumer.
 - `pnpm lint` — invoke `turbo run lint` to apply ESLint/Stylelint policies repo-wide.
 - `pnpm exec repo doctor` / `pnpm exec repo check` — inspect workspace health and run the repoctl checks.
 - `pnpm exec repo clean` — intentionally delete selected workspace package directories after reviewing the selection.

@@ -128,6 +128,36 @@ jobs:
           RUNTIME_NODE: ${{ steps.runtime.outputs.node }}
         run: node scripts/check-runtime-compat.mjs --node-bin "$RUNTIME_NODE"
 
+  vite-compat:
+    name: Published Vite Compatibility
+    timeout-minutes: 15
+    runs-on: ubuntu-latest
+    env:
+      HUSKY: 0
+    steps:
+      - name: Check out code
+        uses: actions/checkout@v7
+
+      - uses: pnpm/action-setup@v6
+
+      - name: Setup Node.js environment
+        uses: actions/setup-node@v7
+        with:
+          node-version: 24
+          cache: pnpm
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Check peer dependencies
+        run: pnpm peers check
+
+      - name: Build publishable packages
+        run: pnpm run build:packages
+
+      - name: Check published loader with Vite 5 through 8
+        run: pnpm run test:vite-compat
+
   e2e:
     name: E2E Tests
     timeout-minutes: 20

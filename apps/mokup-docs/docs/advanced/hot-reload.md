@@ -35,6 +35,16 @@ changing them may require restarting the native server process, even after
 refreshing the entry. Vite dev uses Vite's module graph invalidation for modules
 it loads, so its dependency refresh behavior follows that graph.
 
+## Vite refresh
+
+During Vite dev, successful mock and configuration refreshes reuse idle entries
+in Vite's module graph. Overlapping loads use separate request identities, so
+their count follows each input's peak concurrency rather than the number of
+scans. Different aliases and query strings are distinct inputs; repairing a
+resolution failure can also require a new identity. Imported helpers refresh
+through Vite's watcher and dependency graph; dependencies externalized to Node
+keep Node's cache behavior.
+
 ## Debug tips
 
 - Playground refreshes on route changes (`mokup:routes-changed`).
