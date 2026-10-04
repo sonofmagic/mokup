@@ -6,7 +6,7 @@ import { createUpdateJob, runUpdateScript } from './helpers/sw-update-job'
 function setup(registrations: object[]) {
   const html = injectPlaygroundHmr('', '/')
   const source = html.slice(html.indexOf('>') + 1, html.lastIndexOf('</script>'))
-    .replace('import(\'/@vite/client\')', 'loadClient()')
+    .replace('import("/@vite/client")', 'loadClient()')
   return runUpdateScript(source, registrations)
 }
 

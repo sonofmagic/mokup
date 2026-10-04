@@ -182,7 +182,7 @@ describe('mokup SW', () => {
       resolveModulePath: () => '/abs/mock/users.get.ts',
     })
 
-    expect(code).toContain('import * as module0 from \'/abs/mock/users.get.ts\'')
+    expect(code).toContain('import * as module0 from "/abs/mock/users.get.ts"')
   })
 
   it('appends module version query for SW hot updates', () => {
@@ -205,7 +205,7 @@ describe('mokup SW', () => {
       resolveModulePath: () => '/abs/mock/users.get.ts',
     })
 
-    expect(code).toContain('import * as module0 from \'/abs/mock/users.get.ts?mokupv=7\'')
+    expect(code).toContain('import * as module0 from "/abs/mock/users.get.ts?mokupv=7"')
   })
 
   it('uses defaults when SW config is missing overrides', () => {

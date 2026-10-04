@@ -25,7 +25,7 @@ async function setup() {
   }
   const html = injectPlaygroundHmr('', '/')
   const source = html.slice(html.indexOf('>') + 1, html.lastIndexOf('</script>'))
-    .replace('import(\'/@vite/client\')', 'loadClient()')
+    .replace('import("/@vite/client")', 'loadClient()')
   runInNewContext(source, {
     loadClient: async () => ({ createHotContext: () => hot }),
     navigator: { serviceWorker: { ready: { then: waitUntilReady }, getRegistrations } },

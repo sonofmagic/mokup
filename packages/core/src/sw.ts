@@ -262,7 +262,7 @@ export function buildSwScript(params: {
 
   for (const entry of modules) {
     const name = `module${moduleIndex++}`
-    imports.push(`import * as ${name} from '${entry.id}'`)
+    imports.push(`import * as ${name} from ${JSON.stringify(entry.id)}`)
     moduleEntries.push({ id: entry.id, name, kind: entry.kind })
   }
 

@@ -9,7 +9,7 @@ function injectPlaygroundHmr(html: string, base: string) {
   const clientPath = `${normalizedBase}/@vite/client`
   const snippet = [
     '<script type="module" id="mokup-playground-hmr">',
-    `import('${clientPath}').then(({ createHotContext }) => {`,
+    `import(${JSON.stringify(clientPath)}).then(({ createHotContext }) => {`,
     '  const hot = createHotContext(\'/@mokup/playground\')',
     '  let active = true',
     '  let pending = false',

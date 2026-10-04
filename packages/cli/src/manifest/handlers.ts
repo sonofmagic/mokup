@@ -110,7 +110,7 @@ export async function writeHandlerIndex(
     const relImport = toPosix(relative(handlersDir, absolutePath))
     const importPath = relImport.startsWith('.') ? relImport : `./${relImport}`
     const name = `module${index}`
-    imports.push(`import * as ${name} from '${importPath}'`)
+    imports.push(`import * as ${name} from ${JSON.stringify(importPath)}`)
     entries.push({ key: modulePath, name })
   })
 
@@ -118,7 +118,7 @@ export async function writeHandlerIndex(
     ...imports,
     '',
     'export const mokupModuleMap = {',
-    ...entries.map(entry => `  '${entry.key}': ${entry.name},`),
+    ...entries.map(entry => `  ${JSON.stringify(entry.key)}: ${entry.name},`),
     '}',
     '',
   ]
