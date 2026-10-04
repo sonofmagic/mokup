@@ -69,6 +69,8 @@ Vite resolves a relative `build.outDir` from the project `root`. The Playground 
 
 With `playground.build: true`, `vite preview` serves the built Playground HTML, assets, and route list. Changes to mock source files appear there after the next build. This mount takes precedence over server mock routes; requests elsewhere retain their usual mock behavior. With `playground.build: false`, the preview Playground continues to use the current mock source files.
 
+The dynamic Playground can also register a Service Worker when opened directly in `vite preview`. Registration uses the existing worker from `vite build`, so deleting source routes does not disable a worker that was already built, and source changes require a rebuild to update its responses. If the worker artifact is missing, the Playground does not try to register it. The current preview configuration still controls `sw.register` and `sw.unregister`; explicit unregister works even after the worker file has been removed.
+
 Notes:
 
 - `sw.basePath` controls which requests the SW intercepts. If omitted, it inherits the entry `prefix`.

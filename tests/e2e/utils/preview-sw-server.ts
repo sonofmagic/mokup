@@ -6,7 +6,15 @@ import { build, preview } from 'vite'
 import { createMokupPlugin } from '../../../packages/mokup/src/vite/plugin'
 import { repoRoot } from './paths'
 
-export async function startPreviewSwServer(runtime: 'node' | 'worker', register = true) {
+interface PreviewSwOptions {
+  playground?: boolean
+  removeSource?: boolean
+  removeWorker?: boolean
+  unregister?: boolean
+  buildRegister?: boolean
+}
+
+export async function startPreviewSwServer(runtime: 'node' | 'worker', register = true, options: PreviewSwOptions = {}) {
   const root = await realpath(await mkdtemp(path.join(os.tmpdir(), 'mokup-preview-sw-')))
   const mockDir = path.join(root, 'mock')
   let server: PreviewServer | undefined
@@ -17,6 +25,15 @@ export async function startPreviewSwServer(runtime: 'node' | 'worker', register 
     await symlink(path.join(repoRoot, 'packages/shared'), path.join(root, 'node_modules/@mokup/shared'), 'junction')
     await writeFile(path.join(root, 'package.json'), JSON.stringify({ type: 'module' }))
     await writeFile(path.join(root, 'index.html'), '<!doctype html><html><body>Built SW preview</body></html>')
+    if (options.playground) {
+      const publicDir = path.join(root, 'public')
+      await mkdir(publicDir)
+      await writeFile(path.join(publicDir, 'fixture-setup.html'), '<!doctype html><html><body>Registration setup without lifecycle scripts</body></html>')
+      await writeFile(path.join(publicDir, 'unrelated-worker.js'), [
+        'self.addEventListener("install", () => self.skipWaiting())',
+        'self.addEventListener("activate", event => event.waitUntil(self.clients.claim()))',
+      ].join('\n'))
+    }
     const routeFile = path.join(mockDir, 'value.get.json')
     await writeFile(routeFile, JSON.stringify({ source: 'build', revision: 1 }))
     await writeFile(path.join(mockDir, 'typed.get.ts'), [
@@ -32,7 +49,7 @@ export async function startPreviewSwServer(runtime: 'node' | 'worker', register 
       '  },',
       '})',
     ].join('\n'))
-    const config = (): InlineConfig => ({
+    const config = (building = false): InlineConfig => ({
       root,
       base: '/workspace/',
       configFile: false,
@@ -40,8 +57,19 @@ export async function startPreviewSwServer(runtime: 'node' | 'worker', register 
       plugins: [
         createMokupPlugin({
           runtime,
-          entries: { dir: mockDir, prefix: '/workspace/api', mode: 'sw', sw: { fallback: false, register }, watch: false, log: false },
-          playground: false,
+          entries: {
+            dir: mockDir,
+            prefix: '/workspace/api',
+            mode: 'sw',
+            sw: {
+              fallback: false,
+              register: building ? options.buildRegister ?? register : register,
+              unregister: !building && options.unregister === true,
+            },
+            watch: false,
+            log: false,
+          },
+          playground: options.playground ? { build: false } : false,
         }),
         {
           name: 'preview-network-sentinel',
@@ -59,10 +87,18 @@ export async function startPreviewSwServer(runtime: 'node' | 'worker', register 
         },
       ],
     })
-    await build(config())
-    const worker = await readFile(path.join(root, 'dist/mokup-sw.js'), 'utf8')
+    await build(config(true))
+    const workerFile = path.join(root, 'dist/mokup-sw.js')
+    const worker = await readFile(workerFile, 'utf8')
     // Preview must serve the built snapshot even if source mocks have since changed.
     await writeFile(routeFile, JSON.stringify({ source: 'unbuilt', revision: 2 }))
+    if (options.removeSource) {
+      await rm(mockDir, { recursive: true })
+      await mkdir(mockDir)
+    }
+    if (options.removeWorker) {
+      await rm(workerFile)
+    }
     server = await preview({ ...config(), preview: { host: '127.0.0.1', port: 0 } })
     const address = server.httpServer.address()
     if (!address || typeof address === 'string') {
@@ -71,6 +107,7 @@ export async function startPreviewSwServer(runtime: 'node' | 'worker', register 
     return {
       url: `http://127.0.0.1:${address.port}/workspace/`,
       worker,
+      removeWorker: () => rm(workerFile, { force: true }),
       async close() {
         try {
           await server?.close()

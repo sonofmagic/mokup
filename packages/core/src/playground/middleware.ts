@@ -31,7 +31,7 @@ const LEADING_SLASH_RE = /^\/+/
  * @param params.getDisabledConfigFiles - Getter for disabled config files.
  * @param params.config - Playground config.
  * @param params.logger - Logger instance.
- * @param params.getServer - Getter for the active dev server.
+ * @param params.getServer - Getter for the active Vite server.
  * @param params.getDirs - Getter for scanned directories.
  * @param params.getSwScript - Getter for service worker lifecycle script.
  * @param params.resolvePlaygroundDist - Resolver for playground dist location.
@@ -93,8 +93,8 @@ export function createPlaygroundMiddleware(params: {
         let output = html
         if (isViteDevServer(server)) {
           output = injectPlaygroundHmr(output, server.config.base ?? '/')
-          output = injectPlaygroundSw(output, params.getSwScript?.())
         }
+        output = injectPlaygroundSw(output, params.getSwScript?.())
         const contentType = mimeTypes['.html'] ?? 'text/html; charset=utf-8'
         sendFile(res, output, contentType)
       }

@@ -40,7 +40,7 @@ export default defineConfig({
     },
     {
       name: 'playground',
-      testMatch: /playground(?:-preview)?\.spec\.ts/,
+      testMatch: ['**/playground.spec.ts', '**/playground-preview.spec.ts'],
       use: {
         baseURL: webBaseURL,
       },
@@ -66,7 +66,7 @@ export default defineConfig({
     },
     {
       name: 'service-worker',
-      testMatch: /service-worker-(?:update|empty|preview)\.spec\.ts/,
+      testMatch: /service-worker-(?:update|empty|preview|playground)\.spec\.ts/,
     },
   ],
   globalSetup: './tests/e2e/global-setup.ts',

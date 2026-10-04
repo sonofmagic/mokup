@@ -69,6 +69,8 @@ Vite 相对于项目 `root` 解析 `build.outDir`，Playground 遵循同一规�
 
 设置 `playground.build: true` 后，`vite preview` 使用构建好的 Playground HTML、资源和路由清单；修改 mock 源文件后需要重新构建，才会更新这些产物。该挂载路径优先于服务端 mock 路由，其他路径仍按原有规则处理。设置 `playground.build: false` 时，预览中的 Playground 继续读取当前 mock 源文件。
 
+在 `vite preview` 中直接打开动态 Playground，也可以自动注册 Service Worker。它使用 `vite build` 已生成的 worker，因此删除源路由不会阻止已有构建产物的注册，修改源码后则需要重新构建才能更新响应。worker 产物缺失时，Playground 不会尝试注册。注册与注销仍遵循当前预览配置中的 `sw.register` 和 `sw.unregister`；即使 worker 文件已删除，显式注销依然有效。
+
 注意：
 
 - `sw.basePath` 用于控制 SW 拦截的请求路径，默认继承 entry 的 `prefix`。

@@ -14,6 +14,7 @@ import { createLogger } from '../shared/logger'
 import { transformMokupIndexHtml } from './plugin/html-transform'
 import { normalizeMokupOptions, normalizeOptions } from './plugin/options'
 import { resolveRegisterPath, resolveSwImportPath } from './plugin/paths'
+import { buildPlaygroundSwLifecycleScript } from './plugin/playground-sw'
 import { createRouteRefresher } from './plugin/refresh'
 import { createDirResolver, createHtmlAssetResolver, createSwPathResolver } from './plugin/resolvers'
 import { configureDevServer, configurePreviewServer } from './plugin/server-hooks'
@@ -98,8 +99,10 @@ export function createMokupPlugin(options: MokupPluginOptions = {}): Plugin {
     logger,
     getServer: () => currentServer,
     getDirs: () => resolveAllDirs(),
-    getSwScript: () => buildSwLifecycleScript({
-      importPath: resolveSwImportPath(base),
+    getSwScript: () => buildPlaygroundSwLifecycleScript({
+      server: currentServer,
+      outDir,
+      base,
       swConfig,
       unregisterConfig,
       hasSwEntries,

@@ -1,5 +1,5 @@
 import type { IncomingMessage, ServerResponse } from 'node:http'
-import type { ViteDevServer } from 'vite'
+import type { PreviewServer, ViteDevServer } from 'vite'
 import { Buffer } from 'node:buffer'
 import { promises as fs } from 'node:fs'
 import { tmpdir } from 'node:os'
@@ -18,14 +18,19 @@ afterAll(async () => {
   await fs.rm(distDir, { recursive: true, force: true })
 })
 
-async function request(url: string, path = '/__mokup', base = '/') {
-  const server = { config: { base }, ws: {} } as ViteDevServer
+async function request(url: string, path = '/__mokup', base = '/', options: {
+  preview?: boolean
+  getSwScript?: () => string | null
+} = { getSwScript: () => 'globalThis.mokupWorker = true' }) {
+  const server = options.preview
+    ? { config: { base } } as PreviewServer
+    : { config: { base }, ws: {} } as ViteDevServer
   const middleware = createPlaygroundMiddleware({
     config: { enabled: true, path, build: false },
     logger: { info: vi.fn(), warn: vi.fn(), error: vi.fn() },
     getRoutes: () => [],
     getServer: () => server,
-    getSwScript: () => 'globalThis.mokupWorker = true',
+    ...(options.getSwScript ? { getSwScript: options.getSwScript } : {}),
     resolvePlaygroundDist: () => distDir,
   })
   const headers = new Map<string, string>()
@@ -96,5 +101,60 @@ describe('playground mount boundaries', () => {
   it('does not duplicate a base already present as a complete path segment', async () => {
     const response = await request('/base/__mokup/routes', '/base/__mokup', '/base/')
     expect(JSON.parse(response.body)).toMatchObject({ basePath: '/base/__mokup' })
+  })
+})
+
+describe('playground lifecycle injection', () => {
+  it.each(['dev', 'preview'])('injects SW lifecycle scripts for %s HTML requests', async (kind) => {
+    const getSwScript = vi.fn(() => 'globalThis.mokupWorker = true')
+    for (const suffix of ['/', '/index.html']) {
+      const response = await request(`/base/__mokup${suffix}`, '/__mokup', '/base/', {
+        preview: kind === 'preview',
+        getSwScript,
+      })
+
+      expect(response.status).toBe(200)
+      expect(response.body).toContain('mokup-playground-sw')
+      expect(response.body).toContain('globalThis.mokupWorker = true')
+      expect(response.next).not.toHaveBeenCalled()
+      if (kind === 'dev') {
+        expect(response.body).toContain('mokup-playground-hmr')
+        expect(response.body).toContain('/base/@vite/client')
+      }
+      else {
+        expect(response.body).not.toContain('mokup-playground-hmr')
+        expect(response.body).not.toContain('/@vite/client')
+      }
+    }
+    expect(getSwScript).toHaveBeenCalledTimes(2)
+  })
+
+  it('omits SW injection when the lifecycle getter is absent', async () => {
+    const response = await request('/__mokup/', '/__mokup', '/', { preview: true })
+
+    expect(response.status).toBe(200)
+    expect(response.body).not.toContain('mokup-playground-sw')
+    expect(response.body).not.toContain('mokup-playground-hmr')
+  })
+
+  it('omits SW injection when the lifecycle getter returns null', async () => {
+    const getSwScript = vi.fn(() => null)
+    const response = await request('/__mokup/', '/__mokup', '/', { preview: true, getSwScript })
+
+    expect(response.status).toBe(200)
+    expect(response.body).not.toContain('mokup-playground-sw')
+    expect(getSwScript).toHaveBeenCalledOnce()
+  })
+
+  it.each(['dev', 'preview'])('does not evaluate lifecycle scripts for %s non-HTML requests', async (kind) => {
+    const getSwScript = vi.fn(() => 'globalThis.mokupWorker = true')
+    for (const suffix of ['', '/routes', '/assets/app.js', '-other']) {
+      const response = await request(`/base/__mokup${suffix}`, '/__mokup', '/base/', {
+        preview: kind === 'preview',
+        getSwScript,
+      })
+      expect(response.body).not.toContain('mokup-playground-sw')
+    }
+    expect(getSwScript).not.toHaveBeenCalled()
   })
 })
