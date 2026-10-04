@@ -20,6 +20,11 @@ export async function smokeClientRequests() {
         response.end('{"message":"try later"}')
         return
       }
+      if (['/no-content', '/reset-content', '/empty-json'].includes(request.url)) {
+        const status = request.url === '/no-content' ? 204 : request.url === '/reset-content' ? 205 : 200
+        response.writeHead(status, { 'content-type': 'application/json' }).end()
+        return
+      }
       response.setHeader('content-type', 'application/json')
       response.end(JSON.stringify({
         method: request.method,
@@ -99,6 +104,16 @@ async function smokeQueryRequests(origin) {
   const { createMokupQueryClient, createFetchExecutor, MokupHttpError } = await import('@mokup/query')
   const resolverOptions = { realBase: origin, markers: { header: true } }
   const { queryFn, mutationFn } = createMokupQueryClient({ resolverOptions })
+  assert.equal(await queryFn({ queryKey: ['HEAD', '/echo'], signal: AbortSignal.timeout(10_000) }), '')
+  assert.equal(await mutationFn({ url: '/no-content', method: 'DELETE' }), '')
+  assert.equal(await mutationFn({ url: '/reset-content', method: 'POST' }), '')
+  await assert.rejects(queryFn({ queryKey: ['/empty-json'], signal: AbortSignal.timeout(10_000) }), SyntaxError)
+  await assert.rejects(queryFn({ queryKey: ['HEAD', '/error'], signal: AbortSignal.timeout(10_000) }), (error) => {
+    assert.ok(error instanceof MokupHttpError)
+    assert.equal(error.status, 503)
+    assert.equal(error.response.bodyUsed, false)
+    return true
+  })
   const body = { name: 'mokup', nested: { enabled: true } }
   const result = await mutationFn({ url: '/echo', method: 'POST', body, params: { page: 2 } })
   assert.equal(result.url, '/echo?page=2')

@@ -114,8 +114,11 @@ applyMokupToQueryClient(queryClient, { executor })
 ```
 
 The default Fetch executor rejects non-2xx responses with `MokupHttpError`
-before reading the response body. Successful responses use `response.json()`
-when the content type contains `application/json`, or `response.text()` otherwise.
+before reading the response body. Successful `HEAD` requests and HTTP 204/205
+responses return an empty string, including when a JSON content type is present.
+Other successful responses use `response.json()` when the content type contains
+`application/json`, or `response.text()` otherwise. Empty or malformed JSON on
+a regular successful response still rejects with its JSON parse error.
 This also applies when `createMokupQueryClient` or `applyMokupToQueryClient`
 creates the default executor.
 

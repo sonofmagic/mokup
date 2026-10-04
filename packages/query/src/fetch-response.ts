@@ -13,9 +13,12 @@ export class MokupHttpError extends Error {
   }
 }
 
-export function defaultTransformResponse(response: Response): Promise<unknown> {
+export function defaultTransformResponse(response: Response, method?: string): Promise<unknown> {
   if (!response.ok) {
     throw new MokupHttpError(response)
+  }
+  if (method === 'HEAD' || response.status === 204 || response.status === 205) {
+    return Promise.resolve('')
   }
   const contentType = response.headers.get('content-type') ?? ''
   if (contentType.includes('application/json')) {

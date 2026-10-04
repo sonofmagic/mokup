@@ -152,7 +152,7 @@ export function createFetchExecutor(options: FetchExecutorOptions = {}): Request
         }
       : {}),
   })
-  const transform = options.transformResponse ?? defaultTransformResponse
+  const transform = options.transformResponse
 
   return async (descriptor, context) => {
     const normalized = normalizeRequest(descriptor, descriptor.meta as Record<string, unknown> | undefined)
@@ -165,7 +165,7 @@ export function createFetchExecutor(options: FetchExecutorOptions = {}): Request
       ...(normalized.meta ? { meta: normalized.meta as Record<string, unknown> } : {}),
     }
     const response = await adapter(normalized.url, init)
-    return transform(response)
+    return transform ? transform(response) : defaultTransformResponse(response, normalized.method)
   }
 }
 
