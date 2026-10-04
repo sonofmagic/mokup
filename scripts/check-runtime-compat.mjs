@@ -9,6 +9,7 @@ import process from 'node:process'
 import { fileURLToPath, pathToFileURL } from 'node:url'
 import { promisify } from 'node:util'
 import { smokeClientRequests } from './runtime-client-smoke.mjs'
+import { smokeExternalHandlers } from './runtime-external-handlers-smoke.mjs'
 import { smokeModuleRefresh } from './runtime-module-smoke.mjs'
 import { smokeResponseContracts } from './runtime-response-smoke.mjs'
 import { smokeRouteGrammar } from './runtime-route-smoke.mjs'
@@ -74,6 +75,7 @@ async function prepareConsumer(root, directory, packages) {
   await fs.copyFile(scriptFile, path.join(directory, 'smoke.mjs'))
   await fs.copyFile(new URL('./runtime-response-smoke.mjs', import.meta.url), path.join(directory, 'runtime-response-smoke.mjs'))
   await fs.copyFile(new URL('./runtime-client-smoke.mjs', import.meta.url), path.join(directory, 'runtime-client-smoke.mjs'))
+  await fs.copyFile(new URL('./runtime-external-handlers-smoke.mjs', import.meta.url), path.join(directory, 'runtime-external-handlers-smoke.mjs'))
   await fs.copyFile(new URL('./runtime-module-smoke.mjs', import.meta.url), path.join(directory, 'runtime-module-smoke.mjs'))
   await fs.copyFile(new URL('./runtime-route-smoke.mjs', import.meta.url), path.join(directory, 'runtime-route-smoke.mjs'))
   await fs.copyFile(new URL('./runtime-typescript-smoke.mjs', import.meta.url), path.join(directory, 'runtime-typescript-smoke.mjs'))
@@ -148,6 +150,7 @@ async function smokeBuiltHandlers(directory) {
   }
   await smokeResponseContracts(directory, cli, run)
   await smokeRouteGrammar(directory, cli, run)
+  await smokeExternalHandlers(directory, cli, run)
 }
 
 async function smokePlaygroundWebSocket(directory) {
@@ -227,7 +230,7 @@ async function main() {
     await smokePlaygroundWebSocket(directory)
     await smokeClientRequests()
     await smokeModuleRefresh(directory)
-    process.stdout.write(`runtime compatibility ok (Node ${process.version}, ${entries} exports, CLI check/build, HTTP/HEAD/cookies/binary/bodyless responses, request body fallthrough, WebSocket metrics, Fetch Request, Query HTTP/JSON and Axios URL semantics, native module refresh, CommonJS/ESM TypeScript, literal route grammar)\n`)
+    process.stdout.write(`runtime compatibility ok (Node ${process.version}, ${entries} exports, CLI check/build, external handlers and middleware, HTTP/HEAD/cookies/binary/bodyless responses, request body fallthrough, WebSocket metrics, Fetch Request, Query HTTP/JSON and Axios URL semantics, native module refresh, CommonJS/ESM TypeScript, literal route grammar)\n`)
     return
   }
   const args = process.argv.slice(2)

@@ -13,7 +13,19 @@ interface InvalidatableModuleNode {
   importers?: Set<InvalidatableModuleNode>
 }
 
-function invalidateModuleChain(server: ViteDevServer, node: InvalidatableModuleNode) {
+interface ModuleGraphLike {
+  getModuleById: (id: string) => InvalidatableModuleNode | null | undefined
+  invalidateModule: (node: InvalidatableModuleNode) => void
+}
+
+interface ViteServerWithEnvironments {
+  // Vite 8 exposes one module graph per environment. Keep this optional so
+  // the plugin remains compatible with Vite 5-7, which only expose the mixed
+  // server graph.
+  environments?: Record<string, { moduleGraph?: ModuleGraphLike }>
+}
+
+function invalidateModuleChain(moduleGraph: ModuleGraphLike, node: InvalidatableModuleNode) {
   const visited = new Set<InvalidatableModuleNode>()
   const stack = [node]
 
@@ -23,10 +35,34 @@ function invalidateModuleChain(server: ViteDevServer, node: InvalidatableModuleN
       continue
     }
     visited.add(current)
-    server.moduleGraph.invalidateModule(current as Parameters<typeof server.moduleGraph.invalidateModule>[0])
+    moduleGraph.invalidateModule(current)
     if (current.importers) {
       for (const importer of current.importers) {
         stack.push(importer)
+      }
+    }
+  }
+}
+
+function getModuleGraphs(server: ViteDevServer): ModuleGraphLike[] {
+  const graphs: ModuleGraphLike[] = [server.moduleGraph as unknown as ModuleGraphLike]
+  const environments = (server as unknown as ViteServerWithEnvironments).environments
+  if (environments) {
+    for (const environment of Object.values(environments)) {
+      if (environment.moduleGraph) {
+        graphs.push(environment.moduleGraph)
+      }
+    }
+  }
+  return Array.from(new Set(graphs))
+}
+
+function invalidateVirtualModuleChains(server: ViteDevServer, moduleIds: string[]) {
+  for (const moduleGraph of getModuleGraphs(server)) {
+    for (const id of moduleIds) {
+      const moduleNode = moduleGraph.getModuleById(id)
+      if (moduleNode) {
+        invalidateModuleChain(moduleGraph, moduleNode)
       }
     }
   }
@@ -192,12 +228,7 @@ function createRouteRefresher(params: {
           data: { ts: Date.now() },
         })
         if (virtualModuleIds && virtualModuleIds.length > 0) {
-          for (const id of virtualModuleIds) {
-            const moduleNode = server.moduleGraph.getModuleById(id)
-            if (moduleNode) {
-              invalidateModuleChain(server, moduleNode as InvalidatableModuleNode)
-            }
-          }
+          invalidateVirtualModuleChains(server, virtualModuleIds)
         }
         // An initially empty page has no SW registration script yet. Let Vite's
         // existing client load the HTML that registers the first worker.
