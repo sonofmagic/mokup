@@ -37,6 +37,18 @@ it loads, so its dependency refresh behavior follows that graph.
 
 ## Vite refresh
 
+With watching enabled, Node mock routes update in both Vite dev and preview even
+when the configured mock directory is empty at startup. Adding the first valid
+route takes effect after the watcher refreshes, without restarting the server.
+Deleting all routes lets requests pass through to the application's remaining
+middleware; adding a route again restores mocking.
+
+During Vite dev, with HMR and automatic Service Worker registration enabled,
+adding the first SW route to an empty route table reloads the page to load the
+registration script. Removing all SW routes updates the registered worker to an
+empty route table, so requests pass through to the network. Setting
+`sw.register: false` continues to disable automatic registration.
+
 During Vite dev, successful mock and configuration refreshes reuse idle entries
 in Vite's module graph. Overlapping loads use separate request identities, so
 their count follows each input's peak concurrency rather than the number of

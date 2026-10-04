@@ -40,6 +40,7 @@ function createRouteRefresher(params: {
   enableViteMiddleware: boolean
   virtualModuleIds?: string[]
   reloadOnChange?: boolean
+  reloadOnFirstSwRoute?: boolean
   errorOn?: DiagnosticErrorMode
 }) {
   const {
@@ -50,6 +51,7 @@ function createRouteRefresher(params: {
     enableViteMiddleware,
     virtualModuleIds,
     reloadOnChange = false,
+    reloadOnFirstSwRoute = false,
     errorOn,
   } = params
 
@@ -57,6 +59,7 @@ function createRouteRefresher(params: {
     server?: ViteDevServer | PreviewServer,
     options?: { force?: boolean, silent?: boolean },
   ) => {
+    const hadSwRoutes = state.swRoutes.length > 0
     const unsupportedRuleFiles = new Set<string>()
     const missingHandlerFiles = new Set<string>()
     const duplicateRoutes = new Set<string>()
@@ -168,7 +171,7 @@ function createRouteRefresher(params: {
     }
     if (isViteDevServer(server) && server.ws) {
       const shouldNotify = !options?.silent
-        && state.lastSignature
+        && state.lastSignature !== null
         && changed
       if (shouldNotify) {
         server.ws.send({
@@ -184,7 +187,9 @@ function createRouteRefresher(params: {
             }
           }
         }
-        if (reloadOnChange) {
+        // An initially empty page has no SW registration script yet. Let Vite's
+        // existing client load the HTML that registers the first worker.
+        if (reloadOnChange || (reloadOnFirstSwRoute && !hadSwRoutes && state.swRoutes.length > 0)) {
           server.ws.send({ type: 'full-reload', path: '*' })
         }
       }

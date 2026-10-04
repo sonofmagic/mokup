@@ -12,7 +12,7 @@ import { resolvePlaygroundDist } from '../playground/assets'
 import { createLogger } from '../shared/logger'
 import { transformMokupIndexHtml } from './plugin/html-transform'
 import { normalizeMokupOptions, normalizeOptions } from './plugin/options'
-import { resolveSwImportPath } from './plugin/paths'
+import { resolveRegisterPath, resolveSwImportPath } from './plugin/paths'
 import { createRouteRefresher } from './plugin/refresh'
 import { createDirResolver, createHtmlAssetResolver, createSwPathResolver } from './plugin/resolvers'
 import { configureDevServer, configurePreviewServer } from './plugin/server-hooks'
@@ -114,6 +114,7 @@ export function createMokupPlugin(options: MokupPluginOptions = {}): Plugin {
     enableViteMiddleware,
     virtualModuleIds: [resolvedBundleVirtualId],
     reloadOnChange: runtime === 'worker',
+    reloadOnFirstSwRoute: !!swConfig && swConfig.register !== false && !unregisterConfig.unregister,
     ...(normalizedOptions.errorOn ? { errorOn: normalizedOptions.errorOn } : {}),
   }
   const scanRoutes = createRouteRefresher(refreshRouteParams)
@@ -212,11 +213,11 @@ export function createMokupPlugin(options: MokupPluginOptions = {}): Plugin {
         swConfig,
         unregisterConfig,
         hasSwEntries,
-        hasSwRoutes: hasSwRoutes(),
         resolveSwImportPath,
         resolveRequestPath: resolveSwRequestPath,
         resolveRegisterScope: resolveSwRegisterScope,
         swLifecycleFileName,
+        swLifecycleImportPath: resolveRegisterPath(base, `/@id/${resolvedSwLifecycleVirtualId.replace('\0', '__x00__')}`),
         resolveHtmlAssetPath,
       })
     },
@@ -239,7 +240,6 @@ export function createMokupPlugin(options: MokupPluginOptions = {}): Plugin {
         playgroundConfig,
         playgroundMiddleware,
         swConfig,
-        hasSwRoutes,
         enableViteMiddleware,
         refreshRoutes: (_server, refreshOptions) => session.refresh(refreshOptions),
         resolveAllDirs,
@@ -258,7 +258,6 @@ export function createMokupPlugin(options: MokupPluginOptions = {}): Plugin {
         playgroundConfig,
         playgroundMiddleware,
         swConfig,
-        hasSwRoutes,
         enableViteMiddleware,
         refreshRoutes: (_server, refreshOptions) => session.refresh(refreshOptions),
         resolveAllDirs,

@@ -110,7 +110,6 @@ describe('vite server hooks extra coverage', () => {
       playgroundConfig: { path: '/__mokup', enabled: false, build: false },
       playgroundMiddleware: (_req, _res, next) => next(),
       swConfig,
-      hasSwRoutes: () => true,
       enableViteMiddleware: false,
       refreshRoutes: async () => {},
       resolveAllDirs: () => ['/root/mock'],
@@ -156,7 +155,6 @@ describe('vite server hooks extra coverage', () => {
       playgroundConfig: { path: '/__mokup', enabled: false, build: false },
       playgroundMiddleware: (_req, _res, next) => next(),
       swConfig: null,
-      hasSwRoutes: () => false,
       enableViteMiddleware: true,
       refreshRoutes: async () => {},
       resolveAllDirs: () => ['/root/mock'],
@@ -197,7 +195,6 @@ describe('vite server hooks extra coverage', () => {
       playgroundConfig: { path: '/__mokup', enabled: false, build: false },
       playgroundMiddleware: (_req, _res, next) => next(),
       swConfig: null,
-      hasSwRoutes: () => false,
       enableViteMiddleware: false,
       refreshRoutes: async () => {},
       resolveAllDirs: () => ['/root/mock'],
@@ -236,7 +233,6 @@ describe('vite server hooks extra coverage', () => {
       playgroundConfig: { path: '/__mokup', enabled: false, build: false },
       playgroundMiddleware: (_req, _res, next) => next(),
       swConfig: null,
-      hasSwRoutes: () => false,
       enableViteMiddleware: true,
       refreshRoutes: async () => {},
       resolveAllDirs: () => ['/root/mock'],
@@ -277,7 +273,6 @@ describe('vite server hooks extra coverage', () => {
       playgroundConfig: { path: '/__mokup', enabled: false, build: false },
       playgroundMiddleware: (_req, _res, next) => next(),
       swConfig,
-      hasSwRoutes: () => true,
       enableViteMiddleware: true,
       refreshRoutes: async () => {},
       resolveAllDirs: () => ['/root/mock'],
@@ -297,6 +292,6 @@ describe('vite server hooks extra coverage', () => {
     expect(res.statusCode).toBe(500)
     expect(res.end).toHaveBeenCalledWith('Failed to generate mokup service worker.')
     expect(logger.error).toHaveBeenCalledWith('SW generation failed:', expect.objectContaining({ message: 'boom' }))
-    expect(middlewareMocks.createMiddleware).not.toHaveBeenCalled()
+    expect(middlewareMocks.createMiddleware).toHaveBeenCalledOnce()
   })
 })

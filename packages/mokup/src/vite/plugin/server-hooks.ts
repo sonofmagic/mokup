@@ -23,7 +23,6 @@ async function configureDevServer(params: {
   playgroundConfig: PlaygroundConfig
   playgroundMiddleware: MiddlewareHandler
   swConfig: ReturnType<typeof resolveSwConfig>
-  hasSwRoutes: () => boolean
   enableViteMiddleware: boolean
   refreshRoutes: (
     server?: ViteDevServer | PreviewServer,
@@ -41,7 +40,6 @@ async function configureDevServer(params: {
     playgroundConfig,
     playgroundMiddleware,
     swConfig,
-    hasSwRoutes,
     enableViteMiddleware,
     refreshRoutes,
     resolveAllDirs,
@@ -49,7 +47,7 @@ async function configureDevServer(params: {
   } = params
 
   await refreshRoutes(server)
-  if (enableViteMiddleware && state.serverRoutes.length > 0) {
+  if (enableViteMiddleware) {
     addMiddlewareFirst(server, createMiddleware(() => state.app, logger))
   }
   addMiddlewareFirst(server, playgroundMiddleware)
@@ -58,7 +56,7 @@ async function configureDevServer(params: {
     patchPlaygroundPrintUrls(server, playgroundPath)
   }
   const swPath = swConfig ? resolveRegisterPath(base, swConfig.path) : null
-  if (swPath && hasSwRoutes()) {
+  if (swPath) {
     server.middlewares.use(async (req, res, next) => {
       const parsed = parseHttpRequestUrl(req, res)
       if (!parsed) {
@@ -113,7 +111,6 @@ async function configurePreviewServer(params: {
   playgroundConfig: PlaygroundConfig
   playgroundMiddleware: MiddlewareHandler
   swConfig: ReturnType<typeof resolveSwConfig>
-  hasSwRoutes: () => boolean
   enableViteMiddleware: boolean
   refreshRoutes: (
     server?: ViteDevServer | PreviewServer,
@@ -130,7 +127,6 @@ async function configurePreviewServer(params: {
     logger,
     playgroundMiddleware,
     swConfig,
-    hasSwRoutes,
     enableViteMiddleware,
     refreshRoutes,
     resolveAllDirs,
@@ -138,12 +134,12 @@ async function configurePreviewServer(params: {
   } = params
 
   await refreshRoutes(server)
-  if (enableViteMiddleware && state.serverRoutes.length > 0) {
+  if (enableViteMiddleware) {
     addMiddlewareFirst(server, createMiddleware(() => state.app, logger))
   }
   addMiddlewareFirst(server, playgroundMiddleware)
   const swPath = swConfig ? resolveRegisterPath(base, swConfig.path) : null
-  if (swPath && hasSwRoutes()) {
+  if (swPath) {
     server.middlewares.use(async (req, res, next) => {
       const parsed = parseHttpRequestUrl(req, res)
       if (!parsed) {
