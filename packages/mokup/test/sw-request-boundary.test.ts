@@ -2,9 +2,11 @@ import type { IncomingMessage, ServerResponse } from 'node:http'
 import type { ViteDevServer } from 'vite'
 import type { MiddlewareHandler } from '../src/vite/plugin/middleware'
 import type { PluginState } from '../src/vite/plugin/state'
+import type { WebpackBuildSnapshot } from '../src/webpack/plugin/session'
 import { resolveSwConfig } from '@mokup/core'
 import { describe, expect, it, vi } from 'vitest'
 import { configureDevServer } from '../src/vite/plugin/server-hooks'
+import { createWebpackBuildSession } from '../src/webpack/plugin/session'
 import { createSwMiddleware } from '../src/webpack/plugin/sw-middleware'
 
 async function viteMiddleware(): Promise<MiddlewareHandler> {
@@ -48,13 +50,27 @@ const factories = [
   { name: 'Vite dev', create: viteMiddleware },
   {
     name: 'Webpack',
-    create: async () => createSwMiddleware({
-      swConfig: { path: '/mokup-sw.js' },
-      hasSwRoutes: () => true,
-      getBase: () => '/base/',
-      ensureBuilt: async () => {},
-      getSwBundle: () => 'self.skipWaiting()',
-    }),
+    create: async () => {
+      const snapshot: WebpackBuildSnapshot = {
+        root: '/',
+        base: '/base/',
+        bundles: { swLifecycleBundle: null, swBundle: 'self.skipWaiting()' },
+        state: {
+          routes: [],
+          serverRoutes: [],
+          swRoutes: [{ file: 'test.get.json', method: 'GET', template: '/test', tokens: [], score: [], handler: 'ok' }],
+          disabledRoutes: [],
+          ignoredRoutes: [],
+          configFiles: [],
+          disabledConfigFiles: [],
+          app: null,
+          lastDiagnosticsSignature: null,
+        },
+      }
+      const session = createWebpackBuildSession({ build: async () => snapshot, onRefresh: vi.fn(), onError: vi.fn() })
+      await session.ensureBuilt()
+      return createSwMiddleware({ swConfig: { path: '/mokup-sw.js' }, getSession: () => session, getBase: () => '/base/' })
+    },
   },
 ]
 
