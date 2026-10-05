@@ -260,6 +260,9 @@ overrides:
   drizzle-kit@0.31.11>@esbuild-kit/esm-loader: '-'
   drizzle-kit@0.31.11>tsx: ^4.23.15
 
+patchedDependencies:
+  '@icebreakers/monorepo@5.7.1': fb97e2c15258f3672a52fedb60a9f1325c7e2ec1937657752e04ba152d7f08bf
+
 importers:
 
   .:
@@ -12880,7 +12883,7 @@ snapshots:
     transitivePeerDependencies:
       - '@types/node'
 
-  '@icebreakers/monorepo@5.7.1(@commitlint/cli@21.2.3(@types/node@24.19.1)(conventional-commits-parser@7.1.2)(typescript@6.0.3))(@types/node@24.19.1)(@vitest/coverage-v8@5.0.3)(conventional-changelog-conventionalcommits@10.4.0)(eslint-plugin-pnpm@1.9.1(eslint@10.12.0(jiti@2.6.1)(supports-color@10.2.2)))(eslint@10.12.0(jiti@2.6.1)(supports-color@10.2.2))(jsdom@30.1.1(@noble/hashes@2.4.0))(magicast@0.5.5)(postcss@8.5.28)(stylelint-config-html@2.0.0(postcss-html@2.0.0(postcss@8.5.28))(stylelint@17.16.0(supports-color@10.2.2)(typescript@6.0.3)))(stylelint@17.16.0(supports-color@10.2.2)(typescript@6.0.3))(supports-color@10.2.2)(tailwindcss@4.3.3)(typanion@3.14.0)(typescript@6.0.3)(vite@8.3.2(@types/node@24.19.1)(esbuild@0.28.2)(jiti@2.6.1)(terser@5.46.1)(tsx@4.23.15)(yaml@2.9.1))':
+  '@icebreakers/monorepo@5.7.1(patch_hash=fb97e2c15258f3672a52fedb60a9f1325c7e2ec1937657752e04ba152d7f08bf)(@commitlint/cli@21.2.3(@types/node@24.19.1)(conventional-commits-parser@7.1.2)(typescript@6.0.3))(@types/node@24.19.1)(@vitest/coverage-v8@5.0.3)(conventional-changelog-conventionalcommits@10.4.0)(eslint-plugin-pnpm@1.9.1(eslint@10.12.0(jiti@2.6.1)(supports-color@10.2.2)))(eslint@10.12.0(jiti@2.6.1)(supports-color@10.2.2))(jsdom@30.1.1(@noble/hashes@2.4.0))(magicast@0.5.5)(postcss@8.5.28)(stylelint-config-html@2.0.0(postcss-html@2.0.0(postcss@8.5.28))(stylelint@17.16.0(supports-color@10.2.2)(typescript@6.0.3)))(stylelint@17.16.0(supports-color@10.2.2)(typescript@6.0.3))(supports-color@10.2.2)(tailwindcss@4.3.3)(typanion@3.14.0)(typescript@6.0.3)(vite@8.3.2(@types/node@24.19.1)(esbuild@0.28.2)(jiti@2.6.1)(terser@5.46.1)(tsx@4.23.15)(yaml@2.9.1))':
     dependencies:
       '@arethetypeswrong/core': 0.18.5
       '@babel/parser': 7.29.9
@@ -20504,7 +20507,7 @@ snapshots:
 
   repoctl@5.7.1(@commitlint/cli@21.2.3(@types/node@24.19.1)(conventional-commits-parser@7.1.2)(typescript@6.0.3))(@types/node@24.19.1)(@vitest/coverage-v8@5.0.3)(conventional-changelog-conventionalcommits@10.4.0)(eslint-plugin-pnpm@1.9.1(eslint@10.12.0(jiti@2.6.1)(supports-color@10.2.2)))(eslint@10.12.0(jiti@2.6.1)(supports-color@10.2.2))(jsdom@30.1.1(@noble/hashes@2.4.0))(magicast@0.5.5)(postcss@8.5.28)(stylelint-config-html@2.0.0(postcss-html@2.0.0(postcss@8.5.28))(stylelint@17.16.0(supports-color@10.2.2)(typescript@6.0.3)))(stylelint@17.16.0(supports-color@10.2.2)(typescript@6.0.3))(supports-color@10.2.2)(tailwindcss@4.3.3)(typanion@3.14.0)(typescript@6.0.3)(vite@8.3.2(@types/node@24.19.1)(esbuild@0.28.2)(jiti@2.6.1)(terser@5.46.1)(tsx@4.23.15)(yaml@2.9.1))(vitest@5.0.3):
     dependencies:
-      '@icebreakers/monorepo': 5.7.1(@commitlint/cli@21.2.3(@types/node@24.19.1)(conventional-commits-parser@7.1.2)(typescript@6.0.3))(@types/node@24.19.1)(@vitest/coverage-v8@5.0.3)(conventional-changelog-conventionalcommits@10.4.0)(eslint-plugin-pnpm@1.9.1(eslint@10.12.0(jiti@2.6.1)(supports-color@10.2.2)))(eslint@10.12.0(jiti@2.6.1)(supports-color@10.2.2))(jsdom@30.1.1(@noble/hashes@2.4.0))(magicast@0.5.5)(postcss@8.5.28)(stylelint-config-html@2.0.0(postcss-html@2.0.0(postcss@8.5.28))(stylelint@17.16.0(supports-color@10.2.2)(typescript@6.0.3)))(stylelint@17.16.0(supports-color@10.2.2)(typescript@6.0.3))(supports-color@10.2.2)(tailwindcss@4.3.3)(typanion@3.14.0)(typescript@6.0.3)(vite@8.3.2(@types/node@24.19.1)(esbuild@0.28.2)(jiti@2.6.1)(terser@5.46.1)(tsx@4.23.15)(yaml@2.9.1))
+      '@icebreakers/monorepo': 5.7.1(patch_hash=fb97e2c15258f3672a52fedb60a9f1325c7e2ec1937657752e04ba152d7f08bf)(@commitlint/cli@21.2.3(@types/node@24.19.1)(conventional-commits-parser@7.1.2)(typescript@6.0.3))(@types/node@24.19.1)(@vitest/coverage-v8@5.0.3)(conventional-changelog-conventionalcommits@10.4.0)(eslint-plugin-pnpm@1.9.1(eslint@10.12.0(jiti@2.6.1)(supports-color@10.2.2)))(eslint@10.12.0(jiti@2.6.1)(supports-color@10.2.2))(jsdom@30.1.1(@noble/hashes@2.4.0))(magicast@0.5.5)(postcss@8.5.28)(stylelint-config-html@2.0.0(postcss-html@2.0.0(postcss@8.5.28))(stylelint@17.16.0(supports-color@10.2.2)(typescript@6.0.3)))(stylelint@17.16.0(supports-color@10.2.2)(typescript@6.0.3))(supports-color@10.2.2)(tailwindcss@4.3.3)(typanion@3.14.0)(typescript@6.0.3)(vite@8.3.2(@types/node@24.19.1)(esbuild@0.28.2)(jiti@2.6.1)(terser@5.46.1)(tsx@4.23.15)(yaml@2.9.1))
     optionalDependencies:
       '@commitlint/cli': 21.2.3(@types/node@24.19.1)(conventional-commits-parser@7.1.2)(typescript@6.0.3)
       eslint: 10.12.0(jiti@2.6.1)(supports-color@10.2.2)

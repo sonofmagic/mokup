@@ -1,0 +1,43 @@
+diff --git a/dist/commands-Bj0sX3R9.mjs b/dist/commands-Bj0sX3R9.mjs
+index 26cf7bf03d6ae3046db6d41e26e74f93a16636fd..67f127594c982e0f112266a3cf4236bf066775b6 100644
+--- a/dist/commands-Bj0sX3R9.mjs
++++ b/dist/commands-Bj0sX3R9.mjs
+@@ -4987,13 +4987,35 @@ async function writeReleaseState(request, key, state, revision) {
+ 		await request("GET", `/git/ref/heads/${branch}`);
+ 	} catch (error) {
+ 		if (!missing(error)) throw error;
++		// Checkpoints are data, not a copy of a historical source tree. Copying
++		// workflows from an older release commit requires workflows permission,
++		// which the Actions GITHUB_TOKEN cannot grant to a new branch.
++		const { data: tree } = await request("POST", "/git/trees", {
++			tree: [{
++				path: ".repoctl-release/README.md",
++				mode: "100644",
++				type: "blob",
++				content: "# Release checkpoints\n\nManaged by repoctl. Package source commits are recorded in each checkpoint.\n"
++			}]
++		});
++		if (!tree?.sha) throw new ReleaseCommandError("GitHub returned no release state tree");
++		const { data: commit } = await request("POST", "/git/commits", {
++			message: "chore(release): initialize release checkpoints [skip ci]",
++			tree: tree.sha,
++			parents: []
++		});
++		if (!commit?.sha) throw new ReleaseCommandError("GitHub returned no release state commit");
+ 		try {
+ 			await request("POST", "/git/refs", {
+ 				ref: `refs/heads/${branch}`,
+-				sha: state.packages[0]?.target
++				sha: commit.sha
+ 			});
+-		} catch {
+-			await request("GET", `/git/ref/heads/${branch}`);
++		} catch (creationError) {
++			try {
++				await request("GET", `/git/ref/heads/${branch}`);
++			} catch {
++				throw creationError;
++			}
+ 		}
+ 	}
+ 	const content = JSON.stringify(state);

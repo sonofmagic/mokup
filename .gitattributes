@@ -16,6 +16,9 @@
 ##   This will handle all files NOT defined below.
 *                 text=auto eol=lf
 
+# Unified patch context adds a space before the upstream source indentation.
+patches/*.patch    whitespace=-space-before-tab
+
 # Source code
 *.bash            text eol=lf
 *.bat             text eol=crlf

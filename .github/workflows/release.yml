@@ -49,6 +49,13 @@ jobs:
     name: Release
     runs-on: ubuntu-latest
     steps:
+      - name: Validate trusted publishing source
+        if: ${{ inputs.source-sha != '' && inputs.source-sha != github.sha }}
+        run: |
+          echo 'npm trusted publishing requires source-sha to match the workflow run commit.' >&2
+          echo 'Resume an existing checkpoint from its original run. For an unstarted release, publish the corrected main without source-sha.' >&2
+          exit 1
+
       - name: Validate release preview mode
         if: ${{ inputs.dry-run && inputs.mode != 'publish' && inputs.mode != 'reconcile' }}
         run: |
@@ -100,6 +107,9 @@ jobs:
       - name: Check peer dependencies
         run: pnpm peers check
 
+      - name: Release tooling regression tests
+        run: pnpm run test:release-tools
+
       - name: Validate prerelease source commit
         if: ${{ github.ref_name != 'main' }}
         run: |
@@ -137,6 +147,10 @@ jobs:
           REPO_RELEASE_PACKAGE: ${{ inputs.package }}
           REPO_RELEASE_VERSION: ${{ inputs.version }}
           REPO_RELEASE_DRY_RUN: ${{ inputs.dry-run }}
+          # New releases must identify the commit actually built by this run.
+          # Version introduction may predate workflow-only fixes and cannot
+          # serve as the provenance or tag target for today's checkout.
+          REPO_RELEASE_SOURCE_SHA: ${{ github.sha }}
           REPO_RELEASE_RECOVERY_SOURCE_SHA: ${{ inputs.source-sha }}
         run: pnpm exec repo release ci
 

@@ -41,6 +41,18 @@ Prereleases use a manual workflow dispatch so npm trusted publishing identifies 
 
 Dependency maintenance should leave package versions and release intents pending for the release workflow.
 
+### Release checkpoint recovery
+
+The `repoctl-release-state` branch stores durable publishing checkpoints. Its initial commit contains only checkpoint documentation, with no source-tree parent or workflow files. Each checkpoint retains the original package source commit separately. A version commit can predate workflow fixes, so initializing this branch from that commit can require workflow permissions unavailable to `GITHUB_TOKEN`.
+
+The version-scoped pnpm patch in `patches/@icebreakers__monorepo@5.7.1.patch` fixes initialization and preserves the original branch-creation error when no concurrent publisher created the branch. `pnpm run test:release-tools` exercises the installed repoctl client with a simulated GitHub API, including concurrent creation and checkpoint conflicts. Keep these tests when upgrading repoctl; remove the patch once the upstream implementation passes them.
+
+New releases explicitly use the workflow's checked-out commit as `REPO_RELEASE_SOURCE_SHA`, keeping checkpoint targets, npm `gitHead`, tags, and provenance aligned even when workflow fixes follow the version commit.
+
+After a failed release, inspect the preserved `npm-publish-progress` artifact, the state branch, and npm before retrying. If no durable checkpoint or published version exists, dispatch Release with `mode=publish` on the corrected `main` without `source-sha`; the unchanged versions are built and published from that run's commit. Preserve existing versions and intents. If publication already began, preserve its checkpoint and source identity instead of starting a fresh release. Use `repo release plan` for a read-only preview.
+
+The OIDC workflow rejects a `source-sha` different from its run commit: npm verifies the provenance source against the signed workflow identity. Resume a checkpoint from its original run; use `mode=reconcile` without a source override when only GitHub metadata is missing after npm publication. Do not override `GITHUB_SHA` or move release tags to repair a failed run.
+
 ## Line Budget Guard
 
 `scripts/lint-lines.mjs` checks non-comment source lines in `packages/*/src` and currently uses a `300`-line budget per file.

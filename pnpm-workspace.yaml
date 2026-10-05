@@ -84,3 +84,5 @@ overrides:
   # This stable Drizzle release uses tsx; its old loader dependency is unused.
   drizzle-kit@0.31.11>@esbuild-kit/esm-loader: '-'
   drizzle-kit@0.31.11>tsx: ^4.23.15
+patchedDependencies:
+  '@icebreakers/monorepo@5.7.1': patches/@icebreakers__monorepo@5.7.1.patch
