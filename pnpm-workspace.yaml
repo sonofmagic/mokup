@@ -47,9 +47,6 @@ overrides:
   stylelint@17.16.0>@csstools/css-tokenizer: 4.0.2
   '@asamuzakjp/css-color@5.1.11>@csstools/css-parser-algorithms': 4.0.2
   '@asamuzakjp/css-color@5.1.11>@csstools/css-tokenizer': 4.0.2
-  # repoctl's workspace reader requires the matching pnpm logger/worker APIs.
-  '@icebreakers/monorepo@5.7.1>@pnpm/logger': 1001.0.1
-  '@icebreakers/monorepo@5.7.1>@pnpm/worker': 1000.6.11
   # Retain the remote branch's security floors without pinning all build tools.
   '@babel/plugin-transform-modules-systemjs@>=7.12.0 <=7.29.3': ^7.29.4
   '@hono/node-server@<1.19.13': ^1.19.13
@@ -85,4 +82,4 @@ overrides:
   drizzle-kit@0.31.11>@esbuild-kit/esm-loader: '-'
   drizzle-kit@0.31.11>tsx: ^4.23.15
 patchedDependencies:
-  '@icebreakers/monorepo@5.7.1': patches/@icebreakers__monorepo@5.7.1.patch
+  '@icebreakers/monorepo@5.9.0': patches/@icebreakers__monorepo@5.9.0.patch
