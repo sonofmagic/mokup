@@ -68,7 +68,9 @@
     "repo:check": "repo check",
     "repo:doctor": "repo doctor",
     "test:runtime": "node scripts/check-runtime-compat.mjs",
-    "test:vite-compat": "node scripts/check-vite-compat.mjs"
+    "test:vite-compat": "node scripts/check-vite-compat.mjs",
+    "sync:npmmirror": "repo release sync-npmmirror --all",
+    "release:sync-npmmirror": "repo release sync-npmmirror --published"
   },
   "devDependencies": {
     "@commitlint/cli": "^21.2.3",
@@ -92,7 +94,7 @@
     "only-allow": "^1.2.2",
     "pathe": "catalog:",
     "pkg-types": "^2.3.3",
-    "repoctl": "^5.7.1",
+    "repoctl": "^5.9.0",
     "rimraf": "^6.1.3",
     "semver": "^7.8.5",
     "stylelint": "^17.16.0",
