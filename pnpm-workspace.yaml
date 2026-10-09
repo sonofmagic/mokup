@@ -24,6 +24,11 @@ catalog:
 autoInstallPeers: true
 strictPeerDependencies: false
 resolutionMode: highest
+packageExtensions:
+  # The legacy manifest readers need logger 1001; pnpm's worker uses logger 1100.
+  '@pnpm/fs.find-packages@1000.0.24':
+    dependencies:
+      '@pnpm/logger': 1001.0.1
 pmOnFail: error
 minimumReleaseAge: 0
 strictDepBuilds: true
