@@ -1,5 +1,19 @@
 # @mokup/core
 
+## 3.0.0
+
+### Major Changes
+
+- Require Node.js 22.12.0 or newer for all published packages and upgrade their dependencies to the latest stable releases. Node.js 20 is no longer supported.
+
+  Repository development and builds use the existing Node.js 24.15.0 baseline and repoctl release workflow. TypeScript remains on version 6 until the lint and Vue tooling supports TypeScript 7.
+
+### Patch Changes
+
+- Updated dependencies:
+  - @mokup/runtime@3.0.0
+  - @mokup/shared@3.0.0
+
 ## 2.0.1
 
 ### Patch Changes
